@@ -8,3 +8,6 @@ Need to add the option to check (CVP verify) the configuration contained in the 
 
 cv_container - add, delete, and show containers
 Containers can be created or deleted
+
+To use these modules you will need cvprac found here: [Arista Networks cvprac](https://github.com/aristanetworks/cvprac)
+Other CVP Ansible modules canbe found here: [Arista EOS+ Ansible Modules](https://github.com/arista-eosplus/ansible-cloudvision)
