@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2019, Arista Networks EOS+
+# Copyright (c) 2019, Arista Networks AS-EMEA
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,77 @@
 DOCUMENTATION = """
 ---
 module: cv_configlet
-version_added: "2.2"
-author: "EMEA AS (ansible-dev@arista.com)"
+version_added: "1.0"
+author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Create or Update CloudVision Portal Configlet.
 description:
   - CloudVison Portal Configlet configuration requires the configlet name,
     container or device to apply to, and configuration to be applied
+  - Returns the configlet data and any Task IDs created during the operation
 options:
-add options here when complete
+  host:
+    description - IP Address or hostname of the CloudVisin Server
+    required - true
+    default - null
+  username:
+    description - The username to log into Cloudvision.
+    required - true
+    default - null
+  password:
+    description - The password to log into Cloudvision.
+    required - true
+    default - null
+  protocol:
+    description - The HTTP protocol to use. Choices http or https.
+    required - false
+    default - https
+  port:
+    description - The HTTP port to use. The cvprac defaults will be used
+                  if none is specified.
+    required - false
+    default - null
+  container:
+    description - CVP container to apply the configlet to if no device
+                  is specified
+    required - false
+    default - None
+  device:
+    description - CVP device to apply configlet to,
+                  overides contianer association
+    required - false
+    default - None
+  parent:
+    description - Name of the Parent container for the container specified
+                  Used to configure target container and double check
+                  container configuration
+    required - false
+    default - 'Tenant'
+  configletName:
+    description - If associated with a device the configlet name will be
+                  'device_configletName' if configletName has been provided
+                  otherwise it will be 'device_template' if none of the above
+                  have been provided it will be 'configletName' if that was
+                  not provided a default name of 'Ansible_Test' will be used
+    required - false
+    default - None
+  template:
+    description - Jinja2 Template used to create configlet configuration block
+    required - true
+    default - null
+  data:
+    description - location of data file to use with Jinja2 template
+    required - true
+    default - null
+  action:
+    description - action to carry out on configlet
+                  add - create the configlet and add it to container or device
+                  delete - remove from container or device, if configlet has
+                           has no other associations then delete it
+                  show - return the current configuration in the configlet
+                         and the new configuration if generated
+    required - true
+    choices - 'show', 'add', 'delete'
+    default - show
 """
 from ansible.module_utils.basic import AnsibleModule
 
@@ -102,7 +165,7 @@ def process_configlet(module, configlet):
     Returns a list of associated containers / devices
     Returns None if the configlet has no associations.
     If action = add apply configlet to device or container
-                if device specified only apply to device 
+                if device specified only apply to device
     If action = delete removes configlet from device or container
     param module: Ansible module with parameters and client connection.
     configlet: Name of Configlet to process
@@ -341,7 +404,7 @@ def configlet_action(module):
             configlet_data = module['client'].api.get_configlet_by_name(configlet_name)
             existing_config = configlet_data['config']
             configlet_found = True
-            
+
     # Create New config if required
     if module.params['template']:
         config = config_from_template(module)
@@ -412,7 +475,7 @@ def main():
         device=dict(default='None'),
         parent=dict(default='Tenant'),
         configletName=dict(default='None'),
-        template=dict(default='None'),
+        template=dict(required=True),
         data=dict(required=True),
         action=dict(default='show', choices=['show', 'add', 'delete'])
         )
@@ -423,7 +486,7 @@ def main():
     messages = dict(issues=False)
     module.client = connect(module)
     # Before Starting check for existing tasks
-    
+
     # Pass config and module params to configlet_action to act on configlet
     print "### Creating Configlet ###"
     result['changed'],result['configlet_data'] = configlet_action(module)

@@ -32,26 +32,55 @@
 #
 DOCUMENTATION = """
 ---
-module: cv_info
-version_added: "2.2"
-author: "EOS+ CS (ansible-dev@arista.com)"
-short_description: Gather Information about Cloudvision node.
+module: cv_container
+version_added: "1.0"
+author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+short_description: Create or Update CloudVision Portal Container.
 description:
-  - Arista EOS configurations use a simple block indent file syntax
-    for segmenting configuration into sections.  This module provides
-    an implementation for working with eos configuration sections in
-    a deterministic way.  This module works with either CLI or eAPI
-    transports.
+  - CloudVison Portal Configlet configuration requires the container name,
+    and parent container name to create the new container under
+  - Returns the container data and any Task IDs created during the operation
 options:
-  lines:
-    description:
-      - The ordered set of commands that should be configured in the
-        section.  The commands must be the exact same commands as found
-        in the device running-config.  Be sure to note the configuration
-        command syntax as some commands are automatically modified by the
-        device config parser.
-    required: false
-    default: null
+  host:
+    description - IP Address or hostname of the CloudVisin Server
+    required - true
+    default - null
+  username:
+    description - The username to log into Cloudvision.
+    required - true
+    default - null
+  password:
+    description - The password to log into Cloudvision.
+    required - true
+    default - null
+  protocol:
+    description - The HTTP protocol to use. Choices http or https.
+    required - false
+    default - https
+  port:
+    description - The HTTP port to use. The cvprac defaults will be used
+                  if none is specified.
+    required - false
+    default - null
+  container:
+    description - CVP container to apply the configlet to if no device
+                  is specified
+    required - false
+    default - None
+  parent:
+    description - Name of the Parent container for the container specified
+                  Used to configure target container and double check
+                  container configuration
+    required - false
+    default - 'Tenant'
+  action:
+    description - action to carry out on the container
+                  add - create the container under the parent container
+                  delete - remove from parent container
+                  show - return the current container data if available
+    required - true
+    choices - 'show', 'add', 'delete'
+    default - add
 """
 
 from ansible.module_utils.basic import AnsibleModule
