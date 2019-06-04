@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017, Arista Networks EOS+
+# Copyright (c) 2019, Arista Networks AS-EMEA
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
