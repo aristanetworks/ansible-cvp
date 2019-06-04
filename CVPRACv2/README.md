@@ -2,7 +2,7 @@
 
 Copy of original CvpRac distribution - https://github.com/aristanetworks/cvprac
 
-cvp_client now imports cvp_apiV2 instead of the original cvp_apiV2
+cvp_client now imports cvp_apiV2 instead of the original cvp_api
 
 **cvp_apiV2**
 
