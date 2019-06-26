@@ -73,8 +73,7 @@ options:
   container:
     description - CVP container to add/delete device to/from if CVP
                   is specified for a delete option device will be removed
-                  completely from CVP. If reset is specified the device will
-                  be factory reset and moved to the Undefined container
+                  completely from CVP.
     required - false
     default - 'Tenat'
   configlet:
@@ -173,7 +172,7 @@ def process_device(module):
                     module.fail_json(msg=str('Fetch Configlet details %s failed: %s'
                                              %(configlet, temp_configlet)))
         else:
-            configletData = None
+            configletData = "None"
         # Used for existing config on a valid device
         existing_config = 'None'
         # Work out where switch is in provisoning hierachy and act accordingly
@@ -208,6 +207,7 @@ def process_device(module):
         elif deviceData['parentContainerKey'] != 'undefined_container':
             existing_config = module.client.api.get_device_configuration(deviceData['systemMacAddress'])
             if module.params['action'] == "add":
+                # Add device to container
                 target_container = module.client.api.get_container_by_name(module.params['container'])
                 if ("error" not in str(target_container)) and ("None" not in str(target_container)):
                     device_action = module.client.api.move_device_to_container("Ansible", deviceData,
@@ -220,6 +220,25 @@ def process_device(module):
                         result['config']['current'] = existing_config
                     else:
                         result['data']=device_action
+                    # Add Configlets to device
+                    if configletData != 'None':
+                        device_addConfiglets = module.client.api.apply_configlets_to_device("Ansible",
+                                                                                               deviceData,
+                                                                                               configletData,
+                                                                                               create_task=True)
+                        if "error" not in device_addConfiglets:
+                            result['changed']= True
+                            reconcile = True
+                            result['config']['current'] = existing_config
+                            # Add tasks to result data if they are not there already
+                            if 'taskIds' in str(result['data']):
+                                for taskId in device_addConfiglets['data']['taskIds']:
+                                    if taskId not in result['data']['taskIds']:
+                                        result['data']['taskIds'].append(taskId)
+                            else:
+                                result['data'].update(device_addConfiglets)
+                        else:
+                            result['data'].update(device_addConfiglets)
                 else:
                     result['data']=target_container
                     result['config']['current'] = existing_config
@@ -234,8 +253,19 @@ def process_device(module):
                         result['config']['current'] = existing_config
                     else:
                         result['data']=device_action
-                elif module.params['container'] == deviceData['parentContainer']['name']:
+                elif module.params['container'] == "RESET":
                     device_action = module.client.api.reset_device("Ansible-Delete/ResetDevice",deviceData)
+                    if "error" not in str(device_action).lower():
+                        result['changed'] = False
+                        result['data'] = device_action['data']
+                        result['config']['current'] = existing_config
+                elif module.params['container'] == deviceData['parentContainer']['name']:
+                    if configletData != 'None':
+                        device_action = module.client.api.remove_configlets_from_device("Ansible",deviceData,
+                                                                                           configletData,
+                                                                                           create_task=True)
+                    else:
+                        device_action = {'data':"error - No Valid Configlets to remove"}
                     if "error" not in str(device_action).lower():
                         result['changed'] = False
                         result['data'] = device_action['data']
