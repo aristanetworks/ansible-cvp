@@ -195,7 +195,7 @@ def process_configlet(module, configlet):
                         # If a device is specified in module params then do not remove configlet
                         result['action'] = 'delete_from_container'
                         if container_data != "None":
-                            result['data'] = module['client'].api.remove_configlets_from_container("Ansible Removed Configlet",
+                            result['data'] = module['client'].api.remove_configlets_from_container("Ansible",
                                                                                                 container_data, [configlet_info])
                         else:
                             result['data'] = {'error':'container not found %s' %module.params['container']}
@@ -206,7 +206,7 @@ def process_configlet(module, configlet):
                 # If a device is specified in module params then do not add configlet
                 result['action'] = 'add_to_container'
                 if container_data != "None":
-                    result['data'] = module['client'].api.apply_configlets_to_container("Ansible Add Configlet",
+                    result['data'] = module['client'].api.apply_configlets_to_container("Ansible",
                                                                                      container_data, [configlet_info])
                 else:
                     result['data'] = {'error':'container not found %s' %module.params['container']}
@@ -227,12 +227,12 @@ def process_configlet(module, configlet):
                 if module.params['device'] in device['hostName']:
                     if configlet_info["netElementCount"] > 0 and device_data != "None":
                         result['action'] = 'delete_from_device'
-                        result['data'] = module['client'].api.remove_configlets_from_device("Ansible Removed Configlet",
+                        result['data'] = module['client'].api.remove_configlets_from_device("Ansible",
                                                                                             device_data, [configlet_info])
         # Add configlet to device if action = add
         if module.params['action'] == "add" and device_data != "None":
             result['action'] = 'add_to_device'
-            result['data'] = module['client'].api.apply_configlets_to_device("Ansible Added Configlet", device_data,
+            result['data'] = module['client'].api.apply_configlets_to_device("Ansible", device_data,
                                                                              [configlet_info],create_task=True)
     # Check to see if any containers or devices have been added or removed
     configlet_info = module['client'].api.get_configlet_by_name(configlet)
