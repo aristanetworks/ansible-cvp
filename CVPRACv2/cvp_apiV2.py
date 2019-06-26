@@ -914,7 +914,7 @@ class CvpApi(object):
                     ckeys.append(configlet['key'])
                 elif configlet['type'] == 'Builder':
                     bnames.append(configlet['name'])
-                    bkeys.append(configlet['key'])        
+                    bkeys.append(configlet['key'])
 
         # Add the new configlets to the end of the arrays
         for entry in new_configlets:
@@ -1030,7 +1030,55 @@ class CvpApi(object):
             return self._save_topology_v2([])
         else:
             return data
-    
+            
+    def reset_device(self, app_name, device, create_task=True):
+        ''' Reset device by moving it to the Undefined Container.
+
+            Args:
+                app_name (str): String to specify info/signifier of calling app
+                device (dict): Device info
+                container (dict): Container info
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        info = '%s Reseting device %s moving it to Undefined' % (app_name,
+                                                        device['fqdn'])
+        self.log.debug('Attempting to Reset device %s moving it to Undefined'
+                       % (device['fqdn']))
+        if 'parentContainerId' in device:
+            from_id = device['parentContainerId']
+        else:
+            parent_cont = self.get_parent_container_for_device(device['key'])
+            from_id = parent_cont['key']
+        data = {'data': [{'info': info,
+                          'infoPreview': info,
+                          'action': 'reset',
+                          'nodeType': 'netelement',
+                          'nodeId': device['key'],
+                          'toId': 'undefined_container',
+                          'fromId': from_id,
+                          'nodeName': device['fqdn'],
+                          'toName': 'Undefined',
+                          'toIdType': 'container',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        try:
+            self._add_temp_action(data)
+        # pylint: disable=invalid-name
+        except CvpApiError as e:
+            if 'Data already exists' in str(e):
+                self.log.debug('Device %s already in container Undefined'
+                               %device['fqdn'])
+        if create_task:
+            resp = self._save_topology_v2([])
+            return resp
+
     # pylint: disable=too-many-locals
     def remove_configlets_from_container(self, app_name, container, del_configlets, create_task=True):
         ''' Remove the configlets from the container.
@@ -1918,3 +1966,78 @@ class CvpApi(object):
             self.apply_image_to_device(image_info, device, create_task=False)
         if create_task:
             return self._save_topology_v2([])
+
+# New modules to add to cvp_api
+
+    def reset_device(self, app_name, device, create_task=True):
+        ''' Reset device by moving it to the Undefined Container.
+
+            Args:
+                app_name (str): String to specify info/signifier of calling app
+                device (dict): Device info
+                container (dict): Container info
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        info = '%s Reseting device %s moving it to Undefined' % (app_name,
+                                                        device['fqdn'])
+        self.log.debug('Attempting to Reset device %s moving it to Undefined'
+                       % (device['fqdn']))
+        if 'parentContainerId' in device:
+            from_id = device['parentContainerId']
+        else:
+            parent_cont = self.get_parent_container_for_device(device['key'])
+            from_id = parent_cont['key']
+        data = {'data': [{'info': info,
+                          'infoPreview': info,
+                          'action': 'reset',
+                          'nodeType': 'netelement',
+                          'nodeId': device['key'],
+                          'toId': 'undefined_container',
+                          'fromId': from_id,
+                          'nodeName': device['fqdn'],
+                          'toName': 'Undefined',
+                          'toIdType': 'container',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        try:
+            self._add_temp_action(data)
+        # pylint: disable=invalid-name
+        except CvpApiError as e:
+            if 'Data already exists' in str(e):
+                self.log.debug('Device %s already in container Undefined'
+                               %device['fqdn'])
+        if create_task:
+            resp = self._save_topology_v2([])
+            return resp
+
+    def get_device_reconcile_config(self, device_mac):
+        ''' Returns the Reconcile configuration for the device provided.
+
+            Args:
+                device_mac (str): Mac address of the device to get the Reconciled
+                    configuration for.
+
+            Returns:
+                reconciledConfig config (string): The string of configuration
+                elements different from the running config.
+        '''
+        self.log.debug('get_device_reconcile_config: device_mac: %s' % device_mac)
+        configlet_list = self.get_configlets_by_device_id(device_mac)
+        configletKey_list = []
+        for configlet in configlet_list:
+            configletKey_list.append(configlet['key'])
+        body = {'configIdList':configletKey_list, 'netElementId':device_mac, 'pageType':'viewConfig'}
+        validate_compare = self.clnt.post('/provisioning/validateAndCompareConfiglets.do',
+                             data=body,
+                             timeout=self.request_timeout)
+        reconcile_config = ''
+        if 'reconciledConfig' in validate_compare:
+            reconcile_config = validate_compare['reconciledConfig']
+        return reconcile_config
