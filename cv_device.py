@@ -125,6 +125,7 @@ def device_info(module):
         device_info['warning']="Device with name '%s' does not exist." % module.params['device']
     else:
         device_info['configlets'] = module.client.api.get_configlets_by_netelement_id(device_info['systemMacAddress'])['configletList']
+        device_info['parentContainer'] = module.client.api.get_container_by_id(device_info['parentContainerKey'])
     return device_info
 
 def container_info(module):
@@ -150,13 +151,14 @@ def process_device(module):
        show - show current device config and data'''
     result={'changed':False,'data':{},'config':{}}
     # Check that device exist in CVP
-    devices = module.client.api.get_inventory()
     deviceData = False
     reconcile = False
-    for device in devices:
-      if module.params['device'] in device['fqdn']:
-        deviceData = device
-        deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
+    #devices = module.client.api.get_inventory()
+    #for device in devices:
+    #  if module.params['device'] in device['fqdn']:
+    #    deviceData = device
+    #    deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
+    deviceData = device_info(module)
     if deviceData:
         # Collect Required Configlets to apply to device
         if module.params['configlet'] != 'None':
@@ -237,7 +239,7 @@ def process_device(module):
                         else:
                             result['data'].update(device_addConfiglets)
                 else:
-                    result['data']=target_container
+                    result['data']={'targetContainer_Returned':target_container}
                     result['config']['current'] = existing_config
             elif module.params['action'] == "delete":
                 # Check Container remove configlets and / or remove device from container
@@ -304,8 +306,7 @@ def main():
         password=dict(required=True),
         device=dict(required=True),
         container=dict(default='None'),
-        parent=dict(default='Tenant'),
-        configlet=dict(default=None),
+        configlet=dict(type='list', default='None'),
         action=dict(default='show', choices=['add','delete','show'])
     )
 
@@ -326,6 +327,7 @@ def main():
                 result['taskIDs'] = changed['data']['taskIdList']
             else:
                 result['taskIDs'] = 'None'
+            result['config'] = changed['config']
         else:
             result['data'] = changed['data']
     except CvpApiError, e:
