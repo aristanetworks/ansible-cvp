@@ -27,6 +27,10 @@ Test script to used in the development of CvpRacV2 to confirm behaviour of funct
 
 Test script to used in the development of CvpRacV2 to confirm behaviour of functions used in with the ansible modules to manipulate devices
 
-**test.sh**
+**test_container.sh**
 
-shell script to execute cvprac_test.py and pass command line arguments to it, me being lazy during testing.
+shell script to execute cvprac_ContainerTest.py and pass command line arguments to it, me being lazy during testing.
+
+**test_device.sh**
+
+shell script to execute cvprac_Devicetest.py and pass command line arguments to it, me being lazy during testing.
