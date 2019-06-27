@@ -157,7 +157,6 @@ def process_device(module):
       if module.params['device'] in device['fqdn']:
         deviceData = device
         deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
-        print "## Debug: Parent Container - %s ##" %deviceData['parentContainer']
     if deviceData:
         # Collect Required Configlets to apply to device
         if module.params['configlet'] != 'None':
@@ -240,7 +239,7 @@ def process_device(module):
                 else:
                     result['data']=target_container
                     result['config']['current'] = existing_config
-            elif module.params.['action'] == "delete":
+            elif module.params['action'] == "delete":
                 # Check Container remove configlets and / or remove device from container
                 # if container is CVP remove from CVP, if container is Device Parent factory reset device
                 if module.params['container'] == "CVP":
