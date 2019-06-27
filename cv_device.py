@@ -41,8 +41,7 @@ description:
     and the container name to move a device into a container
   - Device configuration requires the devcie name and a list of Configlets
     and / or Configlet Builders to apply to apply to it.
-  - Device configuration requires the devcie name and an image bundle name
-    to apply EOS Images and extensions to the device.
+  - Device configuration requires the devcie name.
   - Returns the device data and any Task IDs created during the operation
 options:
   host:
@@ -67,7 +66,7 @@ options:
     required - false
     default - null
   device:
-    description - CVP device to apply the configlets and image bundles to
+    description - CVP device to apply the configlets to
     required - true
     default - None
   container:
@@ -80,15 +79,11 @@ options:
       description - List of Configlet to add or remove from device
       required - false
       default - None
-  image:
-      description - Name of Image Bundle to add or remove from device
-      required - false
-      default - 'None'
   action:
     description - action to carry out on the container
-                  add - place a device in a container and/or add images / Configlets
+                  add - place a device in a container and/or add Configlets
                   delete - remove a device from a container and factory reset if Container = RESET
-                           or remove images / Configlets if container = Parent Container for Device
+                           or remove Configlets if container = Parent Container for Device
                            or if Container = CVP remove from CVP
                   show - return the current device data if available
     required - true
@@ -102,6 +97,10 @@ from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
 
 
 def connect(module):
+    ''' Connects to CVP device using user provided credentials from playbook.
+    :param module: Ansible module with parameters and client connection.
+    :return: CvpClient object with connection instantiated.
+    '''
     client = CvpClient()
     try:
         client.connect([module.params['host']],
@@ -184,8 +183,7 @@ def process_device(module):
             if module.params['action'] == "add":
                 device_action = module.client.api.deploy_device(deviceData,
                                                                 module.params['container'],
-                                                                configletData,
-                                                                module.params['image'])
+                                                                configletData)
                 if "error" not in device_action:
                     result['changed'] = True
                     reconcile = True
@@ -309,7 +307,6 @@ def main():
         container=dict(default='None'),
         parent=dict(default='Tenant'),
         configlet=dict(default=None),
-        image=dict(default=None),
         action=dict(default='show', choices=['add','delete','show'])
     )
 
