@@ -105,7 +105,10 @@ options:
     choices - 'show', 'add', 'delete'
     default - show
 """
+
 from ansible.module_utils.basic import AnsibleModule
+from cvprac.cvp_client import CvpClient
+from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
 
 import re
 import time
@@ -113,8 +116,7 @@ from jinja2 import meta
 import jinja2
 import yaml
 
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
@@ -344,7 +346,8 @@ def config_from_template(module):
                                  undefined=jinja2.DebugUndefined)
         template = env.get_template(module.params['template'])
         if not template:
-            print'Could not find template - %s'% module.params['template']
+            module.fail_json(msg=str('Could not find template - %s'
+                                     % module.params['template']))
 
         templateData = {}
         templateData["data"] = yaml.safe_load(module.params['data'])
@@ -356,14 +359,15 @@ def config_from_template(module):
         temp_vars = list(meta.find_undeclared_variables(parsed_content))
         for var in temp_vars:
             if str(var) not in templateData:
-                print 'Template %s requires %s value.'%(module.params['template'],var)
-                print 'Please re-run with %s provided.'%(var)
+                module.fail_json(msg=str('Template %s requires %s value.'
+                                         %(module.params['template'],var)))
         try:
           template = template.render(templateData)
         except Exception as templateError:
-          print'Template - %s: does not render correctly: %s'%(module.params['template'],templateError)
+          module.fail_json(msg=str('Template - %s: does not render correctly: %s'
+                                   %(module.params['template'],templateError)))
     else:
-        print'Template - required but not provided'
+        module.fail_json(msg=str('Template - required but not provided'))
     return template
 
 def configlet_action(module):
@@ -406,8 +410,12 @@ def configlet_action(module):
             configlet_found = True
 
     # Create New config if required
-    if module.params['template']:
+    if module.params['template'] != 'None' and module.params['data'] != 'None':
         config = config_from_template(module)
+    elif module.params['configletConfig'] != 'None':
+        config = str(module.params['configletConfig'])
+    else:
+        module.fail_json(msg=str('Config Assignment failed: Missing configletConfig or template'))
 
     # Return current config if found and action was show
     if module.params['action'] == 'show':
@@ -475,8 +483,9 @@ def main():
         device=dict(default='None'),
         parent=dict(default='Tenant'),
         configletName=dict(default='None'),
-        template=dict(required=True),
-        data=dict(required=True),
+        configletConfig=dict(default='None'),
+        template=dict(default='None'),
+        data=dict(default='None'),
         action=dict(default='show', choices=['show', 'add', 'delete'])
         )
 
