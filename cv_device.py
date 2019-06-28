@@ -122,7 +122,15 @@ def device_info(module):
     '''
     device_info = module.client.api.get_device_by_name(module.params['device'])
     if not device_info:
-        device_info['warning']="Device with name '%s' does not exist." % module.params['device']
+            devices = module.client.api.get_inventory()
+            for device in devices:
+              if module.params['device'] in device['fqdn']:
+                device_info = device
+    if not device_info:
+        ## Debug Line ##
+        module.fail_json(msg=str('Debug - device_info: %r' %device_info))
+        ## Debug Line ##
+        device_info['error']="Device with name '%s' does not exist." % module.params['device']
     else:
         device_info['configlets'] = module.client.api.get_configlets_by_netelement_id(device_info['systemMacAddress'])['configletList']
         device_info['parentContainer'] = module.client.api.get_container_by_id(device_info['parentContainerKey'])
@@ -137,7 +145,7 @@ def container_info(module):
     container_info = module.client.api.get_container_by_name(module.params['container'])
     if container_info == None:
         container_info = {}
-        container_info['warning'] = "Container with name '%s' does not exist." % module.params['container']
+        container_info['error'] = "Container with name '%s' does not exist." % module.params['container']
     else:
         container_info['configlets'] = module.client.api.get_configlets_by_container_id(container_info['key'])
     return container_info
@@ -159,9 +167,9 @@ def process_device(module):
     #    deviceData = device
     #    deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
     deviceData = device_info(module)
-    if deviceData:
+    if "error" not in str(deviceData).lower():
         # Collect Required Configlets to apply to device
-        if module.params['configlet'] != 'None':
+        if 'none' not in str(module.params['configlet']).lower():
             configletData = []
             for configlet in module.params['configlet']:
                 temp_configlet = module.client.api.get_configlet_by_name(configlet)
@@ -253,7 +261,7 @@ def process_device(module):
                     else:
                         result['data']=device_action
                 elif module.params['container'] == "RESET":
-                    device_action = module.client.api.reset_device("Ansible-Delete/ResetDevice",deviceData)
+                    device_action = module.client.api.reset_device("Ansible",deviceData)
                     if "error" not in str(device_action).lower():
                         result['changed'] = False
                         result['data'] = device_action['data']
