@@ -16,6 +16,6 @@ x) device="CTL1-PRD-SLEAF-006";;
 esac
 done
 echo 'CVPrac - Test Script..'
-./cvprac_test.py --username cvpadmin --password atsira --host 10.83.30.100 --container $container --device $device --data ./vars/lab_data.yml --template Test.j2 --action $action
+./cvprac_ContianerTest.py --username cvpadmin --password atsira --host 10.83.30.100 --container $container --device $device --data ./vars/lab_data.yml --template Test.j2 --action $action
 echo 'CVPrac - Test Script Option: '$action
 echo 'Completed'

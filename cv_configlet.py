@@ -105,7 +105,10 @@ options:
     choices - 'show', 'add', 'delete'
     default - show
 """
+
 from ansible.module_utils.basic import AnsibleModule
+from cvprac.cvp_client import CvpClient
+from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
 
 import re
 import time
@@ -113,8 +116,7 @@ from jinja2 import meta
 import jinja2
 import yaml
 
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
@@ -174,7 +176,7 @@ def process_configlet(module, configlet):
 
     result = {}
     # Find out if configlet is associated with any containers or devices
-    configlet_info = module['client'].api.get_configlet_by_name(configlet)
+    configlet_info = module.client.api.get_configlet_by_name(configlet)
     result['start_container_count']= configlet_info["containerCount"]
     result['start_device_count'] = configlet_info["netElementCount"]
 
@@ -184,7 +186,7 @@ def process_configlet(module, configlet):
         if 'Warning' in container_data:
             result['data']=container_data
             container_data = "None"
-        container_list = module['client'].api.get_applied_containers(configlet)['data']
+        container_list = module.client.api.get_applied_containers(configlet)['data']
         # Remove configlet from container if action = delete
         if module.params['action'] == "delete":
             for container in container_list:
@@ -195,7 +197,7 @@ def process_configlet(module, configlet):
                         # If a device is specified in module params then do not remove configlet
                         result['action'] = 'delete_from_container'
                         if container_data != "None":
-                            result['data'] = module['client'].api.remove_configlets_from_container("Ansible Removed Configlet",
+                            result['data'] = module.client.api.remove_configlets_from_container("Ansible",
                                                                                                 container_data, [configlet_info])
                         else:
                             result['data'] = {'error':'container not found %s' %module.params['container']}
@@ -206,7 +208,7 @@ def process_configlet(module, configlet):
                 # If a device is specified in module params then do not add configlet
                 result['action'] = 'add_to_container'
                 if container_data != "None":
-                    result['data'] = module['client'].api.apply_configlets_to_container("Ansible Add Configlet",
+                    result['data'] = module.client.api.apply_configlets_to_container("Ansible",
                                                                                      container_data, [configlet_info])
                 else:
                     result['data'] = {'error':'container not found %s' %module.params['container']}
@@ -221,21 +223,21 @@ def process_configlet(module, configlet):
             device_data = "None"
         # Remove configlet from device if action = delete
         if module.params['action'] == "delete":
-            device_list = module['client'].api.get_applied_devices(configlet)['data']
+            device_list = module.client.api.get_applied_devices(configlet)['data']
             for device in device_list:
                 # If configlet applied to device then delete it.
                 if module.params['device'] in device['hostName']:
                     if configlet_info["netElementCount"] > 0 and device_data != "None":
                         result['action'] = 'delete_from_device'
-                        result['data'] = module['client'].api.remove_configlets_from_device("Ansible Removed Configlet",
+                        result['data'] = module.client.api.remove_configlets_from_device("Ansible",
                                                                                             device_data, [configlet_info])
         # Add configlet to device if action = add
         if module.params['action'] == "add" and device_data != "None":
             result['action'] = 'add_to_device'
-            result['data'] = module['client'].api.apply_configlets_to_device("Ansible Added Configlet", device_data,
+            result['data'] = module.client.api.apply_configlets_to_device("Ansible", device_data,
                                                                              [configlet_info],create_task=True)
     # Check to see if any containers or devices have been added or removed
-    configlet_info = module['client'].api.get_configlet_by_name(configlet)
+    configlet_info = module.client.api.get_configlet_by_name(configlet)
     result['end_container_count']= configlet_info["containerCount"]
     result['end_device_count'] = configlet_info["netElementCount"]
     # Added
@@ -281,9 +283,7 @@ def process_container(module, container, parent):
         module.client.api.add_container(container, parent['name'],
                                         parent['key'])
         return True
-
     return False
-
 
 def config_from_template(module):
     ''' Load the Jinja template and apply user provided parameters in necessary
@@ -315,55 +315,15 @@ def config_from_template(module):
         temp_vars = list(meta.find_undeclared_variables(parsed_content))
         for var in temp_vars:
             if str(var) not in templateData:
-                module.fail_json(msg=str('Template %s requires %s value. Please'
-                                         ' re-run with %s provided.'
-                                         % (module.params['template'],var,var)))
+                module.fail_json(msg=str('Template %s requires %s value.'
+                                         %(module.params['template'],var)))
         try:
           template = template.render(templateData)
         except Exception as templateError:
           module.fail_json(msg=str('Template - %s: does not render correctly: %s'
-           % (module.params['template'],templateError)))
+                                   %(module.params['template'],templateError)))
     else:
         module.fail_json(msg=str('Template - required but not provided'))
-    return template
-
-def config_from_template(module):
-    ''' Load the Jinja template and apply user provided parameters in necessary
-        places. Fail if template is not found. Fail if rendered template does
-        not reference the correct port. Fail if the template requires a VLAN
-        but the user did not provide one with the port_vlan parameter.
-
-    :param module: Ansible module with parameters and client connection.
-    :return: String of Jinja template rendered with parameters or exit with
-             failure.
-    '''
-    template = False
-    if module.params['template']:
-        template_loader = jinja2.FileSystemLoader('./templates')
-        env = jinja2.Environment(loader=template_loader,
-                                 undefined=jinja2.DebugUndefined)
-        template = env.get_template(module.params['template'])
-        if not template:
-            print'Could not find template - %s'% module.params['template']
-
-        templateData = {}
-        templateData["data"] = yaml.safe_load(module.params['data'])
-        templateData["device"] = module.params['device']
-        templateData["container"] = module.params['container']
-
-        temp_source = env.loader.get_source(env, module.params['template'])[0]
-        parsed_content = env.parse(temp_source)
-        temp_vars = list(meta.find_undeclared_variables(parsed_content))
-        for var in temp_vars:
-            if str(var) not in templateData:
-                print 'Template %s requires %s value.'%(module.params['template'],var)
-                print 'Please re-run with %s provided.'%(var)
-        try:
-          template = template.render(templateData)
-        except Exception as templateError:
-          print'Template - %s: does not render correctly: %s'%(module.params['template'],templateError)
-    else:
-        print'Template - required but not provided'
     return template
 
 def configlet_action(module):
@@ -398,16 +358,22 @@ def configlet_action(module):
         configlet_name = "Ansible_Temp"
     result['configletName'] = configlet_name
     # Find Configlet in CVP if it exists
-    configlet_list = module['client'].api.get_configlets()['data']
+    configlet_list = module.client.api.get_configlets()['data']
     for configlet in configlet_list:
         if str(configlet['name']) == str(configlet_name):
-            configlet_data = module['client'].api.get_configlet_by_name(configlet_name)
+            configlet_data = module.client.api.get_configlet_by_name(configlet_name)
             existing_config = configlet_data['config']
             configlet_found = True
 
     # Create New config if required
-    if module.params['template']:
+    if module.params['template'] != 'None' and module.params['data'] != 'None':
         config = config_from_template(module)
+    elif module.params['configletConfig'] != 'None':
+        config = str(module.params['configletConfig'])
+    elif module.params['action'] == 'show':
+        config = "! show action - no config required"
+    else:
+        module.fail_json(msg=str('Config Assignment failed: Missing configletConfig or template'))
 
     # Return current config if found and action was show
     if module.params['action'] == 'show':
@@ -423,17 +389,17 @@ def configlet_action(module):
         if configlet_found:
             result['currentConfigBlock'] = existing_config
             result['newConfigBlock'] = config
-            resp = module['client'].api.update_configlet(config, configlet_data['key'],
+            resp = module.client.api.update_configlet(config, configlet_data['key'],
                                                       configlet_data['name'])
-            module['client'].api.add_note_to_configlet(configlet_data['key'],
+            module.client.api.add_note_to_configlet(configlet_data['key'],
                                                     "## Managed by Ansible ##")
             result.update(process_configlet(module, configlet_name))
             changed = True
         else:
             result['currentConfigBlock'] = "New Configlet - No Config to return"
             result['newConfigBlock'] = config
-            resp = module['client'].api.add_configlet(configlet_name,config)
-            module['client'].api.add_note_to_configlet(resp,
+            resp = module.client.api.add_configlet(configlet_name,config)
+            module.client.api.add_note_to_configlet(resp,
                                                     "## Managed by Ansible ##")
             result.update(process_configlet(module, configlet_name))
             changed = True
@@ -448,7 +414,7 @@ def configlet_action(module):
                 changed = False
                 result['newConfigBlock'] = config
             else:
-                resp =  module['client'].api.delete_configlet(configlet_data['name'], configlet_data['key'])
+                resp =  module.client.api.delete_configlet(configlet_data['name'], configlet_data['key'])
                 changed = True
                 result['newConfigBlock'] = "No Config - Configlet Deleted"
         else:
@@ -475,8 +441,9 @@ def main():
         device=dict(default='None'),
         parent=dict(default='Tenant'),
         configletName=dict(default='None'),
-        template=dict(required=True),
-        data=dict(required=True),
+        configletConfig=dict(default='None'),
+        template=dict(default='None'),
+        data=dict(default='None'),
         action=dict(default='show', choices=['show', 'add', 'delete'])
         )
 
@@ -488,7 +455,6 @@ def main():
     # Before Starting check for existing tasks
 
     # Pass config and module params to configlet_action to act on configlet
-    print "### Creating Configlet ###"
     result['changed'],result['configlet_data'] = configlet_action(module)
 
     # Check if the configlet is applied to a device or container
@@ -498,10 +464,8 @@ def main():
         device_data = device_info(module)
         if 'warning' not in device_data:
             configletList = []
-            print "Debug device_data-configlets:"
             for configlet in device_data['configlets']:
                 configletList.append(configlet['name'])
-            pp2.pprint(configletList)
             for configlet in device_data['configlets']:
                 # Check if Configlet is applied to Device
                 if configlet['name'] == result['configlet_data']['configletName']:
@@ -510,19 +474,13 @@ def main():
         container_data = container_info(module)
         if 'warning' not in container_data:
             configletList = []
-            print "Debug container_data-configlets:"
             for configlet in container_data['configlets']['configletList']:
                 configletList.append(configlet['name'])
-            pp2.pprint(configletList)
             for configlet in container_data['configlets']['configletList']:
                 # Check if Configlet is applied to Container
                 if configlet['name'] == result['configlet_data']['configletName']:
                     configlet_type = "container"
     result['configlet_data']['configletType'] = configlet_type
-
-    # Check Results of configlet_action and act accordingly
-    if result['changed']:
-        pass
 
     module.exit_json(**result)
 
