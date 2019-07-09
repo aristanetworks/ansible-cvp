@@ -1030,54 +1030,6 @@ class CvpApi(object):
             return self._save_topology_v2([])
         else:
             return data
-            
-    def reset_device(self, app_name, device, create_task=True):
-        ''' Reset device by moving it to the Undefined Container.
-
-            Args:
-                app_name (str): String to specify info/signifier of calling app
-                device (dict): Device info
-                container (dict): Container info
-                create_task (bool): Determines whether or not to execute a save
-                    and create the tasks (if any)
-
-            Returns:
-                response (dict): A dict that contains a status and a list of
-                    task ids created (if any).
-
-                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
-        '''
-        info = '%s Reseting device %s moving it to Undefined' % (app_name,
-                                                        device['fqdn'])
-        self.log.debug('Attempting to Reset device %s moving it to Undefined'
-                       % (device['fqdn']))
-        if 'parentContainerId' in device:
-            from_id = device['parentContainerId']
-        else:
-            parent_cont = self.get_parent_container_for_device(device['key'])
-            from_id = parent_cont['key']
-        data = {'data': [{'info': info,
-                          'infoPreview': info,
-                          'action': 'reset',
-                          'nodeType': 'netelement',
-                          'nodeId': device['key'],
-                          'toId': 'undefined_container',
-                          'fromId': from_id,
-                          'nodeName': device['fqdn'],
-                          'toName': 'Undefined',
-                          'toIdType': 'container',
-                          'childTasks': [],
-                          'parentTask': ''}]}
-        try:
-            self._add_temp_action(data)
-        # pylint: disable=invalid-name
-        except CvpApiError as e:
-            if 'Data already exists' in str(e):
-                self.log.debug('Device %s already in container Undefined'
-                               %device['fqdn'])
-        if create_task:
-            resp = self._save_topology_v2([])
-            return resp
 
     # pylint: disable=too-many-locals
     def remove_configlets_from_container(self, app_name, container, del_configlets, create_task=True):
@@ -2041,3 +1993,25 @@ class CvpApi(object):
         if 'reconciledConfig' in validate_compare:
             reconcile_config = validate_compare['reconciledConfig']
         return reconcile_config
+
+    def get_net_element_info_by_device_id(self, d_id):
+        ''' Return a dict of info about a device in CVP.
+
+            Args:
+                d_id (str): Device Id Key / System MAC.
+
+            Returns:
+                net element data (dict): Dict of info specific to the device
+                    requested or None if the name requested doesn't exist.
+        '''
+        self.log.debug('Attempt to get net element data for %s' % d_id)
+        try:
+            element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
+                                  % qplus(d_id), timeout=self.request_timeout)
+        except CvpApiError as error:
+            # Catch an invalid task_id error and return None
+            if 'errorMessage' in str(error):
+                self.log.debug('Device with id %s could not be found' % d_id)
+                return None
+            raise error
+        return element_info
