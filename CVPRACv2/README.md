@@ -17,6 +17,8 @@ These were logged as Issues:
 
 91 Get Device Reconcile Config - https://github.com/aristanetworks/cvprac/issues/91
 
+94 Get additional Device info using getNetElementInfoById - https://github.com/aristanetworks/cvprac/issues/94
+
 Any additional functionality will be added to this version and raised as Issues in the original CvpRac distribution.
 
 **cvprac_ContainerTest.py**
