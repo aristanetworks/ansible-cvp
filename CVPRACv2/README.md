@@ -21,11 +21,15 @@ Any additional functionality will be added to this version and raised as Issues 
 
 **cvprac_ContainerTest.py**
 
-Test script to used in the development of CvpRacV2 to confirm behaviour of functions used in with the ansible modules to manipulate containers
+Test script used in the development of CvpRacV2 to confirm behaviour of functions used with the ansible modules to manipulate containers
 
 **cvprac_DeviceTest.py**
 
-Test script to used in the development of CvpRacV2 to confirm behaviour of functions used in with the ansible modules to manipulate devices
+Test script used in the development of CvpRacV2 to confirm behaviour of functions used with the ansible modules to manipulate devices
+
+**cvprac_ImageTest.py**
+
+Test script used in the development of CvpRacV2 to confirm behaviour of functions used with the ansible modules to manipulate images
 
 **test_container.sh**
 
@@ -34,3 +38,7 @@ shell script to execute cvprac_ContainerTest.py and pass command line arguments 
 **test_device.sh**
 
 shell script to execute cvprac_Devicetest.py and pass command line arguments to it, me being lazy during testing.
+
+**test_image.sh**
+
+shell script to execute cvprac_Imagetest.py and pass command line arguments to it, me being lazy during testing.
