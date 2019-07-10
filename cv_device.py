@@ -327,6 +327,9 @@ def main():
 
     try:
         changed = process_device(module)
+    except CvpApiError, e:
+        module.fail_json(msg=str(e))
+    else:
         if changed['changed']:
             result['changed'] = True
             if 'taskIds' in str(changed['data']):
@@ -338,8 +341,6 @@ def main():
             result['config'] = changed['config']
         else:
             result['data'] = changed['data']
-    except CvpApiError, e:
-        module.fail_json(msg=str(e))
 
     module.exit_json(**result)
 
