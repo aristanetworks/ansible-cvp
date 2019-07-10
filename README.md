@@ -14,7 +14,7 @@ Pre Release Work in progress Anisble modules for CVP
 
 Containers can be created or deleted
 
-**cv_device [Work in progress]**
+**cv_device [testing]**
  - add, delete, and show devices
 
   Devices can be deployed from the undefined container to a provisioned container or moved from one container to another using the add functionality and specifying the target container. Configlets can be added to devices using add and specifying the current parent container.
@@ -23,7 +23,7 @@ Containers can be created or deleted
   Configlets can be removed from a device using the delete option and specifying the configs to be removed and the current parent container as the container.
   show option provide device data and current config.
 
-**cv_image [Future]**
+**cv_image [testing]**
  - add, delete, and show image bundles
 
   Image bundles must exist in CVP already, this module will allow the manipulation of them in CVP.
