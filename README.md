@@ -14,7 +14,7 @@ Pre Release Work in progress Anisble modules for CVP
 
 Containers can be created or deleted
 
-**cv_device [testing]**
+**cv_device**
  - add, delete, and show devices
 
   Devices can be deployed from the undefined container to a provisioned container or moved from one container to another using the add functionality and specifying the target container. Configlets can be added to devices using add and specifying the current parent container.
