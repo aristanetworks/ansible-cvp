@@ -2,7 +2,7 @@
 
 Copy of original CvpRac distribution - https://github.com/aristanetworks/cvprac
 
-** To Install **
+**To Install**
 Instal the official version of CvpRac then copy the cvp_apiV2 library to the CvpRac directory.
 
 Ammend the cvp_client to import cvp_apiV2 instead of the original cvp_api as follows:
