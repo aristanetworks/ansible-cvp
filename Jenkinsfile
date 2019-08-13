@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('environment.build') {
             steps {
-                sh 'tree'
+                sh 'ls -l'
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
             }
