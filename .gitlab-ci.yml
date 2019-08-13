@@ -50,7 +50,7 @@ CVPRAC.ENHANCED:
   stage: test
   script:
     - source .venv/bin/activate
-    - python -c "from cvprac.cvp_apiV2 import CvpApi" && echo $?
+    - sh .ci/check_cvprac.sh
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
