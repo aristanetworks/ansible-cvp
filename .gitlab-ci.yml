@@ -36,4 +36,7 @@ CHECK.CACHE:
   stage: build
   script:
     - ls -al
-
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
