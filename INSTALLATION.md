@@ -26,7 +26,7 @@ To Be done later
 A virtual environment is __strongly__ recommended to not break your current Python setup
 
 ```
-$ virtualenv -p $(which python3) .venv
+$ virtualenv -p $(which python) .venv
 $ source .venv/bin/activate
 ```
 

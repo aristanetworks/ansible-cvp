@@ -1,0 +1,39 @@
+image: inetsix/docker-ansible:2.7
+
+stages:
+  - build
+  - analysis
+  - test
+  - diff
+  - push
+  - clean
+
+#######################
+# Template management #
+#######################
+
+.configure_python: &configure_python
+  before_script:
+    - pip install -r requirements.txt
+
+
+#######################
+# CI MANAGEMENT       #
+#######################
+
+BUILD.ENVIRONMENT:
+  stage: build
+  script:
+    - pip install virtualenv
+    - virtualenv -p $(which python) .venv
+    - source .venv/bin/activate
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
+
+CHECK.CACHE:
+  stage: build
+  script:
+    - ls -al
+
