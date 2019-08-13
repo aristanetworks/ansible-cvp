@@ -66,7 +66,7 @@ __init__.py          __pycache__          cvp_api.py           cvp_client.py    
 To support Ansible module for CVP, __cvprac__ has been updated in this project. As it is an early stage development, cvprac changes have not been pushed back to __cvprac__.
 
 ```
-$ cp CVPRACv2/* .venv/lib/python3.7/site-packages/cvprac/
+$ cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
 ```
 
 Then, you can validate cvprac has been updated correctly:
