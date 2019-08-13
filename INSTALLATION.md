@@ -57,7 +57,7 @@ ansible 2.8.3
 - __cvprac__ installed in correct path:
 
 ```
-$ ls .venv/lib/python3.7/site-packages/cvprac/
+$ ls .venv/lib/python2.7/site-packages/cvprac/
 __init__.py          __pycache__          cvp_api.py           cvp_client.py        cvp_client_errors.py
 ```
 
@@ -72,9 +72,12 @@ $ cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
 Then, you can validate cvprac has been updated correctly:
 
 ```
-$ python
-Python 3.7.3 (default, Mar 27 2019, 09:23:15) 
-[Clang 10.0.1 (clang-1001.0.46.3)] on darwin
+$ python --version
+Python 2.7.10
+
+$ python          
+Python 2.7.10 (default, Feb 22 2019, 21:55:15) 
+[GCC 4.2.1 Compatible Apple LLVM 10.0.1 (clang-1001.0.37.14)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from cvprac import cvp_apiV2
 >>> exit()
