@@ -21,21 +21,49 @@ stages:
 # CI MANAGEMENT       #
 #######################
 
-BUILD.ENVIRONMENT:
+ENVIRONMENT.BUILD:
   stage: build
   script:
     - pip install virtualenv
     - virtualenv -p $(which python) .venv
+    - cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
     - source .venv/bin/activate
+    - ls -a .venv/lib/python2.7/site-packages/cvprac/
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - .venv/
 
-CHECK.CACHE:
+ENVIRONMENT.VERSION:
   stage: build
   script:
-    - ls -al
+    - source .venv/bin/activate
+    - ansible --version
+    - python --version
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
+
+CVPRAC.ENHANCED:
+  stage: test
+  script:
+    - source .venv/bin/activate
+    - python -c "from cvprac.cvp_apiV2 import CvpApi" && echo $?
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
+
+CVP_MODULE.LOAD:
+  stage: test
+  script:
+    - source .venv/bin/activate
+    - cd examples
+    - ansible-doc -t module cv_device
+    - ansible-doc -t module cv_container
+    - ansible-doc -t module cv_configlet
+    - ansible-doc -t module cv_image
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
