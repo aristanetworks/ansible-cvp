@@ -5,12 +5,17 @@ pipeline {
       }
     }
     stages {
-        stage('anvironment.build') {
+        stage('environment.build') {
             steps {
-                sh 'ls'
-                sh 'pip install virtualenv '
-                sh 'virtualenv -p $(which python) .venv'
-                sh 'source .venv/bin/activate'
+                sh 'tree'
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        stage('environment.validate') {
+            steps {
+                sh 'python --version'
+                sh 'ansible --version'
             }
         }
     }
