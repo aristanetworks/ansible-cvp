@@ -314,7 +314,7 @@ def main():
         port=dict(type='list', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         device=dict(required=True),
         container=dict(default='None'),
         configlet=dict(type='list', default='None'),

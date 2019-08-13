@@ -437,7 +437,7 @@ def main():
         port=dict(type='list', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         container=dict(default='None'),
         device=dict(default='None'),
         parent=dict(default='Tenant'),
