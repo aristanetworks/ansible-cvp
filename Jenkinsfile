@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+      docker {
+        image 'inetsix/docker-ansible:2.7'
+      }
+    }
     stages {
         stage('anvironment.build') {
             steps {
