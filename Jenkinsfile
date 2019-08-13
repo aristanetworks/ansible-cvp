@@ -1,16 +1,31 @@
 pipeline {
-  agent any
-  stages {
-    stage('') {
-      steps {
-        sh '''pip install virtualenv
-virtualenv -p $(which python) .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-ansible --version
-ls .venv/lib/python2.7/site-packages/cvprac/
-cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/'''
-      }
+    agent any
+    stages {
+        stage('anvironment.build') {
+            steps {
+                sh 'ls'
+                sh 'pip install virtualenv '
+                sh 'virtualenv -p $(which python) .venv'
+                sh 'source .venv/bin/activate'
+            }
+        }
     }
-  }
+    post {
+        always {
+            echo 'One way or another, I have finished and I will cleanup environement'
+            deleteDir() /* clean up our workspace */
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
 }
