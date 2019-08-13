@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2019, Arista Networks AS-EMEA
 # All rights reserved.
@@ -30,80 +31,79 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
 DOCUMENTATION = """
 ---
 module: cv_configlet
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Create or Update CloudVision Portal Configlet.
 description:
   - CloudVison Portal Configlet configuration requires the configlet name,
     container or device to apply to, and configuration to be applied
   - Returns the configlet data and any Task IDs created during the operation
+version_added: "1.0"
+author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 options:
   host:
-    description - IP Address or hostname of the CloudVisin Server
-    required - true
-    default - null
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
   username:
-    description - The username to log into Cloudvision.
-    required - true
-    default - null
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
   password:
-    description - The password to log into Cloudvision.
-    required - true
-    default - null
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
   protocol:
-    description - The HTTP protocol to use. Choices http or https.
-    required - false
-    default - https
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
   port:
-    description - The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required - false
-    default - null
+    description: The HTTP port to use. The cvprac defaults will be used if none is specified.
+    required: false
+    default: null
   container:
-    description - CVP container to apply the configlet to if no device
-                  is specified
-    required - false
-    default - None
+    description: CVP container to apply the configlet to if no device is specified
+    required:  false
+    default:  None
   device:
-    description - CVP device to apply configlet to,
-                  overides contianer association
-    required - false
-    default - None
+    description:  CVP device to apply configlet to overides contianer association
+    required:  false
+    default:  None
   parent:
-    description - Name of the Parent container for the container specified
-                  Used to configure target container and double check
-                  container configuration
-    required - false
-    default - 'Tenant'
+    description:  Name of the Parent container for the container specified
+        Used to configure target container and double check container configuration
+    required:  false
+    default:  'Tenant'
   configletName:
-    description - If associated with a device the configlet name will be
-                  'device_configletName' if configletName has been provided
-                  otherwise it will be 'device_template' if none of the above
-                  have been provided it will be 'configletName' if that was
-                  not provided a default name of 'Ansible_Test' will be used
-    required - false
-    default - None
+    description:  If associated with a device the configlet name will 
+      be 'device_configletName' if configletName has been provided otherwise 
+      it will be 'device_template' if none of the above have been provided it 
+      will be 'configletName' if that was not provided a default name of 'Ansible_Test' will be used
+    required: false
+    default:  None
   template:
-    description - Jinja2 Template used to create configlet configuration block
-    required - true
-    default - null
+    description:  Jinja2 Template used to create configlet configuration block
+    required:  true
+    default:  null
   data:
-    description - location of data file to use with Jinja2 template
-    required - true
-    default - null
+    description:  location of data file to use with Jinja2 template
+    required:  true
+    default:  null
   action:
-    description - action to carry out on configlet
-                  add - create the configlet and add it to container or device
-                  delete - remove from container or device, if configlet has
-                           has no other associations then delete it
-                  show - return the current configuration in the configlet
-                         and the new configuration if generated
-    required - true
-    choices - 'show', 'add', 'delete'
-    default - show
+    description: action to carry out on configlet
+                    add - create the configlet and add it to container or device
+                    delete - remove from container or device, if configlet has
+                            has no other associations then delete it
+                    show - return the current configuration in the configlet
+                        and the new configuration if generated
+    required:  true
+    choices:  
+      - 'show'
+      - 'add'
+      - 'delete'
+    default:  show
 """
 
 from ansible.module_utils.basic import AnsibleModule

@@ -45,50 +45,53 @@ description:
   - Returns the device data and any Task IDs created during the operation
 options:
   host:
-    description - IP Address or hostname of the CloudVisin Server
-    required - true
-    default - null
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
   username:
-    description - The username to log into Cloudvision.
-    required - true
-    default - null
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
   password:
-    description - The password to log into Cloudvision.
-    required - true
-    default - null
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
   protocol:
-    description - The HTTP protocol to use. Choices http or https.
-    required - false
-    default - https
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
   port:
-    description - The HTTP port to use. The cvprac defaults will be used
+    description: The HTTP port to use. The cvprac defaults will be used
                   if none is specified.
-    required - false
-    default - null
+    required: false
+    default: null
   device:
-    description - CVP device to apply the configlets to
-    required - true
-    default - None
+    description: CVP device to apply the configlets to
+    required: true
+    default: None
   container:
-    description - CVP container to add/delete device to/from if CVP
+    description: CVP container to add/delete device to/from if CVP
                   is specified for a delete option device will be removed
                   completely from CVP.
-    required - false
-    default - 'Tenat'
+    required: false
+    default: 'Tenat'
   configlet:
-      description - List of Configlet to add or remove from device
-      required - false
-      default - None
+      description: List of Configlet to add or remove from device
+      required: false
+      default: None
   action:
-    description - action to carry out on the container
+    description: action to carry out on the container
                   add - place a device in a container and/or add Configlets
                   delete - remove a device from a container and factory reset if Container = RESET
                            or remove Configlets if container = Parent Container for Device
                            or if Container = CVP remove from CVP
                   show - return the current device data if available
-    required - true
-    choices - 'show', 'add', 'delete'
-    default - show
+    required: true
+    choices: 
+      - 'show'
+      - 'add'
+      - 'delete'
+    default: show
 """
 
 from ansible.module_utils.basic import AnsibleModule
