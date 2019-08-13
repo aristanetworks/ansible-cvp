@@ -12,9 +12,11 @@ stages:
 # Template management #
 #######################
 
-.configure_python: &configure_python
+.test_ansible_bootstrap: &test_ansible_bootstrap
   before_script:
-    - pip install -r requirements.txt
+    - source .venv/bin/activate
+    - chmod 755 examples
+    - cd examples
 
 
 #######################
@@ -58,9 +60,8 @@ CVPRAC.ENHANCED:
 
 CVP_MODULE.LOAD:
   stage: test
+  <<: *test_ansible_bootstrap
   script:
-    - source .venv/bin/activate
-    - cd examples
     - ansible-doc -t module cv_device
     - ansible-doc -t module cv_container
     - ansible-doc -t module cv_configlet
