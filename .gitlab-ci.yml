@@ -28,6 +28,7 @@ ENVIRONMENT.BUILD:
     - virtualenv -p $(which python) .venv
     - cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
     - source .venv/bin/activate
+    - pip install -r requirements.txt
     - ls -a .venv/lib/python2.7/site-packages/cvprac/
   cache:
     key: "$CI_COMMIT_REF_SLUG"
@@ -35,7 +36,7 @@ ENVIRONMENT.BUILD:
       - .venv/
 
 ENVIRONMENT.VERSION:
-  stage: build
+  stage: analysis
   script:
     - source .venv/bin/activate
     - ansible --version
