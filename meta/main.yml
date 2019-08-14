@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Hugh Adams EMEA AS Team
+  description: Network build automation of Arista CVP devices. 
+  company: Arista Networks
+  license: BSD 3-Clause
+  min_ansible_version: 2.1
+  platforms:
+    - name: cvp
+      versions:
+        - 2018.2.2
+  categories:
+    - networking
+  galaxy_tags:
+  - networking
+  - arista
+  - cloudvision
+dependencies: []
