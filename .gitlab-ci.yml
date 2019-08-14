@@ -2,7 +2,8 @@ image: inetsix/docker-ansible:2.7
 
 stages:
   - build
-  - analysis
+  - analysis.environment
+  - analysis.ansible
   - test
   - diff
   - push
@@ -21,6 +22,8 @@ stages:
     - source .venv/bin/activate
     - chmod 755 tests
     - cd tests
+    - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" inventory.ini
+    - cat inventory.ini
 
 
 #######################
@@ -47,7 +50,7 @@ ENVIRONMENT.BUILD:
 
 ENVIRONMENT.VERSION:
   # Test if we are using correct virtual environment
-  stage: analysis
+  stage: analysis.environment
   tags:
     - arista
     - emea
@@ -62,7 +65,7 @@ ENVIRONMENT.VERSION:
 
 CVPRAC.ENHANCED:
   # Test if cvprac enhancements are correctly deployed.
-  stage: test
+  stage: analysis.ansible
   tags:
     - arista
     - emea
@@ -76,7 +79,7 @@ CVPRAC.ENHANCED:
 
 CVP_MODULE.DOCUMENTATION:
   # Allow to check if modules are seen by ansible
-  stage: test
+  stage: analysis.ansible
   <<: *test_ansible_bootstrap
   script:
     - ansible-doc -t module cv_device
@@ -88,6 +91,21 @@ CVP_MODULE.DOCUMENTATION:
     paths:
       - .venv/
 
+
+CVP_MODULE.CONTAINER:
+  # Test cv_container module
+  stage: test
+  <<: *test_ansible_bootstrap
+  script:
+    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
+    - ansible-playbook playbook.container.add.yaml -i inventory.ini
+    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
+    - ansible-playbook playbook.container.delete.yaml -i inventory.ini
+    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/   
 
 #######################
 # ENV Cleanup         #
