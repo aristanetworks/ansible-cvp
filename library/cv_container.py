@@ -30,6 +30,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 DOCUMENTATION = """
 ---
 module: cv_container
@@ -85,6 +90,46 @@ options:
       - 'delete'
     default: add
 """
+
+EXAMPLES = r'''
+# Example to create a container just under root container
+- name: Create a container on CVP.
+  cv_container:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: ansible_container
+    parent: Tenant
+    action: add
+
+# Example to delete container attached to root container
+- name: Delete a container on CVP.
+  cv_container:
+      host: '{{ansible_host}}'
+      username: '{{cvp_username}}'
+      password: '{{cvp_password}}'
+      protocol: https
+      container: ansible_container
+      parent: Tenant
+      action: delete
+
+# Example to get information on a container
+- name: Show a container on CVP.
+  cv_container:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: ansible_container
+    parent: Tenant
+    action: show
+  register: cvp_result
+
+- name: Display cv_container show result
+  debug:
+    msg: "{{cvp_result}}"
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
