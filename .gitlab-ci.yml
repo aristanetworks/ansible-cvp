@@ -13,10 +13,14 @@ stages:
 #######################
 
 .test_ansible_bootstrap: &test_ansible_bootstrap
+  tags:
+    - arista
+    - emea
+    - cvp
   before_script:
     - source .venv/bin/activate
-    - chmod 755 examples
-    - cd examples
+    - chmod 755 tests
+    - cd tests
 
 
 #######################
@@ -24,7 +28,11 @@ stages:
 #######################
 
 ENVIRONMENT.BUILD:
+  # Deploy all requirements for the pipeline.
   stage: build
+  tags:
+    - arista
+    - emea
   script:
     - pip install virtualenv
     - virtualenv -p $(which python) .venv
@@ -33,32 +41,41 @@ ENVIRONMENT.BUILD:
     - cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
     - ls -a .venv/lib/python2.7/site-packages/cvprac/
   cache:
-    key: "$CI_COMMIT_REF_SLUG"
+    key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
 
 ENVIRONMENT.VERSION:
+  # Test if we are using correct virtual environment
   stage: analysis
+  tags:
+    - arista
+    - emea
   script:
     - source .venv/bin/activate
     - ansible --version
     - python --version
   cache:
-    key: "$CI_COMMIT_REF_SLUG"
+    key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
 
 CVPRAC.ENHANCED:
+  # Test if cvprac enhancements are correctly deployed.
   stage: test
+  tags:
+    - arista
+    - emea
   script:
     - source .venv/bin/activate
     - sh .ci/check_cvprac.sh
   cache:
-    key: "$CI_COMMIT_REF_SLUG"
+    key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
 
-CVP_MODULE.LOAD:
+CVP_MODULE.DOCUMENTATION:
+  # Allow to check if modules are seen by ansible
   stage: test
   <<: *test_ansible_bootstrap
   script:
@@ -67,6 +84,23 @@ CVP_MODULE.LOAD:
     - ansible-doc -t module cv_configlet
     - ansible-doc -t module cv_image
   cache:
-    key: "$CI_COMMIT_REF_SLUG"
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+
+
+#######################
+# ENV Cleanup         #
+#######################
+
+ENVIRONMENT.CLEAN:
+  stage: clean
+  tags:
+    - arista
+    - emea
+  script:
+    - rm -rf .venv/*
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
