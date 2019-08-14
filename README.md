@@ -51,7 +51,7 @@ Containers can be created or deleted.
   The official version can be found here: [Arista Networks cvprac](https://github.com/aristanetworks/cvprac)
   CVPRACV2 in this repository is a tweaked version with additional functionality that has been requested in the official version.
 
-  Installation notes are available on [installation page](INSTALLTION.md)
+  Installation notes are available on [installation page](INSTALLATION.md)
 
 > Note: Repository is a pre-release work. Installation is requires to run non standard process for python and ansible.
 
