@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   tasks:
-    - name: Create a container on CVP.
+    - name: Delete a container on CVP.
       cv_container:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'

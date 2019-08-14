@@ -5,6 +5,12 @@
 # - CVP_USERNAME
 # - CVP_PASSWORD
 
+if [ -z ${CVP_SERVER} ]; then
+    CVP_SERVER='10.73.1.139'
+    CVP_USERNAME='tom'
+    CVP_PASSWORD='nomios101'
+fi
+
 CONTAINER='ansible_cvp'
 COOKIE='cookie.txt'
 
