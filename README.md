@@ -1,5 +1,8 @@
+![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/Hugh-Adams/CVP_Ansible_Modules)  ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/Hugh-Adams/CVP_Ansible_Modules)  ![GitHub last commit](https://img.shields.io/github/last-commit/Hugh-Adams/CVP_Ansible_Modules)  ![Gitlab pipeline status](https://img.shields.io/gitlab/pipeline/arista-projects/CVP_Ansible_Modules)
 # CVP_Ansible_Modules
 Pre Release Work in progress Anisble modules for CVP
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 ## Modules overview
 
@@ -14,11 +17,7 @@ Pre Release Work in progress Anisble modules for CVP
 **cv_container**
  - `add`, `delete`, and `show` containers
 
-Containers can be created or deleted.
-
-- Example playbook for container creation: [playbook.container.add.yaml](tests/playbook.container.add.yaml) 
-- Example playbook for container deletion: [playbook.container.delete.yaml](tests/playbook.container.delete.yaml) 
-
+Containers can be created or deleted. A complete playbook to create / show / delete container is available under [tests folder](tests/playbook.container.demo.yaml) 
 
 **cv_device**
  - `add`, `delete`, and `show` devices
