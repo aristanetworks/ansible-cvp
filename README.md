@@ -64,16 +64,37 @@ This example outlines how to use Ansible to create a device container on Arista 
   hosts: cvp
   connection: local
   gather_facts: no
+  vars:
+    - container_name: automated_container
+    - container_parent: Tenant
   tasks:
+    # Create container under root container
     - name: Create a container on CVP.
       cv_container:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
-        container: ansible_container
-        parent: Tenant
+        container: "{{container_name}}"
+        parent: "{{container_parent}}"
         action: add
+    
+    # Look for container deleted previously.
+    # If result contains, then we assume there is en error
+    - name: Show a container on CVP.
+      cv_container:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        container: "{{container_name}}"
+        parent: "{{container_parent}}"
+        action: show
+      register: cvp_result
+
+    - name: Display cv_container show result
+      debug:
+        msg: "{{cvp_result}}"
 ```
 
 
