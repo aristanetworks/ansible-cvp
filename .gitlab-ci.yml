@@ -97,11 +97,7 @@ CVP_MODULE.CONTAINER:
   stage: test
   <<: *test_ansible_bootstrap
   script:
-    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
-    - ansible-playbook playbook.container.add.yaml -i inventory.ini
-    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
-    - ansible-playbook playbook.container.delete.yaml -i inventory.ini
-    - echo 'Check if ansible_cvp exists' && sh .ci/check_container.sh
+    - ansible-playbook playbook.container.demo.yaml -i inventory.ini
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
