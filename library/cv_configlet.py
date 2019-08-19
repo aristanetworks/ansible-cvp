@@ -31,6 +31,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
 
 DOCUMENTATION = """
 ---
@@ -109,7 +112,6 @@ options:
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
 from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import re
 import time
@@ -307,21 +309,26 @@ def config_from_template(module):
                                      % module.params['template']))
 
         templateData = {}
-        templateData["data"] = yaml.safe_load(module.params['data'])
+        try:
+            with open(module.params['data']) as handle:
+                templateData["data"] = yaml.safe_load(handle)
+        except Exception as e:
+            print('Could not load data file: {0}'.format(e))
+        
         templateData["device"] = module.params['device']
         templateData["container"] = module.params['container']
-
         temp_source = env.loader.get_source(env, module.params['template'])[0]
         parsed_content = env.parse(temp_source)
         temp_vars = list(meta.find_undeclared_variables(parsed_content))
         for var in temp_vars:
-            if str(var) not in templateData:
-                module.fail_json(msg=str('Template %s requires %s value.'
-                                         %(module.params['template'],var)))
+            if str(var) not in templateData["data"]:
+                module.fail_json(msg=str('Template %s requires %s value - %s.'
+                                         %(module.params['template'],var,yaml.dump(templateData["data"]))))
         try:
-          template = template.render(templateData)
+            template = template.render(templateData["data"])
+            return template
         except Exception as templateError:
-          module.fail_json(msg=str('Template - %s: does not render correctly: %s'
+            module.fail_json(msg=str('Template - %s: does not render correctly: %s'
                                    %(module.params['template'],templateError)))
     else:
         module.fail_json(msg=str('Template - required but not provided'))
@@ -487,5 +494,4 @@ def main():
 
 
 if __name__ == '__main__':
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     main()
