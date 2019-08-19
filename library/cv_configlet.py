@@ -31,6 +31,18 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+from ansible.module_utils.basic import AnsibleModule
+from cvprac.cvp_client import CvpClient
+from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+
+import re
+import time
+from jinja2 import meta
+import jinja2
+import yaml
+
+
 ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
                     'status': ['preview'],
                     'supported_by': 'community'}
@@ -109,17 +121,50 @@ options:
     default:  show
 """
 
-from ansible.module_utils.basic import AnsibleModule
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+EXAMPLES = r'''
+# Create configlet attached to container
+- name: Create a configlet on CVP.
+  cv_configlet:
+    host: '{{cvp_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: "{{container_name}}"
+    parent: "{{container_parent}}"
+    configletName: "{{configlet_name}}"
+    template: "{{configlet_template}}"
+    data: "{{configlet_data}}"
 
-import re
-import time
-from jinja2 import meta
-import jinja2
-import yaml
+# Show configlet attached to container
+- name: Show configlet configured on CVP.
+  cv_configlet:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: "{{container_name}}"
+    parent: "{{container_parent}}"
+    configletName: "{{configlet_name}}"
+    action: show
+    register: cvp_result
 
+- name: Display cv_configlet show result
+  debug:
+    msg: "{{cvp_result}}"
 
+# Delete configlet attached to container
+- name: Delete a configlet on CVP.
+  cv_configlet:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: "{{container_name}}"
+    parent: "{{container_parent}}"
+    configletName: "{{configlet_name}}"
+    configletConfig: ""
+    action: delete
+'''
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
