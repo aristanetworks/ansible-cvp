@@ -4,7 +4,4 @@ management api http-commands
    vrf vrf-mgmt
       no shutdown
 !
-hostname {{inventory_hostname}}
-{% for user in users %}
-username {{user.name}} privilege 15 secret sha512 $6$VIeqppufemK9nLGV$bwenyC/mURjyQdSyL/xEn5GEfGmk1Xl7/iv7vrnUA3Zw/2AMpwS/cdFyKjllVFaYBqEvP.8On1nDk4NSxnoEb0
-{% endfor %}
+hostname {{hostname}}

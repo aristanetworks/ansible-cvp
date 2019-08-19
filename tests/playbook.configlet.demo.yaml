@@ -8,7 +8,7 @@
     - container_parent: Tenant
     - configlet_name: ansible_configlet
     - configlet_template: "configlet.template.j2"
-    - configlet_data: "group_vars/cvp.yml"
+    - configlet_data: "templates/cvp.yml"
   tasks:
     # Create container under root container
     - name: Create a container on CVP.
@@ -32,8 +32,11 @@
         parent: "{{container_parent}}"
         configletName: "{{configlet_name}}"
         template: "{{configlet_template}}"
-        data: "{{hostvars}}"
+        data: "{{configlet_data}}"
+        # data:
+        #   hostname: "test"
         action: add
+      ignore_errors: yes
 
     # Show configlet attached to container
     - name: Create a configlet on CVP.
@@ -52,43 +55,43 @@
       debug:
         msg: "{{cvp_result}}"
 
-    # # Delete configlet attached to container
-    # - name: Delete a configlet on CVP.
-    #   cv_configlet:
-    #     host: '{{ansible_host}}'
-    #     username: '{{cvp_username}}'
-    #     password: '{{cvp_password}}'
-    #     protocol: https
-    #     container: "{{container_name}}"
-    #     parent: "{{container_parent}}"
-    #     configletName: "{{configlet_name}}"
-    #     configletConfig: ""
-    #     action: delete
-    #   register: cvp_result
+    # Delete configlet attached to container
+    - name: Delete a configlet on CVP.
+      cv_configlet:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        container: "{{container_name}}"
+        parent: "{{container_parent}}"
+        configletName: "{{configlet_name}}"
+        configletConfig: ""
+        action: delete
+      register: cvp_result
 
-    # # Show configlet attached to container
-    # - name: Create a configlet on CVP.
-    #   cv_configlet:
-    #     host: '{{ansible_host}}'
-    #     username: '{{cvp_username}}'
-    #     password: '{{cvp_password}}'
-    #     protocol: https
-    #     container: "{{container_name}}"
-    #     parent: "{{container_parent}}"
-    #     configletName: "{{configlet_name}}"
-    #     action: show
-    #   register: cvp_result
+    # Show configlet attached to container
+    - name: Create a configlet on CVP.
+      cv_configlet:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        container: "{{container_name}}"
+        parent: "{{container_parent}}"
+        configletName: "{{configlet_name}}"
+        action: show
+      register: cvp_result
 
-    # - name: Display cv_configlet show result
-    #   debug:
-    #     msg: "{{cvp_result}}"
+    - name: Display cv_configlet show result
+      debug:
+        msg: "{{cvp_result}}"
 
-    # - name: Delete a container on CVP.
-    #   cv_container:
-    #     host: '{{ansible_host}}'
-    #     username: '{{cvp_username}}'
-    #     password: '{{cvp_password}}'
-    #     protocol: https
-    #     container: "{{container_name}}"
-    #     parent: "{{container_parent}}"
-    #     action: delete
+    - name: Delete a container on CVP.
+      cv_container:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        container: "{{container_name}}"
+        parent: "{{container_parent}}"
+        action: delete
