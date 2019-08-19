@@ -97,11 +97,24 @@ CVP_MODULE.CONTAINER:
   stage: test
   <<: *test_ansible_bootstrap
   script:
+    - ansible-playbook playbook.container.demo.yaml -i inventory.ini --syntax-check
     - ansible-playbook playbook.container.demo.yaml -i inventory.ini
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/   
+
+CVP_MODULE.CONFIGLET:
+  # Test cv_container module
+  stage: test
+  <<: *test_ansible_bootstrap
+  script:
+    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini --syntax-check
+    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/ 
 
 #######################
 # ENV Cleanup         #

@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   vars:
-    - container_name: automated_container
+    - container_name: automated_configlet
     - container_parent: Tenant
     - configlet_name: ansible_configlet
     - configlet_template: "configlet.template.j2"
@@ -39,7 +39,7 @@
       ignore_errors: yes
 
     # Show configlet attached to container
-    - name: Create a configlet on CVP.
+    - name: Show configlet configured on CVP.
       cv_configlet:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
