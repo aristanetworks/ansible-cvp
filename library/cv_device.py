@@ -74,7 +74,7 @@ options:
                   is specified for a delete option device will be removed
                   completely from CVP.
     required: false
-    default: 'Tenat'
+    default: 'Tenant'
   configlet:
       description: List of Configlet to add or remove from device
       required: false
@@ -170,7 +170,7 @@ def process_device(module):
     #    deviceData = device
     #    deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
     deviceData = device_info(module)
-    if "error" not in str(deviceData).lower():
+    if "error" not in deviceData.keys():
         # Collect Required Configlets to apply to device
         if 'none' not in str(module.params['configlet']).lower():
             configletData = []
