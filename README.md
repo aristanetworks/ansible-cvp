@@ -2,7 +2,22 @@
 # CVP_Ansible_Modules
 Pre Release Work in progress Anisble modules for CVP
 
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [CVP_Ansible_Modules](#cvp_ansible_modules)
+  - [Modules overview](#modules-overview)
+  - [Installation](#installation)
+  - [Example playbook](#example-playbook)
+- [Resources](#resources)
+- [License](#license)
+- [Ask question or report issue](#ask-question-or-report-issue)
+- [Contribute](#contribute)
+
+<!-- /code_chunk_output -->
+
 
 ## Modules overview
 
@@ -14,10 +29,14 @@ Pre Release Work in progress Anisble modules for CVP
   Any Tasks that are generated as a result will be returned.
   Need to add the option to check (CVP verify) the configuration contained in the Configlet
 
+> A complete playbook to create / show / delete configlet is available under [tests folder](tests/playbook.configlet.demo.yaml) 
+
 **cv_container**
  - `add`, `delete`, and `show` containers
 
-Containers can be created or deleted. A complete playbook to create / show / delete container is available under [tests folder](tests/playbook.container.demo.yaml) 
+Containers can be created or deleted. 
+
+> A complete playbook to create / show / delete container is available under [tests folder](tests/playbook.container.demo.yaml) 
 
 **cv_device**
  - `add`, `delete`, and `show` devices
@@ -27,6 +46,8 @@ Containers can be created or deleted. A complete playbook to create / show / del
   Devices can be reset and moved to the undefined container using the delete option and specifying "RESET" as the container.
   Configlets can be removed from a device using the delete option and specifying the configs to be removed and the current parent container as the container.
   show option provide device data and current config.
+
+> A complete playbook to move / show / delete devices is available under [tests folder](tests/playbook.device.demo.yaml) 
 
 **cv_image [testing]**
  - `add`, `delete`, and `show` image bundles
@@ -41,6 +62,7 @@ Containers can be created or deleted. A complete playbook to create / show / del
   Tasks must exist in CVP already, this module will allow the manipulation of them in CVP.
   Add and Delete will allow Tasks to be executed or Canceled
   Show will provide information on the current Status or a Task.
+  
 
 ## Installation
 
@@ -52,7 +74,7 @@ Containers can be created or deleted. A complete playbook to create / show / del
 
   Installation notes are available on [installation page](INSTALLATION.md)
 
-> Note: Repository is a pre-release work. Installation is requires to run non standard process for python and ansible.
+> Note: Repository is a pre-release work. A custom installation is required to run non standard installation process for python and ansible.
 
 ## Example playbook
 
@@ -98,18 +120,18 @@ This example outlines how to use Ansible to create a device container on Arista 
 ```
 
 
-## Resources
+# Resources
 
   Other CVP Ansible modules can be found here: [Arista EOS+ Ansible Modules](https://github.com/arista-eosplus/ansible-cloudvision)
 
-## License
+# License
 
 Project is published under [BSD License](LICENSE).
 
-## Ask question or report issue
+# Ask question or report issue
 
 Please open an issue on Github this is the fastest way to get an answer.
 
-## Contribute
+# Contribute
 
 Contributing pull requests are gladly welcomed for this repository. If you are planning a big change, please start a discussion first to make sure we’ll be able to merge it.
