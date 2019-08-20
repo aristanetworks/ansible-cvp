@@ -21,7 +21,7 @@ stages:
   before_script:
     - source .venv/bin/activate
     - cd .ci
-    - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" env.lab.emea
+    - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" env.lab
     - cd ..
     - chmod 755 tests
     - cd tests
