@@ -841,9 +841,10 @@ class CvpApi(object):
             ckeys.append(configlet['key'])
 
         # Add the new configlets to the end of the arrays
-        for entry in new_configlets:
-            cnames.append(entry['name'])
-            ckeys.append(entry['key'])
+        ### DEBUG TOM ###
+        # for entry in new_configlets:
+        #     cnames.append(entry['name'])
+        #     ckeys.append(entry['key'])
 
         info = '%s: Configlet Assign: to Device %s' % (app_name, dev['fqdn'])
         info_preview = '<b>Configlet Assign:</b> to Device' + dev['fqdn']
@@ -1908,10 +1909,11 @@ class CvpApi(object):
         prop_conf = self.clnt.get('/provisioning/getTempConfigsByNetElementId.'
                                   'do?netElementId=%s' % device['key'])
         new_configlets = prop_conf['proposedConfiglets']
-        if configlets:
-            new_configlets.extend(configlets)
-        self.apply_configlets_to_device('deploy_device', device,
-                                        new_configlets, create_task=False)
+        ### DEBUG TOM ###
+        # if configlets:
+        #     new_configlets.extend(configlets)
+        # self.apply_configlets_to_device('deploy_device', device,
+        #                                 new_configlets, create_task=False)
         # Apply image to the device
         if image:
             image_info = self.get_image_bundle_by_name(image)
