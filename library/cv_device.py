@@ -94,6 +94,50 @@ options:
     default: show
 """
 
+EXAMPLES="""
+# Move a device to a new container
+# Container must already exist
+- name: Move device to CVP container
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    container: "{{container_name}}"
+    action: add
+    register: cvp_result
+
+# Display information for device before a container's move
+- name: Show device information from CVP
+  tags: create, show
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    action: show
+    register: cvp_result
+
+- name: Display cv_device add result
+  tags: create, show
+  debug:
+    msg: "{{cvp_result}}"
+
+# Reset device from CVP
+- name: Reset device from CVP
+  tags: rollback
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    container: "RESET"
+    action: delete
+"""
+
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
 from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
