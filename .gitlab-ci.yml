@@ -138,7 +138,7 @@ CVP_MODULE.DEVICE:
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=show
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=rollback
     - cvp-task-manager -l
-    - cvp-task-manager -ra -t 240
+    - cvp-task-manager -ra -t 320
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=clean
   cache:
     key: "$CI_COMMIT_REF_NAME"
