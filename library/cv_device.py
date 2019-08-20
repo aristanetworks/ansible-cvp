@@ -237,9 +237,13 @@ def process_device(module):
             if deviceData['ztpMode'] == False:
                 existing_config = module.client.api.get_device_configuration(deviceData['systemMacAddress'])
             if module.params['action'] == "add":
-                device_action = module.client.api.deploy_device(deviceData,
-                                                                module.params['container'],
-                                                                configletData)
+                # FIX Issue #10: deploy_device is testing if configlet is not None
+                # current implemetation uses a string instead of python None type.
+                # Add a new test to emulate None.
+                if configletData != 'None':
+                    device_action = module.client.api.deploy_device(device=deviceData, container=module.params['container'],configlets=configletData)
+                else:
+                    device_action = module.client.api.deploy_device(device=deviceData, container=module.params['container'])
                 if "error" not in device_action:
                     result['changed'] = True
                     reconcile = True
