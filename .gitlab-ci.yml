@@ -27,7 +27,11 @@ stages:
     - cd tests
     - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" inventory.ini
     - cat inventory.ini
-
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
 
 #######################
 # CI MANAGEMENT       #
@@ -51,6 +55,11 @@ ENVIRONMENT.BUILD:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
 
 ENVIRONMENT.VERSION:
   # Test if we are using correct virtual environment
@@ -66,6 +75,11 @@ ENVIRONMENT.VERSION:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
 
 CVPRAC.ENHANCED:
   # Test if cvprac enhancements are correctly deployed.
@@ -80,6 +94,11 @@ CVPRAC.ENHANCED:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
 
 CVP_MODULE.DOCUMENTATION:
   # Allow to check if modules are seen by ansible
@@ -134,11 +153,11 @@ CVP_MODULE.DEVICE:
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --syntax-check
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=create
     - cvp-task-manager -l
-    - cvp-task-manager -ra -t 240
+    - cvp-task-manager -ra
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=show
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=rollback
     - cvp-task-manager -l
-    - cvp-task-manager -ra -t 320
+    - cvp-task-manager -ra
     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=clean
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -160,3 +179,8 @@ ENVIRONMENT.CLEAN:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
