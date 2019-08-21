@@ -812,7 +812,7 @@ class CvpApi(object):
         url = '/provisioning/v2/saveTopology.do'
         return self.clnt.post(url, data=data, timeout=self.request_timeout)
 
-    def apply_configlets_to_device(self, app_name, dev, new_configlets, create_task=True):
+    def apply_configlets_to_device(self, app_name, dev, new_configlets=None, create_task=True):
         ''' Apply the configlets to the device.
 
             Args:
@@ -841,9 +841,11 @@ class CvpApi(object):
             ckeys.append(configlet['key'])
 
         # Add the new configlets to the end of the arrays
-        for entry in new_configlets:
-            cnames.append(entry['name'])
-            ckeys.append(entry['key'])
+        # Issue #10 - move device to container without new configlet.
+        if new_configlets is not None:
+            for entry in new_configlets:
+                cnames.append(entry['name'])
+                ckeys.append(entry['key'])
 
         info = '%s: Configlet Assign: to Device %s' % (app_name, dev['fqdn'])
         info_preview = '<b>Configlet Assign:</b> to Device' + dev['fqdn']
@@ -1905,13 +1907,12 @@ class CvpApi(object):
                                       create_task=False)
         # Get proposed configlets device will inherit from container it is
         # being moved to.
-        prop_conf = self.clnt.get('/provisioning/getTempConfigsByNetElementId.'
-                                  'do?netElementId=%s' % device['key'])
+        prop_conf = self.clnt.get('/provisioning/getTempConfigsByNetElementId.do?netElementId=%s' % device['key'])  # noqa E501
         new_configlets = prop_conf['proposedConfiglets']
         if configlets:
             new_configlets.extend(configlets)
-        self.apply_configlets_to_device('deploy_device', device,
-                                        new_configlets, create_task=False)
+        self.apply_configlets_to_device(app_name='deploy_device', dev=device,
+                                        new_configlets=new_configlets, create_task=False)
         # Apply image to the device
         if image:
             image_info = self.get_image_bundle_by_name(image)

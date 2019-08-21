@@ -1,0 +1,186 @@
+image: inetsix/docker-ansible:2.7
+
+stages:
+  - build
+  - analysis.environment
+  - analysis.ansible
+  - test
+  - diff
+  - push
+  - clean
+
+#######################
+# Template management #
+#######################
+
+.test_ansible_bootstrap: &test_ansible_bootstrap
+  tags:
+    - arista
+    - emea
+    - cvp
+  before_script:
+    - source .venv/bin/activate
+    - cd .ci
+    - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" env.lab
+    - cd ..
+    - chmod 755 tests
+    - cd tests
+    - sed -i -e "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$CVP_SERVER/g" inventory.ini
+    - cat inventory.ini
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
+
+#######################
+# CI MANAGEMENT       #
+#######################
+
+ENVIRONMENT.BUILD:
+  # Deploy all requirements for the pipeline.
+  stage: build
+  tags:
+    - arista
+    - emea
+  script:
+    - pip install virtualenv
+    - virtualenv -p $(which python) .venv
+    - source .venv/bin/activate
+    - pip install -r requirements.txt
+    - cp CVPRACv2/* .venv/lib/python2.7/site-packages/cvprac/
+    - ls -a .venv/lib/python2.7/site-packages/cvprac/
+    - pip install git+https://github.com/titom73/arista-cvp-scripts.git
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
+
+ENVIRONMENT.VERSION:
+  # Test if we are using correct virtual environment
+  stage: analysis.environment
+  tags:
+    - arista
+    - emea
+  script:
+    - source .venv/bin/activate
+    - ansible --version
+    - python --version
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
+
+CVPRAC.ENHANCED:
+  # Test if cvprac enhancements are correctly deployed.
+  stage: analysis.ansible
+  tags:
+    - arista
+    - emea
+  script:
+    - source .venv/bin/activate
+    - sh .ci/check_cvprac.sh
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*
+
+CVP_MODULE.DOCUMENTATION:
+  # Allow to check if modules are seen by ansible
+  stage: analysis.ansible
+  <<: *test_ansible_bootstrap
+  script:
+    - ansible-doc -t module cv_device
+    - ansible-doc -t module cv_container
+    - ansible-doc -t module cv_configlet
+    - ansible-doc -t module cv_image
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+
+
+CVP_MODULE.CONTAINER:
+  # Test cv_container module
+  stage: test
+  <<: *test_ansible_bootstrap
+  script:
+    - ansible-playbook playbook.container.demo.yaml -i inventory.ini --syntax-check
+    - ansible-playbook playbook.container.demo.yaml -i inventory.ini
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/   
+
+CVP_MODULE.CONFIGLET:
+  # Test cv_container module
+  stage: test
+  <<: *test_ansible_bootstrap
+  script:
+    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini --syntax-check
+    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/ 
+
+CVP_MODULE.DEVICE:
+  # Test cv_device module
+  # Since TASKs are not run by ansible, it is required to insert a 3rd part
+  # script to execute changes. Script will list available tasks for validation
+  # and execute all pending tasks.
+  # Every task will require a reboot, so script wait 4 minutes for complete 
+  # reboot of the vEOS VM.
+  stage: test
+  <<: *test_ansible_bootstrap
+  script:
+    - source ../.ci/env.lab
+    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --syntax-check
+    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=create
+    - cvp-task-manager -l
+    - cvp-task-manager -ra
+    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=show
+    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=rollback
+    - cvp-task-manager -l
+    - cvp-task-manager -ra
+    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=clean
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/ 
+
+#######################
+# ENV Cleanup         #
+#######################
+
+ENVIRONMENT.CLEAN:
+  stage: clean
+  tags:
+    - arista
+    - emea
+  script:
+    - rm -rf .venv/*
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .venv/
+  only:
+    changes:
+      - CVPRACv2/*
+      - tests/*
+      - library/*

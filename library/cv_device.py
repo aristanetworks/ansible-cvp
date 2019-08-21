@@ -45,50 +45,97 @@ description:
   - Returns the device data and any Task IDs created during the operation
 options:
   host:
-    description - IP Address or hostname of the CloudVisin Server
-    required - true
-    default - null
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
   username:
-    description - The username to log into Cloudvision.
-    required - true
-    default - null
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
   password:
-    description - The password to log into Cloudvision.
-    required - true
-    default - null
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
   protocol:
-    description - The HTTP protocol to use. Choices http or https.
-    required - false
-    default - https
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
   port:
-    description - The HTTP port to use. The cvprac defaults will be used
+    description: The HTTP port to use. The cvprac defaults will be used
                   if none is specified.
-    required - false
-    default - null
+    required: false
+    default: null
   device:
-    description - CVP device to apply the configlets to
-    required - true
-    default - None
+    description: CVP device to apply the configlets to
+    required: true
+    default: None
   container:
-    description - CVP container to add/delete device to/from if CVP
+    description: CVP container to add/delete device to/from if CVP
                   is specified for a delete option device will be removed
                   completely from CVP.
-    required - false
-    default - 'Tenat'
+    required: false
+    default: 'Tenant'
   configlet:
-      description - List of Configlet to add or remove from device
-      required - false
-      default - None
+      description: List of Configlet to add or remove from device
+      required: false
+      default: None
   action:
-    description - action to carry out on the container
+    description: action to carry out on the container
                   add - place a device in a container and/or add Configlets
                   delete - remove a device from a container and factory reset if Container = RESET
                            or remove Configlets if container = Parent Container for Device
                            or if Container = CVP remove from CVP
                   show - return the current device data if available
-    required - true
-    choices - 'show', 'add', 'delete'
-    default - show
+    required: true
+    choices: 
+      - 'show'
+      - 'add'
+      - 'delete'
+    default: show
+"""
+
+EXAMPLES="""
+# Move a device to a new container
+# Container must already exist
+- name: Move device to CVP container
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    container: "{{container_name}}"
+    action: add
+    register: cvp_result
+
+# Display information for device before a container's move
+- name: Show device information from CVP
+  tags: create, show
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    action: show
+    register: cvp_result
+
+- name: Display cv_device add result
+  tags: create, show
+  debug:
+    msg: "{{cvp_result}}"
+
+# Reset device from CVP
+- name: Reset device from CVP
+  tags: rollback
+  cv_device:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    device: "{{cvp_device}}"
+    container: "RESET"
+    action: delete
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -167,7 +214,7 @@ def process_device(module):
     #    deviceData = device
     #    deviceData['parentContainer'] = module.client.api.get_container_by_id(device['parentContainerKey'])
     deviceData = device_info(module)
-    if "error" not in str(deviceData).lower():
+    if "error" not in deviceData.keys():
         # Collect Required Configlets to apply to device
         if 'none' not in str(module.params['configlet']).lower():
             configletData = []
@@ -190,9 +237,13 @@ def process_device(module):
             if deviceData['ztpMode'] == False:
                 existing_config = module.client.api.get_device_configuration(deviceData['systemMacAddress'])
             if module.params['action'] == "add":
-                device_action = module.client.api.deploy_device(deviceData,
-                                                                module.params['container'],
-                                                                configletData)
+                # FIX Issue #10: deploy_device is testing if configlet is not None
+                # current implemetation uses a string instead of python None type.
+                # Add a new test to emulate None.
+                if configletData != 'None':
+                    device_action = module.client.api.deploy_device(device=deviceData, container=module.params['container'],configlets=configletData)
+                else:
+                    device_action = module.client.api.deploy_device(device=deviceData, container=module.params['container'])
                 if "error" not in device_action:
                     result['changed'] = True
                     reconcile = True
@@ -308,10 +359,10 @@ def main():
     """
     argument_spec = dict(
         host=dict(required=True),
-        port=dict(type='list', default=None),
+        port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         device=dict(required=True),
         container=dict(default='None'),
         configlet=dict(type='list', default='None'),

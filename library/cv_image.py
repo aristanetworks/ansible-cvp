@@ -32,12 +32,12 @@
 #
 DOCUMENTATION = """
 ---
-module: cv_device
+module: cv_image
 version_added: "1.0"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Create or Update CloudVision Portal Devices.
 description:
-  - CloudVison Portal Device configuration requires the device name,
+  -  CloudVison Portal Device configuration requires the device name,
     and the container name to move a device into a container
   - Device configuration requires the devcie name and a list of Configlets
     and / or Configlet Builders to apply to apply to it.
@@ -45,47 +45,50 @@ description:
   - Returns the device data and any Task IDs created during the operation
 options:
   host:
-    description - IP Address or hostname of the CloudVisin Server
-    required - true
-    default - null
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
   username:
-    description - The username to log into Cloudvision.
-    required - true
-    default - null
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
   password:
-    description - The password to log into Cloudvision.
-    required - true
-    default - null
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
   protocol:
-    description - The HTTP protocol to use. Choices http or https.
-    required - false
-    default - https
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
   port:
-    description - The HTTP port to use. The cvprac defaults will be used
+    description: The HTTP port to use. The cvprac defaults will be used
                   if none is specified.
-    required - false
-    default - null
+    required: false
+    default: null
   device:
-    description - CVP device to add/delete the image to/from
-    required - false
-    default - None
+    description: CVP device to add/delete the image to/from
+    required: false
+    default: None
   container:
-    description - CVP container to add/delete image to/from 
-    required - false
-    default - 'Tenat'
+    description: CVP container to add/delete image to/from 
+    required: false
+    default: 'Tenat'
   image:
-      description - Image to apply/remove or show information about
-      required - false
-      default - None
+      description: Image to apply/remove or show information about
+      required: false
+      default: None
   action:
-    description - action to carry out on the image
-                  add - place an Image in a container or device, device takes precedence
-                  delete - remove an Image from a container or device
-                  show - return the current Image data if available or show image
+    description: action to carry out on the image
+                  add- place an Image in a container or device, device takes precedence
+                  delete- remove an Image from a container or device
+                  show- return the current Image data if available or show image
                   associated with a device or container
-    required - true
-    choices - 'show', 'add', 'delete'
-    default - show
+    required: true
+    choices: 
+      - 'show'
+      - 'add'
+      - 'delete'
+    default: show
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -253,10 +256,10 @@ def main():
     """
     argument_spec = dict(
         host=dict(required=True),
-        port=dict(type='list', default=None),
+        port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         image=dict(default='None'),
         container=dict(default='None'),
         device=dict(default='None'),

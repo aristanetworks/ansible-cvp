@@ -30,6 +30,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 DOCUMENTATION = """
 ---
 module: cv_container
@@ -42,46 +47,89 @@ description:
   - Returns the container data and any Task IDs created during the operation
 options:
   host:
-    description - IP Address or hostname of the CloudVisin Server
-    required - true
-    default - null
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
   username:
-    description - The username to log into Cloudvision.
-    required - true
-    default - null
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
   password:
-    description - The password to log into Cloudvision.
-    required - true
-    default - null
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
   protocol:
-    description - The HTTP protocol to use. Choices http or https.
-    required - false
-    default - https
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
   port:
-    description - The HTTP port to use. The cvprac defaults will be used
+    description: The HTTP port to use. The cvprac defaults will be used
                   if none is specified.
-    required - false
-    default - null
+    required: false
+    default: null
   container:
-    description - CVP container to apply the configlet to if no device
+    description: CVP container to apply the configlet to if no device
                   is specified
-    required - false
-    default - None
+    required: false
+    default: None
   parent:
-    description - Name of the Parent container for the container specified
+    description: Name of the Parent container for the container specified
                   Used to configure target container and double check
                   container configuration
-    required - false
-    default - 'Tenant'
+    required: false
+    default: 'Tenant'
   action:
-    description - action to carry out on the container
-                  add - create the container under the parent container
+    description: action to carry out on the container
+                  add -  create the container under the parent container
                   delete - remove from parent container
                   show - return the current container data if available
-    required - true
-    choices - 'show', 'add', 'delete'
-    default - add
+    required: true
+    choices: 
+      - 'show'
+      - 'add'
+      - 'delete'
+    default: add
 """
+
+EXAMPLES = r'''
+# Example to create a container just under root container
+- name: Create a container on CVP.
+  cv_container:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: ansible_container
+    parent: Tenant
+    action: add
+
+# Example to delete container attached to root container
+- name: Delete a container on CVP.
+  cv_container:
+      host: '{{ansible_host}}'
+      username: '{{cvp_username}}'
+      password: '{{cvp_password}}'
+      protocol: https
+      container: ansible_container
+      parent: Tenant
+      action: delete
+
+# Example to get information on a container
+- name: Show a container on CVP.
+  cv_container:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    container: ansible_container
+    parent: Tenant
+    action: show
+  register: cvp_result
+
+- name: Display cv_container show result
+  debug:
+    msg: "{{cvp_result}}"
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
@@ -144,10 +192,10 @@ def main():
     """
     argument_spec = dict(
         host=dict(required=True),
-        port=dict(type='list', default=None),
+        port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         container=dict(required=True),
         parent=dict(default='Tenant'),
         action=dict(default='add', choices=['add','delete','show'])
