@@ -256,7 +256,7 @@ def main():
     """
     argument_spec = dict(
         host=dict(required=True),
-        port=dict(type='list', default=None),
+        port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
         password=dict(required=True, no_log=True),
