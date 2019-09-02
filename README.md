@@ -56,7 +56,7 @@ Containers can be created or deleted.
   Add and Delete will allow bundles to be applied or removed from Containers and devices
   Show will provide information on the contents of the image bundle.
 
-**cv_tasks [In-progress]**
+**cv_tasks [testing]**
  - `add`, `delete`, and `show` tasks
 
   Tasks must exist in CVP already, this module will allow the manipulation of them in CVP.
