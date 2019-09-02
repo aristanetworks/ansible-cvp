@@ -198,8 +198,8 @@ class CvpApi(object):
         '''
         self.log.debug('execute_task: task_id: %s' % task_id)
         data = {'data': [task_id]}
-        self.clnt.post('/task/executeTask.do', data=data,
-                       timeout=self.request_timeout)
+        return self.clnt.post('/task/executeTask.do', data=data,
+                              timeout=self.request_timeout)
 
     def cancel_task(self, task_id):
         ''' Cancel the task
@@ -209,7 +209,7 @@ class CvpApi(object):
         '''
         self.log.debug('cancel_task: task_id: %s' % task_id)
         data = {'data': [task_id]}
-        self.clnt.post('/task/cancelTask.do', data=data,
+        return self.clnt.post('/task/cancelTask.do', data=data,
                        timeout=self.request_timeout)
 
     def get_configlets(self, start=0, end=0):
