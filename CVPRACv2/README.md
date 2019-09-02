@@ -43,6 +43,10 @@ Test script used in the development of CvpRacV2 to confirm behaviour of function
 
 Test script used in the development of CvpRacV2 to confirm behaviour of functions used with the ansible modules to manipulate images
 
+**cvprac_TaskTest.py**
+
+Test script used in the development of CvpRacV2 to confirm behaviour of functions used with the ansible modules to manipulate tasks
+
 **test_container.sh**
 
 shell script to execute cvprac_ContainerTest.py and pass command line arguments to it, me being lazy during testing.
@@ -54,3 +58,7 @@ shell script to execute cvprac_Devicetest.py and pass command line arguments to 
 **test_image.sh**
 
 shell script to execute cvprac_Imagetest.py and pass command line arguments to it, me being lazy during testing.
+
+**test_task.sh**
+
+shell script to execute cvprac_TaskTest.py and pass command line arguments to it, me being lazy during testing.
