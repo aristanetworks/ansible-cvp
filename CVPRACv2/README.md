@@ -29,6 +29,10 @@ These were logged as Issues:
 
 94 Get additional Device info using getNetElementInfoById - https://github.com/aristanetworks/cvprac/issues/94
 
+96 No return for the method "execute_task" - https://github.com/aristanetworks/cvprac/issues/96
+
+98 Add return option to - def cancel_task(self, task_id): - https://github.com/aristanetworks/cvprac/issues/98
+
 Any additional functionality will be added to this version and raised as Issues in the original CvpRac distribution.
 
 **cvprac_ContainerTest.py**
