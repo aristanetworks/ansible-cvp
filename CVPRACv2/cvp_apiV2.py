@@ -498,6 +498,13 @@ class CvpApi(object):
             data = {'data': 0, 'message': message}
             return data
 
+    def get_devices(self):
+        ''' Returns a dict of all devices known to CVP
+
+        '''
+        self.log.debug('get_devices: called')
+        return self.get_inventory(0, 0)
+
     def get_devices_in_container(self, name):
         ''' Returns a dict of the devices under the named container.
 
