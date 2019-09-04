@@ -1,0 +1,29 @@
+---
+- name: Test cv_configlet v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    - cloudvision_topology:
+        configlets:
+          - configletName: MyConfiglet1
+            data: "{{playbook_dir}}/templates/configlet1.txt"
+          - configletName: MyConfiglet2
+            data: "{{playbook_dir}}/templates/configlet2.txt"
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+      register: cv_facts
+    
+    - name: "Check facts are build correctly"
+      assert:
+        that:
+          - "'configlets' in cv_facts.ansible_facts"
+          - "'devices' in cv_facts.ansible_facts"
+          - "'containers' in cv_facts.ansible_facts"
+          - "'images' in cv_facts.ansible_facts"
+          - "'tasks' in cv_facts.ansible_facts"
