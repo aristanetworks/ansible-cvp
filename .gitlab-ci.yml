@@ -109,60 +109,73 @@ CVP_MODULE.DOCUMENTATION:
     - ansible-doc -t module cv_container
     - ansible-doc -t module cv_configlet
     - ansible-doc -t module cv_image
+    - ansible-doc -t module cv_facts
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .venv/
 
 
-CVP_MODULE.CONTAINER:
+CVP_MODULE.FACTS:
   # Test cv_container module
   stage: test
   <<: *test_ansible_bootstrap
   script:
-    - ansible-playbook playbook.container.demo.yaml -i inventory.ini --syntax-check
-    - ansible-playbook playbook.container.demo.yaml -i inventory.ini
+    - ansible-playbook playbook.cv_facts.yaml -i inventory.ini --syntax-check
+    - ansible-playbook playbook.cv_facts.yaml -i inventory.ini
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
-      - .venv/   
+      - .venv/  
 
-CVP_MODULE.CONFIGLET:
-  # Test cv_container module
-  stage: test
-  <<: *test_ansible_bootstrap
-  script:
-    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini --syntax-check
-    - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    paths:
-      - .venv/ 
+# CVP_MODULE.CONTAINER:
+#   # Test cv_container module
+#   stage: test
+#   <<: *test_ansible_bootstrap
+#   script:
+#     - ansible-playbook playbook.container.demo.yaml -i inventory.ini --syntax-check
+#     - ansible-playbook playbook.container.demo.yaml -i inventory.ini
+#   cache:
+#     key: "$CI_COMMIT_REF_NAME"
+#     paths:
+#       - .venv/   
 
-CVP_MODULE.DEVICE:
-  # Test cv_device module
-  # Since TASKs are not run by ansible, it is required to insert a 3rd part
-  # script to execute changes. Script will list available tasks for validation
-  # and execute all pending tasks.
-  # Every task will require a reboot, so script wait 4 minutes for complete 
-  # reboot of the vEOS VM.
-  stage: test
-  <<: *test_ansible_bootstrap
-  script:
-    - source ../.ci/env.lab
-    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --syntax-check
-    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=create
-    - cvp-task-manager -l
-    - cvp-task-manager -ra
-    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=show
-    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=rollback
-    - cvp-task-manager -l
-    - cvp-task-manager -ra
-    - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=clean
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    paths:
-      - .venv/ 
+# CVP_MODULE.CONFIGLET:
+#   # Test cv_container module
+#   stage: test
+#   <<: *test_ansible_bootstrap
+#   script:
+#     - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini --syntax-check
+#     - ansible-playbook playbook.configlet.demo.yaml -i inventory.ini
+#   cache:
+#     key: "$CI_COMMIT_REF_NAME"
+#     paths:
+#       - .venv/ 
+
+# CVP_MODULE.DEVICE:
+#   # Test cv_device module
+#   # Since TASKs are not run by ansible, it is required to insert a 3rd part
+#   # script to execute changes. Script will list available tasks for validation
+#   # and execute all pending tasks.
+#   # Every task will require a reboot, so script wait 4 minutes for complete 
+#   # reboot of the vEOS VM.
+#   stage: test
+#   <<: *test_ansible_bootstrap
+#   script:
+#     - source ../.ci/env.lab
+#     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --syntax-check
+#     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=create
+#     - cvp-task-manager -l
+#     - cvp-task-manager -ra
+#     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=show
+#     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=rollback
+#     - cvp-task-manager -l
+#     - cvp-task-manager -ra
+#     - ansible-playbook playbook.device.demo.yaml -i inventory.ini --tags=clean
+#   cache:
+#     key: "$CI_COMMIT_REF_NAME"
+#     paths:
+#       - .venv/ 
 
 #######################
 # ENV Cleanup         #
