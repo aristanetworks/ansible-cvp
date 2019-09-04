@@ -19,7 +19,7 @@
         protocol: https
       register: cv_facts
     
-    - name: "Check facts are build correctly"
+    - name: "Check facts have expected lists"
       assert:
         that:
           - "'configlets' in cv_facts.ansible_facts"
@@ -27,3 +27,22 @@
           - "'containers' in cv_facts.ansible_facts"
           - "'images' in cv_facts.ansible_facts"
           - "'tasks' in cv_facts.ansible_facts"
+        fail_msg: "'ansible_facts do not have expected lists"
+        success_msg: "ansible_facts have all expected list from CVP"
+
+    - name: "Check containers facts "
+      assert:
+        that:
+          - "{{ cv_facts.ansible_facts['containers'] | length }} >1"
+        fail_msg: "Facts from CVP do not return any container. (>=2 are expected)"
+        success_msg: "Facts from CVP return more than 1 container as expected"
+    
+    - name: "Check if undefined container exists"
+      assert:
+        that:
+          - "cv_facts.ansible_facts['containers'] | selectattr(search_key,'equalto',search_val) | list | count > 0"
+        fail_msg: "Undefined_container has not been found in facts"
+        success_msg: "undefined_container has been found as expected"
+      vars:
+        search_key: key
+        search_val: undefined_container
