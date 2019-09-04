@@ -1,0 +1,17 @@
+---
+- name: Test cvp_facts
+  hosts: cvp
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Gather CVP facts
+      cv_facts:
+          host: '{{ansible_host}}'
+          username: '{{cvp_username}}'
+          password: '{{cvp_password}}'
+          protocol: https
+
+    - name: Display cvp_facts
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
