@@ -1,9 +1,10 @@
 ---
-- name: Test cv_configlet v2
+- name: Test and validation for cv_facts module.
   hosts: cvp
   connection: local
   gather_facts: no
   vars:
+    - verbose: False
     - cloudvision_topology:
         configlets:
           - configletName: MyConfiglet1
@@ -19,7 +20,12 @@
         protocol: https
       register: cv_facts
     
-    - name: "Check facts are build correctly"
+    - name: "Print out facts from CVP"
+      debug:
+        msg: "{{cv_facts}}"
+      when: verbose|bool
+
+    - name: "Check facts have expected lists"
       assert:
         that:
           - "'configlets' in cv_facts.ansible_facts"
@@ -27,3 +33,39 @@
           - "'containers' in cv_facts.ansible_facts"
           - "'images' in cv_facts.ansible_facts"
           - "'tasks' in cv_facts.ansible_facts"
+        fail_msg: "'ansible_facts do not have expected lists"
+        success_msg: "ansible_facts have all expected list from CVP"
+
+    - name: "Check containers facts "
+      assert:
+        that:
+          - "{{ cv_facts.ansible_facts['containers'] | length }} >1"
+        fail_msg: "Facts from CVP do not return any container. (>=2 are expected)"
+        success_msg: "Facts from CVP return more than 1 container as expected"
+    
+    - name: "Check if undefined container exists"
+      assert:
+        that:
+          - "cv_facts.ansible_facts['containers'] | selectattr(search_key,'equalto',search_val) | list | count > 0"
+        fail_msg: "Undefined_container has not been found in facts"
+        success_msg: "undefined_container has been found as expected"
+      vars:
+        search_key: key
+        search_val: undefined_container
+
+    - name: "Check configlets facts "
+      assert:
+        that:
+          - "{{ cv_facts.ansible_facts['configlets'] | length }} >0"
+        fail_msg: "Facts from CVP do not return any configlets. (>=1 are expected)"
+        success_msg: "Facts from CVP return more than 1 configlets as expected"
+    
+    - name: "Check if SYS_TelemetryBuilderV2 configlet exists"
+      assert:
+        that:
+          - "cv_facts.ansible_facts['configlets'] | selectattr(search_key,'equalto',search_val) | list | count > 0"
+        fail_msg: "SYS_TelemetryBuilderV2 has not been found in facts"
+        success_msg: "SYS_TelemetryBuilderV2 has been found as expected"
+      vars:
+        search_key: name
+        search_val: SYS_TelemetryBuilderV2
