@@ -25,6 +25,19 @@
 
 ## Modules overview
 
+**cv_facts**
+
+  Module to extract information from any CloudVision server. with this module, ansible can access to following content:
+  - dict of configlets.
+  - dict of containers.
+  - dict of devices.
+  - dict of tasks.
+  - dict of images.
+
+  Every dict provides all information given by CVP API and not only object's name.
+
+  > A complete playbook to collect CVP facts is available under [tests folder](tests/playbook.cv_facts.yaml) 
+
 **cv_configlet**
 
  - `add`, `delete`, and `show` configlets.
@@ -94,6 +107,19 @@ This example outlines how to use Ansible to create a device container on Arista 
     - container_name: automated_container
     - container_parent: Tenant
   tasks:
+    # collect CVP facts
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+      register: cv_facts
+    # Print CVP facts.
+    - name: "Print out facts from CVP"
+      debug:
+        msg: "{{cv_facts}}"
+    
     # Create container under root container
     - name: Create a container on CVP.
       cv_container:
