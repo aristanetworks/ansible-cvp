@@ -62,6 +62,45 @@ options:
     default: null
 """
 
+EXAMPLES="""
+# Collect Facts from CVP server
+# Register output into a variable
+- name: Test and validation for cv_facts module.
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+      register: cv_facts
+    
+    - name: "Print out facts from CVP"
+      debug:
+        msg: "{{cv_facts}}"
+
+# Collect Facts from CVP server
+# Use pre-defined module output
+- name: Test and validation for cv_facts module.
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+    
+    - name: "Print out facts from CVP"
+      debug:
+        msg: "{{ansible_facts}}"
+"""
+
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
 from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
