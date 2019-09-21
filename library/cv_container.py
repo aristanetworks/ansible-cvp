@@ -35,16 +35,16 @@ ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
                     'status': ['preview'],
                     'supported_by': 'community'}
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
 ---
 module: cv_container
 version_added: "1.0"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Create or Update CloudVision Portal Container.
 description:
-  - CloudVison Portal Configlet configuration requires the container name,
-    and parent container name to create the new container under
-  - Returns the container data and any Task IDs created during the operation
+  - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
+    to create and delete containers on CVP side.
+  - Returns number of created and/or deleted containers
 options:
   host:
     description: IP Address or hostname of the CloudVisin Server
@@ -67,68 +67,64 @@ options:
                   if none is specified.
     required: false
     default: null
-  container:
-    description: CVP container to apply the configlet to if no device
-                  is specified
-    required: false
-    default: None
-  parent:
-    description: Name of the Parent container for the container specified
-                  Used to configure target container and double check
-                  container configuration
-    required: false
-    default: 'Tenant'
-  action:
-    description: action to carry out on the container
-                  add -  create the container under the parent container
-                  delete - remove from parent container
-                  show - return the current container data if available
+  topology:
+    description: Yaml dictionary to describe intended containers
     required: true
-    choices: 
-      - 'show'
-      - 'add'
-      - 'delete'
-    default: add
+    default: None
+  cvp_facts:
+    description: Facts from CVP collected by cv_facts module
+    required: true
+    default: None
 """
 
 EXAMPLES = r'''
-# Example to create a container just under root container
-- name: Create a container on CVP.
-  cv_container:
-    host: '{{ansible_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    container: ansible_container
-    parent: Tenant
-    action: add
+- name: Create container topology on CVP
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    verbose: False
+    containers:
+      - name: Fabric
+        parent_container: Tenant
+      - name: Spines
+        parent_container: Fabric
+      - name: Leaves
+        parent_container: Fabric
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+      register: cvp_facts
+    - name: "Build Container topology on {{inventory_hostname}}"
+      cv_container:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        topology: '{{containers}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+'''
 
-# Example to delete container attached to root container
-- name: Delete a container on CVP.
-  cv_container:
-      host: '{{ansible_host}}'
-      username: '{{cvp_username}}'
-      password: '{{cvp_password}}'
-      protocol: https
-      container: ansible_container
-      parent: Tenant
-      action: delete
-
-# Example to get information on a container
-- name: Show a container on CVP.
-  cv_container:
-    host: '{{ansible_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    container: ansible_container
-    parent: Tenant
-    action: show
-  register: cvp_result
-
-- name: Display cv_container show result
-  debug:
-    msg: "{{cvp_result}}"
+RETURN = r'''
+creation_result:
+    description: Information about number of containers created on CVP.
+    returned: On Success.
+    type: complex
+    contains:
+        containers_created:
+            description: Number of created containers on CVP.
+            sample: "creation_result": {"containers_created": "4"}
+deletion_result:
+    description: Information about number of containers deleted on CVP.
+    returned: On Success.
+    type: complex
+    contains:
+        containers_deleted:
+            description: Number of deleted containers on CVP.
+            sample: "deletion_result": {"containers_deleted": "4"}
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -137,6 +133,19 @@ from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
 
 
 def connect(module):
+    """
+    Create a connection to CVP server to use API
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+
+    Returns
+    -------
+    CvpClient
+        CvpClient object to manager API calls.
+    """
     client = CvpClient()
     try:
         client.connect([module.params['host']],
@@ -152,13 +161,26 @@ def connect(module):
 
 
 def process_container(module, container, parent, action):
-    containers = module.client.api.get_containers()
+    """
+    Execute action on CVP side to create / delete container.
 
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    container : string
+        Name of container to manage
+    parent : string
+        Name of parent of container to manage
+    action : string
+        Action to run on container. Must be one of: 'show/add/delete'
+    """
+    containers = module.client.api.get_containers()
     # Ensure the parent exists
     parent = next((item for item in containers['data'] if
                    item['name'] == parent), None)
     if not parent:
-        module.fail_json(msg=str('Parent container does not exist.'))
+        module.fail_json(msg=str('Parent container (' + str(parent) + ') does not exist for container ' + str(container)))
 
     cont = next((item for item in containers['data'] if
                  item['name'] == container), None)
@@ -168,12 +190,14 @@ def process_container(module, container, parent, action):
         elif action == "add":
             return [False,{'container':cont}]
         elif action == "delete":
-            resp = module.client.api.delete_container(cont['name'],cont['key'], parent['name'],
-                                            parent['key'])
+            resp = module.client.api.delete_container(cont['name'],
+                                                      cont['key'],
+                                                      parent['name'],
+                                                      parent['key'])
             if resp['data']['status'] == "success":
                 return [True,{'taskIDs':resp['data']['taskIds']},
                         {'container':cont}]
-    else:
+    else:                 
         if action == "show":
             return [False,{'container':"Not Found"}]
         elif action == "add":
@@ -186,6 +210,204 @@ def process_container(module, container, parent, action):
             return [False,{'container':"Not Found"}]
 
 
+def create_new_containers(module, intended, facts):
+    """
+    Create missing container to CVP Topology.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    intended : list
+        List of expected containers based on following structure:
+    facts : dict
+        Facts from CVP collected by cv_facts module
+    """
+    count_container_creation = 0
+    for container in intended:
+        found = False
+        for existing_container in facts['containers']:
+            if container['name'] == existing_container['Name']:
+                found = True
+                break
+        if not found:
+            response = process_container(module=module,
+                                         container=container['name'],
+                                         parent=container['parent_container'],
+                                         action='add')
+            if response[0]:
+                count_container_creation += 1
+    if count_container_creation > 0:
+        return [True, {'containers_created': "" + str(count_container_creation) + ""}]
+    return [False, {'containers_created': "0"}]
+
+
+def is_empty(module, container_name, facts):
+    """
+    Check if container can be removed safely.
+
+    To be removed, a container shall not have any container or
+    device attached to it. Current function parses facts to see if a device or
+    a container is attached. If not, we can remove container
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    container_name : str
+        Name of the container to look for.
+    facts : dict
+        Facts from CVP collected by cv_facts module
+    """
+    is_empty = True
+    not_empty = False
+    # test if container_name is a parent container for another container
+    for container_fact in facts['containers']:
+        # If at least one container has container_name as parent container
+        # we return information container_name is not empty
+        if container_fact['parentName'] == container_name:
+            return not_empty
+    # test if container has at least one device attached
+    for device in facts['devices']:
+        if device['containerName'] == container_name:
+            return not_empty
+    return is_empty
+
+
+def get_parentName_list(container_list, facts):
+    """
+    Collect list of parentName for all containers provided.
+
+    Parameters
+    ----------
+    container_list : list
+        List of containers' name to collect their parentName
+    facts : dict
+        Facts from CVP collected by cv_facts module
+    """
+    parentName = list()
+    for container in facts['containers']:
+        if container['Name'] in container_list:
+            parentName.append(container['parentName'])
+    return parentName
+
+
+def recursive_tree_lookup(module, facts, children_to_delete, sorted_list):
+    """
+    Extract a sorted list of container to delete.
+
+    Read facts[containers] and locate containers we can delete from bottom to top.
+    Tree naviguation use recursive approach.
+    This function assumes leaves are identified first and injected to function with sorted_list.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    facts : dict
+        Facts from CVP collected by cv_facts module
+    children_to_delete : list
+        List of container to delete and used to lookup for sorted list.
+    sorted_list : list
+        Sorted list from bottom to top of containers we have to delete.
+    """
+    list_parentName = get_parentName_list(container_list=children_to_delete, facts=facts)
+    list_resultLevelUp = list()
+    # Build list of potential next containers to delete
+    for container in facts['containers']:
+        if container['Name'] in list_parentName and container['parentName'] != 'Tenant':
+            list_resultLevelUp.append(container['Name'])
+
+    # Recursive section
+    # If a potential list exist, then go to next level
+    if len(list_resultLevelUp) > 0:
+        sorted_list = sorted_list + list_resultLevelUp
+        recursive_tree_lookup(module=module,
+                              facts=facts,
+                              children_to_delete=list_resultLevelUp,
+                              sorted_list=sorted_list)
+
+    # If no more potential, then try to catch level under Tenant
+    else:
+        for container in facts['containers']:
+            if container['Name'] in list_parentName and container['parentName'] == 'Tenant':
+                sorted_list.append(container['Name'])
+
+    # Return current sorted list
+    return sorted_list
+
+
+def sort_container_to_delete(module, containers_list, facts):
+    """
+    Build complete end to end list of container to delete.
+
+    Identify leaves and then collect complete tree by reading recursive_tree_lookup
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    facts : dict
+        Facts from CVP collected by cv_facts module
+    containers_list : list
+        Unsorted list of container to delete from CVP.
+    """
+    sorted_container_list = list()
+
+    # Get first container we can remove
+    # These container shall not have container nor device attached to them
+    for container in containers_list:
+        if is_empty(module=module, container_name=container, facts=facts):
+            sorted_container_list.append(container)
+
+    # Get parent container of leaf container identified previously
+    sorted_container_list = recursive_tree_lookup(module=module,
+                                 facts=facts,
+                                 children_to_delete=sorted_container_list,
+                                 sorted_list=sorted_container_list)
+    return sorted_container_list
+
+
+def delete_unused_containers(module, intended, facts):
+    """
+    Delete containers from CVP Topology when not defined in intended.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    intended : list
+        List of expected containers based on following structure:
+    facts : list
+        List of containers extracted from CVP using cv_facts.
+    """
+    default_containers = ['Tenant', 'Undefined']
+    count_container_deletion = 0
+    container_to_delete = list()
+    for container in facts['containers']:
+        found = False
+        for new_container in intended:
+            if new_container['name'] == container['Name']:
+                found = True
+        if not found and container['Name'] not in default_containers:
+            container_to_delete.append(container['Name'])
+
+    sorted_container_list = sort_container_to_delete(module=module,
+                                                     containers_list=container_to_delete,
+                                                     facts=facts)
+    for container_name in sorted_container_list:
+        for container in facts['containers']:
+            if container_name == container['Name']:
+                response = process_container(module=module,
+                                             container=container['Name'],
+                                             parent=container['parentName'],
+                                             action='delete')
+                if response[0]:
+                    count_container_deletion += 1
+    if count_container_deletion > 0:
+        return [True, {'containers_deleted': "" + str(count_container_deletion) + ""}]
+    return [False, {'containers_deleted': "0"}]
+
 
 def main():
     """ main entry point for module execution
@@ -196,31 +418,31 @@ def main():
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
         password=dict(required=True, no_log=True),
-        container=dict(required=True),
-        parent=dict(default='Tenant'),
-        action=dict(default='add', choices=['add','delete','show'])
+        topology=dict(type='list', required=True),
+        cvp_facts=dict(type='dict', required=True)
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
-
     result = dict(changed=False)
-
     module.client = connect(module)
-    container = module.params['container']
-    parent = module.params['parent']
-    action = module.params['action']
 
     try:
-        changed = process_container(module, container, parent, action)
-        if changed[0]:
+        creation_process = create_new_containers(module=module,
+                                                 intended=module.params['topology'],
+                                                 facts=module.params['cvp_facts'])
+        if creation_process[0]:
             result['changed'] = True
-            result['taskIDs'] = changed[1]
-        else:
-            result['data'] = changed[1]
+            result['creation_result'] = creation_process[1]
+
+        deletion_process = delete_unused_containers(module=module,
+                                                    intended=module.params['topology'],
+                                                    facts=module.params['cvp_facts'])
+        if deletion_process[0]:
+            result['changed'] = True
+            result['deletion_result'] = deletion_process[1]
     except CvpApiError, e:
         module.fail_json(msg=str(e))
-
     module.exit_json(**result)
 
 
