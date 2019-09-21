@@ -40,11 +40,7 @@
 
 **cv_configlet**
 
- - `add`, `delete`, and `show` configlets.
-
-  Configlets can be created, deleted then added to containers or devices. - also in cv_devices as required to move devices between containers
-  Any Tasks that are generated as a result will be returned.
-  Need to add the option to check (CVP verify) the configuration contained in the Configlet
+  Module to manage containers on CVP based on an intend method. After extracting facts from CVP with `cv_facts`, module create and delete containers based on the topology defined within ansible.
 
 > A complete playbook to create / show / delete configlet is available under [tests folder](tests/playbook.configlet.demo.yaml) 
 
@@ -104,8 +100,13 @@ This example outlines how to use Ansible to create a device container on Arista 
   connection: local
   gather_facts: no
   vars:
-    - container_name: automated_container
-    - container_parent: Tenant
+    containers:
+      - name: Fabric
+        parent_container: Tenant
+      - name: Spines
+        parent_container: Fabric
+      - name: Leaves
+        parent_container: Fabric
   tasks:
     # collect CVP facts
     - name: "Gather CVP facts {{inventory_hostname}}"
@@ -120,33 +121,14 @@ This example outlines how to use Ansible to create a device container on Arista 
       debug:
         msg: "{{cv_facts}}"
     
-    # Create container under root container
+    # Create containers topology
     - name: Create a container on CVP.
       cv_container:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
-        protocol: https
-        container: "{{container_name}}"
-        parent: "{{container_parent}}"
-        action: add
-    
-    # Look for container deleted previously.
-    # If result contains, then we assume there is en error
-    - name: Show a container on CVP.
-      cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        container: "{{container_name}}"
-        parent: "{{container_parent}}"
-        action: show
-      register: cvp_result
-
-    - name: Display cv_container show result
-      debug:
-        msg: "{{cvp_result}}"
+        topology: '{{containers}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
 ```
 
 
