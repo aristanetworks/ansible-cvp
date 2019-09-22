@@ -1,9 +1,9 @@
-![](https://img.shields.io/badge/development-In_Progress-red)   ![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/aristanetworks/ansible-cvp)  ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/aristanetworks/ansible-cvp)  ![GitHub last commit](https://img.shields.io/github/last-commit/aristanetworks/ansible-cvp)
+![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/aristanetworks/ansible-cvp)  ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/aristanetworks/ansible-cvp)  ![GitHub last commit](https://img.shields.io/github/last-commit/aristanetworks/ansible-cvp)
 
 # Ansible Modules for CloudVision Platform (CVP)
 
 
-![](https://img.shields.io/badge/development-In_Progress-red)  __WARNING: Pre Release Work in progress Anisble modules for CVP__ 
+![Development Status](https://img.shields.io/badge/development-In_Progress-red)  __WARNING: Pre Release Work in progress Anisble modules for CVP__ 
 
 
 
@@ -11,7 +11,7 @@
 
 <!-- code_chunk_output -->
 
-- [Ansible Modules for CloudVision Platform](#ansible-modules-for-cloudvision-platform)
+- [Ansible Modules for CloudVision Platform (CVP)](#ansible-modules-for-cloudvision-platform-cvp)
   - [Modules overview](#modules-overview)
   - [Installation](#installation)
   - [Example playbook](#example-playbook)
@@ -24,19 +24,6 @@
 
 
 ## Modules overview
-
-**cv_facts**
-
-  Module to extract information from any CloudVision server. with this module, ansible can access to following content:
-  - dict of configlets.
-  - dict of containers.
-  - dict of devices.
-  - dict of tasks.
-  - dict of images.
-
-  Every dict provides all information given by CVP API and not only object's name.
-
-  > A complete playbook to collect CVP facts is available under [tests folder](tests/playbook.cv_facts.yaml) 
 
 **cv_configlet**
 
@@ -122,6 +109,7 @@ This example outlines how to use Ansible to create a device container on Arista 
         msg: "{{cv_facts}}"
     
     # Create containers topology
+
     - name: Create a container on CVP.
       cv_container:
         host: '{{ansible_host}}'
@@ -138,7 +126,7 @@ This example outlines how to use Ansible to create a device container on Arista 
 
 # License
 
-Project is published under [BSD License](LICENSE).
+Project is published under [Apache License](LICENSE).
 
 # Ask question or report issue
 
