@@ -131,6 +131,22 @@ from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
 from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
 
+def isIterable( testing_object= None):
+    """
+    Test if an object is iterable or not.
+
+    Test if an object is iterable or not. If yes return True, else return False.
+
+    Parameters
+    ----------
+    testing_object : any, optional
+        Object to test if it is iterable or not, by default None
+    """
+    try:
+        some_object_iterator = iter(testing_object)
+        return True
+    except TypeError as te:
+        return False
 
 def connect(module):
     """
@@ -384,24 +400,33 @@ def delete_unused_containers(module, intended, facts):
     default_containers = ['Tenant', 'Undefined']
     count_container_deletion = 0
     container_to_delete = list()
+    
+    # Parse existing container to remove unused containers not listed in topology
+    # assuming topology is iterable and not none.
+
+    # Build list of container to delete (only container name).
     for container in facts['containers']:
         found = False
-        for new_container in intended:
-            if new_container['name'] == container['Name']:
-                found = True
+        # Issue #14 - check if topology is iterable
+        if ( isIterable(intended) ):
+            for new_container in intended:
+                if new_container['name'] == container['Name']:
+                    found = True
         if not found and container['Name'] not in default_containers:
             container_to_delete.append(container['Name'])
 
+    # Order list of unused containers to start bottom to top.
     sorted_container_list = sort_container_to_delete(module=module,
-                                                     containers_list=container_to_delete,
-                                                     facts=facts)
+                                                    containers_list=container_to_delete,
+                                                    facts=facts)
+    # Delete containers identify above.
     for container_name in sorted_container_list:
         for container in facts['containers']:
             if container_name == container['Name']:
                 response = process_container(module=module,
-                                             container=container['Name'],
-                                             parent=container['parentName'],
-                                             action='delete')
+                                            container=container['Name'],
+                                            parent=container['parentName'],
+                                            action='delete')
                 if response[0]:
                     count_container_deletion += 1
     if count_container_deletion > 0:
@@ -428,13 +453,16 @@ def main():
     module.client = connect(module)
 
     try:
-        creation_process = create_new_containers(module=module,
-                                                 intended=module.params['topology'],
-                                                 facts=module.params['cvp_facts'])
-        if creation_process[0]:
-            result['changed'] = True
-            result['creation_result'] = creation_process[1]
-
+        # Start process to create new containers
+        # Should be done only if topology is iterable.
+        if (isIterable(module.params['topology']) ):
+            creation_process = create_new_containers(module=module,
+                                                    intended=module.params['topology'],
+                                                    facts=module.params['cvp_facts'])
+            if creation_process[0]:
+                result['changed'] = True
+                result['creation_result'] = creation_process[1]
+        # Start process to delete unused container.
         deletion_process = delete_unused_containers(module=module,
                                                     intended=module.params['topology'],
                                                     facts=module.params['cvp_facts'])
