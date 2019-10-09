@@ -251,9 +251,9 @@ def process_configlet(module, configlet):
                             result['data'] = {'error':'container not found %s' %module.params['container']}
         if module.params['action'] == "add":
             if module.params['device'] == 'None':
+                # If a device is specified in module params then do not add configlet
                 # Add configlet to spcified container in module params
                 # If none specified then do not add configlet
-                # If a device is specified in module params then do not add configlet
                 result['action'] = 'add_to_container'
                 if container_data != "None":
                     result['data'] = module.client.api.apply_configlets_to_container("Ansible",
@@ -289,20 +289,26 @@ def process_configlet(module, configlet):
     result['end_container_count']= configlet_info["containerCount"]
     result['end_device_count'] = configlet_info["netElementCount"]
     # Added
-    if result['end_container_count'] > result['start_container_count']:
+    # Expect to add container name to output if new container is targeted by configlet.
+    if module.params['container'] != 'None' and result['end_container_count'] > result['start_container_count']:
         result['added_container'] = container_data['name']
     else:
         result['added_container'] = False
-    if result['end_device_count'] > result['start_device_count']:
+
+    # Expect to add device name to output if new device is targeted by configlet.
+    # Issue #13: this condition should be TRUE only if target is a device and not a container
+    if module.params['device'] != 'None' and result['end_device_count'] > result['start_device_count']:
         result['added_device'] = device_data['fqdn']
     else:
         result['added_device'] = False
+    
     # Removed
-    if result['end_container_count'] < result['start_container_count']:
+    if module.params['container'] != 'None' and result['end_container_count'] < result['start_container_count']:
         result['removed_container'] = container_data['name']
     else:
         result['removed_container'] = False
-    if result['end_device_count'] < result['start_device_count']:
+    # Issue #13: this condition should be TRUE only if target is a device and not a container
+    if module.params['device'] != 'None' and result['end_device_count'] < result['start_device_count']:
         result['removed_device'] = device_data['fqdn']
     else:
         result['removed_device'] = False
