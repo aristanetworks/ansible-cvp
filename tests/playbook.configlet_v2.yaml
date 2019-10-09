@@ -1,0 +1,37 @@
+---
+- name: Test cv_configlet_v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    configlets_create:
+      Test_Configlet: "! This is a Testing Configlet\n! it has no affect on the Device but has been changed again\n!\ninterface loopback 999\n  description Test Interface_1\n  ip address 192.168.99.99/32\n  no shutdown\nexit"
+      # Test_Configlet_2: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 998\n  description Test Interface_2\n  ip address 192.168.99.98/32\n  no shutdown\nexit"
+      # Test_Configlet_3: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 997\n  description Test Interface_3\n  ip address 192.168.99.97/32\n  no shutdown\nexit"
+      # Test_Configlet_4: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 996\n  description Test Interface_4\n  ip address 192.168.99.96/32\n  no shutdown\nexit"
+      # Test_Configlet_5: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 995\n  description Test Interface_5\n  ip address 192.168.99.95/32\n  no shutdown\nexit"
+  
+  tasks:
+    - name: CV_FACTS
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+
+    - name: CV_CONFIGLET
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlets_create}}"
+        # cvp_filter: ["Test","base-chk","base-firewall"]
+      # check_mode: no
+      register: cvp_configlet
+    - debug:
+        var: cvp_configlet
