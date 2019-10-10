@@ -118,8 +118,8 @@ def configlet_action(module):
         # Include only configlets that match filter elements "all" will
         # include all configlets.
         if configlet['type'] == 'Static':
-            if re.search(r"\ball\b", str(module.params['cvp_filter'])) or (
-                any(element in configlet['name'] for element in module.params['cvp_filter'])):
+            if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
+                any(element in configlet['name'] for element in module.params['configlet_filter'])):
                 if configlet['name'] in module.params['configlets']:
                     ansible_configlet = module.params['configlets'][configlet['name']]
                     configlet_compare = compare(configlet['config'],ansible_configlet)
@@ -235,10 +235,10 @@ def main():
         port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True, no_log=True),
         configlets=dict(type='dict',required=True),
         cvp_facts=dict(type='dict',required=True),
-        cvp_filter=dict(type='list', default='none')
+        configlet_filter=dict(type='list', default='none')
         )
 
     module = AnsibleModule(argument_spec=argument_spec,
