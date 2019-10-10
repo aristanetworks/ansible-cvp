@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019, Arista Networks AS-EMEA
+# Copyright (c) 2019, Arista Networks EOS+
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,140 +30,49 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
-from ansible.module_utils.basic import AnsibleModule
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
-
-import re
-import time
-from jinja2 import meta
-import jinja2
-import yaml
-
-
-ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
-
 DOCUMENTATION = """
 ---
 module: cv_configlet
-short_description: Create or Update CloudVision Portal Configlet.
+version_added: "2.2"
+author: "EMEA AS (ansible-dev@arista.com)"
+short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
-  - CloudVison Portal Configlet configuration requires the configlet name,
-    container or device to apply to, and configuration to be applied
-  - Returns the configlet data and any Task IDs created during the operation
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
-options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used if none is specified.
-    required: false
-    default: null
-  container:
-    description: CVP container to apply the configlet to if no device is specified
-    required:  false
-    default:  None
-  device:
-    description:  CVP device to apply configlet to overides contianer association
-    required:  false
-    default:  None
-  parent:
-    description:  Name of the Parent container for the container specified
-        Used to configure target container and double check container configuration
-    required:  false
-    default:  'Tenant'
-  configletName:
-    description:  If associated with a device the configlet name will 
-      be 'device_configletName' if configletName has been provided otherwise 
-      it will be 'device_template' if none of the above have been provided it 
-      will be 'configletName' if that was not provided a default name of 'Ansible_Test' will be used
-    required: false
-    default:  None
-  template:
-    description:  Jinja2 Template used to create configlet configuration block
-    required:  true
-    default:  null
-  data:
-    description:  location of data file to use with Jinja2 template
-    required:  true
-    default:  null
-  action:
-    description: action to carry out on configlet
-                    add - create the configlet and add it to container or device
-                    delete - remove from container or device, if configlet has
-                            has no other associations then delete it
-                    show - return the current configuration in the configlet
-                        and the new configuration if generated
-    required:  true
-    choices:  
-      - 'show'
-      - 'add'
-      - 'delete'
-    default:  show
+  - CloudVison Portal Configlet compares the list of configlets and config in
+  in configlets against cvp-facts then adds, deletes, or updates them as appropriate.
+  If a configlet is in cvp_facts but not in configlets it will be deleted
+  If a configlet is in configlets but not in cvp_facts it will be created
+  If a configlet is in both configlets and cvp_facts it configuration will be compared
+  and updated with the version in configlets if the two are different.
 """
+# Required by Ansible and CVP
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.cv_client import CvpClient
+from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+import re
+from time import sleep
+# Required by compare function
+import difflib
+from fuzzywuzzy import fuzz # Library that uses Levenshtein Distance to calculate the differences between strings.
 
-EXAMPLES = r'''
-# Create configlet attached to container
-- name: Create a configlet on CVP.
-  cv_configlet:
-    host: '{{cvp_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    container: "{{container_name}}"
-    parent: "{{container_parent}}"
-    configletName: "{{configlet_name}}"
-    template: "{{configlet_template}}"
-    data: "{{configlet_data}}"
-
-# Show configlet attached to container
-- name: Show configlet configured on CVP.
-  cv_configlet:
-    host: '{{ansible_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    container: "{{container_name}}"
-    parent: "{{container_parent}}"
-    configletName: "{{configlet_name}}"
-    action: show
-    register: cvp_result
-
-- name: Display cv_configlet show result
-  debug:
-    msg: "{{cvp_result}}"
-
-# Delete configlet attached to container
-- name: Delete a configlet on CVP.
-  cv_configlet:
-    host: '{{ansible_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    container: "{{container_name}}"
-    parent: "{{container_parent}}"
-    configletName: "{{configlet_name}}"
-    configletConfig: ""
-    action: delete
-'''
+def compare(fromText, toText, lines=10):
+    """ Compare text string in 'fromText' with 'toText' and produce
+        diffRatio - a score as a float in the range [0, 1] 2.0*M / T
+          T is the total number of elements in both sequences,
+          M is the number of matches.
+          Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
+        unified diff list
+          Code	Meaning
+          '- '	line unique to sequence 1
+          '+ '	line unique to sequence 2
+          '  '	line common to both sequences
+          '? '	line not present in either input sequence
+    """
+    fromlines = fromText.splitlines(1)
+    tolines = toText.splitlines(1)
+    diff = list(difflib.unified_diff(fromlines, tolines,n=lines))
+    textComp = difflib.SequenceMatcher(None, fromText, toText)
+    diffRatio = round( textComp.quick_ratio()*100, 2)
+    return [diffRatio,diff]
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
@@ -183,308 +91,140 @@ def connect(module):
         module.fail_json(msg=str(e))
     return client
 
-def device_info(module):
-    ''' Get dictionary of device info from CVP.
-    :param module: Ansible module with parameters and client connection.
-    :return: Dict of device info from CVP or exit with failure if no
-             info for device is found.
-    '''
-    device_info = module.client.api.get_device_by_name(module.params['device'])
-    if not device_info:
-        device_info['warning']="Device with name '%s' does not exist." % module.params['device']
-    else:
-        device_info['configlets'] = module.client.api.get_configlets_by_netelement_id(device_info['systemMacAddress'])['configletList']
-    return device_info
-
-def container_info(module):
-    ''' Get dictionary of container info from CVP.
-    :param module: Ansible module with parameters and client connection.
-    :return: Dict of container info from CVP or exit with failure if no
-             info for device is found.
-    '''
-    container_info = module.client.api.get_container_by_name(module.params['container'])
-    if container_info == None:
-        container_info = {}
-        container_info['warning'] = "Container with name '%s' does not exist." % module.params['container']
-    else:
-        container_info['configlets'] = module.client.api.get_configlets_by_container_id(container_info['key'])
-    return container_info
-
-def process_configlet(module, configlet):
-    ''' Check the current status of a configlet.
-    Returns a list of associated containers / devices
-    Returns None if the configlet has no associations.
-    If action = add apply configlet to device or container
-                if device specified only apply to device
-    If action = delete removes configlet from device or container
-    param module: Ansible module with parameters and client connection.
-    configlet: Name of Configlet to process
-    return: Dict of action taken, containers/devices affected and counts of same
-    '''
-
-    result = {}
-    # Find out if configlet is associated with any containers or devices
-    configlet_info = module.client.api.get_configlet_by_name(configlet)
-    result['start_container_count']= configlet_info["containerCount"]
-    result['start_device_count'] = configlet_info["netElementCount"]
-
-    # Get details of container
-    if module.params['container'] != 'None':
-        container_data = container_info(module)
-        if 'Warning' in container_data:
-            result['data']=container_data
-            container_data = "None"
-        container_list = module.client.api.get_applied_containers(configlet)['data']
-        # Remove configlet from container if action = delete
-        if module.params['action'] == "delete":
-            for container in container_list:
-                if module.params['container'] in container['containerName']:
-                    if configlet_info["containerCount"] > 0 and module.params['device'] == 'None':
-                        # Remove configlet from spcified container in module params
-                        # If none specified then do not remove configlet
-                        # If a device is specified in module params then do not remove configlet
-                        result['action'] = 'delete_from_container'
-                        if container_data != "None":
-                            result['data'] = module.client.api.remove_configlets_from_container("Ansible",
-                                                                                                container_data, [configlet_info])
-                        else:
-                            result['data'] = {'error':'container not found %s' %module.params['container']}
-        if module.params['action'] == "add":
-            if module.params['device'] == 'None':
-                # If a device is specified in module params then do not add configlet
-                # Add configlet to spcified container in module params
-                # If none specified then do not add configlet
-                result['action'] = 'add_to_container'
-                if container_data != "None":
-                    result['data'] = module.client.api.apply_configlets_to_container("Ansible",
-                                                                                     container_data, [configlet_info])
-                else:
-                    result['data'] = {'error':'container not found %s' %module.params['container']}
-
-    # Get details of device
-    # Remove configlet from specified device in module params
-    # If none specified then do not remove configlet
-    if module.params['device'] != 'None':
-        device_data = device_info(module)
-        if "Warning" in device_data:
-            result['data']=device_data
-            device_data = "None"
-        # Remove configlet from device if action = delete
-        if module.params['action'] == "delete":
-            device_list = module.client.api.get_applied_devices(configlet)['data']
-            for device in device_list:
-                # If configlet applied to device then delete it.
-                if module.params['device'] in device['hostName']:
-                    if configlet_info["netElementCount"] > 0 and device_data != "None":
-                        result['action'] = 'delete_from_device'
-                        result['data'] = module.client.api.remove_configlets_from_device("Ansible",
-                                                                                            device_data, [configlet_info])
-        # Add configlet to device if action = add
-        if module.params['action'] == "add" and device_data != "None":
-            result['action'] = 'add_to_device'
-            result['data'] = module.client.api.apply_configlets_to_device("Ansible", device_data,
-                                                                             [configlet_info],create_task=True)
-    # Check to see if any containers or devices have been added or removed
-    configlet_info = module.client.api.get_configlet_by_name(configlet)
-    result['end_container_count']= configlet_info["containerCount"]
-    result['end_device_count'] = configlet_info["netElementCount"]
-    # Added
-    # Expect to add container name to output if new container is targeted by configlet.
-    if module.params['container'] != 'None' and result['end_container_count'] > result['start_container_count']:
-        result['added_container'] = container_data['name']
-    else:
-        result['added_container'] = False
-
-    # Expect to add device name to output if new device is targeted by configlet.
-    # Issue #13: this condition should be TRUE only if target is a device and not a container
-    if module.params['device'] != 'None' and result['end_device_count'] > result['start_device_count']:
-        result['added_device'] = device_data['fqdn']
-    else:
-        result['added_device'] = False
-    
-    # Removed
-    if module.params['container'] != 'None' and result['end_container_count'] < result['start_container_count']:
-        result['removed_container'] = container_data['name']
-    else:
-        result['removed_container'] = False
-    # Issue #13: this condition should be TRUE only if target is a device and not a container
-    if module.params['device'] != 'None' and result['end_device_count'] < result['start_device_count']:
-        result['removed_device'] = device_data['fqdn']
-    else:
-        result['removed_device'] = False
-    return result
-
-
-def process_container(module, container, parent):
-    ''' Check for existence of a Container and its parent in CVP.
-    Returns True if the Containerand Parent exist
-    Creates Container if Parent exists but Container doesn't and
-    Returns True
-    Returns False if the Parent container does not exist and dose not
-    create the Container specified.
-    '''
-    containers = module.client.api.get_containers()
-
-    # Ensure the parent exists
-    parent = next((item for item in containers['data'] if
-                   item['name'] == parent), None)
-    if not parent:
-        module.fail_json(msg=str('Parent container does not exist.'))
-
-    cont = next((item for item in containers['data'] if
-                 item['name'] == container), None)
-    if not cont:
-        module.client.api.add_container(container, parent['name'],
-                                        parent['key'])
-        return True
-    return False
-
-def config_from_template(module):
-    ''' Load the Jinja template and apply user provided parameters in necessary
-        places. Fail if template is not found. Fail if rendered template does
-        not reference the correct port. Fail if the template requires a VLAN
-        but the user did not provide one with the port_vlan parameter.
-
-    :param module: Ansible module with parameters and client connection.
-    :return: String of Jinja template rendered with parameters or exit with
-             failure.
-    '''
-    template = False
-    if module.params['template']:
-        template_loader = jinja2.FileSystemLoader('./templates')
-        env = jinja2.Environment(loader=template_loader,
-                                 undefined=jinja2.DebugUndefined)
-        template = env.get_template(module.params['template'])
-        if not template:
-            module.fail_json(msg=str('Could not find template - %s'
-                                     % module.params['template']))
-
-        templateData = {}
-        try:
-            with open(module.params['data']) as handle:
-                templateData["data"] = yaml.safe_load(handle)
-        except Exception as e:
-            print('Could not load data file: {0}'.format(e))
-        
-        templateData["device"] = module.params['device']
-        templateData["container"] = module.params['container']
-        temp_source = env.loader.get_source(env, module.params['template'])[0]
-        parsed_content = env.parse(temp_source)
-        temp_vars = list(meta.find_undeclared_variables(parsed_content))
-        for var in temp_vars:
-            if str(var) not in templateData["data"]:
-                module.fail_json(msg=str('Template %s requires %s value - %s.'
-                                         %(module.params['template'],var,yaml.dump(templateData["data"]))))
-        try:
-            template = template.render(templateData["data"])
-            return template
-        except Exception as templateError:
-            module.fail_json(msg=str('Template - %s: does not render correctly: %s'
-                                   %(module.params['template'],templateError)))
-    else:
-        module.fail_json(msg=str('Template - required but not provided'))
-    return template
-
 def configlet_action(module):
-    ''' Act upon specified Configlet based on options provided.
-        - show - display contents of existing config let
-        - add - update or add new configlet to CVP
-        - delete - delete existing configlet
-
+    ''' Compare configlets in "configlets" with configlets in "cvp_facts"
+    if configlet exists in "cvp_facts" check config, if changed update
+    if configlet does not exist in "cvp_facts" add to CVP
+    if configlet in "cvp_facts" but not in "configlets" remove from CVP if
+    not applied to a device or container.
     :param module: Ansible module with parameters and client connection.
-    :return: Dict of information to updated results with.
-
-    The configlet will be named as follows:
-        If associated with a device the configlet name will be
-        device_configletName if configletName has been provided
-        otherwise it will be device_template
-        if none of the above have been provided it will be configletName
-        if that was not provided a default name of Ansible_Test will be used
+    :return: data: dict of module actions and taskIDs
     '''
-    result = dict()
-    result['configletAction']=module.params['action']
+    # If any configlet changed updated 'changed' flag
     changed = False
-    configlet_found = False
-    existing_config = 'None'
-    # Create Configlet Name
-    if module.params['device'] != 'None' and module.params['configletName'] != 'None':
-        configlet_name = str(module.params['device'])+'_'+str(module.params['configletName'])
-    elif module.params['device'] != 'None' and module.params['template'] != 'None':
-        configlet_name = str(module.params['device'])+'_'+str(re.split('\.',module.params['template'])[0])
-    elif module.params['configletName'] != 'None':
-        configlet_name = str(module.params['configletName'])
+    #Compare configlets against cvp_facts-configlets
+    keep_configlet = [] # configlets with no changes
+    delete_configlet = [] # configlets to delete from CVP
+    deleted = []
+    update_configlet = [] # configlets with config changes
+    updated = []
+    new_configlet = [] # configlets to add to CVP
+    new = []
+    taskList = [] # Tasks that have a pending status after function runs
+
+    for configlet in module.params['cvp_facts']['configlets']:
+        # Only deal with Static configlets not Configletbuilders or
+        # their derived configlets
+        # Include only configlets that match filter elements "all" will
+        # include all configlets.
+        if configlet['type'] == 'Static':
+            if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
+                any(element in configlet['name'] for element in module.params['configlet_filter'])):
+                if configlet['name'] in module.params['configlets']:
+                    ansible_configlet = module.params['configlets'][configlet['name']]
+                    configlet_compare = compare(configlet['config'],ansible_configlet)
+                    # compare function returns a floating point number
+                    if configlet_compare[0] == 100.0:
+                        keep_configlet.append(configlet)
+                    else:
+                        update_configlet.append({'data':configlet,'config':ansible_configlet})
+                else:
+                    delete_configlet.append(configlet)
+    # Look for new configlets, if a configlet is not CVP assume it is to be created
+    for ansible_configlet in module.params['configlets']:
+        found = False
+        for cvp_configlet in module.params['cvp_facts']['configlets']:
+            if str(ansible_configlet) == str(cvp_configlet['name']):
+                found = True
+        if not found:
+            new_configlet.append({'name':str(ansible_configlet),
+                                  'config':str(module.params['configlets'][ansible_configlet])})
+
+    # Only execute this section if ansible check_mode is false
+    if not module.check_mode:
+        # delete any configlets as required
+        if len(delete_configlet) > 0:
+            for configlet in delete_configlet:
+              try:
+                delete_resp =  module.client.api.delete_configlet(configlet['name'], configlet['key'])
+              except Exception as error:
+                errorMessage = re.split(':', str(error))[-1]
+                message = "Configlet %s cannot be deleted - %s"%(configlet['name'],errorMessage)
+                deleted.append({configlet['name']:message})
+              else:
+                if "error" in str(delete_resp).lower():
+                    message = "Configlet %s cannot be deleted - %s"%(configlet['name'],delete_resp['errorMessage'])
+                    deleted.append({configlet['name']:message})
+                else:
+                    changed = True
+                    deleted.append({configlet['name']:"success"})
+
+        # Update any configlets as required
+        if len(update_configlet) > 0:
+            for configlet in update_configlet:
+              try:
+                update_resp = module.client.api.update_configlet(configlet['config'],
+                                                                 configlet['data']['key'],
+                                                                 configlet['data']['name'])
+              except Exception as error:
+                errorMessage = re.split(':', str(error))[-1]
+                message = "Configlet %s cannot be updated - %s"%(configlet['name'],errorMessage)
+                updated.append({configlet['name']:message})
+              else:
+                if "errorMessage" in str(update_resp):
+                    message = "Configlet %s cannot be updated - %s"%(configlet['name'],update_resp['errorMessage'])
+                    updated.append({configlet['data']['name']:message})
+                else:
+                    module.client.api.add_note_to_configlet(configlet['data']['key'],"## Managed by Ansible ##")
+                    changed = True
+                    updated.append({configlet['data']['name']:"success"})
+
+        # Add any new configlets as required
+        if len(new_configlet) > 0:
+            for configlet in new_configlet:
+              try:
+                new_resp = module.client.api.add_configlet(configlet['name'],configlet['config'])
+              except Exception as error:
+                errorMessage = re.split(':', str(error))[-1]
+                message = "Configlet %s cannot be created - %s"%(configlet['name'],errorMessage)
+                created.append({configlet['name']:message})
+              else:
+                if "errorMessage" in str(new_resp):
+                    message = "Configlet %s cannot be created - %s"%(configlet['name'],new_resp['errorMessage'])
+                    new.append({configlet['name']:message})
+                else:
+                    module.client.api.add_note_to_configlet(new_resp,"## Managed by Ansible ##")
+                    changed = True
+                    new.append({configlet['name']:"success"})
+
+        # Get any Pending Tasks in CVP
+        if changed:
+            # Allow CVP to generate Tasks
+            sleep(10)
+            # Build required data for tasks in CVP - work order Id, current task status, name
+            # description
+            tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
+                          'currentTaskName':'currentAction','description':'description',
+                          'workOrderUserDefinedStatus':'displayedStutus','note':'note',
+                          'taskStatus':'actionStatus'}
+            tasks = module.client.api.get_tasks_by_status('Pending')
+            # Reduce task data to required fields
+            for task in tasks:
+                taskFacts= {}
+                for field in task.keys():
+                    if field in tasksField:
+                        taskFacts[tasksField[field]] = task[field]
+                taskList.append(taskFacts)
+        data = {'new':new,'updated':updated,'deleted':deleted,'tasks':taskList}
     else:
-        configlet_name = "Ansible_Temp"
-    result['configletName'] = configlet_name
-    # Find Configlet in CVP if it exists
-    configlet_list = module.client.api.get_configlets()['data']
-    for configlet in configlet_list:
-        if str(configlet['name']) == str(configlet_name):
-            configlet_data = module.client.api.get_configlet_by_name(configlet_name)
-            existing_config = configlet_data['config']
-            configlet_found = True
-
-    # Create New config if required
-    if module.params['template'] != 'None' and module.params['data'] != 'None':
-        config = config_from_template(module)
-    elif module.params['configletConfig'] != 'None':
-        config = str(module.params['configletConfig'])
-    elif module.params['action'] == 'show':
-        config = "! show action - no config required"
-    else:
-        module.fail_json(msg=str('Config Assignment failed: Missing configletConfig or template'))
-
-    # Return current config if found and action was show
-    if module.params['action'] == 'show':
-        if configlet_found:
-            result['currentConfigBlock'] = existing_config
-            result['newConfigBlock'] = "No Config - show only existing"
-        else:
-            result['currentConfigBlock'] = "No Config - Configlet Not Found"
-            result['newConfigBlock'] = "No Config - show only existing"
-
-    # Amend or Create Configlet/Config if action was add
-    elif module.params['action'] == 'add':
-        if configlet_found:
-            result['currentConfigBlock'] = existing_config
-            result['newConfigBlock'] = config
-            resp = module.client.api.update_configlet(config, configlet_data['key'],
-                                                      configlet_data['name'])
-            module.client.api.add_note_to_configlet(configlet_data['key'],
-                                                    "## Managed by Ansible ##")
-            result.update(process_configlet(module, configlet_name))
-            changed = True
-        else:
-            result['currentConfigBlock'] = "New Configlet - No Config to return"
-            result['newConfigBlock'] = config
-            resp = module.client.api.add_configlet(configlet_name,config)
-            module.client.api.add_note_to_configlet(resp,
-                                                    "## Managed by Ansible ##")
-            result.update(process_configlet(module, configlet_name))
-            changed = True
-
-    # Delete Configlet if it exists
-    elif module.params['action'] == 'delete':
-        if configlet_found:
-            result['currentConfigBlock'] = existing_config
-            result['newConfigBlock'] = "No Config - Configlet Deleted"
-            result.update(process_configlet(module, configlet_name))
-            if result['end_container_count'] > 0 or result['end_device_count'] > 0:
-                changed = False
-                result['newConfigBlock'] = config
-            else:
-                resp =  module.client.api.delete_configlet(configlet_data['name'], configlet_data['key'])
-                changed = True
-                result['newConfigBlock'] = "No Config - Configlet Deleted"
-        else:
-            result['currentConfigBlock'] = "No Config - Configlet Not Found"
-            result['newConfigBlock'] = "No Config - Configlet Not Found"
-    else:
-        result['currentConfigBlock'] = "No Config - Invalid action"
-        result['newConfigBlock'] = "No Config - Invalid action"
-
-    # Return Results from operations
-    return [changed,result]
+        for configlet in new_configlet:
+            new.append({configlet['name']:"checked"})
+        for configlet in update_configlet:
+            updated.append({configlet['data']['name']:"checked"})
+        for configlet in delete_configlet:
+            deleted.append({configlet['name']:"checked"})
+        data = {'new':new,'updated':updated,'deleted':deleted,'tasks':taskList}
+    return [changed,data]
 
 
 def main():
@@ -496,51 +236,20 @@ def main():
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
         password=dict(required=True, no_log=True),
-        container=dict(default='None'),
-        device=dict(default='None'),
-        parent=dict(default='Tenant'),
-        configletName=dict(default='None'),
-        configletConfig=dict(default='None'),
-        template=dict(default='None'),
-        data=dict(default='None'),
-        action=dict(default='show', choices=['show', 'add', 'delete'])
+        configlets=dict(type='dict',required=True),
+        cvp_facts=dict(type='dict',required=True),
+        configlet_filter=dict(type='list', default='none')
         )
 
     module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=False)
-    result = dict(changed=False)
+                           supports_check_mode=True)
+    result = dict(changed=False,data={})
     messages = dict(issues=False)
+    # Connect to CVP instance
     module.client = connect(module)
-    # Before Starting check for existing tasks
 
-    # Pass config and module params to configlet_action to act on configlet
-    result['changed'],result['configlet_data'] = configlet_action(module)
-
-    # Check if the configlet is applied to a device or container
-    # Device will take priority of Container
-    configlet_type = "None"
-    if module.params['device'] != "None":
-        device_data = device_info(module)
-        if 'warning' not in device_data:
-            configletList = []
-            for configlet in device_data['configlets']:
-                configletList.append(configlet['name'])
-            for configlet in device_data['configlets']:
-                # Check if Configlet is applied to Device
-                if configlet['name'] == result['configlet_data']['configletName']:
-                    configlet_type = "device"
-    if module.params['container'] != "None" and module.params['device'] == "None":
-        container_data = container_info(module)
-        if 'warning' not in container_data:
-            configletList = []
-            for configlet in container_data['configlets']['configletList']:
-                configletList.append(configlet['name'])
-            for configlet in container_data['configlets']['configletList']:
-                # Check if Configlet is applied to Container
-                if configlet['name'] == result['configlet_data']['configletName']:
-                    configlet_type = "container"
-    result['configlet_data']['configletType'] = configlet_type
-
+    # Pass module params to configlet_action to act on configlet
+    result['changed'],result['data'] = configlet_action(module)
     module.exit_json(**result)
 
 
