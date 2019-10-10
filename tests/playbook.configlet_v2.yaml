@@ -10,9 +10,12 @@
       # Test_Configlet_3: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 997\n  description Test Interface_3\n  ip address 192.168.99.97/32\n  no shutdown\nexit"
       # Test_Configlet_4: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 996\n  description Test Interface_4\n  ip address 192.168.99.96/32\n  no shutdown\nexit"
       # Test_Configlet_5: "! This is a Testing Configlet\n! it has no affect on the Device\n!\ninterface loopback 995\n  description Test Interface_5\n  ip address 192.168.99.95/32\n  no shutdown\nexit"
-  
+    configlets_delete:
+
   tasks:
-    - name: CV_FACTS
+    - name: 'Collecting facts from CVP {{inventory_hostname}}.'
+      tags:
+        - always
       cv_facts:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
@@ -21,7 +24,9 @@
         port: '{{cvp_port}}'
       register: cvp_facts
 
-    - name: CV_CONFIGLET
+    - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
       cv_configlet:
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
@@ -31,7 +36,31 @@
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlets_create}}"
         # cvp_filter: ["Test","base-chk","base-firewall"]
-      # check_mode: no
       register: cvp_configlet
-    - debug:
+
+    - name: 'CVP configlets status on {{inventory_hostname}}'
+      tags:
+        - provision
+      debug:
         var: cvp_configlet
+
+    # NOT YET SUPPORTED
+    # - name: 'Use Empty configlet list to deploy on CVP {{inventory_hostname}}.'
+    #   tags:
+    #     - cleanup
+    #   cv_configlet:
+    #     host: "{{ansible_host}}"
+    #     username: '{{cvp_username}}'
+    #     password: '{{cvp_password}}'
+    #     protocol: https
+    #     port: '{{cvp_port}}'
+    #     cvp_facts: "{{cvp_facts.ansible_facts}}"
+    #     configlets: "{{configlets_delete}}"
+    #     # cvp_filter: ["Test","base-chk","base-firewall"]
+    #   register: cvp_configlet
+
+    # - name: 'CVP configlets status on {{inventory_hostname}}'
+    #   tags:
+    #     - cleanup
+    #   debug:
+    #     var: cvp_configlet
