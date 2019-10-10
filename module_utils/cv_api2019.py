@@ -172,12 +172,20 @@ class CvpApi(object):
                     otherwise returns an empty hash.
         '''
         self.log.debug('get_device_configuration: device_mac: %s' % device_mac)
-        data = self.clnt.get('/inventory/getInventoryConfiguration.do?'
-                             'netElementId=%s' % device_mac,
-                             timeout=self.request_timeout)
         running_config = ''
-        if 'output' in data:
-            running_config = data['output']
+        # Implement protection when getting configuration device:
+        #   - If device is not online --> reply Device unreachable
+        #   - If CVP does not send device configuration --> reply Configuration not found
+        try:
+            data = self.clnt.get('/inventory/getInventoryConfiguration.do?'
+                                 'netElementId=%s' % device_mac,
+                                 timeout=self.request_timeout)
+            if 'output' in data:
+                running_config = data['output']
+            else:
+                running_config='Configuration not found'
+        except:
+            running_config='Device unreachable'
         return running_config
 
     def get_configlets_by_device_id(self, mac, start=0, end=0):
