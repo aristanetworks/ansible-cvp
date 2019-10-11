@@ -128,8 +128,8 @@ deletion_result:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
+from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
 
 def isIterable( testing_object= None):
     """
@@ -243,7 +243,7 @@ def create_new_containers(module, intended, facts):
     for container in intended:
         found = False
         for existing_container in facts['containers']:
-            if container['name'] == existing_container['Name']:
+            if container['name'] == existing_container['name']:
                 found = True
                 break
         if not found:
@@ -285,7 +285,7 @@ def is_empty(module, container_name, facts):
             return not_empty
     # test if container has at least one device attached
     for device in facts['devices']:
-        if device['containerName'] == container_name:
+        if device['parentContainerName'] == container_name:
             return not_empty
     return is_empty
 
@@ -303,7 +303,7 @@ def get_parentName_list(container_list, facts):
     """
     parentName = list()
     for container in facts['containers']:
-        if container['Name'] in container_list:
+        if container['name'] in container_list:
             parentName.append(container['parentName'])
     return parentName
 
@@ -331,8 +331,8 @@ def recursive_tree_lookup(module, facts, children_to_delete, sorted_list):
     list_resultLevelUp = list()
     # Build list of potential next containers to delete
     for container in facts['containers']:
-        if container['Name'] in list_parentName and container['parentName'] != 'Tenant':
-            list_resultLevelUp.append(container['Name'])
+        if container['name'] in list_parentName and container['parentName'] != 'Tenant':
+            list_resultLevelUp.append(container['name'])
 
     # Recursive section
     # If a potential list exist, then go to next level
@@ -346,8 +346,8 @@ def recursive_tree_lookup(module, facts, children_to_delete, sorted_list):
     # If no more potential, then try to catch level under Tenant
     else:
         for container in facts['containers']:
-            if container['Name'] in list_parentName and container['parentName'] == 'Tenant':
-                sorted_list.append(container['Name'])
+            if container['name'] in list_parentName and container['parentName'] == 'Tenant':
+                sorted_list.append(container['name'])
 
     # Return current sorted list
     return sorted_list
@@ -410,10 +410,10 @@ def delete_unused_containers(module, intended, facts):
         # Issue #14 - check if topology is iterable
         if ( isIterable(intended) ):
             for new_container in intended:
-                if new_container['name'] == container['Name']:
+                if new_container['name'] == container['name']:
                     found = True
-        if not found and container['Name'] not in default_containers:
-            container_to_delete.append(container['Name'])
+        if not found and container['name'] not in default_containers:
+            container_to_delete.append(container['name'])
 
     # Order list of unused containers to start bottom to top.
     sorted_container_list = sort_container_to_delete(module=module,
@@ -422,9 +422,9 @@ def delete_unused_containers(module, intended, facts):
     # Delete containers identify above.
     for container_name in sorted_container_list:
         for container in facts['containers']:
-            if container_name == container['Name']:
+            if container_name == container['name']:
                 response = process_container(module=module,
-                                            container=container['Name'],
+                                            container=container['name'],
                                             parent=container['parentName'],
                                             action='delete')
                 if response[0]:
