@@ -85,12 +85,16 @@ EXAMPLES = r'''
   vars:
     verbose: False
     containers:
-      - name: Fabric
-        parent_container: Tenant
-      - name: Spines
-        parent_container: Fabric
-      - name: Leaves
-        parent_container: Fabric
+        Fabric:
+            parent_container: Tenant
+        Spines:
+            parent_container: Fabric
+            configlets:
+                - container_configlet
+            images:
+                - 4.22.0F
+            devices:
+                - veos01
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
       cv_facts:
@@ -130,6 +134,115 @@ deletion_result:
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
 from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
+
+def tree_to_list(json_data, myList):
+    """
+    Transform a tree structure into a list of object to create CVP.
+
+    Because some object have to be created in a specific order on CVP side, 
+    this function parse a tree to provide an ordered list of elements to create
+    
+    Example:
+    --------
+        >>> containers = {"Tenant": {"children": [{"Fabric": {"children": [{"Leaves": {"children": ["MLAG01", "MLAG02"]}}, "Spines"]}}]}}
+        >>> print tree_to_list(containers=containers, myList=lsit())
+        [u'Tenant', u'Fabric', u'Leaves', u'MLAG01', u'MLAG02', u'Spines']
+
+    Parameters
+    ----------
+    json_data : [type]
+        [description]
+    myList : list
+        Ordered list of element to create on CVP / recusrive function
+    
+    Returns
+    -------
+    list
+        Ordered list of element to create on CVP
+    """
+    # Cast input to be encoded as JSON structure.
+    if isinstance(json_data,str):
+        json_data = json.loads(json_data)
+    # If it is a dictionary object, 
+    # it means we have to go through it to extract content
+    if isinstance(json_data,dict):
+        # Get key as it is a container name we want to save.
+        for k1,v1 in json_data.items():
+            # Ensure we are getting children element.
+            if isinstance(v1,dict):
+                for k2,v2 in v1.items():
+                    if 'children' == k2:
+                        # Save entry as we are dealing with an object to create
+                        myList.append(k1)
+                        for e in v2:
+                            # Move to next element with a recursion
+                            if isinstance(e,dict):
+                                tree_to_list(json_data=e, myList=myList)
+    # We are facing a end of a branch with a list of leaves.
+    elif isinstance(json_data, list):
+        for entry in json_data:
+            myList.append(entry)
+    # We are facing a end of a branch with a single leaf.
+    elif isinstance(json_data, basestring):
+        myList.append(json_data)
+    return myList
+
+def tree_build( containers=None):
+    """
+    Build a tree based on a unsorted list.
+
+    Build a tree of containers based on an unsorted list of containers.
+
+    Example:
+    --------
+        >>> containers = {'Fabric': {'parent_container': 'Tenant'},
+            'Leaves': {'configlets': ['container_configlet'],
+                        'devices': ['veos01'],
+                        'images': ['4.22.0F'],
+                        'parent_container': 'Fabric'},
+            'MLAG01': {'configlets': ['container_configlet'],
+                        'devices': ['veos01'],
+                        'images': ['4.22.0F'],
+                        'parent_container': 'Leaves'},
+            'MLAG02': {'configlets': ['container_configlet'],
+                        'devices': ['veos01'],
+                        'images': ['4.22.0F'],
+                        'parent_container': 'Leaves'},
+            'Spines': {'configlets': ['container_configlet'],
+                        'devices': ['veos01'],
+                        'images': ['4.22.0F'],
+                        'parent_container': 'Fabric'}}
+        >>> print(tree_build(containers=containers))
+            {"Tenant": {"children": [{"Fabric": {"children": [{"Leaves": {"children": ["MLAG01", "MLAG02"]}}, "Spines"]}}]}}
+    Parameters
+    ----------
+    containers : dict, optional
+        Container topology to create on CVP, by default None
+    
+    Returns
+    -------
+    json
+        tree topology
+    """
+    # Create tree object
+    tree = Tree() # Create the base node
+    previously_created=list()
+    # Create root node to mimic CVP behavior
+    tree.create_node("Tenant", "Tenant") 
+    # Iterate for first level of containers directly attached under root.
+    for container_name, container_info in containers.items():
+        if container_info['parent_container'] in ['Tenant']:
+            previously_created.append(container_name)
+            tree.create_node(container_name, container_name, parent=container_info['parent_container'])
+    # Loop since expected tree is not equal to number of entries in container topology
+    while len(tree.all_nodes()) < len(containers)+1:
+        for container_name, container_info in containers.items():
+            if  tree.contains(container_info['parent_container']) and container_info['parent_container'] not in ['Tenant']:
+                try: 
+                    tree.create_node(container_name, container_name, parent=container_info['parent_container'])
+                except:
+                    continue
+    return tree.to_json()
 
 def isIterable( testing_object= None):
     """
@@ -240,16 +353,16 @@ def create_new_containers(module, intended, facts):
         Facts from CVP collected by cv_facts module
     """
     count_container_creation = 0
-    for container in intended:
+    for container_name, container_info in intended.items():
         found = False
         for existing_container in facts['containers']:
-            if container['name'] == existing_container['name']:
+            if container_name == existing_container['name']:
                 found = True
                 break
         if not found:
             response = process_container(module=module,
-                                         container=container['name'],
-                                         parent=container['parent_container'],
+                                         container=container_name,
+                                         parent=container_info['parent_container'],
                                          action='add')
             if response[0]:
                 count_container_creation += 1
@@ -443,7 +556,7 @@ def main():
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
         password=dict(required=True, no_log=True),
-        topology=dict(type='list', required=True),
+        topology=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True)
     )
 
