@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 
 .vscode/*
+add
+devel-scripts
+outputs
