@@ -6,7 +6,7 @@
 <!-- code_chunk_output -->
 
 - [Installation notes](#installation-notes)
-  - [User installation](#user-installation)
+  - [Repository Structure](#repository-structure)
   - [Installation for dev environment](#installation-for-dev-environment)
     - [Create a virtual environment](#create-a-virtual-environment)
     - [Install project's requirements](#install-projects-requirements)
@@ -14,10 +14,28 @@
 
 <!-- /code_chunk_output -->
 
+## Repository Structure
 
-## User installation
+Repository comes with different folders:
 
-To Be done later
+- [`library`](library): folder where modules are located.
+- [`module_utils`](modules_utils): folder where Pyhton modules related to this repository are saved.
+- [`tests`](tests): Where examples take place.
+
+Because all playbooks are saved in `tests` folder, an [`ansible.cfg`](tests/ansible.cfg) file has been created to configure ansible to use this repository.
+
+_ansible.cfg example_
+```cfg
+[defaults]
+hash_behaviour=merge
+inventory= inventory.ini
+deprecation_warnings=True
+command_warnings=False
+retry_files_enabled = False
+host_key_checking = False
+library = $PWD/../library:$HOME/.ansible/plugins/modules:/usr/share/ansible/plugins/modules
+module_utils = $PWD/../module_utils
+```
 
 ## Installation for dev environment
 

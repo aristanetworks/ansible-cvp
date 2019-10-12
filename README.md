@@ -13,6 +13,10 @@
 
 - [Ansible Modules for CloudVision Platform (CVP)](#ansible-modules-for-cloudvision-platform-cvp)
   - [Modules overview](#modules-overview)
+    - [cv_facts](#cv_facts)
+    - [cv_configlet](#cv_configlet)
+    - [cv_container](#cv_container)
+    - [cv_device](#cv_device)
   - [Installation](#installation)
   - [Example playbook](#example-playbook)
 - [Resources](#resources)
@@ -25,43 +29,96 @@
 
 ## Modules overview
 
-**cv_configlet**
+This repository provides a list of modules related to [CloudVision platform](https://www.arista.com/en/products/eos/eos-cloudvision) from [Arista Networks](https://www.arista.com/).
 
-  Module to manage containers on CVP based on an intend method. After extracting facts from CVP with `cv_facts`, module create and delete containers based on the topology defined within ansible.
+### cv_facts
 
-> A complete playbook to create / show / delete configlet is available under [tests folder](tests/playbook.configlet.demo.yaml) 
+Module to collect relevant information from CVP instance. It is baseline module to use before using other modules to interact with CVP servers. This module collect the following list of elements:
+- List of devices.
+- List of containers.
+- List of configlets.
+- List of image bundles.
+- List of tasks.
 
-**cv_container**
- - `add`, `delete`, and `show` containers
+_Playbook Example_
 
-Containers can be created or deleted. 
+```yaml
+---
+- name: Test cv_configlet_v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+      host: '{{ansible_host}}'
+      username: '{{cvp_username}}'
+      password: '{{cvp_password}}'
+      protocol: https
+      port: '{{cvp_port}}'
+      register: cv_facts
+```
 
-> A complete playbook to create / show / delete container is available under [tests folder](tests/playbook.container.demo.yaml) 
+_Tested CVP versions:_
 
-**cv_device**
- - `add`, `delete`, and `show` devices
+- 2018.2.5
+- 2019.1.0
+
+### cv_configlet
+
+Module to manage containers on CVP based on an intend method. After extracting facts from CVP with `cv_facts`, module create, delete and update containers based on the topology defined within ansible.
+
+This module only manages configlets that match a list of filter. If this filter is not set, then module only run addition of configlet.
+
+_Module example:_
+
+```yaml
+---
+- name: Test cv_configlet_v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    configlet_list:
+      Test_Configlet: "! This is a Very First Testing Configlet\n!"
+      Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
+  tasks:
+  - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["New", "Test"]
+      register: cvp_configlet
+```
+
+_Tested CVP versions:_
+
+- 2018.2.5
+- 2019.1.0
+
+### cv_container
+
+This module is in charge of topology management as well as attaching configlet to containers and move devices to containers.
+
+> WORK IN PROGRESS
+
+
+### cv_device
 
   Devices can be deployed from the undefined container to a provisioned container or moved from one container to another using the add functionality and specifying the target container. Configlets can be added to devices using add and specifying the current parent container.
-  Devices can be Removed from CVP using the delete option and specifying "CVP" as the container, equivalent to the REMOVE GUI option.
-  Devices can be reset and moved to the undefined container using the delete option and specifying "RESET" as the container.
+  Devices can be Removed from CVP using the delete option and specifying `CVP` as the container, equivalent to the `REMOVE` GUI option.
+  
+  Devices can be reset and moved to the undefined container using the delete option and specifying `RESET` as the container.
+
   Configlets can be removed from a device using the delete option and specifying the configs to be removed and the current parent container as the container.
   show option provide device data and current config.
 
-> A complete playbook to move / show / delete devices is available under [tests folder](tests/playbook.device.demo.yaml) 
-
-**cv_image [testing]**
- - `add`, `delete`, and `show` image bundles
-
-  Image bundles must exist in CVP already, this module will allow the manipulation of them in CVP.
-  Add and Delete will allow bundles to be applied or removed from Containers and devices
-  Show will provide information on the contents of the image bundle.
-
-**cv_tasks [testing]**
- - `add`, `delete`, and `show` tasks
-
-  Tasks must exist in CVP already, this module will allow the manipulation of them in CVP.
-  Add and Delete will allow Tasks to be executed or Canceled
-  Show will provide information on the current Status or a Task.
+> WORK IN PROGRESS
   
 
 ## Installation
@@ -87,13 +144,7 @@ This example outlines how to use Ansible to create a device container on Arista 
   connection: local
   gather_facts: no
   vars:
-    containers:
-      - name: Fabric
-        parent_container: Tenant
-      - name: Spines
-        parent_container: Fabric
-      - name: Leaves
-        parent_container: Fabric
+
   tasks:
     # collect CVP facts
     - name: "Gather CVP facts {{inventory_hostname}}"
@@ -107,18 +158,10 @@ This example outlines how to use Ansible to create a device container on Arista 
     - name: "Print out facts from CVP"
       debug:
         msg: "{{cv_facts}}"
-    
-    # Create containers topology
 
-    - name: Create a container on CVP.
-      cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        topology: '{{containers}}'
-        cvp_facts: '{{cvp_facts.ansible_facts}}'
 ```
 
+> TO BE UPDATED WHEN MODULES SHIPPED
 
 # Resources
 

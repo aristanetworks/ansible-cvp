@@ -33,7 +33,7 @@
 DOCUMENTATION = """
 ---
 module: cv_facts
-version_added: "1.0"
+version_added: "2.8"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Collect facts from CloudVision Portal.
 description:
@@ -60,6 +60,22 @@ options:
                   if none is specified.
     required: false
     default: null
+"""
+
+EXAMPLE = """
+- name: "Gather CVP facts {{inventory_hostname}}"
+    cv_facts:
+    host: '{{ansible_host}}'
+    username: '{{cvp_username}}'
+    password: '{{cvp_password}}'
+    protocol: https
+    port: '{{cvp_port}}'
+    register: cv_facts
+
+- name: "Print out facts from CVP"
+    debug:
+    msg: "{{cv_facts}}"
+    when: verbose
 """
 
 from ansible.module_utils.basic import AnsibleModule

@@ -33,17 +33,92 @@
 DOCUMENTATION = """
 ---
 module: cv_configlet
-version_added: "2.2"
+version_added: "2.8"
 author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
   - CloudVison Portal Configlet compares the list of configlets and config in
-  in configlets against cvp-facts then adds, deletes, or updates them as appropriate.
-  If a configlet is in cvp_facts but not in configlets it will be deleted
-  If a configlet is in configlets but not in cvp_facts it will be created
-  If a configlet is in both configlets and cvp_facts it configuration will be compared
-  and updated with the version in configlets if the two are different.
+  - configlets against cvp-facts then adds, deletes, or updates
+  - them as appropriate.
+  - If a configlet is in cvp_facts but not in configlets it will be deleted.
+  - If a configlet is in configlets but not in cvp_facts it will be created.
+  - If a configlet is in both configlets and cvp_facts it configuration will
+  - be compared and updated with the version in configlets
+  - if the two are different.
+options:
+  host:
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
+  username:
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
+  password:
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
+  protocol:
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
+  port:
+    description: The HTTP port to use. The cvprac defaults will be used
+                  if none is specified.
+    required: false
+    default: null
+  configlets:
+    description: List of configlets to managed on CVP server.
+    required: true
+    default: null
+  cvp_facts:
+    description: Facts extracted from CVP servers using cv_facts module
+    required: true
+    default: null
+  configlet_filter:
+    description: Filter to apply intended mode on a set of configlet.
+                 If not used, then module only uses ADD mode. configlet_filter
+                 list configlets that can be modified or deleted based
+                 on configlets entries.
+    required: false
+    default: null
 """
+
+EXAMPLE = """
+---
+- name: Test cv_configlet_v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    configlet_list:
+      Test_Configlet: "! This is a Very First Testing Configlet\n!"
+      Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
+  tasks:
+    - name: 'Collecting facts from CVP {{inventory_hostname}}.'
+      tags:
+        - always
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+      register: cvp_facts
+
+    - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["New", "Test","base-chk","base-firewall"]
+      register: cvp_configlet
+"""
+
 # Required by Ansible and CVP
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.cv_client import CvpClient
