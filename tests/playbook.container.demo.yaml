@@ -7,12 +7,16 @@
     verbose: False
     containers_cleanup:
     containers_build:
-      - name: Fabric
-        parent_container: Tenant
-      - name: Spines
-        parent_container: Fabric
-      - name: Leaves
-        parent_container: Fabric
+        Fabric:
+            parent_container: Tenant
+        Spines:
+            parent_container: Fabric
+            configlets:
+                - container_configlet
+        Leaves:
+            parent_container: Fabric
+            configlets:
+                - container_configlet
   tasks:
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:

@@ -134,6 +134,8 @@ deletion_result:
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
 from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
+from treelib import Node, Tree
+import json
 
 def tree_to_list(json_data, myList):
     """
@@ -176,8 +178,7 @@ def tree_to_list(json_data, myList):
                         myList.append(k1)
                         for e in v2:
                             # Move to next element with a recursion
-                            if isinstance(e,dict):
-                                tree_to_list(json_data=e, myList=myList)
+                            tree_to_list(json_data=e, myList=myList)
     # We are facing a end of a branch with a list of leaves.
     elif isinstance(json_data, list):
         for entry in json_data:
@@ -353,19 +354,29 @@ def create_new_containers(module, intended, facts):
         Facts from CVP collected by cv_facts module
     """
     count_container_creation = 0
-    for container_name, container_info in intended.items():
+    # Build ordered list of containers to create: from Tenant to leaves.
+    container_intended_tree = tree_build(containers=intended)
+    container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
+    # Parse ordered list of container and chek if they are configured on CVP.
+    # If not, then call container creation process.
+    for container_name in container_intended_ordered_list:
         found = False
-        for existing_container in facts['containers']:
-            if container_name == existing_container['name']:
+        # Check if container name is found in CVP Facts.
+        for fact_container in facts['containers']:
+            if container_name == fact_container['name']:
                 found = True
                 break
+        # If container has not been found, we create it
         if not found:
+            # module.fail_json(msg='** Create container'+container_name+' attached to '+intended[container_name]['parent_container'])
             response = process_container(module=module,
                                          container=container_name,
-                                         parent=container_info['parent_container'],
+                                         parent=intended[container_name]['parent_container'],
                                          action='add')
+            # If a container has been created, increment creation counter
             if response[0]:
                 count_container_creation += 1
+    # Build module message to retur for creation.
     if count_container_creation > 0:
         return [True, {'containers_created': "" + str(count_container_creation) + ""}]
     return [False, {'containers_created': "0"}]
@@ -576,12 +587,12 @@ def main():
                 result['changed'] = True
                 result['creation_result'] = creation_process[1]
         # Start process to delete unused container.
-        deletion_process = delete_unused_containers(module=module,
-                                                    intended=module.params['topology'],
-                                                    facts=module.params['cvp_facts'])
-        if deletion_process[0]:
-            result['changed'] = True
-            result['deletion_result'] = deletion_process[1]
+        # deletion_process = delete_unused_containers(module=module,
+        #                                             intended=module.params['topology'],
+        #                                             facts=module.params['cvp_facts'])
+        # if deletion_process[0]:
+        #     result['changed'] = True
+        #     result['deletion_result'] = deletion_process[1]
     except CvpApiError, e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
