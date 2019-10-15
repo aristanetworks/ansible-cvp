@@ -706,7 +706,7 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
     result = dict(changed=False, cv_container={})
-    result['taskIds'] = list()
+    result['cv_container']['taskIds'] = list()
     module.client = connect(module)
     deletion_process = None
     creation_process = None
@@ -718,8 +718,8 @@ def main():
                                                     intended=module.params['topology'],
                                                     facts=module.params['cvp_facts'])
             if creation_process[0]:
-                result['changed'] = True
-                result['creation_result'] = creation_process[1]
+                result['cv_container']['changed'] = True
+                result['cv_container']['creation_result'] = creation_process[1]
             
             # Start process to move devices to targetted containers
             move_process = move_devices_to_container(module=module,
@@ -727,12 +727,12 @@ def main():
                                                      facts=module.params['cvp_facts'])
 
             if move_process is not None:
-                result['changed'] = True
+                result['cv_container']['changed'] = True
                 # If a list of task exists, we expose it
                 if 'taskIds' in move_process['moved_devices']:
-                    result['taskIds'].append(move_process['moved_devices']['taskIds'])
+                    result['cv_container']['taskIds'].append(move_process['moved_devices']['taskIds'])
                 move_process['moved_devices'].pop('taskIds',None)
-                result['moved_result'] = move_process['moved_devices']
+                result['cv_container']['moved_result'] = move_process['moved_devices']
                 
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
@@ -744,8 +744,8 @@ def main():
                                                         intended=dict(),
                                                         facts=module.params['cvp_facts'])
         if deletion_process[0]:
-            result['changed'] = True
-            result['deletion_result'] = deletion_process[1]
+            result['cv_container']['changed'] = True
+            result['cv_container']['deletion_result'] = deletion_process[1]
     except CvpApiError, e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
