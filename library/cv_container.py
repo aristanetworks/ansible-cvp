@@ -708,7 +708,7 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
     result = dict(changed=False, cv_container={})
-    result['cv_container']['taskIds'] = list()
+    result['cv_container']['tasks'] = list()
     module.client = connect(module)
     deletion_process = None
     creation_process = None
@@ -733,7 +733,7 @@ def main():
                 # If a list of task exists, we expose it
                 if 'taskIds' in move_process['moved_devices']:
                     for taskId in move_process['moved_devices']['taskIds']:
-                        result['cv_container']['taskIds'].append(task_info(module=module, taskId = taskId))
+                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
                 # move_process['moved_devices'].pop('taskIds',None)
                 result['cv_container']['moved_result'] = move_process['moved_devices']
                 
