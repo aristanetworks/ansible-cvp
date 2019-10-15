@@ -224,10 +224,10 @@ def cv_facts(module):
 
     # Build required data for tasks in CVP - work order Id, current task status, name
     # description
-    tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
-                  'currentTaskName':'currentAction','description':'description',
-                  'workOrderUserDefinedStatus':'displayedStutus','note':'note',
-                  'taskStatus':'actionStatus'}
+    tasksField = {'workOrderId':'workOrderId','workOrderState':'workOrderState',
+                  'currentTaskName':'currentTaskName','description':'description',
+                  'workOrderUserDefinedStatus':'workOrderUserDefinedStatus','note':'note',
+                  'taskStatus':'taskStatus', 'workOrderDetails': 'workOrderDetails'}
     facts['tasks'] = []
 
     # Get List of all Tasks

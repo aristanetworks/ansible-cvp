@@ -162,7 +162,7 @@ def connect(module):
                        protocol=module.params['protocol'],
                        port=module.params['port'],
                        )
-    except CvpLoginError, e:
+    except CvpLoginError as e:
         module.fail_json(msg=str(e))
     return client
 
@@ -278,10 +278,10 @@ def configlet_action(module):
             sleep(10)
             # Build required data for tasks in CVP - work order Id, current task status, name
             # description
-            tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
-                          'currentTaskName':'currentAction','description':'description',
-                          'workOrderUserDefinedStatus':'displayedStutus','note':'note',
-                          'taskStatus':'actionStatus'}
+            tasksField = {'workOrderId':'workOrderId','workOrderState':'workOrderState',
+                  'currentTaskName':'currentTaskName','description':'description',
+                  'workOrderUserDefinedStatus':'workOrderUserDefinedStatus','note':'note',
+                  'taskStatus':'taskStatus', 'workOrderDetails': 'workOrderDetails'}
             tasks = module.client.api.get_tasks_by_status('Pending')
             # Reduce task data to required fields
             for task in tasks:

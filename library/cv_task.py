@@ -33,96 +33,73 @@
 DOCUMENTATION = """
 ---
 module: cv_task
-version_added: "1.0"
+version_added: "2.0"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Execute or Cancel CVP Tasks.
 description:
-  - CloudVison Portal Task execution or cancelation requires taskID
-  - add will execute the task with the ID supplied
-  - delete will cancel the task with the ID supplied
+  - CloudVison Portal Task module
 options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
-  taskID:
-    description: CVP taskID to act on
-    required: false
-    default: all
-  action:
+  tasks:
+    description: CVP taskIDs to act on
+    required: True
+  wait:
+    description: Time to wait for tasks to transition to 'Completed'
+    required: False
+    default: 0
+  state:
     description: action to carry out on the task
-                  add - execute the task with taskID supplied or all pending tasks if no taskID supplied
-                  delete - cancel the task with taskID supplied or all pending tasks if no taskID supplied
-                  show - return the current status of a task or all tasks if no taskID supplied
-    required: true
+                  executed - execute tasks
+                  cancelled - cancel tasks
+    required: false
+    default: 'executed
     choices: 
-      - 'show'
-      - 'add'
-      - 'delete'
-    default: show
+      - 'executed'
+      - 'cancel'
 """
 
 EXAMPLES="""
-# Execute a task
-# task must exist and be pending
-- name: Execute a task
-  tags: execute, show
-  cv_device:
-    host: '{{ansible_host}}'
+- name: Execute all tasks registered in cvp_configlets variable
+  cv_task:
+    host: "{{ansible_host}}"
     username: '{{cvp_username}}'
     password: '{{cvp_password}}'
     protocol: https
-    taskID: "{{cvp_taskID}}"
-    action: add
-    register: cvp_result
-
-# Display information for a task
-- name: Show task information from CVP
-  tags: show
-  cv_device:
-    host: '{{ansible_host}}'
+    port: '{{cvp_port}}'
+    tasks: "{{ cvp_configlets.data.tasks }}"
+    
+- name: Cancel a list of pending tasks
+  cv_task:
+    host: "{{ansible_host}}"
     username: '{{cvp_username}}'
     password: '{{cvp_password}}'
     protocol: https
-    taskID: "{{cvp_taskID}}"
-    action: show
-    register: cvp_result
+    port: '{{cvp_port}}'
+    tasks: "{{ cvp_configlets.data.tasks }}"
+    state: cancelled
 
-- name: Display cv_task add result
-  tags: create, show
-  debug:
-    msg: "{{cvp_result}}"
+# Execute all pending tasks and wait for completion for 60 seconds
+# In order to get a list of all pending tasks, execute cv_facts first
+- name: Update cvp facts
+    cv_facts:
+      host: '{{ansible_host}}'
+      username: '{{cvp_username}}'
+      password: '{{cvp_password}}'
+      protocol: https
+      port: '{{cvp_port}}'
 
-# Cancel task in CVP
-# task must exist and be pending or failed
-- name: Cancel a pending task
-  tags: cancel
-  cv_device:
-    host: '{{ansible_host}}'
+- name: Execute all pending tasks and wait for completion for 60 seconds
+  cv_task:
+    host: "{{ansible_host}}"
     username: '{{cvp_username}}'
     password: '{{cvp_password}}'
     protocol: https
-    taskID: "{{cvp_taskID}}"
-    action: delete
+    port: '{{cvp_port}}'
+    tasks: "{{ tasks }}"
+    wait: 60
+
 """
 
+import time
 from ansible.module_utils.basic import AnsibleModule
 from cvprac.cvp_client import CvpClient
 from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
@@ -141,100 +118,85 @@ def connect(module):
                        protocol=module.params['protocol'],
                        port=module.params['port'],
                        )
-    except CvpLoginError, e:
+    except CvpLoginError as e:
         module.fail_json(msg=str(e))
 
     return client
 
-def task_info(module):
-    ''' Get dictionary of task info from CVP.
-    :param module: Ansible module with parameters and client connection.
-    :return: Dict of task info from CVP or exit with failure if no
-             info for tasks is found.
-    '''
-    if module.params['taskID'] == "all":
-        task_info = module.client.api.get_tasks()
-    else:
-        task_data = module.client.api.get_task_by_id(module.params['taskID'])
-        if task_data == None:
-            task_info = {'total':0,'data':[task_data]}
-        else:
-            task_info = {'total':1,'data':[task_data]}
-    return task_info
+def get_id(task):
+    return task.get("workOrderId")
 
-def process_task(module):
-    '''Ensure task(s) exists then process
-       add - execute the task(s) required
-       delete - cancel the task(s) required
-       show - show current task(s)'''
-    result={'changed':False,'data':{}}
-    # Check that tasks exist in CVP
-    taskData = False
-    taskData = task_info(module)
-    taskResult = []
-    if "error" not in taskData.keys():
-        if module.params['action'] == "show":
-            result['data'] = taskData['data']
-        elif module.params['action'] == "add":
-            if taskData['data'] == [None]:
-                result['data']={'changed':False,'data':taskData,'response':'nothing found'}
-            elif len (taskData['data']) == 1:
-                task = taskData['data'][0]
-                if task['workOrderUserDefinedStatus'] == "Pending" or task['workOrderUserDefinedStatus'] == "Failed":
-                    module.client.api.add_note_to_task(task['workOrderId'], "Executed by Ansible")
-                    taskResponse = module.client.api.execute_task(task['workOrderId'])
-                    if "errorMessage" in str(taskResponse):
-                        result['data']={'changed':False,'data':task,'response':taskResponse['errorMessage']}
-                    else:
-                        result['data']={'changed':True,'data':task,'response':taskResponse['data']}
-                        result['changed']=True
-                else:
-                    result['data']={'changed':False,'data':task,'response':'invalid task status'}
-            else:
-                for task in taskData['data']:
-                    if task['workOrderUserDefinedStatus'] == "Pending" or task['workOrderUserDefinedStatus'] == "Failed":
-                        module.client.api.add_note_to_task(task['workOrderId'], "Executed by Ansible")
-                        taskResponse = module.client.api.execute_task(task['workOrderId'])
-                        if "errorMessage" in str(taskResponse):
-                            taskResult.append({'changed':False,'data':task,'response':taskResponse['errorMessage']})
-                        else:
-                            taskResult.append({'changed':True,'data':task,'response':taskResponse['data']})
-                            result['changed']=True
-                result['data']=taskResult
-        elif module.params['action'] == "delete":
-            if taskData['data'] == [None]:
-                result['data']={'changed':False,'data':taskData,'response':'nothing found'}
-            elif len (taskData['data']) == 1:
-                task = taskData['data'][0]
-                if task['workOrderUserDefinedStatus'] == "Pending" or task['workOrderUserDefinedStatus'] == "Failed":
-                    module.client.api.add_note_to_task(task['workOrderId'], "Deleted by Ansible")
-                    taskResponse = module.client.api.cancel_task(task['workOrderId'])
-                    if "errorMessage" in str(taskResponse):
-                        result['data']={'changed':False,'data':task,'response':taskResponse['errorMessage']}
-                    else:
-                        result['data']={'changed':True,'data':task,'response':taskResponse['data']}
-                        result['changed']=True
-                else:
-                    result['data']={'changed':False,'data':task,'response':'invalid task status'}
-            else:
-                for task in taskData['data']:
-                    if task['workOrderUserDefinedStatus'] == "Pending" or task['workOrderUserDefinedStatus'] == "Failed":
-                        module.client.api.add_note_to_task(task['workOrderId'], "Deleted by Ansible")
-                        taskResponse = module.client.api.execute_task(task['workOrderId'])
-                        if "errorMessage" in str(taskResponse):
-                            taskResult.append({'changed':False,'data':task,'response':taskResponse['errorMessage']})
-                        else:
-                            taskResult.append({'changed':True,'data':task,'response':taskResponse['data']})
-                            result['changed']=True
-                result['data']=taskResult
-        else:
-            ## Debug Line ##
-            module.fail_json(msg=str('Debug - invalid action: %r' %module.params['action']))
-            ## Debug Line ##
-    else:
-      errorOutput = 'No Task Found: %s' %module['params']['taskID']
-      result['data']={'error':errorOutput}
-    return result
+def get_state(task):
+    return task.get("workOrderUserDefinedStatus")
+
+def execute_task(cvp, task_id):
+    return cvp.execute_task(task_id)
+
+def cancel_task(cvp, task_id):
+    return cvp.cancel_task(task_id)
+
+def apply_state(cvp, task, state):
+    cvp.add_note_to_task(get_id(task), "Executed by Ansible")
+    if state == "executed":
+        return execute_task(cvp, get_id(task))
+    elif state == "cancelled":
+        return cancel_task(cvp, get_id(task))
+
+def actionable(state):
+    return state in ["Pending"]
+
+def terminal(state):
+    return state in ["Completed", "Cancelled"]
+
+def state_is_different(task, target):
+    return get_state(task) != target
+
+def update_all_tasks(cvp, data):
+    new_data = dict()
+    for task_id in data.keys():
+        new_data[task_id] = cvp.get_task_by_id(task_id)
+    return new_data
+
+def task_action(module):
+    ''' 
+    TODO
+    '''
+    changed = False
+    data = dict()
+    warnings = list()
+
+    tasks = module.params['tasks']
+    state = module.params['state']
+    wait  = module.params['wait']
+    cvp = module.client.api
+
+    actionable_tasks = [t for t in tasks if actionable(get_state(t))]
+
+    if len(actionable_tasks) == 0:
+        warnings.append("No actionable tasks found on CVP")
+        return changed, data, warnings
+
+    for task in actionable_tasks:
+        if state_is_different(task, state):
+            apply_state(cvp, task, state)
+            changed = True
+            data[get_id(task)] = task
+
+    start = time.time()
+    now   = time.time()
+    while (now - start) < wait:
+        data = update_all_tasks(cvp, data)
+        if all([terminal(t) for t in data.values()]):
+            break
+        now = time.time()
+
+    if wait:
+        for i, task in data.items():
+            if not terminal(get_state(task)):
+                warnings.append("Task {} has not completed in {} seconds".format(i, wait))
+
+    return changed, data, warnings
+
 
 def main():
     """ main entry point for module execution
@@ -245,8 +207,9 @@ def main():
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
         password=dict(required=True, no_log=True),
-        taskID=dict(default='all',type='str'),
-        action=dict(default='show', choices=['add','delete','show'])
+        tasks=dict(required=True, type='list'),
+        wait=dict(default=0, type='int'),
+        state=dict(default='executed', choices=['executed','cancelled'])
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
@@ -254,16 +217,15 @@ def main():
 
     result = dict(changed=False)
 
+    
+    # Connect to CVP instance
     module.client = connect(module)
 
-    try:
-        changed = process_task(module)
-    except CvpApiError, e:
-        module.fail_json(msg=str(e))
-    else:
-        if changed['changed']:
-            result['changed'] = True
-        result['data'] = changed['data']
+    result['changed'],result['data'], warnings = task_action(module)
+
+    if warnings:
+        [module.warn(w) for w in warnings]
+
     module.exit_json(**result)
 
 if __name__ == '__main__':
