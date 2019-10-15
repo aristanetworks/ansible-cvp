@@ -186,7 +186,7 @@ def task_action(module):
     now   = time.time()
     while (now - start) < wait:
         data = update_all_tasks(cvp, data)
-        if all([terminal(t) for t in data.values()]):
+        if all([terminal(get_state(t)) for t in data.values()]):
             break
         now = time.time()
 
