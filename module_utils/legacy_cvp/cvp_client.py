@@ -102,8 +102,8 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout, \
 
 #from cvprac.cvp_api import CvpApi
 # Import Updated CvpApi until cvprac is updated
-from cvprac.cvp_apiV2 import CvpApi
-from cvprac.cvp_client_errors import CvpApiError, CvpLoginError, \
+from ansible.module_utils.legacy_cvp.cvp_apiV2 import CvpApi
+from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpApiError, CvpLoginError, \
     CvpRequestError, CvpSessionLogOutError
 
 

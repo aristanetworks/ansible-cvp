@@ -36,7 +36,7 @@ import os
 # pylint: disable=redefined-builtin
 from io import open
 
-from cvprac.cvp_client_errors import CvpApiError
+from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpApiError
 
 try:
     from urllib import quote_plus as qplus
