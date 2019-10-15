@@ -631,6 +631,8 @@ def device_info(device_name, module):
         device_info['parentContainer'] = module.client.api.get_container_by_id(device_info['parentContainerKey'])
     return device_info
 
+def task_info(module, taskId):
+    return module.client.api.get_task_by_id(taskId)
 
 def move_devices_to_container(module, intended, facts):
     """
@@ -730,8 +732,9 @@ def main():
                 result['cv_container']['changed'] = True
                 # If a list of task exists, we expose it
                 if 'taskIds' in move_process['moved_devices']:
-                    result['cv_container']['taskIds'].append(move_process['moved_devices']['taskIds'])
-                move_process['moved_devices'].pop('taskIds',None)
+                    for taskId in move_process['moved_devices']['taskIds']:
+                        result['cv_container']['taskIds'].append(task_info(module=module, taskId = taskId))
+                # move_process['moved_devices'].pop('taskIds',None)
                 result['cv_container']['moved_result'] = move_process['moved_devices']
                 
         # Start process to delete unused container.
