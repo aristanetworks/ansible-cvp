@@ -654,6 +654,8 @@ def move_devices_to_container(module, intended, facts):
     moved = dict()
     #  Number of devices moved to containers.
     moved['devices_moved'] = 0
+    #  List of created taskIds to pass to cv_tasks
+    task_ids=list()
     # Define wether we want to save topology or not
     save_topology = False if module.params['save_topology']==False else True
     # Read complete intended topology to locate devices
@@ -674,10 +676,15 @@ def move_devices_to_container(module, intended, facts):
                                                                            device=device_cvpinfo,
                                                                            container=container_cvpinfo,
                                                                            create_task=save_topology)
-                moved_devices.append(device)
-                moved['devices_moved']= moved['devices_moved']+1
+                if device_action['data']['status'] == 'success':
+                    if 'taskIds' in device_action['data']:
+                        for task in device_action['data']['taskIds']:
+                            task_ids.append(task)
+                    moved_devices.append(device)
+                    moved['devices_moved']= moved['devices_moved']+1
     # Build ansible output messages.
     moved['list'] = moved_devices
+    moved['taskIds'] = task_ids
     result['changed'] = True
     result['moved_devices'] = moved
     return result
@@ -698,7 +705,8 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
-    result = dict(changed=False)
+    result = dict(changed=False, cv_container={})
+    result['taskIds'] = list()
     module.client = connect(module)
     deletion_process = None
     creation_process = None
@@ -720,7 +728,12 @@ def main():
 
             if move_process is not None:
                 result['changed'] = True
+                # If a list of task exists, we expose it
+                if 'taskIds' in move_process['moved_devices']:
+                    result['taskIds'].append(move_process['moved_devices']['taskIds'])
+                move_process['moved_devices'].pop('taskIds',None)
                 result['moved_result'] = move_process['moved_devices']
+                
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
             deletion_process = delete_unused_containers(module=module,

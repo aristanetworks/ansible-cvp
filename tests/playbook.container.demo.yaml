@@ -102,6 +102,13 @@
         protocol: https
         topology: '{{containers_cleanup}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
+      register: cv_container
+
+    - name: "Display cv_container outputs"
+      tags:
+        - cleanup
+      debug:
+        msg: "{{cv_container}}"
 
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
