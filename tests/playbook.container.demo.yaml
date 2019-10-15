@@ -18,18 +18,14 @@
           parent_container: Tenant
         Spines:
           parent_container: Fabric
-          configlets:
-              - container_configlet
         Leaves:
           parent_container: Fabric
           configlets:
-              - container_configlet
+              - alias
           devices:
             - veos03
         MLAG01:
           parent_container: Leaves
-          configlets:
-              - container_configlet
           devices:
             - veos01
             - veos02

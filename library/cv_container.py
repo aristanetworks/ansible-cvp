@@ -691,6 +691,86 @@ def move_devices_to_container(module, intended, facts):
     result['moved_devices'] = moved
     return result
 
+
+def configlet_info(configlet_name, facts):
+    """
+    Get dictionary of configlet info from CVP.
+    
+    Parameters
+    ----------
+    configlet_name : string
+        Name of the container to look for on CVP side.
+    module : AnsibleModule
+        Ansible module to get access to cvp cient.
+
+    Returns
+    -------
+    dict: Dict of configlet info from CVP or exit with failure if no info for
+            container is found.
+    """
+    for configlet in facts['configlets']:
+        if configlet['name'] == configlet_name:
+            return configlet
+    return None
+
+
+def attached_configlet_to_container(module, intended, facts):
+    """
+    Attached existing configlet to desired containers based on topology.
+    
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    intended : list
+        List of expected containers based on following structure:
+    facts : list
+        List of containers extracted from CVP using cv_facts.
+    """
+    # Initialize response structure
+    #  Result return for Ansible
+    result = dict()
+    #  List of configlets attached by this function
+    attached_configlet = list()
+    #  Structure to save list of configlets attached and number of moved
+    attached = dict()
+    #  Number of configlets attached to containers.
+    attached['configlet_attached'] = 0
+    #  List of created taskIds to pass to cv_tasks
+    task_ids=list()
+    # Define wether we want to save topology or not
+    save_topology = False if module.params['save_topology']==False else True
+    # Read complete intended topology to locate devices
+    for container_name, container in intended.items():
+        # If we have at least one configlet defined, then we can start process
+        if 'configlets' in container:
+            # Extract list of configlet names
+            for configlet in container['configlets']:
+                # Get CVP information for target container.
+                container_cvpinfo = container_info(container_name=container_name, module=module)
+                # Get CVP information for device.
+                configlet_cvpinfo = configlet_info(configlet_name=configlet, facts=facts)  
+                # Initiate a move to desired container.
+                # Task is created but not executed.
+                configlet_list = list()
+                configlet_list.append(configlet_cvpinfo)
+                configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
+                                                                           new_configlets=configlet_list,
+                                                                           container=container_cvpinfo,
+                                                                           create_task=True)
+                if configlet_action['data']['status'] == 'success':
+                    if 'taskIds' in configlet_action['data']:
+                        for task in configlet_action['data']['taskIds']:
+                            task_ids.append(task)
+                    attached_configlet.append(configlet)
+                    attached['configlet_attached']= attached['configlet_attached']+1
+    # Build ansible output messages.
+    attached['list'] = attached_configlet
+    attached['taskIds'] = task_ids
+    result['changed'] = True
+    result['attached_configlet'] = attached
+    return result
+
 def main():
     """ main entry point for module execution
     """
@@ -736,6 +816,20 @@ def main():
                         result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
                 # move_process['moved_devices'].pop('taskIds',None)
                 result['cv_container']['moved_result'] = move_process['moved_devices']
+
+            # Start process to move devices to targetted containers
+            attached_process = attached_configlet_to_container(module=module,
+                                                               intended=module.params['topology'],
+                                                               facts=module.params['cvp_facts'])
+            # module.fail_json(msg=attached_process)
+            if attached_process is not None:
+                result['cv_container']['changed'] = True
+                # If a list of task exists, we expose it
+                if 'taskIds' in attached_process['attached_configlet']:
+                    for taskId in attached_process['attached_configlet']['taskIds']:
+                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
+                # move_process['moved_devices'].pop('taskIds',None)
+                result['cv_container']['attached_configlet'] = attached_process['attached_configlet']
                 
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
