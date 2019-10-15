@@ -75,7 +75,7 @@ options:
     description: Facts from CVP collected by cv_facts module
     required: true
     default: None
-  dry_run:
+  save_topology:
     description: Allow to save topology or not
     required: false
     default: False
@@ -493,6 +493,15 @@ def is_empty(module, container_name, facts):
             return not_empty
     return is_empty
 
+def is_container_empty(module, container_name):
+    is_empty = True
+    not_empty = False
+    container_status = module.client.api.get_devices_in_container(container_name)
+    if container_status is not None:
+        if isIterable(container_status) and len(container_status) > 0:
+            return False
+        return True
+    return False
 
 def get_container_facts(container_name='Tenant', facts=None):
     """
@@ -540,7 +549,7 @@ def delete_unused_containers(module, intended, facts):
     for cvp_container in container_cvp_ordered_list:
         # Only container with no devices can be deleted.
         # If container is not empty, no reason to go further.
-        if is_empty(module=module, container_name=cvp_container, facts=facts):
+        if is_empty(module=module, container_name=cvp_container, facts=facts) or is_container_empty(module=module, container_name=cvp_container):
             # Check if a container is not present in intended topology.
             if cvp_container not in container_intended_ordered_list:
                 container_to_delete.append(cvp_container)
@@ -644,9 +653,9 @@ def move_devices_to_container(module, intended, facts):
     #  Structure to save list of devices moved and number of moved
     moved = dict()
     #  Number of devices moved to containers.
-    moved['count'] = 0
+    moved['devices_moved'] = 0
     # Define wether we want to save topology or not
-    save_topology = False if module.params['dry_run']==True else True
+    save_topology = False if module.params['save_topology']==False else True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one device defined, then we can start process
@@ -666,7 +675,7 @@ def move_devices_to_container(module, intended, facts):
                                                                            container=container_cvpinfo,
                                                                            create_task=save_topology)
                 moved_devices.append(device)
-                moved['count']= moved['count']+1
+                moved['devices_moved']= moved['devices_moved']+1
     # Build ansible output messages.
     moved['list'] = moved_devices
     result['changed'] = True
@@ -684,7 +693,7 @@ def main():
         password=dict(required=True, no_log=True),
         topology=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
-        dry_run=dict(type='bool', default=False)    # Enable or disable task creation
+        save_topology=dict(type='bool', default=True)    # Enable or disable task creation
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
@@ -705,10 +714,13 @@ def main():
                 result['creation_result'] = creation_process[1]
             
             # Start process to move devices to targetted containers
-            move_devices = move_devices_to_container(module=module,
+            move_process = move_devices_to_container(module=module,
                                                      intended=module.params['topology'],
                                                      facts=module.params['cvp_facts'])
 
+            if move_process is not None:
+                result['changed'] = True
+                result['moved_result'] = move_process['moved_devices']
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
             deletion_process = delete_unused_containers(module=module,
@@ -724,7 +736,6 @@ def main():
     except CvpApiError, e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
-
 
 if __name__ == '__main__':
     main()

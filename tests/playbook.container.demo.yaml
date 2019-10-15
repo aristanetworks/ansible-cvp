@@ -7,7 +7,7 @@
     verbose: False
     containers_cleanup:
       staging:
-          parent_container: Leaves
+          parent_container: Tenant
           devices:
             - veos01
             - veos02
@@ -56,7 +56,14 @@
         protocol: https
         topology: '{{containers_build}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
-        dry_run: true
+        save_topology: true
+      register: cv_container
+
+    - name: "Display cv_container outputs"
+      tags:
+        - build
+      debug:
+        msg: "{{cv_container}}"
 
     - name: "Check if Leaves container exists"
       tags:
