@@ -31,7 +31,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-ANSIBLE_METADATA = {'metadata_version': '0.0.1.dev0',
+ANSIBLE_METADATA = {'metadata_version': '0.0.2.dev0',
                     'status': ['preview'],
                     'supported_by': 'community'}
 
@@ -40,7 +40,7 @@ DOCUMENTATION = r"""
 module: cv_container
 version_added: "1.0"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
-short_description: Create or Update CloudVision Portal Container.
+short_description: Manage Provisioning topology.
 description:
   - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
@@ -75,6 +75,10 @@ options:
     description: Facts from CVP collected by cv_facts module
     required: true
     default: None
+  dry_run:
+    description: Allow to save topology or not
+    required: false
+    default: False
 """
 
 EXAMPLES = r'''
@@ -560,6 +564,115 @@ def delete_unused_containers(module, intended, facts):
     return [False, {'containers_deleted': "0"}]
 
 
+
+def container_info(container_name, module):
+    """
+    Get dictionary of container info from CVP.
+    
+    Parameters
+    ----------
+    container_name : string
+        Name of the container to look for on CVP side.
+    module : AnsibleModule
+        Ansible module to get access to cvp cient.
+
+    Returns
+    -------
+    dict: Dict of container info from CVP or exit with failure if no info for
+            container is found.
+    """
+    container_info = module.client.api.get_container_by_name(container_name)
+    if container_info == None:
+        container_info = {}
+        container_info['error'] = "Container with name '%s' does not exist." % container_name
+    else:
+        container_info['configlets'] = module.client.api.get_configlets_by_container_id(container_info['key'])
+    return container_info
+
+
+def device_info(device_name, module):
+    """
+    Get dictionary of device info from CVP.
+    
+    Parameters
+    ----------
+    device_name : string
+        Name of the container to look for on CVP side.
+    module : AnsibleModule
+        Ansible module to get access to cvp cient.
+
+    Returns
+    -------
+    dict: Dict of device info from CVP or exit with failure if no info for
+            device is found.
+    """
+    device_info = module.client.api.get_device_by_name(device_name)
+    if not device_info:
+            devices = module.client.api.get_inventory()
+            for device in devices:
+              if device_name in device['fqdn']:
+                device_info = device
+    if not device_info:
+        ## Debug Line ##
+        module.fail_json(msg=str('Debug - device_info: %r' %device_info))
+        ## Debug Line ##
+        device_info['error']="Device with name '%s' does not exist." % device_name
+    else:
+        device_info['configlets'] = module.client.api.get_configlets_by_netelement_id(device_info['systemMacAddress'])['configletList']
+        device_info['parentContainer'] = module.client.api.get_container_by_id(device_info['parentContainerKey'])
+    return device_info
+
+
+def move_devices_to_container(module, intended, facts):
+    """
+    Move devices to desired containers based on topology.
+    
+    Parameters
+    ----------
+    module : AnsibleModule
+        Object representing Ansible module structure with a CvpClient connection
+    intended : list
+        List of expected containers based on following structure:
+    facts : list
+        List of containers extracted from CVP using cv_facts.
+    """
+    # Initialize response structure
+    #  Result return for Ansible
+    result = dict()
+    #  List of devices moved by this function
+    moved_devices = list() # configlets with config changes
+    #  Structure to save list of devices moved and number of moved
+    moved = dict()
+    #  Number of devices moved to containers.
+    moved['count'] = 0
+    # Define wether we want to save topology or not
+    save_topology = False if module.params['dry_run']==True else True
+    # Read complete intended topology to locate devices
+    for container_name, container in intended.items():
+        # If we have at least one device defined, then we can start process
+        if 'devices' in container:
+            # Extract list of device hostname
+            for device in container['devices']:
+                # Get CVP information for target container.
+                # move_device_to_container requires to use structure sends by CVP
+                container_cvpinfo = container_info(container_name=container_name, module=module)
+                # Get CVP information for device.
+                # move_device_to_container requires to use structure sends by CVP
+                device_cvpinfo = device_info(device_name=device, module=module)
+                # Initiate a move to desired container.
+                # Task is created but not executed.
+                device_action = module.client.api.move_device_to_container(app_name="ansible_cv_container",
+                                                                           device=device_cvpinfo,
+                                                                           container=container_cvpinfo,
+                                                                           create_task=save_topology)
+                moved_devices.append(device)
+                moved['count']= moved['count']+1
+    # Build ansible output messages.
+    moved['list'] = moved_devices
+    result['changed'] = True
+    result['moved_devices'] = moved
+    return result
+
 def main():
     """ main entry point for module execution
     """
@@ -570,7 +683,8 @@ def main():
         username=dict(required=True),
         password=dict(required=True, no_log=True),
         topology=dict(type='dict', required=True),
-        cvp_facts=dict(type='dict', required=True)
+        cvp_facts=dict(type='dict', required=True),
+        dry_run=dict(type='bool', default=False)    # Enable or disable task creation
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
@@ -589,6 +703,12 @@ def main():
             if creation_process[0]:
                 result['changed'] = True
                 result['creation_result'] = creation_process[1]
+            
+            # Start process to move devices to targetted containers
+            move_devices = move_devices_to_container(module=module,
+                                                     intended=module.params['topology'],
+                                                     facts=module.params['cvp_facts'])
+
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
             deletion_process = delete_unused_containers(module=module,

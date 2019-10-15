@@ -6,17 +6,33 @@
   vars:
     verbose: False
     containers_cleanup:
+      staging:
+          parent_container: Leaves
+          devices:
+            - veos01
+            - veos02
+            - veos03
+
     containers_build:
         Fabric:
-            parent_container: Tenant
+          parent_container: Tenant
         Spines:
-            parent_container: Fabric
-            configlets:
-                - container_configlet
+          parent_container: Fabric
+          configlets:
+              - container_configlet
         Leaves:
-            parent_container: Fabric
-            configlets:
-                - container_configlet
+          parent_container: Fabric
+          configlets:
+              - container_configlet
+          devices:
+            - veos03
+        MLAG01:
+          parent_container: Leaves
+          configlets:
+              - container_configlet
+          devices:
+            - veos01
+            - veos02
   tasks:
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
@@ -40,6 +56,7 @@
         protocol: https
         topology: '{{containers_build}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
+        dry_run: true
 
     - name: "Check if Leaves container exists"
       tags:
