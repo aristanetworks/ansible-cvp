@@ -33,7 +33,7 @@
 DOCUMENTATION = """
 ---
 module: cv_facts
-version_added: "2.8"
+version_added: "1.0"
 author: "Hugh Adams EMEA AS Team(ha@arista.com)"
 short_description: Collect facts from CloudVision Portal.
 description:
@@ -60,22 +60,6 @@ options:
                   if none is specified.
     required: false
     default: null
-"""
-
-EXAMPLE = """
-- name: "Gather CVP facts {{inventory_hostname}}"
-    cv_facts:
-    host: '{{ansible_host}}'
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    port: '{{cvp_port}}'
-    register: cv_facts
-
-- name: "Print out facts from CVP"
-    debug:
-    msg: "{{cv_facts}}"
-    when: verbose
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -112,7 +96,7 @@ def cv_facts(module):
     # Associated Images, and Associated Configlets
     deviceField = {'hostname':'name','fqdn':'fqdn','complianceCode':'complianceCode',
                    'complianceIndication':'complianceIndication','version':'version',
-                   'systemMacAddress':'systemMacAddress','systemMacAddress':'key',
+                   'ipAddress':'ipAddress','systemMacAddress':'key',
                    'parentContainerKey':'parentContainerKey'}
     facts['devices'] = []
 
@@ -227,10 +211,10 @@ def cv_facts(module):
 
     # Build required data for tasks in CVP - work order Id, current task status, name
     # description
-    tasksField = {'workOrderId':'workOrderId','workOrderState':'workOrderState',
-                  'currentTaskName':'currentTaskName','description':'description',
-                  'workOrderUserDefinedStatus':'workOrderUserDefinedStatus','note':'note',
-                  'taskStatus':'taskStatus', 'workOrderDetails': 'workOrderDetails'}
+    tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
+                  'currentTaskName':'currentAction','description':'description',
+                  'workOrderUserDefinedStatus':'displayedStutus','note':'note',
+                  'taskStatus':'actionStatus'}
     facts['tasks'] = []
 
     # Get List of all Tasks
@@ -258,9 +242,8 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
-    # result = {}
     result = dict(changed=False, ansible_facts={})
-    
+
     module.client = connect(module)
 
     result['ansible_facts'] = cv_facts(module)
