@@ -116,7 +116,7 @@ def device_action(module):
                     # Check assigned images
                     add_imageBundle = ''
                     remove_imageBundle = ''
-                    if str(cvp_device['imageBundle']) != str(ansible_device['imageBundle']):
+                    if 'imageBundle' in ansible_device and str(cvp_device['imageBundle']) != str(ansible_device['imageBundle']):
                         if str(ansible_device['imageBundle']) != "":
                             add_imageBundle = str(ansible_device['imageBundle'])
                             device_update = True
@@ -184,9 +184,9 @@ def device_action(module):
                 new.append({ansible_device['name']:message})
     # Action Devices as required
     # If Ansible check_modde is True then skip any actions and return predicted outcome
-    if not module['check_mode']:
+    if not module.check_mode:
         if len(reset_device) > 0:
-            print "\nReset Devices:"            
+            print "\nReset Devices:"
             # Factory Reseting Devices and returning them to Undefined container
             for device in reset_device:
                 print"   %s" %device['name']
@@ -223,7 +223,7 @@ def device_action(module):
                     if len(device['imageBundle']) > 0:
                         for imageBundle in module.params['cvp_facts']['imageBundles']:
                             if str(device['imageBundle']) == str(imageBundle['name']):
-                                add_imageBundle = {'name':imageBundle['name'],'key':imageBundle['key']}  
+                                add_imageBundle = {'name':imageBundle['name'],'key':imageBundle['key']}
                                 break
                     try:
                         new_device_action = module.client.api.provision_device('Ansible',device['cvp_device'],
@@ -303,7 +303,7 @@ def device_action(module):
                     update_imageBundle = True
                     for imageBundle in module.params['cvp_facts']['imageBundles']:
                         if str(device['imageBundle'][0]) == str(imageBundle['name']):
-                            add_imageBundle = {'name':imageBundle['name'],'key':imageBundle['key']}   
+                            add_imageBundle = {'name':imageBundle['name'],'key':imageBundle['key']}
                             break
                 if len(device['imageBundle'][1]) > 0:
                     update_imageBundle = True
@@ -399,7 +399,7 @@ def main():
     module.client = connect(module)
 
     # Pass module params to configlet_action to act on configlet
-    result['changed'],result['data'] = configlet_action(module)
+    result['changed'],result['data'] = device_action(module)
     module.exit_json(**result)
 
 
