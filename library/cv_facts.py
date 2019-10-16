@@ -105,6 +105,9 @@ def cv_facts(module):
     :return: CvpClient object with connection instantiated.
     '''
     facts = {}
+    # Get version data for CVP
+    facts['cvp_info'] = module.client.api.get_cvp_info()
+    
     # Build required data for devices in CVP - Device Data, Config, Associated Container,
     # Associated Images, and Associated Configlets
     deviceField = {'hostname':'name','fqdn':'fqdn','complianceCode':'complianceCode',
