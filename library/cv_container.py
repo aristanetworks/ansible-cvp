@@ -370,7 +370,7 @@ def connect(module):
                        protocol=module.params['protocol'],
                        port=module.params['port'],
                        )
-    except CvpLoginError, e:
+    except CvpLoginError as e:
         module.fail_json(msg=str(e))
 
     return client
@@ -691,8 +691,29 @@ def move_devices_to_container(module, intended, facts):
     result['moved_devices'] = moved
     return result
 
+def container_factinfo(container_name, facts):
+    """
+    Get dictionary of configlet info from CVP.
+    
+    Parameters
+    ----------
+    configlet_name : string
+        Name of the container to look for on CVP side.
+    module : AnsibleModule
+        Ansible module to get access to cvp cient.
 
-def configlet_info(configlet_name, facts):
+    Returns
+    -------
+    dict: Dict of configlet info from CVP or exit with failure if no info for
+            container is found.
+    """
+    for container in facts['containers']:
+        if container['name'] == container_name:
+            return container
+    return None
+
+
+def configlet_factinfo(configlet_name, facts):
     """
     Get dictionary of configlet info from CVP.
     
@@ -738,32 +759,36 @@ def attached_configlet_to_container(module, intended, facts):
     attached['configlet_attached'] = 0
     #  List of created taskIds to pass to cv_tasks
     task_ids=list()
+    # List of configlets to attach to containers
+    configlet_list = list()
     # Define wether we want to save topology or not
     save_topology = False if module.params['save_topology']==False else True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one configlet defined, then we can start process
+        # Get CVP information for target container.
+        container_info_cvp = container_info(container_name=container_name, module=module)
+        container_info_facts = container_factinfo(container_name=container_name, facts=facts)
         if 'configlets' in container:
             # Extract list of configlet names
             for configlet in container['configlets']:
-                # Get CVP information for target container.
-                container_cvpinfo = container_info(container_name=container_name, module=module)
                 # Get CVP information for device.
-                configlet_cvpinfo = configlet_info(configlet_name=configlet, facts=facts)  
-                # Initiate a move to desired container.
-                # Task is created but not executed.
-                configlet_list = list()
+                configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)  
+                # Configlet information is saved for later deployment
                 configlet_list.append(configlet_cvpinfo)
-                configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
+        # Create call to attach list of containers
+        # Initiate a move to desired container.
+        # Task is created but not executed.
+        configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
-                                                                           container=container_cvpinfo,
+                                                                           container=container_info_cvp,
                                                                            create_task=True)
-                if configlet_action['data']['status'] == 'success':
-                    if 'taskIds' in configlet_action['data']:
-                        for task in configlet_action['data']['taskIds']:
-                            task_ids.append(task)
-                    attached_configlet.append(configlet)
-                    attached['configlet_attached']= attached['configlet_attached']+1
+        if configlet_action['data']['status'] == 'success':
+            if 'taskIds' in configlet_action['data']:
+                for task in configlet_action['data']['taskIds']:
+                    task_ids.append(task)
+            attached_configlet.append(configlet_list)
+            attached['configlet_attached']= attached['configlet_attached']+1
     # Build ansible output messages.
     attached['list'] = attached_configlet
     attached['taskIds'] = task_ids
@@ -843,7 +868,7 @@ def main():
         if deletion_process[0]:
             result['cv_container']['changed'] = True
             result['cv_container']['deletion_result'] = deletion_process[1]
-    except CvpApiError, e:
+    except CvpApiError as e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
 

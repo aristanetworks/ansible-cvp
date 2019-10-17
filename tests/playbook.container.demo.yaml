@@ -13,7 +13,7 @@
             - veos02
             - veos03
 
-    containers_build:
+    containers_provision:
         Fabric:
           parent_container: Tenant
         Spines:
@@ -43,27 +43,27 @@
 
     - name: "Build Container topology on {{inventory_hostname}}"
       tags:
-        - build
+        - provision
       cv_container:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         port: '{{cvp_port}}'
         protocol: https
-        topology: '{{containers_build}}'
+        topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true
       register: cv_container
 
     - name: "Display cv_container outputs"
       tags:
-        - build
+        - provision
       debug:
         msg: "{{cv_container}}"
 
     - name: "Check if Leaves container exists"
       tags:
-        - build
+        - provision
         - never
       cv_facts:
         host: '{{ansible_host}}'
@@ -75,7 +75,7 @@
 
     - name: "Check if Leaves container exists"
       tags:
-        - build
+        - provision
         - check
       assert:
         that:

@@ -94,8 +94,8 @@ class CvpApi(object):
         return data
 
     # ~Device Related API Calls
-    
-    def get_inventory(self, start=0, end=0, query=''):
+
+    def get_inventory(self, start=0, end=0, provisioned = "true"):
         ''' Returns the a dict of the net elements known to CVP.
 
             Args:
@@ -108,8 +108,8 @@ class CvpApi(object):
                     are running a specific version of EOS.
         '''
         self.log.debug('get_inventory: called')
-        self.log.debug('v2 Inventory API Call')
-        data = self.clnt.get('/inventory/devices?provisioned=true',
+        self.log.debug('2019 Inventory API Call')
+        data = self.clnt.get('/inventory/devices?provisioned=%s'%provisioned,
                              timeout=self.request_timeout)
         for dev in data:
             dev['key'] = dev['systemMacAddress']
@@ -138,26 +138,26 @@ class CvpApi(object):
                 dev['containerName'] = ''
         return data
 
-    def get_net_element_info_by_device_id(self, d_id):
+    def get_net_element_info_by_device_id(self, device_id):
         ''' Return a dict of info about a device in CVP.
 
             Args:
-                d_id (str): Device Id Key / System MAC.
+                device_id (str): Device Id Key / System MAC.
 
             Returns:
                 net element data (dict): Dict of info specific to the device
                     requested or None if the name requested doesn't exist.
         '''
-        self.log.debug('Attempt to get net element data for %s' % d_id)
+        self.log.debug('Attempt to get net element data for %s' % device_id)
         try:
             element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
-                                  % qplus(d_id), timeout=self.request_timeout)
-        except CvpApiError as error:
+                                  % qplus(device_id), timeout=self.request_timeout)
+        except CvpApiError as e:
             # Catch an invalid task_id error and return None
-            if 'errorMessage' in str(error):
-                self.log.debug('Device with id %s could not be found' % d_id)
+            if 'errorMessage' in str(e):
+                self.log.debug('Device with id %s could not be found' % device_id)
                 return None
-            raise error
+                raise CvpApiError("get_net_element_info_by_device_id:%s" %e)
         return element_info
 
     def get_device_configuration(self, device_mac):
@@ -172,20 +172,12 @@ class CvpApi(object):
                     otherwise returns an empty hash.
         '''
         self.log.debug('get_device_configuration: device_mac: %s' % device_mac)
+        data = self.clnt.get('/inventory/getInventoryConfiguration.do?'
+                             'netElementId=%s' % device_mac,
+                             timeout=self.request_timeout)
         running_config = ''
-        # Implement protection when getting configuration device:
-        #   - If device is not online --> reply Device unreachable
-        #   - If CVP does not send device configuration --> reply Configuration not found
-        try:
-            data = self.clnt.get('/inventory/getInventoryConfiguration.do?'
-                                 'netElementId=%s' % device_mac,
-                                 timeout=self.request_timeout)
-            if 'output' in data:
-                running_config = data['output']
-            else:
-                running_config='Configuration not found'
-        except:
-            running_config='Device unreachable'
+        if 'output' in data:
+            running_config = data['output']
         return running_config
 
     def get_configlets_by_device_id(self, mac, start=0, end=0):
@@ -208,6 +200,8 @@ class CvpApi(object):
                              timeout=self.request_timeout)
         return data['configletList']
 
+
+    # pylint: disable=too-many-locals
     def update_configlets_on_device(self, app_name, device, add_configlets, del_configlets, create_task=True):
         ''' Remove the configlets from the device.
 
@@ -741,7 +735,7 @@ class CvpApi(object):
                              'containerId=%s&startIndex=%d&endIndex=%d&sessionScope=%s'
                              % (c_id, start, end, scope),
                              timeout=self.request_timeout)
-    
+
     def move_device_to_container(self, app_name, device, container, create_task=True):
         ''' Add the container to the specified parent.
 
@@ -822,7 +816,7 @@ class CvpApi(object):
         return self.clnt.get('/image/getImageBundles.do?queryparam=&'
                              'startIndex=%d&endIndex=%d' % (start, end),
                              timeout=self.request_timeout)
-    
+
     # ~Task Related API Calls
 
     def get_tasks(self, start=0, end=0):
