@@ -136,8 +136,10 @@ deletion_result:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
-from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.cv_client import CvpClient
+from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+# from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
+# from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
 from treelib import Node, Tree
 import json
 
@@ -623,7 +625,7 @@ def device_info(device_name, module):
                 device_info = device
     if not device_info:
         ## Debug Line ##
-        module.fail_json(msg=str('Debug - device_info: %r' %device_info))
+        # module.fail_json(msg=str('Debug - device_info: %r' %device_info))
         ## Debug Line ##
         device_info['error']="Device with name '%s' does not exist." % device_name
     else:

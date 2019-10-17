@@ -36,7 +36,7 @@ import os
 # pylint: disable=redefined-builtin
 from io import open
 
-from cv_client_errors import CvpApiError
+from ansible.module_utils.cv_client_errors import CvpApiError
 
 try:
     from urllib import quote_plus as qplus
@@ -95,7 +95,7 @@ class CvpApi(object):
 
     # ~Device Related API Calls
     
-    def get_inventory(self, start=0, end=0, provisioned = "true"):
+    def get_inventory(self, start=0, end=0, provisioned = "true", query = None):
         ''' Returns the a dict of the net elements known to CVP.
 
             Args:
@@ -159,6 +159,29 @@ class CvpApi(object):
                 return None
                 raise CvpApiError("get_net_element_info_by_device_id:%s" %e)
         return element_info
+
+    def get_device_by_name(self, fqdn):
+        ''' Returns the net element device dict for the devices fqdn name.
+
+            Args:
+                fqdn (str): Fully qualified domain name of the device.
+
+            Returns:
+                device (dict): The net element device dict for the device if
+                    otherwise returns an empty hash.
+        '''
+        self.log.debug('get_device_by_name: fqdn: %s' % fqdn)
+        data = self.get_inventory(start=0, end=0)
+        if len(data) > 0:
+            for netelement in data:
+                if netelement['fqdn'] == fqdn:
+                    device = netelement
+                    break
+            else:
+                device = {}
+        else:
+            device = {}
+        return device
 
     def get_device_configuration(self, device_mac):
         ''' Returns the running configuration for the device provided.
@@ -487,7 +510,81 @@ class CvpApi(object):
                 raise Exception ("provsion_device-update_imageBundle:%s" %e)
         return created_tasks
 
+    def apply_configlets_to_container(self, app_name, container, new_configlets, create_task=True):
+        ''' Apply the configlets to the container.
 
+            Args:
+                app_name (str): The application name to use in info field.
+                container (dict): The container dict
+                new_configlets (list): List of configlet name and key pairs
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'32']}}
+        '''
+        self.log.debug('apply_configlets_to_container: container: %s names: %s' %
+                       (container, new_configlets))
+        # Get all the configlets assigned to the device.
+        configlets = self.get_configlets_by_container_id(container['key'])
+
+        # Get a list of the names and keys of the configlets
+        # Static Configlets
+        cnames = []
+        ckeys = []
+        # ConfigletBuilder Configlets
+        bnames = []
+        bkeys = []
+        if len(configlets['configletList']) > 0:
+            for configlet in configlets['configletList']:
+                if configlet['type'] == 'Static':
+                    cnames.append(configlet['name'])
+                    ckeys.append(configlet['key'])
+                elif configlet['type'] == 'Builder':
+                    bnames.append(configlet['name'])
+                    bkeys.append(configlet['key'])
+
+        # Add the new configlets to the end of the arrays
+        for entry in new_configlets:
+            cnames.append(entry['name'])
+            ckeys.append(entry['key'])
+
+        info = '%s: Configlet Assign: to Container %s' % (app_name, container['name'])
+        info_preview = '<b>Configlet Assign:</b> to Container' + container['name']
+        data = {'data': [{'info': info,
+                          'infoPreview': info_preview,
+                          'note': '',
+                          'action': 'associate',
+                          'nodeType': 'configlet',
+                          'nodeId': '',
+                          'configletList': ckeys,
+                          'configletNamesList': cnames,
+                          'ignoreConfigletNamesList': [],
+                          'ignoreConfigletList': [],
+                          'configletBuilderList': bkeys,
+                          'configletBuilderNamesList': bnames,
+                          'ignoreConfigletBuilderList': [],
+                          'ignoreConfigletBuilderNamesList': [],
+                          'toId': container['key'],
+                          'toIdType': 'container',
+                          'fromId': '',
+                          'nodeName': '',
+                          'fromName': '',
+                          'toName': container['name'],
+                          'nodeIpAddress': '',
+                          'nodeTargetIpAddress': '',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        self.log.debug('apply_configlets_to_container: saveTopology data:\n%s' %
+                       data['data'])
+        self._add_temp_action(data)
+        if create_task:
+            return self._save_topology_v2([])
+        else:
+            return data
 
     # ~Configlet Related API Calls
 
@@ -624,6 +721,137 @@ class CvpApi(object):
 
     # ~Container Related API Calls
 
+    # pylint: disable=too-many-arguments
+    def _container_op(self, container_name, container_key, parent_name,
+                      parent_key, operation):
+        ''' Perform the operation on the container.
+
+            Args:
+                container_name (str): Container name
+                container_key (str): Container key, can be empty for add.
+                parent_name (str): Parent container name
+                parent_key (str): Parent container key
+                operation (str): Container operation 'add' or 'delete'.
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        msg = ('%s container %s under container %s' %
+               (operation, container_name, parent_name))
+        data = {'data': [{'info': msg,
+                          'infoPreview': msg,
+                          'action': operation,
+                          'nodeType': 'container',
+                          'nodeId': container_key,
+                          'toId': '',
+                          'fromId': '',
+                          'nodeName': container_name,
+                          'fromName': '',
+                          'toName': '',
+                          'childTasks': [],
+                          'parentTask': '',
+                          'toIdType': 'container'}]}
+        if operation is 'add':
+            data['data'][0]['toId'] = parent_key
+            data['data'][0]['toName'] = parent_name
+        elif operation is 'delete':
+            data['data'][0]['fromId'] = parent_key
+            data['data'][0]['fromName'] = parent_name
+
+        # Perform the container operation
+        self._add_temp_action(data)
+        return self._save_topology_v2([])
+
+    def _add_temp_action(self, data):
+        ''' Adds temp action that requires a saveTopology call to take effect.
+
+            Args:
+                data (dict): a data dict with a specific format for the
+                    desired action.
+
+                    Base Ex: data = {'data': [{specific key/value pairs}]}
+        '''
+        url = ('/provisioning/addTempAction.do?'
+               'format=topology&queryParam=&nodeId=root')
+        self.clnt.post(url, data=data, timeout=self.request_timeout)
+
+    def _save_topology_v2(self, data):
+        ''' Confirms a previously created temp action.
+
+            Args:
+                data (list): a list that contains a dict with a specific
+                    format for the desired action. Our primary use case is for
+                    confirming existing temp actions so we most often send an
+                    empty list to confirm an existing temp action.
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        url = '/provisioning/v2/saveTopology.do'
+        return self.clnt.post(url, data=data, timeout=self.request_timeout)
+
+    def get_configlets_by_netelement_id(self, d_id, start=0, end=0):
+        ''' Returns a list of configlets applied to the given device.
+
+            Args:
+                d_id (str): The device ID (key) to query.
+                start (int): Start index for the pagination. Default is 0.
+                end (int): End index for the pagination. If end index is 0
+                    then all the records will be returned. Default is 0.
+        '''
+        return self.clnt.get('/provisioning/getConfigletsByNetElementId.do?'
+                             'netElementId=%s&startIndex=%d&endIndex=%d'
+                             % (d_id, start, end),
+                             timeout=self.request_timeout)
+
+    def add_container(self, container_name, parent_name, parent_key):
+        ''' Add the container to the specified parent.
+
+            Args:
+                container_name (str): Container name
+                parent_name (str): Parent container name
+                parent_key (str): Parent container key
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        self.log.debug('add_container: container: %s parent: %s parent_key: %s'
+                       % (container_name, parent_name, parent_key))
+        return self._container_op(container_name, 'new_container', parent_name,
+                                  parent_key, 'add')
+
+    def delete_container(self, container_name, container_key, parent_name,
+                         parent_key):
+        ''' Add the container to the specified parent.
+
+            Args:
+                container_name (str): Container name
+                container_key (str): Container key
+                parent_name (str): Parent container name
+                parent_key (str): Parent container key
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        self.log.debug('delete_container: container: %s container_key: %s '
+                       'parent: %s parent_key: %s' %
+                       (container_name, container_key, parent_name,
+                        parent_key))
+        return self._container_op(container_name, container_key, parent_name,
+                                  parent_key, 'delete')
+
     def get_containers(self, start=0, end=0):
         ''' Returns a list of all the containers.
 
@@ -692,6 +920,22 @@ class CvpApi(object):
         self.log.debug('Get info for container %s' % key)
         return self.clnt.get('/provisioning/getContainerInfoById.do?'
                              'containerId=%s' % qplus(key))
+
+    def get_devices_in_container(self, name):
+        ''' Returns a dict of the devices under the named container.
+
+            Args:
+                name (str): The name of the container to get devices from
+        '''
+        self.log.debug('get_devices_in_container: called')
+        devices = []
+        container = self.get_container_by_name(name)
+        if container:
+            all_devices = self.get_inventory(0, 0, name)
+            for device in all_devices:
+                if device['parentContainerId'] == container['key']:
+                    devices.append(device)
+        return devices
 
     def get_devices_by_container_id(self, key):
         ''' Returns a dict of the devices under the named container.
@@ -854,3 +1098,24 @@ class CvpApi(object):
             '/task/getTasks.do?queryparam=%s&startIndex=%d&endIndex=%d' %
             (status, start, end), timeout=self.request_timeout)
         return data['data']
+
+    def get_task_by_id(self, task_id):
+        ''' Returns the current CVP Task status for the task with the specified
+        TaskId.
+
+        Args:
+            task_id (int): CVP task identifier
+
+        Returns:
+            task (dict): The CVP task for the associated Id.  Returns None
+                if the task_id was invalid.
+        '''
+        self.log.debug('get_task_by_id: task_id: %s' % task_id)
+        try:
+            task = self.clnt.get('/task/getTaskById.do?taskId=%s' % task_id,
+                                    timeout=self.request_timeout)
+        except CvpApiError as error:
+            self.log.debug('Caught error: %s attempting to get task.' % error)
+            # Catch an invalid task_id error and return None
+            return None
+        return task
