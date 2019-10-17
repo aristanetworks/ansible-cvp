@@ -200,6 +200,7 @@ class CvpApi(object):
                              timeout=self.request_timeout)
         return data['configletList']
 
+
     # pylint: disable=too-many-locals
     def update_configlets_on_device(self, app_name, device, add_configlets, del_configlets, create_task=True):
         ''' Remove the configlets from the device.
@@ -486,8 +487,6 @@ class CvpApi(object):
                 self.log.debug('Provision Device - imageBundle %s : %s'%(device['fqdn'],e))
                 raise Exception ("provsion_device-update_imageBundle:%s" %e)
         return created_tasks
-
-
 
     # ~Configlet Related API Calls
 
