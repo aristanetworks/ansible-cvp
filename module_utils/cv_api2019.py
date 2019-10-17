@@ -208,6 +208,292 @@ class CvpApi(object):
                              timeout=self.request_timeout)
         return data['configletList']
 
+    def update_configlets_on_device(self, app_name, device, add_configlets, del_configlets, create_task=True):
+        ''' Remove the configlets from the device.
+
+            Args:
+                app_name (str): The application name to use in info field.
+                device (dict): The switch device dict
+                add_configlets (list): List of configlets name and key pairs
+                del_configlets (list): List of configlet name and key pairs
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'35']}}
+        '''
+        self.log.debug('update_configlets_on_device - %s: add: %s delete: %s' %
+                       (device['name'], add_configlets, del_configlets))
+        # Allow for deviceId key name variations
+        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
+            device['systemMacAddress'] = device['key']
+        if 'systemMacAddress' not in device.keys():
+            raise KeyError("update_configlets: key or systemMacAddress not found in device object %s - %s" %(device['name'],
+                                                                                                        device.keys()))
+
+        # Get all the configlets assigned to the device.
+        configlets = self.get_configlets_by_device_id(device['systemMacAddress'])
+
+        # Get a list of the names and keys of the configlets.  Do not add
+        # configlets that are on the delete list.
+        add_names = []
+        add_keys = []
+        # If provsioning new device skip this
+        if len(configlets) > 0:
+            # Remove del_configlet from existing list
+            for configlet in configlets:
+                found = False
+                for del_configlet in del_configlets:
+                    if configlet['key'] == del_configlet['key']:
+                        found = True
+                if not found:
+                    add_names.append(configlet['name'])
+                    add_keys.append(configlet['key'])
+            # Append list of new configlets to add
+        for entry in add_configlets:
+            add_names.append(entry['name'])
+            add_keys.append(entry['key'])
+
+        # Remove the names and keys of the configlets to keep and build a
+        # list of the configlets to remove.
+        del_names = []
+        del_keys = []
+        for entry in del_configlets:
+            del_names.append(entry['name'])
+            del_keys.append(entry['key'])
+
+        info = '%s Configlet Update: on Device %s' % (app_name, device['name'])
+        info_preview = '<b>Configlet Update:</b> on Device' + device['name']
+        data = {'data': [{'info': info,
+                          'infoPreview': info_preview,
+                          'note': '',
+                          'action': 'associate',
+                          'nodeType': 'configlet',
+                          'nodeId': '',
+                          'configletList': add_keys,
+                          'configletNamesList': add_names,
+                          'ignoreConfigletNamesList': del_names,
+                          'ignoreConfigletList': del_keys,
+                          'configletBuilderList': [],
+                          'configletBuilderNamesList': [],
+                          'ignoreConfigletBuilderList': [],
+                          'ignoreConfigletBuilderNamesList': [],
+                          'toId': device['systemMacAddress'],
+                          'toIdType': 'netelement',
+                          'fromId': '',
+                          'nodeName': '',
+                          'fromName': '',
+                          'toName': device['fqdn'],
+                          'nodeIpAddress': device['ipAddress'],
+                          'nodeTargetIpAddress': device['ipAddress'],
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        self.log.debug('update_configlets_on_device: saveTopology data:\n%s' % data['data'])
+        url = ('/provisioning/addTempAction.do?'
+               'format=topology&queryParam=&nodeId=root')
+        try:
+            self.clnt.post(url, data=data, timeout=self.request_timeout)
+        except Exception as e:
+            self.log.debug('Device %s : %s'%(device['fqdn'],e))
+            raise Exception ("update_configlets_on_device:%s" %e)
+        configlets = []
+        #for configlet in self.get_configlets_by_device_id(device['systemMacAddress']):
+        #    configlets.append(configlet['name'])
+        if create_task:
+            url = '/provisioning/v2/saveTopology.do'
+            tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
+        else:
+            tasks = {}
+        return tasks
+
+    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):
+        ''' Remove the image bundle from the specified container.
+
+            Args:
+                app_name (str): The application name to use in info field.
+                device (dict): The switch device dictionary.
+                add_imageBundle (dict): name & key for imageBundle
+                del_imageBundle (dict): name & key for imageBundle
+                name (): name.
+                id_type (): type.
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'32']}}
+        '''
+        # Allow for deviceId key name variations
+        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
+            device['systemMacAddress'] = device['key']
+        if 'systemMacAddress' not in device.keys():
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+        if len(add_imageBundle) > 0 and len(del_imageBundle) > 0:
+            raise Exception("Attempting to Delete and Add Imagebundles on %s" %device['name'])
+        else:
+            if 'key' in add_imageBundle.keys():
+                self.log.debug('Attempt to update %s on %s' %(add_imageBundle['name'], device['name']))
+                info = '%s Update image: %s on %s' %(app_name, add_imageBundle['name'], device['name'])
+                del_imageBundle = {'key':'','name':''}
+            elif 'key' in del_imageBundle.keys():
+                self.log.debug('Attempt to remove %s on %s' %(del_imageBundle['name'], device['name']))
+                info = '%s Remove image: %s on %s' %(app_name, del_imageBundle['name'], device['name'])
+                add_imageBundle = {'key':'','name':''}
+            else:
+                raise Exception("imageBundle_key check: No imageBundle specified")
+            info_preview = '<b>Image Update:</b> on Device' + device['name']
+            data = {'data': [{'info': info,
+                              'infoPreview': info_preview,
+                              'note': '',
+                              'action': 'associate',
+                              'nodeType': 'imagebundle',
+                              'nodeId': add_imageBundle['key'],
+                              'nodeName': add_imageBundle['name'],
+                              'toId': device['systemMacAddress'],
+                              'toName': device['fqdn'],
+                              'toIdType': 'netelement',
+                              'fromId': '',
+                              'fromName': '',
+                              'ignoreNodeId': del_imageBundle['key'],
+                              'ignoreNodeName': del_imageBundle['name'],
+                              'childTasks': [],
+                              'parentTask': ''}]}
+            self.log.debug('update_imageBundles_on_device: saveTopology data:\n%s' % data['data'])
+            url = ('/provisioning/addTempAction.do?'
+                   'format=topology&queryParam=&nodeId=root')
+            try:
+                self.clnt.post(url, data=data, timeout=self.request_timeout)
+            except Exception as e:
+                raise Exception ("update_imageBundle_on_device:%s" %e)
+                self.log.debug('Device %s : %s'%(device['fqdn'],e))
+            if create_task:
+                url = '/provisioning/v2/saveTopology.do'
+                tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
+                return tasks
+
+
+
+    def reset_device(self, app_name, device, create_task=True):
+        ''' Reset device by moving it to the Undefined Container.
+
+            Args:
+                app_name (str): String to specify info/signifier of calling app
+                device (dict): Device info
+                container (dict): Container info
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        info = '%s Reseting device %s moving it to Undefined' % (app_name,
+                                                        device['fqdn'])
+        self.log.debug('Attempting to Reset device %s moving it to Undefined'
+                       % (device['fqdn']))
+        # Allow for deviceId key name variations
+        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
+            device['systemMacAddress'] = device['key']
+        if 'systemMacAddress' not in device.keys():
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+        # Allow for parentContainerId key name variations
+        if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
+            device['parentContainerId'] = device['parentContainerKey']
+        if 'parentContainerId' not in device.keys():
+            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+        data = {'data': [{'info': info,
+                          'infoPreview': info,
+                          'action': 'reset',
+                          'nodeType': 'netelement',
+                          'nodeId': device['systemMacAddress'],
+                          'toId': 'undefined_container',
+                          'fromId': device['parentContainerId'],
+                          'nodeName': device['fqdn'],
+                          'toName': 'Undefined',
+                          'toIdType': 'container',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        url = ('/provisioning/addTempAction.do?'
+               'format=topology&queryParam=&nodeId=root')
+        try:
+            self.clnt.post(url, data=data, timeout=self.request_timeout)
+        except CvpApiError as e:
+            if any(txt in str(e) for txt in ['Data already exists','undefined container']):
+                self.log.debug('Device %s already in container Undefined'
+                               %device['fqdn'])
+        except Exception as e:
+            self.log.debug('Reset Device %s : %s'%(device['fqdn'],e))
+            raise Exception ("reset_device:%s" %e)
+        if create_task:
+            url = '/provisioning/v2/saveTopology.do'
+            tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
+            return tasks
+
+    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):
+        '''Move a device from the undefined container to a target container.
+            Optionally apply device-specific configlets and an imageBundle.
+
+            Args:
+                device (dict): Device Info
+                container (dict): Container Info
+                configlets (list): list of dicts with configlet key/name pairs
+                imageBundle (dict): imageBundle name and key to apply to device
+                create_task (boolean): Create task for this device provisioning sequence.
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'32']}}
+        '''
+        info = 'Provision device %s to container %s' % (device['fqdn'], container['name'])
+        self.log.debug(info)
+        # Allow for deviceId key name variations
+        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
+            device['systemMacAddress'] = device['key']
+        if 'systemMacAddress' not in device.keys():
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+        # Allow for parentContainerId key name variations
+        if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
+            device['parentContainerId'] = device['parentContainerKey']
+        if 'parentContainerId' not in device.keys():
+            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+        # Add action for moving device to specified container
+        try:
+            self.move_device_to_container('%s:provision_device'%app_name, device, container,
+                                          create_task=False)
+        except Exception as e:
+            self.log.debug('Provision Device - move %s : %s'%(device['fqdn'],e))
+            raise Exception ("provsion_device-move_to_container:%s" %e)
+        # Don't save configlet action if there is an image bundle to add
+        if 'key' in imageBundle.keys():
+            configlet_task = False
+        elif create_task:
+            configlet_task = True
+        else:
+            configlet_task = False
+        try:
+            created_tasks = self.update_configlets_on_device(app_name, device, configlets, [],
+                                                             configlet_task)
+        except Exception as e:
+            self.log.debug('Provision Device - configlets %s : %s'%(device['fqdn'],e))
+            raise Exception ("provsion_device-update_configlets:%s" %e)
+        # If configlet action created tasks then don't action imageBundles
+        # Skip if no imageBundles specified
+        if not configlet_task and 'key' in imageBundle.keys():
+            try:
+                created_tasks = self.update_imageBundle_on_device(app_name, device, imageBundle, {},
+                                                                  create_task)
+            except Exception as e:
+                self.log.debug('Provision Device - imageBundle %s : %s'%(device['fqdn'],e))
+                raise Exception ("provsion_device-update_imageBundle:%s" %e)
+        return created_tasks
+
     # ~Configlet Related API Calls
 
     def get_configlet_by_name(self, name):
@@ -456,6 +742,66 @@ class CvpApi(object):
                              % (c_id, start, end, scope),
                              timeout=self.request_timeout)
     
+    def move_device_to_container(self, app_name, device, container, create_task=True):
+        ''' Add the container to the specified parent.
+
+            Args:
+                app_name (str): String to specify info/signifier of calling app
+                device (dict): Device info
+                container (dict): Container info
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+
+                    Ex: {u'data': {u'status': u'success', u'taskIds': []}}
+        '''
+        info = '%s moving device %s to container %s' % (app_name,
+                                                        device['fqdn'],
+                                                        container['name'])
+        self.log.debug('Attempting to move device %s to container %s'
+                       % (device['fqdn'], container['name']))
+        # Allow for deviceId key name variations
+        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
+            device['systemMacAddress'] = device['key']
+        if 'systemMacAddress' not in device.keys():
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+        # Allow for parentContainerId key name variations
+        if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
+            device['parentContainerId'] = device['parentContainerKey']
+        if 'parentContainerId' not in device.keys():
+            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+        from_id = device['parentContainerId']
+        data = {'data': [{'info': info,
+                          'infoPreview': info,
+                          'action': 'update',
+                          'nodeType': 'netelement',
+                          'nodeId': device['key'],
+                          'toId': container['key'],
+                          'fromId': from_id,
+                          'nodeName': device['fqdn'],
+                          'toName': container['name'],
+                          'toIdType': 'container',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        url = ('/provisioning/addTempAction.do?'
+               'format=topology&queryParam=&nodeId=root')
+        try:
+            self.clnt.post(url, data=data, timeout=self.request_timeout)
+        except CvpApiError as e:
+            if any(txt in str(e) for txt in ['Data already exists']):
+                self.log.debug('Device %s already in container %s'
+                               %(device['fqdn'],container['name']))
+        except Exception as e:
+            self.log.debug('Move %s to %s : %s'%(device['name'],container['name'],e))
+            raise Exception ("move_device:%s" %e)
+        if create_task:
+            url = '/provisioning/v2/saveTopology.do'
+            tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
+            return tasks
+
     # ~Image Related API Calls
 
     def get_image_bundles(self, start=0, end=0):
