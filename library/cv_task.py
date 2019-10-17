@@ -101,8 +101,8 @@ EXAMPLES="""
 
 import time
 from ansible.module_utils.basic import AnsibleModule
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.cv_client import CvpClient
+from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 
 
 def connect(module):

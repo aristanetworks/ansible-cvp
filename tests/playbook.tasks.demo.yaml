@@ -1,6 +1,6 @@
 ---
 - name: Test cv_task_v2
-  hosts: grant
+  hosts: cvp
   connection: local
   gather_facts: no
 
