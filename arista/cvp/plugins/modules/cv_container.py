@@ -136,8 +136,8 @@ deletion_result:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.cv_client import CvpClient
-from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 # from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
 # from ansible.module_utils.legacy_cvp.cvp_client_errors import CvpLoginError, CvpApiError
 from treelib import Node, Tree

@@ -99,11 +99,8 @@ import inspect
 import requests
 from requests.exceptions import ConnectionError, HTTPError, Timeout, \
     ReadTimeout, TooManyRedirects
-
-
-from ansible.module_utils.cv_client_errors import CvpApiError, CvpLoginError, \
-    CvpRequestError, CvpSessionLogOutError
-
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, \
+CvpRequestError, CvpSessionLogOutError
 
 class CvpClient(object):
     ''' Use this class to create a persistent connection to CVP.
@@ -216,13 +213,13 @@ class CvpClient(object):
                     self.apiVersion = '2018'
                     self.apiName = 'cv_api2018'
                     if init:
-                        from ansible.module_utils.cv_api2018 import CvpApi
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2018 import CvpApi
                 elif int(self.splitVersion[0]) == 2019:
                     self.log.info('Setting API version to 2019')
                     self.apiVersion = '2019'
                     self.apiName = 'cv_api2019'
                     if init:
-                        from ansible.module_utils.cv_api2019 import CvpApi
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi
                 else:
                     self.log.error('Unable to set API version')
             else:
