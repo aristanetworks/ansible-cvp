@@ -1,0 +1,161 @@
+---
+- name: Test cv_task_v2
+  hosts: cvp
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+    - name: 'RUN 1: Collect initial facts'
+      tags:
+        - always
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+
+    - name: 'RUN 1: Apply configlets'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["all"]
+      register: cvp_configlets
+      vars:
+        configlet_list:
+          common_configlet: "alias a{{ 999 | random }} show version"
+          another_configlet: "alias a{{ 999 | random }} show version"
+
+    - name: 'RUN 1: Execute tasks registered in the previous task'
+      tags:
+        - provision
+      cv_task:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        tasks: "{{ cvp_configlets.data.tasks }}"
+      register: cvp_tasks
+       
+    - name: 'RUN 1: Verify tasks have been changed'
+      assert:
+        that:
+          - "cvp_tasks.data|length == cvp_configlets.data.tasks|length"
+
+    - name: 'RUN 2: Collect initial facts'
+      tags:
+        - always
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+
+
+    - name: 'RUN 2: Apply configlets'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["all"]
+      register: cvp_configlets
+      vars:
+        configlet_list:
+          common_configlet: "alias a{{ 999 | random }} show version"
+          another_configlet: "alias a{{ 999 | random }} show version"
+
+    - name: 'RUN 2: Cancel tasks'
+      tags:
+        - provision
+      cv_task:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        tasks: "{{ cvp_configlets.data.tasks }}"
+        state: cancelled
+      register: cvp_tasks
+
+    - name: 'RUN 2: Verify tasks have been changed'
+      assert:
+        that:
+          - "cvp_tasks.data|length == cvp_configlets.data.tasks|length"
+
+
+    - name: 'RUN 3: Collect initial facts'
+      tags:
+        - always
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+
+    - name: 'RUN 3: Apply configlets'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["all"]
+      notify:
+        - update cvp facts
+      vars:
+        configlet_list:
+          common_configlet: "alias a{{ 999 | random }} show version"
+          another_configlet: "alias a{{ 999 | random }} show version"
+
+    - meta: flush_handlers
+
+    - name: 'RUN 3: Execute all pending tasks and wait for completion for 60 seconds'
+      tags:
+        - provision
+      cv_task:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        tasks: "{{ tasks }}"
+        wait: 60
+      register: cvp_tasks
+
+    - name: 'RUN 3: Verify tasks have been changed'
+      assert:
+        that:
+          - "cvp_tasks.data|length == cvp_configlets.data.tasks|length"
+
+  handlers:
+    - name: update cvp facts
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'

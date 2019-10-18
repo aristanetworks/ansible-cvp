@@ -1,0 +1,128 @@
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    configlet_list:
+      cv_device_test01: "alias a{{ 999 | random }} show version"
+      cv_device_test02: "alias a{{ 999 | random }} show version"
+    # Device inventory for provision activity: bind configlet
+    devices_inventory:
+      veos01:
+        name: veos01
+        configlets:
+          - cv_device_test01
+          - SYS_TelemetryBuilderV2_172.23.0.2_1
+          - veos01-basic-configuration
+          - SYS_TelemetryBuilderV2
+      veos02:
+        name: veos02
+        configlets:
+          - cv_device_test02
+          - SYS_TelemetryBuilderV2_172.23.0.3_1
+          - SYS_TelemetryBuilderV2
+          - veos02-basic-configuration
+      veos03:
+        name: veos03
+        configlets:
+          - SYS_TelemetryBuilderV2_172.23.0.4_1
+          - SYS_TelemetryBuilderV2
+          - veos03-basic-configuration
+    # Device inventory for rollback activity: unbind configlet
+    devices_inventory_rollback:
+      veos01:
+        name: veos01
+        configlets:
+          - SYS_TelemetryBuilderV2_172.23.0.2_1
+          - veos01-basic-configuration
+          - SYS_TelemetryBuilderV2
+      veos02:
+        name: veos02
+        configlets:
+          - SYS_TelemetryBuilderV2_172.23.0.3_1
+          - SYS_TelemetryBuilderV2
+          - veos02-basic-configuration
+      veos03:
+        name: veos03
+        configlets:
+          - SYS_TelemetryBuilderV2_172.23.0.4_1
+          - SYS_TelemetryBuilderV2
+          - veos03-basic-configuration
+
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+      tags:
+        - always
+
+###################################################
+### Provision
+###################################################
+
+    - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["cv_device_test"]
+      register: cvp_configlet
+
+    # Display information for device before a container's move
+    - name: "Configure devices on {{inventory_hostname}}"
+      tags: 
+        - provision
+      cv_device:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        devices: "{{devices_inventory}}"
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        device_filter: ['veos']
+      register: cvp_device
+
+    - name: Display cv_device
+      tags: 
+        - provision
+      debug:
+        msg: "{{cvp_device}}"
+
+###################################################
+### Cleanup
+###################################################
+
+    # Display information for device before a container's move
+    - name: "Rollback configlet on devices on {{inventory_hostname}}"
+      tags: 
+        - cleanup
+      cv_device:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        devices: "{{devices_inventory_rollback}}"
+        cvp_facts: '{{cvp_facts}}'
+        device_filter: ['veos']
+      register: cvp_device
+
+    - name: Display cv_device
+      tags: 
+        - cleanup
+      debug:
+        msg: "{{cvp_device}}"
