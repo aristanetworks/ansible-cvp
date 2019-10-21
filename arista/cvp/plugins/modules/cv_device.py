@@ -48,6 +48,7 @@ description:
   - If a device is in devices but not in cvp_facts it will be provisioned
   - If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
   - and updated with the version in devices if the two are different.
+<<<<<<< HEAD
 options:
   host:
     description: IP Address or hostname of the CloudVisin Server
@@ -86,6 +87,8 @@ options:
                  on configlets entries.
     required: false
     default: null
+=======
+>>>>>>> Update documentation
 '''
 
 EXAMPLES = r'''
@@ -122,19 +125,33 @@ EXAMPLES = r'''
       tags:
         - always
 
+<<<<<<< HEAD
     - name: "Configure devices on {{inventory_hostname}}"
       tags: 
         - provision
       cv_device:
         host: '{{ansible_host}}'
+=======
+    - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+>>>>>>> Update documentation
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
+<<<<<<< HEAD
         devices: "{{devices_inventory}}"
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         device_filter: ['veos']
       register: cvp_device
+=======
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["cv_device_test"]
+>>>>>>> Update documentation
 '''
 
 

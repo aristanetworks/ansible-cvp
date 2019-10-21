@@ -18,6 +18,10 @@ readme: README.md
 # @nicks:irc/im.site#channel'
 authors:
 - EMEA AS <ansible-dev@arista.com>
+<<<<<<< HEAD
+=======
+
+>>>>>>> Update documentation
 
 ### OPTIONAL but strongly recommended
 
