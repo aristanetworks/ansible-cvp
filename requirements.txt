@@ -1,16 +1,4 @@
-ansible==2.8.3
-asn1crypto==0.24.0
-certifi==2019.6.16
-cffi==1.12.3
-chardet==3.0.4
-cryptography==2.7
-idna==2.8
-Jinja2==2.10.1
-MarkupSafe==1.1.1
-pycparser==2.19
-PyYAML==5.1.2
+ansible==2.9.0rc4
 requests==2.22.0
-six==1.12.0
-urllib3==1.25.3
 fuzzywuzzy==0.17.0
 treelib==1.5.5
