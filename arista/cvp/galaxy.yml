@@ -17,12 +17,7 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-<<<<<<< HEAD
 - EMEA AS <ansible-dev@arista.com>
-=======
-- EMEA AS <ansible@arista.com>
->>>>>>> upstream/grant-release
-
 
 ### OPTIONAL but strongly recommended
 
@@ -40,11 +35,7 @@ license_file: 'LICENSE'
 
 # A list of tags you want to associate with the collection for indexing/searching. A tag name has the same character
 # requirements as 'namespace' and 'name'
-<<<<<<< HEAD
 tags: ['arista', 'networking', 'cloudvision', 'cvp']
-=======
-tags: []
->>>>>>> upstream/grant-release
 
 # Collections that this collection requires to be installed for it to be usable. The key of the dict is the
 # collection label 'namespace.name'. The value is a version range
