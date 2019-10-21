@@ -1,6 +1,9 @@
 # Ansible & CloudVision examples
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Update repository documentation
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
@@ -22,8 +25,11 @@
 <!-- /code_chunk_output -->
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> Update documentation
+=======
+>>>>>>> Update repository documentation
 ## About
 
 This folder contains a list of pre-configured playbook to run with all available modules provided by `arista.cvp` collection. It comes with a preconfigured `ansible.cfg` and a `Makefile` to automate environment building and playbook execution.
