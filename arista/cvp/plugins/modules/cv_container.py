@@ -31,15 +31,15 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-ANSIBLE_METADATA = {'metadata_version': '0.0.2.dev0',
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
                     'status': ['preview'],
                     'supported_by': 'community'}
 
 DOCUMENTATION = r"""
 ---
 module: cv_container
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Manage Provisioning topology.
 description:
   - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,

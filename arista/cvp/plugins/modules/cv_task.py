@@ -30,11 +30,16 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = r'''
 ---
 module: cv_task
-version_added: "2.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Execute or Cancel CVP Tasks.
 description:
   - CloudVison Portal Task module
@@ -47,17 +52,18 @@ options:
     required: False
     default: 0
   state:
-    description: action to carry out on the task
-                  executed - execute tasks
-                  cancelled - cancel tasks
+    description: 
+        - action to carry out on the task
+        - executed - execute tasks
+        - cancelled - cancel tasks
     required: false
-    default: 'executed
+    default: executed
     choices: 
       - 'executed'
       - 'cancel'
-"""
+'''
 
-EXAMPLES="""
+EXAMPLES = r'''
 - name: Execute all tasks registered in cvp_configlets variable
   cv_task:
     host: "{{ansible_host}}"
@@ -96,8 +102,7 @@ EXAMPLES="""
     port: '{{cvp_port}}'
     tasks: "{{ tasks }}"
     wait: 60
-
-"""
+'''
 
 import time
 from ansible.module_utils.basic import AnsibleModule

@@ -30,20 +30,75 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = r'''
 ---
 module: cv_device
-version_added: "2.2"
+version_added: "2.9"
 author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
 description:
   - CloudVison Portal Device compares the list of Devices in
-  in devices against cvp-facts then adds, resets, or updates them as appropriate.
-  If a device is in cvp_facts but not in devices it will be reset to factory defaults
-  If a device is in devices but not in cvp_facts it will be provisioned
-  If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
-  and updated with the version in devices if the two are different.
-"""
+  - in devices against cvp-facts then adds, resets, or updates them as appropriate.
+  - If a device is in cvp_facts but not in devices it will be reset to factory defaults
+  - If a device is in devices but not in cvp_facts it will be provisioned
+  - If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
+  - and updated with the version in devices if the two are different.
+'''
+
+EXAMPLES = r'''
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  vars:
+    configlet_list:
+      cv_device_test01: "alias a{{ 999 | random }} show version"
+      cv_device_test02: "alias a{{ 999 | random }} show version"
+    # Device inventory for provision activity: bind configlet
+    devices_inventory:
+      veos01:
+        name: veos01
+        configlets:
+          - cv_device_test01
+          - SYS_TelemetryBuilderV2_172.23.0.2_1
+          - veos01-basic-configuration
+          - SYS_TelemetryBuilderV2
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+      tags:
+        - always
+
+    - name: 'Create configlets on CVP {{inventory_hostname}}.'
+      tags:
+        - provision
+      cv_configlet:
+        host: "{{ansible_host}}"
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        configlets: "{{configlet_list}}"
+        configlet_filter: ["cv_device_test"]
+'''
+
+
 # Required by Ansible and CVP
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient

@@ -30,11 +30,16 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 DOCUMENTATION = """
 ---
 module: cv_image
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Create or Update CloudVision Portal Devices.
 description:
   -  CloudVison Portal Device configuration requires the device name,

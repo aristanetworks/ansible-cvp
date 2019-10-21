@@ -30,11 +30,15 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
----
+
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = r'''
 module: cv_facts
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns the list of devices, configlets, containers and images
@@ -60,7 +64,29 @@ options:
                   if none is specified.
     required: false
     default: null
-"""
+'''
+
+EXAMPLES = r'''
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        protocol: https
+        port: '{{cvp_port}}'
+      register: cvp_facts
+      tags:
+        - always
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient

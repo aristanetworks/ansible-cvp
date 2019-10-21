@@ -30,10 +30,15 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+ANSIBLE_METADATA = {'metadata_version': '0.5.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 DOCUMENTATION = """
 ---
 module: cv_configlet
-version_added: "2.8"
+version_added: "2.9"
 author: "EMEA AS (ansible-dev@arista.com)"
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
@@ -84,7 +89,7 @@ options:
     default: null
 """
 
-EXAMPLE = """
+EXAMPLES = """
 ---
 - name: Test cv_configlet_v2
   hosts: cvp
