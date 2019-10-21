@@ -30,11 +30,11 @@
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-- __arista.cvp.cv_facts__ - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- __arista.cvp.cv_configlet__:  Manage configlet configured on CVP.
-- __arista.cvp.cv_container__:  Manage container topology and attach configlet and devices to containers.
-- __arista.cvp.cv_device__: Manage devices configured on CVP
-- __arista.cvp.cv_task__:  Run tasks created on CVP.
+- [__arista.cvp.cv_facts__](docs/cv_facts.md) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- [__arista.cvp.cv_configlet__](docs/cv_configlet.md) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container__](docs/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
+- __arista.cvp.cv_device__ - Manage devices configured on CVP
+- [__arista.cvp.cv_task__](docs/cv_tasks.md) - Run tasks created on CVP.
 
 This collection supports both CVP version `2018.2.x` and `2019.1.x`
 
