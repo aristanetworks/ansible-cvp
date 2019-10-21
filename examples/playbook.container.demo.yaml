@@ -3,6 +3,8 @@
   hosts: cvp
   connection: local
   gather_facts: no
+  collections:
+    - arista.cvp
   vars:
     verbose: False
     containers_cleanup:

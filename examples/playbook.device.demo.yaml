@@ -3,6 +3,8 @@
   hosts: cvp
   connection: local
   gather_facts: no
+  collections:
+    - arista.cvp
   vars:
     configlet_list:
       cv_device_test01: "alias a{{ 999 | random }} show version"

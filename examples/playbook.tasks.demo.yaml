@@ -3,7 +3,8 @@
   hosts: cvp
   connection: local
   gather_facts: no
-
+  collections:
+    - arista.cvp
   tasks:
 
     - name: 'RUN 1: Collect initial facts'
