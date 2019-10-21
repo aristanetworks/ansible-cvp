@@ -137,11 +137,8 @@ deletion_result:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
-try:
-    from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-    from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-except:
-    print 'Error'
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 from treelib import Node, Tree
 import json
 
