@@ -1,180 +1,157 @@
 ![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/aristanetworks/ansible-cvp)  ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/aristanetworks/ansible-cvp)  ![GitHub last commit](https://img.shields.io/github/last-commit/aristanetworks/ansible-cvp)
 
-# Ansible Modules for CloudVision Platform (CVP)
-
-
-![Development Status](https://img.shields.io/badge/development-In_Progress-red)  __WARNING: Pre Release Work in progress Anisble modules for CVP__ 
-
-
+# Ansible Modules for Arista CloudVision Platform
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [Ansible Modules for CloudVision Platform (CVP)](#ansible-modules-for-cloudvision-platform-cvp)
+- [Ansible Modules for Arista CloudVision Platform (CVP)](#ansible-modules-for-arista-cloudvision-platform-cvp)
+  - [About](#about)
   - [Modules overview](#modules-overview)
-    - [cv_facts](#cv_facts)
-    - [cv_configlet](#cv_configlet)
-    - [cv_container](#cv_container)
-    - [cv_device](#cv_device)
+    - [Important notes.](#important-notes)
   - [Installation](#installation)
+    - [Dependencies](#dependencies)
+    - [Git installation for testing](#git-installation-for-testing)
+    - [Git installation](#git-installation)
   - [Example playbook](#example-playbook)
-- [Resources](#resources)
-- [License](#license)
-- [Ask question or report issue](#ask-question-or-report-issue)
-- [Contribute](#contribute)
+  - [Resources](#resources)
+  - [License](#license)
+  - [Ask a question](#ask-a-question)
+  - [Contribute](#contribute)
 
 <!-- /code_chunk_output -->
 
+## About
+
+[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to specific section of this readme.
 
 ## Modules overview
 
-This repository provides a list of modules related to [CloudVision platform](https://www.arista.com/en/products/eos/eos-cloudvision) from [Arista Networks](https://www.arista.com/).
+This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-### cv_facts
+- __arista.cvp.cv_facts__ - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- __arista.cvp.cv_configlet__:  Manage configlet configured on CVP.
+- __arista.cvp.cv_container__:  Manage container topology and attach configlet and devices to containers.
+- __arista.cvp.cv_device__: Manage devices configured on CVP
+- __arista.cvp.cv_task__:  Run tasks created on CVP.
 
-Module to collect relevant information from CVP instance. It is baseline module to use before using other modules to interact with CVP servers. This module collect the following list of elements:
-- List of devices.
-- List of containers.
-- List of configlets.
-- List of image bundles.
-- List of tasks.
+This collection supports both CVP version `2018.2.x` and `2019.1.x`
 
-_Playbook Example_
+### Important notes.
 
-```yaml
----
-- name: Test cv_configlet_v2
-  hosts: cvp
-  connection: local
-  gather_facts: no
-  tasks:
-  - name: "Gather CVP facts {{inventory_hostname}}"
-      cv_facts:
-      host: '{{ansible_host}}'
-      username: '{{cvp_username}}'
-      password: '{{cvp_password}}'
-      protocol: https
-      port: '{{cvp_port}}'
-      register: cv_facts
-```
+This repository is built based on [new collections system](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#developing-collections) introduced by ansible starting version 2.9. 
 
-_Tested CVP versions:_
-
-- 2018.2.5
-- 2019.1.0
-
-### cv_configlet
-
-Module to manage containers on CVP based on an intend method. After extracting facts from CVP with `cv_facts`, module create, delete and update containers based on the topology defined within ansible.
-
-This module only manages configlets that match a list of filter. If this filter is not set, then module only run addition of configlet.
-
-_Module example:_
-
-```yaml
----
-- name: Test cv_configlet_v2
-  hosts: cvp
-  connection: local
-  gather_facts: no
-  vars:
-    configlet_list:
-      Test_Configlet: "! This is a Very First Testing Configlet\n!"
-      Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
-  tasks:
-  - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      tags:
-        - provision
-      cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        cvp_facts: "{{cvp_facts.ansible_facts}}"
-        configlets: "{{configlet_list}}"
-        configlet_filter: ["New", "Test"]
-      register: cvp_configlet
-```
-
-_Tested CVP versions:_
-
-- 2018.2.5
-- 2019.1.0
-
-### cv_container
-
-This module is in charge of topology management as well as attaching configlet to containers and move devices to containers.
-
-> WORK IN PROGRESS
-
-
-### cv_device
-
-  Devices can be deployed from the undefined container to a provisioned container or moved from one container to another using the add functionality and specifying the target container. Configlets can be added to devices using add and specifying the current parent container.
-  Devices can be Removed from CVP using the delete option and specifying `CVP` as the container, equivalent to the `REMOVE` GUI option.
-  
-  Devices can be reset and moved to the undefined container using the delete option and specifying `RESET` as the container.
-
-  Configlets can be removed from a device using the delete option and specifying the configs to be removed and the current parent container as the container.
-  show option provide device data and current config.
-
-> WORK IN PROGRESS
-  
+> It means that it is required to run at least ansible `2.9.0rc4` to be able to use this collection.
 
 ## Installation
 
-**CvpRac**
+### Dependencies
 
-  To use these modules you will need cvprac.
-  The official version can be found here: [Arista Networks cvprac](https://github.com/aristanetworks/cvprac)
-  CVPRACV2 in this repository is a tweaked version with additional functionality that has been requested in the official version.
+This collection requires the following to be installed on the Ansible control machine:
 
-  Installation notes are available on [installation page](INSTALLATION.md)
+- ansible >= `2.9.0rc4`
+- requests >= `2.22.0`
+- fuzzywuzzy running `0.17.0` or later
+- treelib version `1.5.5` or later
 
-> Note: Repository is a pre-release work. A custom installation is required to run non standard installation process for python and ansible.
+### Git installation for testing
+
+You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
+
+```shell
+$ git clone https://github.com/aristanetworks/ansible-cvp.git
+$ cd ansible-cvp/examples
+$ make build
+```
+
+> It is highly recommended to use a python virtual-environment to not alter your production environment.
+
+### Git installation
+
+You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
+
+__Clone repository__
+```shell
+$ git clone https://github.com/aristanetworks/ansible-cvp.git
+$ cd ansible-cvp
+```
+
+__Build and install collection__
+
+```shell
+$ ansible-galaxy collection build --force ../arista/cvp
+$ ansible-galaxy collection install arista.cvp.*.tar.gz
+```
 
 ## Example playbook
 
-This example outlines how to use Ansible to create a device container on Arista CloudVision.
+This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
 ```yaml
 ---
-- name: Test cv_container
+- name: Playbook to demonstrate cv_container module.
   hosts: cvp
   connection: local
   gather_facts: no
+  collections:
+    - arista.cvp
   vars:
-
+    containers_provision:
+        Fabric:
+          parent_container: Tenant
+        Spines:
+          parent_container: Fabric
+        Leaves:
+          parent_container: Fabric
+          configlets:
+              - alias
+          devices:
+            - veos03
+        MLAG01:
+          parent_container: Leaves
+          devices:
+            - veos01
+            - veos02
   tasks:
-    # collect CVP facts
-    - name: "Gather CVP facts {{inventory_hostname}}"
+    - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
-      register: cv_facts
-    # Print CVP facts.
-    - name: "Print out facts from CVP"
-      debug:
-        msg: "{{cv_facts}}"
+        port: '{{cvp_port}}'
+      register: cvp_facts
+
+    - name: "Build Container topology on {{inventory_hostname}}"
+      cv_container:
+        host: '{{ansible_host}}'
+        username: '{{cvp_username}}'
+        password: '{{cvp_password}}'
+        port: '{{cvp_port}}'
+        protocol: https
+        topology: '{{containers_provision}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        save_topology: true
 
 ```
 
-> TO BE UPDATED WHEN MODULES SHIPPED
+## Resources
 
-# Resources
+- Ansible for [Arista Validated Design](https://github.com/aristanetworks/ansible-avd)
+- Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
+- [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
 
-  Other CVP Ansible modules can be found here: [Arista EOS+ Ansible Modules](https://github.com/arista-eosplus/ansible-cloudvision)
 
-# License
+## License
 
 Project is published under [Apache License](LICENSE).
 
-# Ask question or report issue
+## Ask a question
 
-Please open an issue on Github this is the fastest way to get an answer.
+Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-avd/issues).
 
-# Contribute
+
+## Contribute
 
 Contributing pull requests are gladly welcomed for this repository. If you are planning a big change, please start a discussion first to make sure we’ll be able to merge it.
