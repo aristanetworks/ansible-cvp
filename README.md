@@ -6,7 +6,7 @@
 
 <!-- code_chunk_output -->
 
-- [Ansible Modules for Arista CloudVision Platform (CVP)](#ansible-modules-for-arista-cloudvision-platform-cvp)
+- [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
   - [About](#about)
   - [Modules overview](#modules-overview)
     - [Important notes.](#important-notes)
