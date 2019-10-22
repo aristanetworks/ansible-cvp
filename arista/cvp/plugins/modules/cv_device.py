@@ -48,6 +48,44 @@ description:
   - If a device is in devices but not in cvp_facts it will be provisioned
   - If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
   - and updated with the version in devices if the two are different.
+options:
+  host:
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
+  username:
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
+  password:
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
+  protocol:
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
+  port:
+    description: The HTTP port to use. The cvprac defaults will be used
+                  if none is specified.
+    required: false
+    default: null
+  devices:
+    description: Yaml dictionary to describe intended devices 
+                 configuration from CVP stand point.
+    required: true
+    default: None
+  cvp_facts:
+    description: Facts from CVP collected by cv_facts module
+    required: true
+    default: None
+  device_filter:
+    description: Filter to apply intended mode on a set of configlet.
+                 If not used, then module only uses ADD mode. device_filter
+                 list devices that can be modified or deleted based
+                 on configlets entries.
+    required: false
+    default: null
 '''
 
 EXAMPLES = r'''
@@ -84,18 +122,19 @@ EXAMPLES = r'''
       tags:
         - always
 
-    - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      tags:
+    - name: "Configure devices on {{inventory_hostname}}"
+      tags: 
         - provision
-      cv_configlet:
-        host: "{{ansible_host}}"
+      cv_device:
+        host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
-        cvp_facts: "{{cvp_facts.ansible_facts}}"
-        configlets: "{{configlet_list}}"
-        configlet_filter: ["cv_device_test"]
+        devices: "{{devices_inventory}}"
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        device_filter: ['veos']
+      register: cvp_device
 '''
 
 
@@ -440,7 +479,7 @@ def main():
         port=dict(type='int', default=None),
         protocol=dict(default='https', choices=['http', 'https']),
         username=dict(required=True),
-        password=dict(required=True),
+        password=dict(required=True,no_log=True),
         devices=dict(type='dict',required=True),
         cvp_facts=dict(type='dict',required=True),
         device_filter=dict(type='list', default='none')

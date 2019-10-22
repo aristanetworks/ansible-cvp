@@ -33,7 +33,7 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 - [__arista.cvp.cv_facts__](docs/cv_facts.md) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](docs/cv_configlet.md) -  Manage configlet configured on CVP.
 - [__arista.cvp.cv_container__](docs/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
-- __arista.cvp.cv_device__ - Manage devices configured on CVP
+- [__arista.cvp.cv_device__](docs/cv_device.md) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/cv_tasks.md) - Run tasks created on CVP.
 
 This collection supports both CVP version `2018.2.x` and `2019.1.x`
@@ -142,7 +142,6 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 - Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
 
-
 ## License
 
 Project is published under [Apache License](LICENSE).
@@ -150,7 +149,6 @@ Project is published under [Apache License](LICENSE).
 ## Ask a question
 
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-avd/issues).
-
 
 ## Contribute
 
