@@ -30,7 +30,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+DOCUMENTATION = r'''
 ---
 module: cv_device
 version_added: "2.2"
@@ -43,7 +43,85 @@ description:
   If a device is in devices but not in cvp_facts it will be provisioned
   If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
   and updated with the version in devices if the two are different.
-"""
+options:
+  host:
+    description: IP Address or hostname of the CloudVisin Server
+    required: true
+    default: null
+  username:
+    description: The username to log into Cloudvision.
+    required: true
+    default: null
+  password:
+    description: The password to log into Cloudvision.
+    required: true
+    default: null
+  protocol:
+    description: The HTTP protocol to use. Choices http or https.
+    required: false
+    default: https
+  port:
+    description: The HTTP port to use. The cvprac defaults will be used
+                  if none is specified.
+    required: false
+    default: null
+  devices:
+    description: Yaml dictionary to describe intended devices 
+                 configuration from CVP stand point.
+    required: true
+    default: None
+  cvp_facts:
+    description: Facts from CVP collected by cv_facts module
+    required: true
+    default: None
+  device_filter:
+    description: Filter to apply intended mode on a set of configlet.
+                 If not used, then module only uses ADD mode. device_filter
+                 list devices that can be modified or deleted based
+                 on configlets entries.
+    required: false
+    default: null
+'''
+
+EXAMPLES = r'''
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  vars:
+    configlet_list:
+      cv_device_test01: "alias a{{ 999 | random }} show version"
+      cv_device_test02: "alias a{{ 999 | random }} show version"
+    # Device inventory for provision activity: bind configlet
+    devices_inventory:
+      veos01:
+        name: veos01
+        configlets:
+          - cv_device_test01
+          - SYS_TelemetryBuilderV2_172.23.0.2_1
+          - veos01-basic-configuration
+          - SYS_TelemetryBuilderV2
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+      tags:
+        - always
+
+    - name: "Configure devices on {{inventory_hostname}}"
+      tags: 
+        - provision
+      cv_device:
+        devices: "{{devices_inventory}}"
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        device_filter: ['veos']
+      register: cvp_device
+'''
+
 # Required by Ansible and CVP
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError

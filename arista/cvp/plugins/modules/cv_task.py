@@ -60,20 +60,10 @@ options:
 EXAMPLES="""
 - name: Execute all tasks registered in cvp_configlets variable
   cv_task:
-    host: "{{ansible_host}}"
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    port: '{{cvp_port}}'
     tasks: "{{ cvp_configlets.data.tasks }}"
     
 - name: Cancel a list of pending tasks
   cv_task:
-    host: "{{ansible_host}}"
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
-    port: '{{cvp_port}}'
     tasks: "{{ cvp_configlets.data.tasks }}"
     state: cancelled
 
@@ -81,18 +71,9 @@ EXAMPLES="""
 # In order to get a list of all pending tasks, execute cv_facts first
 - name: Update cvp facts
     cv_facts:
-      host: '{{ansible_host}}'
-      username: '{{cvp_username}}'
-      password: '{{cvp_password}}'
-      protocol: https
-      port: '{{cvp_port}}'
 
 - name: Execute all pending tasks and wait for completion for 60 seconds
   cv_task:
-    host: "{{ansible_host}}"
-    username: '{{cvp_username}}'
-    password: '{{cvp_password}}'
-    protocol: https
     port: '{{cvp_port}}'
     tasks: "{{ tasks }}"
     wait: 60

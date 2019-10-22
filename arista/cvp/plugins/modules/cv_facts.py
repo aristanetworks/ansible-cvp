@@ -62,6 +62,23 @@ options:
     default: null
 """
 
+EXAMPLES = r'''
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+      tags:
+        - always
+'''
+
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
