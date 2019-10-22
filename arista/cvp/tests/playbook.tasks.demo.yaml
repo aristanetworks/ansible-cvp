@@ -10,22 +10,12 @@
       tags:
         - always
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
     - name: 'RUN 1: Apply configlets'
       tags:
         - provision
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -39,11 +29,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ cvp_configlets.data.tasks }}"
       register: cvp_tasks
        
@@ -56,11 +41,6 @@
       tags:
         - always
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
 
@@ -68,11 +48,6 @@
       tags:
         - provision
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -86,11 +61,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ cvp_configlets.data.tasks }}"
         state: cancelled
       register: cvp_tasks
@@ -105,22 +75,12 @@
       tags:
         - always
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
     - name: 'RUN 3: Apply configlets'
       tags:
         - provision
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -137,11 +97,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ tasks }}"
         wait: 60
       register: cvp_tasks
@@ -154,8 +109,3 @@
   handlers:
     - name: update cvp facts
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'

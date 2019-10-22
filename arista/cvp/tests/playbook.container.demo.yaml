@@ -32,11 +32,6 @@
   tasks:
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
       tags:
         - always
@@ -45,11 +40,6 @@
       tags:
         - provision
       cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        port: '{{cvp_port}}'
-        protocol: https
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true
@@ -66,11 +56,6 @@
         - provision
         - never
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
     - name: "Check if Leaves container exists"
@@ -91,11 +76,6 @@
           - never
           - cleanup
       cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        port: '{{cvp_port}}'
-        protocol: https
         topology: '{{containers_cleanup}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
       register: cv_container
@@ -108,11 +88,6 @@
 
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
       tags:
         - never
