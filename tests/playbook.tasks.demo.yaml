@@ -39,11 +39,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ cvp_configlets.data.tasks }}"
       register: cvp_tasks
        
@@ -86,11 +81,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ cvp_configlets.data.tasks }}"
         state: cancelled
       register: cvp_tasks
@@ -137,11 +127,6 @@
       tags:
         - provision
       cv_task:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         tasks: "{{ tasks }}"
         wait: 60
       register: cvp_tasks
