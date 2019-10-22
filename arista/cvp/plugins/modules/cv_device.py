@@ -140,6 +140,7 @@ EXAMPLES = r'''
 
 # Required by Ansible and CVP
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 import re
@@ -151,12 +152,17 @@ def connect(module):
     :return: CvpClient object with connection instantiated.
     '''
     client = CvpClient()
+    connection = Connection(module._socket_path)
+    host = connection.get_option("host")
+    port = connection.get_option("port")
+    user = connection.get_option("remote_user")
+    pswd = connection.get_option("password")
     try:
-        client.connect([module.params['host']],
-                       module.params['username'],
-                       module.params['password'],
-                       protocol=module.params['protocol'],
-                       port=module.params['port'],
+        client.connect([host],
+                       user,
+                       pswd,
+                       protocol="https",
+                       port=port,
                        )
     except CvpLoginError, e:
         module.fail_json(msg=str(e))
@@ -475,11 +481,6 @@ def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
-        host=dict(required=True),
-        port=dict(type='int', default=None),
-        protocol=dict(default='https', choices=['http', 'https']),
-        username=dict(required=True),
-        password=dict(required=True,no_log=True),
         devices=dict(type='dict',required=True),
         cvp_facts=dict(type='dict',required=True),
         device_filter=dict(type='list', default='none')
