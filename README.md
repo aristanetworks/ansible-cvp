@@ -242,9 +242,12 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> Update documentation
+=======
+>>>>>>> Update cv_device doc
 ## License
 
 Project is published under [Apache License](LICENSE).
@@ -258,7 +261,6 @@ Support for this `arista.cvp` collection is provided by the community directly i
 =======
 
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-avd/issues).
-
 
 ## Contribute
 >>>>>>> Update documentation
