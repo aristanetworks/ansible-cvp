@@ -16,6 +16,24 @@ Module comes with a set of options:
 
 ## Usage
 
+__Authentication__
+
+This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
+
+```ini
+[development]
+cvp_foster  ansible_httpapi_host=10.90.224.122
+
+[development:vars]
+ansible_connection=httpapi
+ansible_httpapi_use_ssl=True
+ansible_httpapi_validate_certs=False
+ansible_user=cvpadmin
+ansible_password=ansible
+ansible_network_os=eos
+ansible_httpapi_port=443
+```
+
 __Inputs__
 
 Below is a basic playbook to collect facts:
