@@ -16,11 +16,6 @@
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cv_facts
     
     - name: "Print out facts from CVP"
