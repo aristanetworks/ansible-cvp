@@ -30,11 +30,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+DOCUMENTATION = r'''
 ---
 module: cv_image
 version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Create or Update CloudVision Portal Devices.
 description:
   -  CloudVison Portal Device configuration requires the device name,
@@ -44,31 +44,6 @@ description:
   - Device configuration requires the devcie name.
   - Returns the device data and any Task IDs created during the operation
 options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
-  device:
-    description: CVP device to add/delete the image to/from
-    required: false
-    default: None
   container:
     description: CVP container to add/delete image to/from 
     required: false
@@ -89,7 +64,7 @@ options:
       - 'add'
       - 'delete'
     default: show
-"""
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError

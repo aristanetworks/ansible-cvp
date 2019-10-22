@@ -30,11 +30,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+DOCUMENTATION = r'''
 ---
 module: cv_task
-version_added: "2.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Execute or Cancel CVP Tasks.
 description:
   - CloudVison Portal Task module
@@ -55,9 +55,9 @@ options:
     choices: 
       - 'executed'
       - 'cancel'
-"""
+'''
 
-EXAMPLES="""
+EXAMPLES = r'''
 - name: Execute all tasks registered in cvp_configlets variable
   cv_task:
     tasks: "{{ cvp_configlets.data.tasks }}"
@@ -78,7 +78,7 @@ EXAMPLES="""
     tasks: "{{ tasks }}"
     wait: 60
 
-"""
+'''
 
 import time
 from ansible.module_utils.basic import AnsibleModule

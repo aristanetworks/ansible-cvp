@@ -33,38 +33,17 @@
 DOCUMENTATION = r'''
 ---
 module: cv_device
-version_added: "2.2"
-author: "EMEA AS (ansible-dev@arista.com)"
+version_added: "2.9"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
 description:
   - CloudVison Portal Device compares the list of Devices in
-  in devices against cvp-facts then adds, resets, or updates them as appropriate.
-  If a device is in cvp_facts but not in devices it will be reset to factory defaults
-  If a device is in devices but not in cvp_facts it will be provisioned
-  If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
-  and updated with the version in devices if the two are different.
+  - in devices against cvp-facts then adds, resets, or updates them as appropriate.
+  - If a device is in cvp_facts but not in devices it will be reset to factory defaults
+  - If a device is in devices but not in cvp_facts it will be provisioned
+  - If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
+  - and updated with the version in devices if the two are different.
 options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
   devices:
     description: Yaml dictionary to describe intended devices 
                  configuration from CVP stand point.

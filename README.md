@@ -121,24 +121,31 @@ Below is a very basic example to build a container tology on a CloudVision platf
   tasks:
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
     - name: "Build Container topology on {{inventory_hostname}}"
       cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        port: '{{cvp_port}}'
-        protocol: https
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true
 ```
+
+As modules of this collection are based on `HTTPAPI` connection plusgin, authentication elements shall be declared using this plugin mechanism:
+
+```ini
+[development]
+cvp_foster  ansible_httpapi_host=10.90.224.122
+
+[development:vars]
+ansible_connection=httpapi
+ansible_httpapi_use_ssl=True
+ansible_httpapi_validate_certs=False
+ansible_user=cvpadmin
+ansible_password=ansible
+ansible_network_os=eos
+ansible_httpapi_port=443
+```
+
 
 ## Resources
 
