@@ -24,7 +24,7 @@
 
 ## About
 
-[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to specific section of this readme.
+[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#git-installation) of this readme.
 
 ## Modules overview
 
@@ -88,6 +88,10 @@ $ ansible-galaxy collection install arista.cvp.*.tar.gz
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
+Some playbook examples are provided in [__`examples`__](examples/) folder with information about how to built a test environment.
+
+Below is a very basic example to build a container tology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
+
 ```yaml
 ---
 - name: Playbook to demonstrate cv_container module.
@@ -133,7 +137,6 @@ This example outlines how to use `arista.cvp` to create a containers topology on
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true
-
 ```
 
 ## Resources
