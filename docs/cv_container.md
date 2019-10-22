@@ -10,11 +10,6 @@ This module manage provisioning topology at container's level. it takes an inten
 
 Module comes with a set of options:
 
-- `host`: IP address of CVP server
-- `protocol`: Which protocol to use to connect to CVP. Can be either `http` or `https` (default: `https`)
-- `port`: Port where CVP is listening. (default: based on `protocol`)
-- `username`: user to use to connect to CVP.
-- `password`: password to use to connect to CVP.
 - `topology`: Topology to build on Cloudvision.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `save_topology`: Boolean to save and create tasks on CVP.

@@ -10,11 +10,6 @@ This module manage configlet content and definition. it takes an intended list o
 
 Module comes with a set of options:
 
-- `host`: IP address of CVP server
-- `protocol`: Which protocol to use to connect to CVP. Can be either `http` or `https` (default: `https`)
-- `port`: Port where CVP is listening. (default: based on `protocol`)
-- `username`: user to use to connect to CVP.
-- `password`: password to use to connect to CVP.
 - `configlets`: List of configlets to manage.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `configlet_filter`: Filter to apply configlet management. If configured, module will add/update/delete configlets matching entries. If not matching, module will ignore configlet configured on CVP. If option is not set, module will only work in `add` mode

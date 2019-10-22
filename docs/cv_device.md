@@ -10,11 +10,6 @@ This module manage devices from a Cloudvision stand point. It takes an intended 
 
 Module comes with a set of options:
 
-- `host`: IP address of CVP server
-- `protocol`: Which protocol to use to connect to CVP. Can be either `http` or `https` (default: `https`)
-- `port`: Port where CVP is listening. (default: based on `protocol`)
-- `username`: user to use to connect to CVP.
-- `password`: password to use to connect to CVP.
 - `devices`: List of devices to manage.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `devices_filter`: Filter to apply intended mode on a set of configlet. If not used, then module only uses ADD mode. device_filter list devices that can be modified or deleted based on configlets entries.

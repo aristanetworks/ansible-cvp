@@ -10,11 +10,6 @@ This module manage provisioning topology at container's level. it takes an inten
 
 Module comes with a set of options:
 
-- `host`: IP address of CVP server
-- `protocol`: Which protocol to use to connect to CVP. Can be either `http` or `https` (default: `https`)
-- `port`: Port where CVP is listening. (default: based on `protocol`)
-- `username`: user to use to connect to CVP.
-- `password`: password to use to connect to CVP.
 - `tasks`: CVP taskIDs to act on
 - `wait`: Time to wait for tasks to transition to 'Completed'. (Default value is `0`)
 - `state`: Action to carry out on the task. Must be either `executed` or `cancelled`. Default is `executed`
