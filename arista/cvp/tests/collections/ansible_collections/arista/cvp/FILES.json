@@ -1,0 +1,201 @@
+{
+ "files": [
+  {
+   "format": 1, 
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": ".", 
+   "chksum_type": null
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "5279f8c34079e02ad79de2944b31e0667102eb67fbbfc3e33b8cc555a8d27f69", 
+   "name": "LICENSE", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "b6998881e4eeb04aa0c2ae90bac105697613f4a0a5532c95796e26adeaf204c8", 
+   "name": "plugins/README.md", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/module_utils", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "46b6dd96ec18803aa858dcb157515799de18fde09acf63183de6323117c00892", 
+   "name": "plugins/module_utils/cv_api2019.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "95a8285a5cef172e72c6655516d81a662682e96192b5c91c2ab90f780e2ac959", 
+   "name": "plugins/module_utils/cv_api2018.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 
+   "name": "plugins/module_utils/__init__.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "dd8f57b39d770e411daca7bfb7ac0b236ff806c700cd07940fd4d5bf5156d04d", 
+   "name": "plugins/module_utils/cv_client_errors.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "70fbbac36e50e31337a9b2d92e992b96d24478b8b347e3300a5af1c074b81f52", 
+   "name": "plugins/module_utils/cv_client.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/modules", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "2aa8df6aa6df4f7c456f87f4daf51a4b11e7c95ad43388d67439e67dd0ee9c32", 
+   "name": "plugins/modules/cv_configlet.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "9f22685dd517e39c627efb2f2256f1729c70044604834354886fa758afe20c02", 
+   "name": "plugins/modules/cv_facts.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "442ffa12e05d80745fe68ff89f10ad51118982bb730abbf9595e886951b9e29f", 
+   "name": "plugins/modules/cv_container.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "0fed72bec760758d17b18a848e916659426626dc19b9690ba606fcf4adbd6ae0", 
+   "name": "plugins/modules/cv_task.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "57a6f697afc80d0734ff63e502ecf40fdbf29153a23f0f5d31dfc603e23c008a", 
+   "name": "plugins/modules/cv_device.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "f5492326c0d4573b57692ae410075db31f97a02ae7860b9a1806f882d747b23e", 
+   "name": "plugins/modules/cv_image.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "tests", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "8673a7235aad054c81e80500bb58b1a9e311721a3a7935ebcac05b7b22732c97", 
+   "name": "tests/playbook.container.demo.yaml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "c0894f10605a2883e407d3201ecc0bfe02139bf8000384ad8dcb7ad8120e9fce", 
+   "name": "tests/playbook.facts.yaml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "724742e9a6264a8fc01d2ab5e5c87897d0b5f896aa2bc4cf02d88690f0ee21c0", 
+   "name": "tests/playbook.configlet.demo.yaml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "689a139777ebd8f07134f6a72229ce2b5f088836f9e7ed788e03f2e5d401c4b0", 
+   "name": "tests/playbook.tasks.demo.yaml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "1656c4487b0d59f9fcd3661931c8bcd53ebc7826a9ec24fd37f7951cbe58c078", 
+   "name": "tests/playbook.device.demo.yaml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "75c50394e44d0eea29cd2daa9f68182d09701e5d77d4b54a666b64c2bd2baec7", 
+   "name": "tests/ansible.cfg", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "0e6980dde693b9acf0eabe194e2cfa2fb8761cc33159f2a53a25c332199880f3", 
+   "name": "tests/inventory.ini", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "roles", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "docs", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "2290715cc48b48afae45cdf50bbba1022bf8a55c841f81145580e60f00a5525a", 
+   "name": "README.md", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }
+ ], 
+ "format": 1
+}

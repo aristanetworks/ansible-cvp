@@ -3,6 +3,8 @@
   hosts: cvp
   connection: local
   gather_facts: no
+  collections:
+    - arista.cvp
   vars:
     configlet_list:
       Test_Configlet: "! This is a Very First Testing Configlet\n! it has no affect on the Device but has been changed again\n!\ninterface loopback 999\n  description Test Interface_1\n  ip address 192.168.99.99/32\n  no shutdown\nexit"

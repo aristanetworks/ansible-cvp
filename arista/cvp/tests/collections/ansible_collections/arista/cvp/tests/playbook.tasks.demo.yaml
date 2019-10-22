@@ -3,36 +3,29 @@
   hosts: cvp
   connection: local
   gather_facts: no
-  collections:
-    - arista.cvp
+
   tasks:
 
     - name: 'RUN 1: Collect initial facts'
       tags:
         - always
       cv_facts:
-<<<<<<< HEAD
-=======
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
       register: cvp_facts
 
     - name: 'RUN 1: Apply configlets'
       tags:
         - provision
       cv_configlet:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -46,14 +39,11 @@
       tags:
         - provision
       cv_task:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         tasks: "{{ cvp_configlets.data.tasks }}"
       register: cvp_tasks
        
@@ -66,14 +56,11 @@
       tags:
         - always
       cv_facts:
-<<<<<<< HEAD
-=======
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
       register: cvp_facts
 
 
@@ -81,14 +68,11 @@
       tags:
         - provision
       cv_configlet:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -102,14 +86,11 @@
       tags:
         - provision
       cv_task:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         tasks: "{{ cvp_configlets.data.tasks }}"
         state: cancelled
       register: cvp_tasks
@@ -124,28 +105,22 @@
       tags:
         - always
       cv_facts:
-<<<<<<< HEAD
-=======
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
       register: cvp_facts
 
     - name: 'RUN 3: Apply configlets'
       tags:
         - provision
       cv_configlet:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["all"]
@@ -162,14 +137,11 @@
       tags:
         - provision
       cv_task:
-<<<<<<< HEAD
-=======
         host: "{{ansible_host}}"
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
         tasks: "{{ tasks }}"
         wait: 60
       register: cvp_tasks
@@ -182,11 +154,8 @@
   handlers:
     - name: update cvp facts
       cv_facts:
-<<<<<<< HEAD
-=======
         host: '{{ansible_host}}'
         username: '{{cvp_username}}'
         password: '{{cvp_password}}'
         protocol: https
         port: '{{cvp_port}}'
->>>>>>> Create Ansible Collection structure (#45)
