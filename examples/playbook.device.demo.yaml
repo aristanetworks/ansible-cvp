@@ -56,11 +56,6 @@
       # Collect CVP Facts as init process
     - name: "Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
       tags:
         - always
@@ -73,11 +68,6 @@
       tags:
         - provision
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["cv_device_test"]
@@ -88,11 +78,6 @@
       tags: 
         - provision
       cv_device:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         devices: "{{devices_inventory}}"
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         device_filter: ['veos']
@@ -113,11 +98,6 @@
       tags: 
         - cleanup
       cv_device:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         devices: "{{devices_inventory_rollback}}"
         cvp_facts: '{{cvp_facts}}'
         device_filter: ['veos']
