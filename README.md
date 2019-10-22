@@ -130,7 +130,7 @@ Below is a very basic example to build a container tology on a CloudVision platf
         save_topology: true
 ```
 
-As modules of this collection are based on `HTTPAPI` connection plusgin, authentication elements shall be declared using this plugin mechanism:
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ```ini
 [development]

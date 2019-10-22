@@ -33,20 +33,10 @@ Below is a basic playbook to collect facts:
   tasks:
     - name: 'Collecting facts from CVP {{inventory_hostname}}.'
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
       register: cvp_facts
 
     - name: 'Create configlets on CVP {{inventory_hostname}}.'
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
-        port: '{{cvp_port}}'
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
