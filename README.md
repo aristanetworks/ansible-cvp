@@ -1,7 +1,5 @@
 ![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/aristanetworks/ansible-cvp)  ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/aristanetworks/ansible-cvp)  ![GitHub last commit](https://img.shields.io/github/last-commit/aristanetworks/ansible-cvp)
 
-# Ansible Modules for Arista CloudVision Platform
-
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -18,9 +16,12 @@
   - [Resources](#resources)
   - [License](#license)
   - [Ask a question](#ask-a-question)
-  - [Contribute](#contribute)
+  - [Contributing](#contributing)
 
 <!-- /code_chunk_output -->
+
+# Ansible Modules for Arista CloudVision Platform
+
 
 ## About
 
@@ -36,7 +37,7 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 - [__arista.cvp.cv_device__](docs/cv_device.md) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/cv_tasks.md) - Run tasks created on CVP.
 
-This collection supports both CVP version `2018.2.x` and `2019.1.x`
+This collection supports CVP version `2018.2.x` and `2019.1.x`
 
 ### Important notes.
 
@@ -80,7 +81,7 @@ $ cd ansible-cvp
 __Build and install collection__
 
 ```shell
-$ ansible-galaxy collection build --force ../arista/cvp
+$ ansible-galaxy collection build --force arista/cvp
 $ ansible-galaxy collection install arista.cvp.*.tar.gz
 ```
 
@@ -153,6 +154,8 @@ Project is published under [Apache License](LICENSE).
 
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-avd/issues).
 
-## Contribute
+## Contributing
 
 Contributing pull requests are gladly welcomed for this repository. If you are planning a big change, please start a discussion first to make sure we’ll be able to merge it.
+
+You can also open an [issue](https://github.com/aristanetworks/ansible-avd/issues) to report any problem or to submit enhancement.
