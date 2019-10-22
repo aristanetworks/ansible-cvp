@@ -35,38 +35,17 @@ ANSIBLE_METADATA = {'metadata_version': '0.0.2.dev0',
                     'status': ['preview'],
                     'supported_by': 'community'}
 
-DOCUMENTATION = r"""
+DOCUMENTATION = r'''
 ---
 module: cv_container
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Manage Provisioning topology.
 description:
   - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
 options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
   topology:
     description: Yaml dictionary to describe intended containers
     required: true
@@ -79,7 +58,7 @@ options:
     description: Allow to save topology or not
     required: false
     default: False
-"""
+'''
 
 EXAMPLES = r'''
 - name: Create container topology on CVP
@@ -102,17 +81,9 @@ EXAMPLES = r'''
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
       register: cvp_facts
     - name: "Build Container topology on {{inventory_hostname}}"
       cv_container:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        topology: '{{containers}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 

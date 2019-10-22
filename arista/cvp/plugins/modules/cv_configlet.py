@@ -30,11 +30,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+DOCUMENTATION = r'''
 ---
 module: cv_configlet
-version_added: "2.8"
-author: "EMEA AS (ansible-dev@arista.com)"
+version_added: "2.9"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
   - CloudVison Portal Configlet compares the list of configlets and config in
@@ -46,27 +46,6 @@ description:
   - be compared and updated with the version in configlets
   - if the two are different.
 options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
   configlets:
     description: List of configlets to managed on CVP server.
     required: true
@@ -82,9 +61,9 @@ options:
                  on configlets entries.
     required: false
     default: null
-"""
+'''
 
-EXAMPLE = """
+EXAMPLE = r'''
 ---
 - name: Test cv_configlet_v2
   hosts: cvp
@@ -99,25 +78,17 @@ EXAMPLE = """
       tags:
         - always
       cv_facts:
-        host: '{{ansible_host}}'
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
       register: cvp_facts
 
     - name: 'Create configlets on CVP {{inventory_hostname}}.'
       tags:
         - provision
       cv_configlet:
-        host: "{{ansible_host}}"
-        username: '{{cvp_username}}'
-        password: '{{cvp_password}}'
-        protocol: https
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
       register: cvp_configlet
-"""
+'''
 
 # Required by Ansible and CVP
 from ansible.module_utils.basic import AnsibleModule

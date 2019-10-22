@@ -45,6 +45,14 @@
         save_topology: true
       register: cv_container
 
+    - name: 'Execute pending tasks -- timeout 60sec'
+      tags:
+        - provision
+      cv_task:
+        tasks: "{{ cv_container.tasks }}"
+        wait: 60
+      register: cvp_tasks
+
     - name: "Display cv_container outputs"
       tags:
         - provision

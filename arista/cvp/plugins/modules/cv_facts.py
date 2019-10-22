@@ -30,37 +30,32 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-DOCUMENTATION = """
+DOCUMENTATION = r'''
 ---
 module: cv_facts
-version_added: "1.0"
-author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+version_added: "2.9"
+author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns the list of devices, configlets, containers and images
-options:
-  host:
-    description: IP Address or hostname of the CloudVisin Server
-    required: true
-    default: null
-  username:
-    description: The username to log into Cloudvision.
-    required: true
-    default: null
-  password:
-    description: The password to log into Cloudvision.
-    required: true
-    default: null
-  protocol:
-    description: The HTTP protocol to use. Choices http or https.
-    required: false
-    default: https
-  port:
-    description: The HTTP port to use. The cvprac defaults will be used
-                  if none is specified.
-    required: false
-    default: null
-"""
+'''
+
+EXAMPLES = r'''
+---
+- name: Test cv_device
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  tasks:
+      # Collect CVP Facts as init process
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+      tags:
+        - always
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError

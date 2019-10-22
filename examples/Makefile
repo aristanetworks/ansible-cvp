@@ -26,11 +26,11 @@ facts-foster:
 	@echo ''
 	@echo '## ---------------------------------------- ##'
 	@echo ''
-	ansible-playbook playbook.facts.yaml --limit cvp_foster
+	ansible-playbook playbook.facts.demo.yaml --limit cvp_foster
 
 facts-grant:
 	@echo '-> Running test cases against foster version'
 	@echo ''
 	@echo '## ---------------------------------------- ##'
 	@echo ''
-	ansible-playbook playbook.facts.yaml --limit cvp_grant
+	ansible-playbook playbook.facts.demo.yaml --limit cvp_grant
