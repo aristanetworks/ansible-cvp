@@ -22,7 +22,7 @@ This module uses `HTTPAPI` connection plugin for authentication. These elements 
 
 ```ini
 [development]
-cvp_foster  ansible_httpapi_host=10.90.224.122
+cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
 
 [development:vars]
 ansible_connection=httpapi

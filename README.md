@@ -51,6 +51,7 @@ This repository is built based on [new collections system](https://docs.ansible.
 
 This collection requires the following to be installed on the Ansible control machine:
 
+- python __`2.7`__
 - ansible >= `2.9.0rc4`
 - requests >= `2.22.0`
 - fuzzywuzzy running `0.17.0` or later
@@ -134,7 +135,7 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 
 ```ini
 [development]
-cvp_foster  ansible_httpapi_host=10.90.224.122
+cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
 
 [development:vars]
 ansible_connection=httpapi

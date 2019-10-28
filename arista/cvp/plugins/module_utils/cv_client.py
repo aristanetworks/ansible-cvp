@@ -99,7 +99,7 @@ import inspect
 import requests
 from requests.exceptions import ConnectionError, HTTPError, Timeout, \
     ReadTimeout, TooManyRedirects
-from cv_client_errors import CvpApiError, CvpLoginError, \
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, \
 CvpRequestError, CvpSessionLogOutError
 from ansible import release
 
