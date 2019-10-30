@@ -1,0 +1,109 @@
+---
+- name: Playbook to validate and demonstrate cv_container module.
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  vars:
+    verbose: False
+    containers_cleanup:
+      staging:
+          parent_container: Tenant
+          devices:
+            - veos01
+            - veos02
+            - veos03
+
+    containers_provision:
+        Fabric:
+          parent_container: Tenant
+        Spines:
+          parent_container: Fabric
+        Leaves:
+          parent_container: Fabric
+          configlets:
+              - alias
+          devices:
+            - veos03
+        MLAG01:
+          parent_container: Leaves
+          devices:
+            - veos01
+            - veos02
+  tasks:
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+      tags:
+        - always
+
+    - name: "Build Container topology on {{inventory_hostname}}"
+      tags:
+        - provision
+      cv_container:
+        topology: '{{containers_provision}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        save_topology: true
+      register: cv_container
+
+    - name: "Display cv_container outputs"
+      tags:
+        - provision
+      debug:
+        msg: "{{cv_container}}"
+
+    - name: "Check if Leaves container exists"
+      tags:
+        - provision
+        - never
+      cv_facts:
+      register: cvp_facts
+
+    - name: "Check if Leaves container exists"
+      tags:
+        - provision
+        - check
+      assert:
+        that:
+          - "cvp_facts.ansible_facts['containers'] | selectattr(search_key,'equalto',search_val) | list | count > 0"
+        fail_msg: "Leaves container has not been found in facts"
+        success_msg: "Leaves container has been found as expected"
+      vars:
+        search_key: name
+        search_val: Leaves
+
+    - name: "Cleanup Container topology on {{inventory_hostname}}"
+      tags:
+          - never
+          - cleanup
+      cv_container:
+        topology: '{{containers_cleanup}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+      register: cv_container
+
+    - name: "Display cv_container outputs"
+      tags:
+        - cleanup
+      debug:
+        msg: "{{cv_container}}"
+
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+      tags:
+        - never
+        - cleanup
+
+    - name: "Check if Leaves container has been removed"
+      tags:
+          - never
+          - cleanup
+      assert:
+        that:
+          - "cvp_facts.ansible_facts['containers'] | selectattr(search_key,'equalto',search_val) | list | count == 0"
+        fail_msg: "Leaves container has been found in facts"
+        success_msg: "Leaves container has not been found as expected"
+      vars:
+        search_key: name
+        search_val: Leaves
