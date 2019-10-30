@@ -58,6 +58,14 @@ options:
     description: Allow to save topology or not
     required: false
     default: False
+  mode:
+    description: Allow to save topology or not
+    required: false
+    default: merge
+    choices:
+      - merge
+      - override
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -84,6 +92,7 @@ EXAMPLES = r'''
       register: cvp_facts
     - name: "Build Container topology on {{inventory_hostname}}"
       cv_container:
+        mode: merge
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 
@@ -715,7 +724,7 @@ def configlet_factinfo(configlet_name, facts):
 def attached_configlet_to_container(module, intended, facts):
     """
     Attached existing configlet to desired containers based on topology.
-    
+
     Parameters
     ----------
     module : AnsibleModule
@@ -779,7 +788,11 @@ def main():
     argument_spec = dict(
         topology=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
-        save_topology=dict(type='bool', default=True)    # Enable or disable task creation
+        save_topology=dict(type='bool', default=True),    # Enable or disable task creation
+        mode=dict(type='str',
+                  required=False,
+                  default='merge',
+                  choices=['merge', 'override', 'delete'])
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
@@ -790,56 +803,56 @@ def main():
     deletion_process = None
     creation_process = None
     try:
-        # Start process to create new containers
-        # Should be done only if topology is iterable.
-        if (isIterable(module.params['topology']) and module.params['topology'] is not None):
-            creation_process = create_new_containers(module=module,
-                                                    intended=module.params['topology'],
-                                                    facts=module.params['cvp_facts'])
-            if creation_process[0]:
-                result['cv_container']['changed'] = True
-                result['cv_container']['creation_result'] = creation_process[1]
-            
-            # Start process to move devices to targetted containers
-            move_process = move_devices_to_container(module=module,
-                                                     intended=module.params['topology'],
-                                                     facts=module.params['cvp_facts'])
-
-            if move_process is not None:
-                result['cv_container']['changed'] = True
-                # If a list of task exists, we expose it
-                if 'taskIds' in move_process['moved_devices']:
-                    for taskId in move_process['moved_devices']['taskIds']:
-                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
-                # move_process['moved_devices'].pop('taskIds',None)
-                result['cv_container']['moved_result'] = move_process['moved_devices']
-
-            # Start process to move devices to targetted containers
-            attached_process = attached_configlet_to_container(module=module,
-                                                               intended=module.params['topology'],
-                                                               facts=module.params['cvp_facts'])
-            # module.fail_json(msg=attached_process)
-            if attached_process is not None:
-                result['cv_container']['changed'] = True
-                # If a list of task exists, we expose it
-                if 'taskIds' in attached_process['attached_configlet']:
-                    for taskId in attached_process['attached_configlet']['taskIds']:
-                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
-                # move_process['moved_devices'].pop('taskIds',None)
-                result['cv_container']['attached_configlet'] = attached_process['attached_configlet']
-                
-        # Start process to delete unused container.
-        if (isIterable(module.params['topology']) and module.params['topology'] is not None):
-            deletion_process = delete_unused_containers(module=module,
+        if module.params['mode'] in ['merge', 'override']:
+            # -> Start process to create new containers
+            if (isIterable(module.params['topology']) and module.params['topology'] is not None):
+                creation_process = create_new_containers(module=module,
                                                         intended=module.params['topology'],
                                                         facts=module.params['cvp_facts'])
-        else: 
-            deletion_process = delete_unused_containers(module=module,
-                                                        intended=dict(),
+                if creation_process[0]:
+                    result['cv_container']['changed'] = True
+                    result['cv_container']['creation_result'] = creation_process[1]
+                
+                # -> Start process to move devices to targetted containers
+                move_process = move_devices_to_container(module=module,
+                                                        intended=module.params['topology'],
                                                         facts=module.params['cvp_facts'])
-        if deletion_process[0]:
-            result['cv_container']['changed'] = True
-            result['cv_container']['deletion_result'] = deletion_process[1]
+                if move_process is not None:
+                    result['cv_container']['changed'] = True
+                    # If a list of task exists, we expose it
+                    if 'taskIds' in move_process['moved_devices']:
+                        for taskId in move_process['moved_devices']['taskIds']:
+                            result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
+                    # move_process['moved_devices'].pop('taskIds',None)
+                    result['cv_container']['moved_result'] = move_process['moved_devices']
+
+                # -> Start process to move devices to targetted containers
+                attached_process = attached_configlet_to_container(module=module,
+                                                                intended=module.params['topology'],
+                                                                facts=module.params['cvp_facts'])
+                if attached_process is not None:
+                    result['cv_container']['changed'] = True
+                    # If a list of task exists, we expose it
+                    if 'taskIds' in attached_process['attached_configlet']:
+                        for taskId in attached_process['attached_configlet']['taskIds']:
+                            result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
+                    # move_process['moved_devices'].pop('taskIds',None)
+                    result['cv_container']['attached_configlet'] = attached_process['attached_configlet']
+
+        # If MODE is override we also delete containers with no device and not listed in our topology
+        if module.params['mode'] == 'override':
+            # -> Start process to delete unused container.
+            if (isIterable(module.params['topology']) and module.params['topology'] is not None):
+                deletion_process = delete_unused_containers(module=module,
+                                                            intended=module.params['topology'],
+                                                            facts=module.params['cvp_facts'])
+            else: 
+                deletion_process = delete_unused_containers(module=module,
+                                                            intended=dict(),
+                                                            facts=module.params['cvp_facts'])
+            if deletion_process[0]:
+                result['cv_container']['changed'] = True
+                result['cv_container']['deletion_result'] = deletion_process[1]
     except CvpApiError as e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
