@@ -86,6 +86,17 @@ $ ansible-galaxy collection build --force arista/cvp
 $ ansible-galaxy collection install arista.cvp.*.tar.gz
 ```
 
+### Docker for testing
+
+The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
+
+```shell
+$ docker build -t ansible_cvp .
+$ docker exec -it ansible_cvp sh
+```
+
+> All files part of [`examples`](examples/) is copied to the container.
+
 ## Example playbook
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
