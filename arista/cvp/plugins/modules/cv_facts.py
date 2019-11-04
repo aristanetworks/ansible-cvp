@@ -92,13 +92,14 @@ def cv_facts(module):
     facts = {}
     # Get version data for CVP
     facts['cvp_info'] = module.client.api.get_cvp_info()
-    
+
     # Build required data for devices in CVP - Device Data, Config, Associated Container,
     # Associated Images, and Associated Configlets
     deviceField = {'hostname':'name','fqdn':'fqdn','complianceCode':'complianceCode',
                    'complianceIndication':'complianceIndication','version':'version',
                    'ipAddress':'ipAddress','systemMacAddress':'key',
-                   'parentContainerKey':'parentContainerKey'}
+                   'parentContainerKey':'parentContainerKey',
+                   'streamingStatus':'streamingStatus'}
     facts['devices'] = []
 
     # Get Inventory Data for All Devices
@@ -114,7 +115,8 @@ def cv_facts(module):
     # Work through Devices list adding device specific information
     for device in facts['devices']:
         # Add designed config for device
-        device['config'] = module.client.api.get_device_configuration(device['key'])
+        if device['streamingStatus'] == "active":
+            device['config'] = module.client.api.get_device_configuration(device['key'])
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
         device['parentContainerName']=container['name']
