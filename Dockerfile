@@ -6,10 +6,23 @@ LABEL vendor1="Arista"
 LABEL com.example.release-date="2019-10-29"
 LABEL com.example.version.is-production="False"
 
+ENV PS1='ansible-cvp:\u% '
+
 WORKDIR /tmp
 WORKDIR /tmp
 
-RUN apk add --no-cache ca-certificates openssh-client build-base gcc g++ make python-dev py-pip libffi-dev sshpass libssl1.0 openssl-dev
+RUN apk add --no-cache ca-certificates &&\
+                       openssh-client &&\
+                       build-base &&\
+                       gcc &&\
+                       g++ &&\
+                       make &&\
+                       python-dev &&\
+                       py-pip &&\
+                       libffi-dev &&\
+                       sshpass &&\
+                       libssl1.0 &&\
+                       openssl-dev
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
