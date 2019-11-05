@@ -1,78 +1,71 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# coding: utf-8 -*-
 #
-# Copyright (c) 2019, Arista Networks AS-EMEA
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+
 DOCUMENTATION = r'''
 ---
 module: cv_task
 version_added: "2.9"
-author: "EMEA AS Team(ansible-dev@arista.com)"
+author: EMEA AS Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description: CloudVison Portal Task module
 options:
   tasks:
     description: CVP taskIDs to act on
     required: True
+    type: list
   wait:
     description: Time to wait for tasks to transition to 'Completed'
     required: False
     default: 0
+    type: int
   state:
     description: action to carry out on the task
                  executed - execute tasks
                  cancelled - cancel tasks
     required: false
     default: executed
+    type: str
     choices:
       - executed
-      - cancel
+      - cancelled
 '''
 
-EXAMPLES = r'''
+EXAMPLES = '''
+---
 - name: Execute all tasks registered in cvp_configlets variable
-  cv_task:
+  arista.cvp.cv_task:
     tasks: "{{ cvp_configlets.data.tasks }}"
 
 - name: Cancel a list of pending tasks
-  cv_task:
+  arista.cvp.cv_task:
     tasks: "{{ cvp_configlets.data.tasks }}"
     state: cancelled
 
 # Execute all pending tasks and wait for completion for 60 seconds
 # In order to get a list of all pending tasks, execute cv_facts first
 - name: Update cvp facts
-    cv_facts:
+  arista.cvp.cv_facts:
 
 - name: Execute all pending tasks and wait for completion for 60 seconds
-  cv_task:
+  arista.cvp.cv_task:
     port: '{{cvp_port}}'
     tasks: "{{ tasks }}"
     wait: 60
