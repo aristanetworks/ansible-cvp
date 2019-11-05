@@ -36,8 +36,7 @@ module: cv_task
 version_added: "2.9"
 author: "EMEA AS Team(ansible-dev@arista.com)"
 short_description: Execute or Cancel CVP Tasks.
-description:
-  - CloudVison Portal Task module
+description: CloudVison Portal Task module
 options:
   tasks:
     description: CVP taskIDs to act on
@@ -48,20 +47,20 @@ options:
     default: 0
   state:
     description: action to carry out on the task
-                  executed - execute tasks
-                  cancelled - cancel tasks
+                 executed - execute tasks
+                 cancelled - cancel tasks
     required: false
-    default: 'executed
-    choices: 
-      - 'executed'
-      - 'cancel'
+    default: executed
+    choices:
+      - executed
+      - cancel
 '''
 
 EXAMPLES = r'''
 - name: Execute all tasks registered in cvp_configlets variable
   cv_task:
     tasks: "{{ cvp_configlets.data.tasks }}"
-    
+
 - name: Cancel a list of pending tasks
   cv_task:
     tasks: "{{ cvp_configlets.data.tasks }}"
@@ -77,7 +76,6 @@ EXAMPLES = r'''
     port: '{{cvp_port}}'
     tasks: "{{ tasks }}"
     wait: 60
-
 '''
 
 import time
@@ -110,17 +108,22 @@ def connect(module):
 
     return client
 
+
 def get_id(task):
     return task.get("workOrderId")
+
 
 def get_state(task):
     return task.get("workOrderUserDefinedStatus")
 
+
 def execute_task(cvp, task_id):
     return cvp.execute_task(task_id)
 
+
 def cancel_task(cvp, task_id):
     return cvp.cancel_task(task_id)
+
 
 def apply_state(cvp, task, state):
     cvp.add_note_to_task(get_id(task), "Executed by Ansible")
@@ -129,14 +132,18 @@ def apply_state(cvp, task, state):
     elif state == "cancelled":
         return cancel_task(cvp, get_id(task))
 
+
 def actionable(state):
     return state in ["Pending"]
+
 
 def terminal(state):
     return state in ["Completed", "Cancelled"]
 
+
 def state_is_different(task, target):
     return get_state(task) != target
+
 
 def update_all_tasks(cvp, data):
     new_data = dict()
@@ -144,9 +151,10 @@ def update_all_tasks(cvp, data):
         new_data[task_id] = cvp.get_task_by_id(task_id)
     return new_data
 
+
 def task_action(module):
-    ''' 
-    TODO
+    '''
+    TODO.
     '''
     changed = False
     data = dict()
@@ -154,7 +162,7 @@ def task_action(module):
 
     tasks = module.params['tasks']
     state = module.params['state']
-    wait  = module.params['wait']
+    wait = module.params['wait']
     cvp = module.client.api
 
     actionable_tasks = [t for t in tasks if actionable(get_state(t))]
@@ -170,7 +178,7 @@ def task_action(module):
             data[get_id(task)] = task
 
     start = time.time()
-    now   = time.time()
+    now = time.time()
     while (now - start) < wait:
         data = update_all_tasks(cvp, data)
         if all([terminal(get_state(t)) for t in data.values()]):
@@ -180,7 +188,7 @@ def task_action(module):
     if wait:
         for i, task in data.items():
             if not terminal(get_state(task)):
-                warnings.append("Task {} has not completed in {} seconds".format(i, wait))
+                warnings.append("Task {0} has not completed in {1} seconds".format(i, wait))
 
     return changed, data, warnings
 
@@ -191,7 +199,7 @@ def main():
     argument_spec = dict(
         tasks=dict(required=True, type='list'),
         wait=dict(default=0, type='int'),
-        state=dict(default='executed', choices=['executed','cancelled'])
+        state=dict(default='executed', choices=['executed', 'cancelled'])
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
@@ -199,16 +207,16 @@ def main():
 
     result = dict(changed=False)
 
-    
     # Connect to CVP instance
     module.client = connect(module)
 
-    result['changed'],result['data'], warnings = task_action(module)
+    result['changed'], result['data'], warnings = task_action(module)
 
     if warnings:
         [module.warn(w) for w in warnings]
 
     module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()
