@@ -87,10 +87,10 @@ def cv_facts(module):
 
     # Build required data for devices in CVP - Device Data, Config, Associated Container,
     # Associated Images, and Associated Configlets
-    deviceField = {'hostname':'name','fqdn':'fqdn','complianceCode':'complianceCode',
-                   'complianceIndication':'complianceIndication','version':'version',
-                   'ipAddress':'ipAddress','systemMacAddress':'key',
-                   'parentContainerKey':'parentContainerKey'}
+    deviceField = {'hostname': 'name', 'fqdn': 'fqdn', 'complianceCode': 'complianceCode',
+                   'complianceIndication': 'complianceIndication', 'version': 'version',
+                   'ipAddress': 'ipAddress', 'systemMacAddress': 'key',
+                   'parentContainerKey': 'parentContainerKey'}
     facts['devices'] = []
 
     # Get Inventory Data for All Devices
@@ -109,7 +109,7 @@ def cv_facts(module):
         device['config'] = module.client.api.get_device_configuration(device['key'])
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
-        device['parentContainerName']=container['name']
+        device['parentContainerName'] = container['name']
         # Add Device Specific Configlets
         configlets = module.client.api.get_configlets_by_device_id(device['key'])
         device['deviceSpecificConfiglets'] = []
@@ -128,8 +128,8 @@ def cv_facts(module):
 
     # Build required data for configlets in CVP - Configlet Name, Config, Associated Containers,
     # Associated Devices, and Configlet Type
-    configletField = {'name':'name','config':'config','type':'type','key':'key'}
-    facts['configlets']=[]
+    configletField = {'name': 'name', 'config': 'config', 'type': 'type', 'key': 'key'}
+    facts['configlets'] = []
 
     # Get List of all configlets
     configlets = module.client.api.get_configlets()['data']
@@ -138,7 +138,7 @@ def cv_facts(module):
         configletFacts = {}
         for field in configlet.keys():
             if field in configletField:
-                configletFacts[configletField[field]]=configlet[field]
+                configletFacts[configletField[field]] = configlet[field]
         facts['configlets'].append(configletFacts)
 
     # Work through Configlet list adding Configlet specific information
@@ -156,18 +156,18 @@ def cv_facts(module):
 
     # Build required data for containers in CVP - Container Name, parent container, Associated Configlets
     # Associated Devices, and Child Containers
-    containerField = {'name':'name','parentName':'parentName','childContainerId':'childContainerKey',
-                      'key':'key'}
+    containerField = {'name': 'name', 'parentName': 'parentName', 'childContainerId': 'childContainerKey',
+                      'key': 'key'}
     facts['containers'] = []
 
     # Get List of all Containers
     containers = module.client.api.get_containers()['data']
     # Reduce container data to required fields
     for container in containers:
-        containerFacts ={}
+        containerFacts = {}
         for field in container.keys():
             if field in containerField:
-                containerFacts[containerField[field]]=container[field]
+                containerFacts[containerField[field]] = container[field]
         facts['containers'].append(containerFacts)
 
     # Work through Container list adding Container specific information
@@ -189,7 +189,7 @@ def cv_facts(module):
             container['imageBundle'] = applied_images[0]['name']
 
     # Build required data for images in CVP - Image Name, certified, Image Components
-    imageField = {'name':'name','isCertifiedImageBundle':'certifified','imageIds':'imageNames','key':'key'}
+    imageField = {'name': 'name', 'isCertifiedImageBundle': 'certifified', 'imageIds': 'imageNames', 'key': 'key'}
     facts['imageBundles'] = []
 
     # Get List of all Image Bundles
@@ -204,17 +204,17 @@ def cv_facts(module):
 
     # Build required data for tasks in CVP - work order Id, current task status, name
     # description
-    tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
-                  'currentTaskName':'currentAction','description':'description',
-                  'workOrderUserDefinedStatus':'displayedStutus','note':'note',
-                  'taskStatus':'actionStatus'}
+    tasksField = {'name': 'name', 'workOrderId': 'taskNo', 'workOrderState': 'status',
+                  'currentTaskName': 'currentAction', 'description': 'description',
+                  'workOrderUserDefinedStatus': 'displayedStutus', 'note': 'note',
+                  'taskStatus': 'actionStatus'}
     facts['tasks'] = []
 
     # Get List of all Tasks
     tasks = module.client.api.get_tasks()['data']
     # Reduce task data to required fields
     for task in tasks:
-        taskFacts= {}
+        taskFacts = {}
         for field in task.keys():
             if field in tasksField:
                 taskFacts[tasksField[field]] = task[field]
@@ -235,7 +235,7 @@ def main():
     module.client = connect(module)
 
     result['ansible_facts'] = cv_facts(module)
-    result['changed']=False
+    result['changed'] = False
 
     module.exit_json(**result)
 

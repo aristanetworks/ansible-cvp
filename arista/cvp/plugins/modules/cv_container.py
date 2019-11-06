@@ -30,12 +30,20 @@ ANSIBLE_METADATA = {
 }
 
 import json
+import traceback
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 from ansible.module_utils.six import string_types
-from treelib import Node, Tree
+TREELIB_IMP_ERR = None
+try:
+    from treelib import Node, Tree
+    HAS_TREELIB = True
+except ImportError:
+    HAS_TREELIB = False
+    TREELIB_IMP_ERR = traceback.format_exc()
+
 
 DOCUMENTATION = r'''
 ---
@@ -59,7 +67,7 @@ options:
   save_topology:
     description: Allow to save topology or not
     required: false
-    default: False
+    default: True
     type: bool
 '''
 
@@ -770,6 +778,9 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
+    if not HAS_TREELIB:
+        module.fail_json(msg='treelib required for this module')
+
     result = dict(changed=False, cv_container={})
     result['cv_container']['tasks'] = list()
     module.client = connect(module)

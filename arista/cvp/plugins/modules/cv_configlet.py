@@ -28,6 +28,31 @@ ANSIBLE_METADATA = {
     'supported_by': 'aristanetworks'
 }
 
+# Required by Ansible and CVP
+import re
+import traceback
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.connection import Connection, ConnectionError
+from time import sleep
+# Required by compare function
+FUZZYWUZZY_IMP_ERR = None
+try:
+    from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
+    HAS_FUZZYWUZZY = True
+except ImportError:
+    HAS_TREELIB = False
+    FUZZYWUZZY_IMP_ERR = traceback.format_exc()
+DIFFLIB_IMP_ERR = None
+try:
+    import difflib
+    HAS_FUZZYWUZZY = True
+except ImportError:
+    HAS_DIFFLIB = False
+    DIFFLIB_IMP_ERR = traceback.format_exc()
+
+
 DOCUMENTATION = r'''
 ---
 module: cv_configlet
@@ -47,7 +72,7 @@ options:
   configlets:
     description: List of configlets to managed on CVP server.
     required: true
-    type: list
+    type: dict
   cvp_facts:
     description: Facts extracted from CVP servers using cv_facts module
     required: true
@@ -58,6 +83,7 @@ options:
                  list configlets that can be modified or deleted based
                  on configlets entries.
     required: false
+    default: ['none']
     type: list
 '''
 
@@ -87,17 +113,6 @@ EXAMPLES = r'''
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
       register: cvp_configlet
 '''
-
-# Required by Ansible and CVP
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-from ansible.module_utils.connection import Connection, ConnectionError
-import re
-from time import sleep
-# Required by compare function
-import difflib
-from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
 
 
 def compare(fromText, toText, lines=10):
@@ -290,6 +305,11 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
+    if not HAS_FUZZYWUZZY:
+        module.fail_json(msg='fuzzywuzzy required for this module')
+    if not HAS_DIFFLIB:
+        module.fail_json(msg='difflib required for this module')
+
     result = dict(changed=False, data={})
     messages = dict(issues=False)
     # Connect to CVP instance

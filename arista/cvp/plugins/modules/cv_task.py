@@ -201,8 +201,7 @@ def main():
     argument_spec = dict(
         tasks=dict(required=True, type='list'),
         wait=dict(default=0, type='int'),
-        state=dict(default='executed', choices=['executed', 'cancelled'])
-    )
+        state=dict(default='executed', choices=['executed', 'cancelled']))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
