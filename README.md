@@ -90,12 +90,23 @@ $ ansible-galaxy collection install arista.cvp.*.tar.gz
 
 The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
 
+- Build Docker with __Python 2.7__
+
 ```shell
-$ docker build -t ansible_cvp .
-$ docker exec -it ansible_cvp sh
+$ docker build -f Dockerfile-2.7 -t ansible-cvp:latest2.7 .
+$ docker exec -it --rm ansible-cvp:latest2.7 sh
 ```
 
-> All files part of [`examples`](examples/) is copied to the container.
+- Build Docker with __Python 3.x__
+
+```shell
+$ docker build -f Dockerfile-3 -t ansible-cvp:latest3 .
+$ docker exec -it --rm ansible-cvp:latest3 sh
+```
+
+> Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
+
+All files part of [`examples`](examples/) are copied into the container.
 
 ## Example playbook
 
