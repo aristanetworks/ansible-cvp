@@ -1,0 +1,19 @@
+name: Code Sanity
+on: 
+  push:
+    branches:
+      - 'issue*'
+      - 'feature*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install requirements
+      run: pip install -r requirements.txt
+    - name: Install dev tools
+      run: pip install -r requirements.dev.txt
+    - name: Code linting 
+      run: make lint-python
+    - name: Ansible code Linting
+      run: make code-validate
