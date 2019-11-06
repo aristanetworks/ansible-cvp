@@ -9,8 +9,8 @@ LABEL com.example.version.is-production="False"
 ENV PS1='py3-ansible-cvp:\u% '
 
 WORKDIR /tmp
-WORKDIR /tmp
 
+COPY requirements.txt .
 RUN apk add --update --no-cache ca-certificates \
                                 openssh-client \
                                 build-base \
@@ -22,20 +22,16 @@ RUN apk add --update --no-cache ca-certificates \
                                 libffi-dev \
                                 sshpass \
                                 libssl1.0 \
-                                openssl-dev
-
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-RUN apk del -r --purge gcc make g++ &&\
-    rm -rf /source/* &&\
-    rm -rf /var/cache/apk/* &&\
-    rm -rf /tmp/*
+                                openssl-dev &&\
+                                pip install --upgrade pip && \
+                                pip install -r requirements.txt &&\
+                                apk del -r --purge gcc make g++ &&\
+                                rm -rf /source/* &&\
+                                rm -rf /var/cache/apk/* &&\
+                                rm -rf /tmp/*
 
 WORKDIR /project
 ADD arista/ arista/
-RUN cat arista/cvp/galaxy.yml
 RUN ansible-galaxy collection build --force arista/cvp && \
     for i in *.tar.gz; do ansible-galaxy collection install $i -p /usr/share/ansible/collections; done
 
@@ -44,4 +40,4 @@ ADD examples/* ./
 RUN cp inventory.ini.example inventory.ini
 
 VOLUME /playbooks
-CMD ["/bin/sh"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
