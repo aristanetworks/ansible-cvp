@@ -127,7 +127,6 @@ import re
 from time import sleep
 # Required by compare function
 import difflib
-from fuzzywuzzy import fuzz # Library that uses Levenshtein Distance to calculate the differences between strings.
 
 def compare(fromText, toText, lines=10):
     """ Compare text string in 'fromText' with 'toText' and produce
