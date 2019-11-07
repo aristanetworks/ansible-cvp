@@ -4,16 +4,13 @@ on:
     branches:
       - 'issue*'
       - 'feature*'
+
 jobs:
   python-linting:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install requirements
-      run: pip install -r requirements.txt
-    - name: Install dev tools
-      run: pip install -r requirements.dev.txt
-    - name: Code linting 
-      run: make lint-python
-    - name: Ansible code Linting
-      run: make code-validate
+    - name: Setup dev environment
+      run: make setup-repository
+    - name: Run python-linting 
+      run: make linting

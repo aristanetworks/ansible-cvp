@@ -1,0 +1,20 @@
+name: Ansible Validation PR
+on: 
+  pull_request:
+    branches:
+      - '*release*'
+      - 'master'
+
+jobs:
+  ansible-code-validation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup environment
+      run: make github-configure-ci
+    - name: Environment Information
+      run: make sanity-info
+    - name: Run ansible-test sanity lint
+      run: make sanity-lint
+    - name: Run ansible-test sanity import
+      run: make sanity-import
