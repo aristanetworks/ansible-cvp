@@ -136,6 +136,7 @@ deletion_result:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import Connection
 from ansible.module_utils.cv_client import CvpClient
 from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 # from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
