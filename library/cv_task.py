@@ -124,7 +124,7 @@ def connect(module):
     return client
 
 def get_id(task):
-    return task.get("workOrderId")
+    return task.get("taskNo")
 
 def get_state(task):
     return task.get("displayedStutus")
