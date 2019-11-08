@@ -708,7 +708,7 @@ def move_devices_to_container(module, intended, facts):
                                                                            device=device_cvpinfo,
                                                                            container=container_cvpinfo,
                                                                            create_task=save_topology)
-                if device_action['data']['status'] == 'success':
+                if save_topology and device_action['data']['status'] == 'success':
                     if 'taskIds' in device_action['data']:
                         for task in device_action['data']['taskIds']:
                             task_ids.append(task)
@@ -809,8 +809,8 @@ def attached_configlet_to_container(module, intended, facts):
         configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
-                                                                           create_task=True)
-        if configlet_action['data']['status'] == 'success':
+                                                                           create_task=save_topology)
+        if save_topology and configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
                     task_ids.append(task)
