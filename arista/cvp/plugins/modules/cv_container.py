@@ -1,45 +1,55 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# coding: utf-8 -*-
+# pylint: disable=bare-except
 #
-# Copyright (c) 2019, Arista Networks AS-EMEA
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-ANSIBLE_METADATA = {'metadata_version': '0.0.2.dev0',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+ANSIBLE_METADATA = {
+    'metadata_version': '1.0',
+    'status': ['preview'],
+    'supported_by': 'aristanetworks'
+}
+
+import json
+import traceback
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import Connection, ConnectionError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.six import string_types
+TREELIB_IMP_ERR = None
+try:
+    from treelib import Node, Tree
+    HAS_TREELIB = True
+except ImportError:
+    HAS_TREELIB = False
+    TREELIB_IMP_ERR = traceback.format_exc()
+
 
 DOCUMENTATION = r'''
 ---
 module: cv_container
 version_added: "2.9"
-author: "EMEA AS Team(ansible-dev@arista.com)"
+author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
   - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
@@ -49,15 +59,16 @@ options:
   topology:
     description: Yaml dictionary to describe intended containers
     required: true
-    default: None
+    type: dict
   cvp_facts:
     description: Facts from CVP collected by cv_facts module
     required: true
-    default: None
+    type: dict
   save_topology:
     description: Allow to save topology or not
     required: false
-    default: False
+    default: True
+    type: bool
 '''
 
 EXAMPLES = r'''
@@ -87,39 +98,14 @@ EXAMPLES = r'''
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 
-RETURN = r'''
-creation_result:
-    description: Information about number of containers created on CVP.
-    returned: On Success.
-    type: complex
-    contains:
-        containers_created:
-            description: Number of created containers on CVP.
-            sample: "creation_result": {"containers_created": "4"}
-deletion_result:
-    description: Information about number of containers deleted on CVP.
-    returned: On Success.
-    type: complex
-    contains:
-        containers_deleted:
-            description: Number of deleted containers on CVP.
-            sample: "deletion_result": {"containers_deleted": "4"}
-'''
-
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.connection import Connection, ConnectionError
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-from treelib import Node, Tree
-import json
 
 def tree_to_list(json_data, myList):
     """
     Transform a tree structure into a list of object to create CVP.
 
-    Because some object have to be created in a specific order on CVP side, 
+    Because some object have to be created in a specific order on CVP side,
     this function parse a tree to provide an ordered list of elements to create
-    
+
     Example:
     --------
         >>> containers = {"Tenant": {"children": [{"Fabric": {"children": [{"Leaves": {"children": ["MLAG01", "MLAG02"]}}, "Spines"]}}]}}
@@ -132,23 +118,23 @@ def tree_to_list(json_data, myList):
         [description]
     myList : list
         Ordered list of element to create on CVP / recusrive function
-    
+
     Returns
     -------
     list
         Ordered list of element to create on CVP
     """
     # Cast input to be encoded as JSON structure.
-    if isinstance(json_data,str):
+    if isinstance(json_data, str):
         json_data = json.loads(json_data)
-    # If it is a dictionary object, 
+    # If it is a dictionary object,
     # it means we have to go through it to extract content
-    if isinstance(json_data,dict):
+    if isinstance(json_data, dict):
         # Get key as it is a container name we want to save.
-        for k1,v1 in json_data.items():
+        for k1, v1 in json_data.items():
             # Ensure we are getting children element.
-            if isinstance(v1,dict):
-                for k2,v2 in v1.items():
+            if isinstance(v1, dict):
+                for k2, v2 in v1.items():
                     if 'children' == k2:
                         # Save entry as we are dealing with an object to create
                         myList.append(k1)
@@ -160,9 +146,10 @@ def tree_to_list(json_data, myList):
         for entry in json_data:
             myList.append(entry)
     # We are facing a end of a branch with a single leaf.
-    elif isinstance(json_data, basestring):
+    elif isinstance(json_data, string_types):
         myList.append(json_data)
     return myList
+
 
 def tree_build_from_dict(containers=None):
     """
@@ -195,31 +182,32 @@ def tree_build_from_dict(containers=None):
     ----------
     containers : dict, optional
         Container topology to create on CVP, by default None
-    
+
     Returns
     -------
     json
         tree topology
     """
     # Create tree object
-    tree = Tree() # Create the base node
-    previously_created=list()
+    tree = Tree()  # Create the base node
+    previously_created = list()
     # Create root node to mimic CVP behavior
-    tree.create_node("Tenant", "Tenant") 
+    tree.create_node("Tenant", "Tenant")
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
         if container_info['parent_container'] in ['Tenant']:
             previously_created.append(container_name)
             tree.create_node(container_name, container_name, parent=container_info['parent_container'])
     # Loop since expected tree is not equal to number of entries in container topology
-    while len(tree.all_nodes()) < len(containers)+1:
+    while len(tree.all_nodes()) < len(containers) + 1:
         for container_name, container_info in containers.items():
-            if  tree.contains(container_info['parent_container']) and container_info['parent_container'] not in ['Tenant']:
-                try: 
+            if tree.contains(container_info['parent_container']) and container_info['parent_container'] not in ['Tenant']:
+                try:
                     tree.create_node(container_name, container_name, parent=container_info['parent_container'])
-                except:
+                except:  # noqa E722
                     continue
     return tree.to_json()
+
 
 def tree_build_from_list(containers):
     """
@@ -258,20 +246,20 @@ def tree_build_from_list(containers):
     ----------
     containers : dict, optional
         Container topology to create on CVP, by default None
-    
+
     Returns
     -------
     json
         tree topology
     """
     # Create tree object
-    tree = Tree() # Create the base node
-    previously_created=list()
+    tree = Tree()  # Create the base node
+    previously_created = list()
     # Create root node to mimic CVP behavior
-    tree.create_node("Tenant", "Tenant") 
+    tree.create_node("Tenant", "Tenant")
     # Iterate for first level of containers directly attached under root.
     for cvp_container in containers:
-        if cvp_container['parentName'] == None:
+        if cvp_container['parentName'] is None:
             continue
         elif cvp_container['parentName'] in ['Tenant']:
             previously_created.append(cvp_container['name'])
@@ -279,19 +267,20 @@ def tree_build_from_list(containers):
     # Loop since expected tree is not equal to number of entries in container topology
     while len(tree.all_nodes()) < len(containers):
         for cvp_container in containers:
-            if  tree.contains(cvp_container['parentName']) : #and cvp_container['parentName'] not in ['Tenant']
+            if tree.contains(cvp_container['parentName']):  # and cvp_container['parentName'] not in ['Tenant']
                 try:
                     tree.create_node(cvp_container['name'], cvp_container['name'], parent=cvp_container['parentName'])
-                except:
+                except:  # noqa E722
                     continue
     return tree.to_json()
+
 
 def tree_build(containers=None):
     """
     Triage function to build a tree.
 
     Call appropriate function wether we are using list() or dict() as input.
-    
+
     Parameters
     ----------
     containers : dict or list, optional
@@ -303,7 +292,8 @@ def tree_build(containers=None):
         return tree_build_from_list(containers=containers)
     return None
 
-def isIterable( testing_object= None):
+
+def isIterable(testing_object=None):
     """
     Test if an object is iterable or not.
 
@@ -319,6 +309,7 @@ def isIterable( testing_object= None):
         return True
     except TypeError as te:
         return False
+
 
 def connect(module):
     """
@@ -379,28 +370,28 @@ def process_container(module, container, parent, action):
                  item['name'] == container), None)
     if cont:
         if action == "show":
-            return [False,{'container':cont}]
+            return [False, {'container': cont}]
         elif action == "add":
-            return [False,{'container':cont}]
+            return [False, {'container': cont}]
         elif action == "delete":
             resp = module.client.api.delete_container(cont['name'],
                                                       cont['key'],
                                                       parent['name'],
                                                       parent['key'])
             if resp['data']['status'] == "success":
-                return [True,{'taskIDs':resp['data']['taskIds']},
-                        {'container':cont}]
-    else:                 
+                return [True, {'taskIDs': resp['data']['taskIds']},
+                        {'container': cont}]
+    else:
         if action == "show":
-            return [False,{'container':"Not Found"}]
+            return [False, {'container': "Not Found"}]
         elif action == "add":
             resp = module.client.api.add_container(container, parent['name'],
-                                            parent['key'])
+                                                   parent['key'])
             if resp['data']['status'] == "success":
-                return [True,{'taskIDs':resp['data']['taskIds']},
-                        {'container':cont}]
+                return [True, {'taskIDs': resp['data']['taskIds']},
+                        {'container': cont}]
         if action == "delete":
-            return [False,{'container':"Not Found"}]
+            return [False, {'container': "Not Found"}]
 
 
 def create_new_containers(module, intended, facts):
@@ -470,9 +461,8 @@ def is_empty(module, container_name, facts):
             return not_empty
     return is_empty
 
+
 def is_container_empty(module, container_name):
-    is_empty = True
-    not_empty = False
     container_status = module.client.api.get_devices_in_container(container_name)
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
@@ -480,10 +470,11 @@ def is_container_empty(module, container_name):
         return True
     return False
 
+
 def get_container_facts(container_name='Tenant', facts=None):
     """
     Get FACTS information for a container.
-    
+
     Parameters
     ----------
     container_name : str, optional
@@ -495,6 +486,7 @@ def get_container_facts(container_name='Tenant', facts=None):
         if container['name'] == container_name:
             return container
     return None
+
 
 def delete_unused_containers(module, intended, facts):
     """
@@ -512,7 +504,7 @@ def delete_unused_containers(module, intended, facts):
     default_containers = ['Tenant', 'Undefined', 'root']
     count_container_deletion = 0
     container_to_delete = list()
-    
+
     # Build a tree of containers configured on CVP
     container_cvp_tree = tree_build_from_list(containers=facts['containers'])
     container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
@@ -530,7 +522,7 @@ def delete_unused_containers(module, intended, facts):
             # Check if a container is not present in intended topology.
             if cvp_container not in container_intended_ordered_list:
                 container_to_delete.append(cvp_container)
-    
+
     # Read cvp_container from end. If containers are part of container_to_delete, then delete container
     for cvp_container in reversed(container_cvp_ordered_list):
         # Check if container is not in intended topology and not a default container.
@@ -550,11 +542,10 @@ def delete_unused_containers(module, intended, facts):
     return [False, {'containers_deleted': "0"}]
 
 
-
 def container_info(container_name, module):
     """
     Get dictionary of container info from CVP.
-    
+
     Parameters
     ----------
     container_name : string
@@ -568,7 +559,7 @@ def container_info(container_name, module):
             container is found.
     """
     container_info = module.client.api.get_container_by_name(container_name)
-    if container_info == None:
+    if container_info is None:
         container_info = {}
         container_info['error'] = "Container with name '%s' does not exist." % container_name
     else:
@@ -579,7 +570,7 @@ def container_info(container_name, module):
 def device_info(device_name, module):
     """
     Get dictionary of device info from CVP.
-    
+
     Parameters
     ----------
     device_name : string
@@ -594,27 +585,29 @@ def device_info(device_name, module):
     """
     device_info = module.client.api.get_device_by_name(device_name)
     if not device_info:
-            devices = module.client.api.get_inventory()
-            for device in devices:
-              if device_name in device['fqdn']:
+        devices = module.client.api.get_inventory()
+        for device in devices:
+            if device_name in device['fqdn']:
                 device_info = device
     if not device_info:
-        ## Debug Line ##
+        # Debug Line ##
         # module.fail_json(msg=str('Debug - device_info: %r' %device_info))
-        ## Debug Line ##
-        device_info['error']="Device with name '%s' does not exist." % device_name
+        # Debug Line ##
+        device_info['error'] = "Device with name '%s' does not exist." % device_name
     else:
         device_info['configlets'] = module.client.api.get_configlets_by_netelement_id(device_info['systemMacAddress'])['configletList']
         device_info['parentContainer'] = module.client.api.get_container_by_id(device_info['parentContainerKey'])
     return device_info
 
+
 def task_info(module, taskId):
     return module.client.api.get_task_by_id(taskId)
+
 
 def move_devices_to_container(module, intended, facts):
     """
     Move devices to desired containers based on topology.
-    
+
     Parameters
     ----------
     module : AnsibleModule
@@ -625,18 +618,18 @@ def move_devices_to_container(module, intended, facts):
         List of containers extracted from CVP using cv_facts.
     """
     # Initialize response structure
-    #  Result return for Ansible
+    # Result return for Ansible
     result = dict()
-    #  List of devices moved by this function
-    moved_devices = list() # configlets with config changes
-    #  Structure to save list of devices moved and number of moved
+    # List of devices moved by this function
+    moved_devices = list()  # configlets with config changes
+    # Structure to save list of devices moved and number of moved
     moved = dict()
-    #  Number of devices moved to containers.
+    # Number of devices moved to containers.
     moved['devices_moved'] = 0
-    #  List of created taskIds to pass to cv_tasks
-    task_ids=list()
+    # List of created taskIds to pass to cv_tasks
+    task_ids = list()
     # Define wether we want to save topology or not
-    save_topology = False if module.params['save_topology']==False else True
+    save_topology = False if module.params['save_topology'] is False else True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one device defined, then we can start process
@@ -645,7 +638,8 @@ def move_devices_to_container(module, intended, facts):
             for device in container['devices']:
                 # Get CVP information for target container.
                 # move_device_to_container requires to use structure sends by CVP
-                container_cvpinfo = container_info(container_name=container_name, module=module)
+                container_cvpinfo = container_info(container_name=container_name,
+                                                   module=module)
                 # Get CVP information for device.
                 # move_device_to_container requires to use structure sends by CVP
                 device_cvpinfo = device_info(device_name=device, module=module)
@@ -660,7 +654,7 @@ def move_devices_to_container(module, intended, facts):
                         for task in device_action['data']['taskIds']:
                             task_ids.append(task)
                     moved_devices.append(device)
-                    moved['devices_moved']= moved['devices_moved']+1
+                    moved['devices_moved'] = moved['devices_moved'] + 1
     # Build ansible output messages.
     moved['list'] = moved_devices
     moved['taskIds'] = task_ids
@@ -668,10 +662,11 @@ def move_devices_to_container(module, intended, facts):
     result['moved_devices'] = moved
     return result
 
+
 def container_factinfo(container_name, facts):
     """
     Get dictionary of configlet info from CVP.
-    
+
     Parameters
     ----------
     configlet_name : string
@@ -693,7 +688,7 @@ def container_factinfo(container_name, facts):
 def configlet_factinfo(configlet_name, facts):
     """
     Get dictionary of configlet info from CVP.
-    
+
     Parameters
     ----------
     configlet_name : string
@@ -715,7 +710,7 @@ def configlet_factinfo(configlet_name, facts):
 def attached_configlet_to_container(module, intended, facts):
     """
     Attached existing configlet to desired containers based on topology.
-    
+
     Parameters
     ----------
     module : AnsibleModule
@@ -735,11 +730,9 @@ def attached_configlet_to_container(module, intended, facts):
     #  Number of configlets attached to containers.
     attached['configlet_attached'] = 0
     #  List of created taskIds to pass to cv_tasks
-    task_ids=list()
+    task_ids = list()
     # List of configlets to attach to containers
     configlet_list = list()
-    # Define wether we want to save topology or not
-    save_topology = False if module.params['save_topology']==False else True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one configlet defined, then we can start process
@@ -750,7 +743,7 @@ def attached_configlet_to_container(module, intended, facts):
             # Extract list of configlet names
             for configlet in container['configlets']:
                 # Get CVP information for device.
-                configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)  
+                configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)
                 # Configlet information is saved for later deployment
                 configlet_list.append(configlet_cvpinfo)
         # Create call to attach list of containers
@@ -765,13 +758,14 @@ def attached_configlet_to_container(module, intended, facts):
                 for task in configlet_action['data']['taskIds']:
                     task_ids.append(task)
             attached_configlet.append(configlet_list)
-            attached['configlet_attached']= attached['configlet_attached']+1
+            attached['configlet_attached'] = attached['configlet_attached'] + 1
     # Build ansible output messages.
     attached['list'] = attached_configlet
     attached['taskIds'] = task_ids
     result['changed'] = True
     result['attached_configlet'] = attached
     return result
+
 
 def main():
     """ main entry point for module execution
@@ -784,6 +778,9 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
+    if not HAS_TREELIB:
+        module.fail_json(msg='treelib required for this module')
+
     result = dict(changed=False, cv_container={})
     result['cv_container']['tasks'] = list()
     module.client = connect(module)
@@ -794,12 +791,12 @@ def main():
         # Should be done only if topology is iterable.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
             creation_process = create_new_containers(module=module,
-                                                    intended=module.params['topology'],
-                                                    facts=module.params['cvp_facts'])
+                                                     intended=module.params['topology'],
+                                                     facts=module.params['cvp_facts'])
             if creation_process[0]:
                 result['cv_container']['changed'] = True
                 result['cv_container']['creation_result'] = creation_process[1]
-            
+
             # Start process to move devices to targetted containers
             move_process = move_devices_to_container(module=module,
                                                      intended=module.params['topology'],
@@ -810,7 +807,7 @@ def main():
                 # If a list of task exists, we expose it
                 if 'taskIds' in move_process['moved_devices']:
                     for taskId in move_process['moved_devices']['taskIds']:
-                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
+                        result['cv_container']['tasks'].append(task_info(module=module, taskId=taskId))
                 # move_process['moved_devices'].pop('taskIds',None)
                 result['cv_container']['moved_result'] = move_process['moved_devices']
 
@@ -824,16 +821,16 @@ def main():
                 # If a list of task exists, we expose it
                 if 'taskIds' in attached_process['attached_configlet']:
                     for taskId in attached_process['attached_configlet']['taskIds']:
-                        result['cv_container']['tasks'].append(task_info(module=module, taskId = taskId))
+                        result['cv_container']['tasks'].append(task_info(module=module, taskId=taskId))
                 # move_process['moved_devices'].pop('taskIds',None)
                 result['cv_container']['attached_configlet'] = attached_process['attached_configlet']
-                
+
         # Start process to delete unused container.
         if (isIterable(module.params['topology']) and module.params['topology'] is not None):
             deletion_process = delete_unused_containers(module=module,
                                                         intended=module.params['topology'],
                                                         facts=module.params['cvp_facts'])
-        else: 
+        else:
             deletion_process = delete_unused_containers(module=module,
                                                         intended=dict(),
                                                         facts=module.params['cvp_facts'])
@@ -843,6 +840,7 @@ def main():
     except CvpApiError as e:
         module.fail_json(msg=str(e))
     module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()

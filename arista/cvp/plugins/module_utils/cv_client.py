@@ -1,34 +1,27 @@
+#!/usr/bin/env python
+# coding: utf-8 -*-
 #
-# Copyright (c) 2017, Arista Networks, Inc.
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 ''' RESTful API Client class for Cloudvision(R) Portal
 
 This module provides a RESTful API client for Cloudvision(R) Portal (CVP)
@@ -93,15 +86,20 @@ Example:
 import re
 import json
 import logging
+import inspect
+import traceback
 from logging.handlers import SysLogHandler
 from itertools import cycle
-import inspect
-import requests
-from requests.exceptions import ConnectionError, HTTPError, Timeout, \
-    ReadTimeout, TooManyRedirects
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, \
-CvpRequestError, CvpSessionLogOutError
-from ansible import release
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, CvpRequestError, CvpSessionLogOutError
+REQUESTS_IMP_ERR = None
+try:
+    import requests
+    from requests.exceptions import ConnectionError, HTTPError, Timeout, ReadTimeout, TooManyRedirects
+    HAS_REQUESTS = True
+except ImportError:
+    HAS_REQUESTS = False
+    REQUESTS_IMP_ERR = traceback.format_exc()
+
 
 class CvpClient(object):
     ''' Use this class to create a persistent connection to CVP.
@@ -157,7 +155,6 @@ class CvpClient(object):
         if syslog is False and filename is None:
             # Not logging so use the null handler
             self.log.addHandler(logging.NullHandler())
-                
 
     @property
     def last_used_node(self):
@@ -182,11 +179,11 @@ class CvpClient(object):
             log_level = 'INFO'
         self.log.setLevel(getattr(logging, log_level))
 
-    def _set_apiVersion(self,init=False):
+    def _set_apiVersion(self, init=False):
         '''
         Use client information to retrive CVP Info and get CVP Version
         assumption made that get CVP Info API request has not changed.
-        :param: init - Boolean, True if intialising module, false if checking. 
+        :param: init - Boolean, True if intialising module, false if checking.
         :return: required cv_api version
         '''
         self.apiVersion = None
@@ -208,7 +205,6 @@ class CvpClient(object):
                     self.apiName = 'cv_api2017'
                     if init:
                         pass
-                        #from ansible.module_utils.cv_api2017 import CvpApi
                 elif int(self.splitVersion[0]) == 2018:
                     self.log.info('Setting API version to 2018')
                     self.apiVersion = '2018'
@@ -227,11 +223,10 @@ class CvpClient(object):
                 # If version is shorter than 2 elements for some reason default
                 self.log.error('Version has less than 2 elements. CVP Version Format Error')
             if self.apiVersion is not None and init:
-                self.log.info('Importing API library: %s' %inspect.getfile(CvpApi))
+                self.log.info('Importing API library: %s', inspect.getfile(CvpApi))
                 self.api = CvpApi(self)
 
-        return {'apiVersion':self.apiVersion,'apiName':self.apiName}
-
+        return {'apiVersion': self.apiVersion, 'apiName': self.apiName}
 
     def connect(self, nodes, username, password, connect_timeout=10,
                 protocol='https', port=None, cert=False):
@@ -285,10 +280,8 @@ class CvpClient(object):
         if not self.session:
             raise CvpLoginError(self.error_msg)
         else:
-        # Instantiate the CvpApi class
+            # Instantiate the CvpApi class
             self.apiVersion = self._set_apiVersion(True)
-
-                    
 
     def _create_session(self, all_nodes=False):
         ''' Login to CVP and get a session ID and user information.
@@ -301,7 +294,7 @@ class CvpClient(object):
             num_nodes -= 1
 
         self.error_msg = '\n'
-        for _ in range(0, num_nodes):
+        for x in range(0, num_nodes):
             host = next(self.node_pool)
             self.url_prefix = ('https://%s:%d/web' % (host, self.port or 443))
             error = self._reset_session()
@@ -723,4 +716,3 @@ class CvpClient(object):
                     CVP node.  Destroy the class and re-instantiate.
         '''
         return self._make_request('POST', url, timeout, data=data, files=files)
-
