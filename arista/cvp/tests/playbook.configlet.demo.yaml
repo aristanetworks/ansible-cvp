@@ -21,7 +21,7 @@
       cv_configlet:
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
-        configlet_filter: ["New", "Test","base-chk","base-firewall"]
+        configlet_filter: ["New", "Test", "base-chk", "base-firewall"]
       register: cvp_configlet
 
     - name: 'CVP configlets status on {{inventory_hostname}}'
