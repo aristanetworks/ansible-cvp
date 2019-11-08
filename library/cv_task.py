@@ -127,7 +127,7 @@ def get_id(task):
     return task.get("workOrderId")
 
 def get_state(task):
-    return task.get("workOrderUserDefinedStatus")
+    return task.get("displayedStutus")
 
 def execute_task(cvp, task_id):
     return cvp.execute_task(task_id)
