@@ -179,6 +179,7 @@ def configlet_action(module):
     new_configlet = []  # configlets to add to CVP
     new = []
     taskList = []  # Tasks that have a pending status after function runs
+    tasks = []  # List of tasks sending by CVP and created by our changes.
 
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
@@ -214,7 +215,9 @@ def configlet_action(module):
         if len(delete_configlet) > 0:
             for configlet in delete_configlet:
                 try:
-                    delete_resp = module.client.api.delete_configlet(configlet['name'], configlet['key'])
+                    delete_resp = module.client.api.delete_configlet(config=configlet['config'],
+                                                                     key=configlet['data']['key'],
+                                                                     wait_task_ids=True)
                 except Exception as error:
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be deleted - %s" % (configlet['name'], errorMessage)
@@ -226,14 +229,18 @@ def configlet_action(module):
                     else:
                         changed = True
                         deleted.append({configlet['name']: "success"})
+                        if 'taskIds' in delete_resp:
+                            for taskId in delete_resp['taskIds']:
+                                tasks.append(task_info(module=module, taskId=taskId))
 
         # Update any configlets as required
         if len(update_configlet) > 0:
             for configlet in update_configlet:
                 try:
-                    update_resp = module.client.api.update_configlet(configlet['config'],
-                                                                     configlet['data']['key'],
-                                                                     configlet['data']['name'])
+                    update_resp = module.client.api.update_configlet(config=configlet['config'],
+                                                                     key=configlet['data']['key'],
+                                                                     name=configlet['data']['name'],
+                                                                     wait_task_ids=True)
                 except Exception as error:
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
@@ -246,12 +253,17 @@ def configlet_action(module):
                         module.client.api.add_note_to_configlet(configlet['data']['key'], "## Managed by Ansible ##")
                         changed = True
                         updated.append({configlet['data']['name']: "success"})
+                        if 'taskIds' in updated:
+                            for taskId in updated['taskIds']:
+                                tasks.append(task_info(module=module, taskId=taskId))
 
         # Add any new configlets as required
         if len(new_configlet) > 0:
             for configlet in new_configlet:
                 try:
-                    new_resp = module.client.api.add_configlet(configlet['name'], configlet['config'])
+                    new_resp = module.client.api.add_configlet(config=configlet['config'],
+                                                               name=configlet['data']['name'],
+                                                               wait_task_ids=True)
                 except Exception as error:
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be created - %s" % (configlet['name'], errorMessage)
@@ -264,26 +276,29 @@ def configlet_action(module):
                         module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
                         changed = True
                         new.append({configlet['name']: "success"})
+                        if 'taskIds' in new:
+                            for taskId in new['taskIds']:
+                                tasks.append(task_info(module=module, taskId=taskId))
 
         # Get any Pending Tasks in CVP
-        if changed:
-            # Allow CVP to generate Tasks
-            sleep(10)
-            # Build required data for tasks in CVP - work order Id, current task status, name
-            # description
-            tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
-                          'currentTaskName': 'currentTaskName', 'description': 'description',
-                          'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
-                          'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
-            tasks = module.client.api.get_tasks_by_status('Pending')
-            # Reduce task data to required fields
-            for task in tasks:
-                taskFacts = {}
-                for field in task.keys():
-                    if field in tasksField:
-                        taskFacts[tasksField[field]] = task[field]
-                taskList.append(taskFacts)
-        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
+        # if changed:
+        #     # Allow CVP to generate Tasks
+        #     sleep(10)
+        #     # Build required data for tasks in CVP - work order Id, current task status, name
+        #     # description
+        #     tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
+        #                   'currentTaskName': 'currentTaskName', 'description': 'description',
+        #                   'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
+        #                   'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
+        #     tasks = module.client.api.get_tasks_by_status('Pending')
+        #     # Reduce task data to required fields
+        #     for task in tasks:
+        #         taskFacts = {}
+        #         for field in task.keys():
+        #             if field in tasksField:
+        #                 taskFacts[tasksField[field]] = task[field]
+        #         taskList.append(taskFacts)
+        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': tasks}
     else:
         for configlet in new_configlet:
             new.append({configlet['name']: "checked"})
@@ -293,6 +308,20 @@ def configlet_action(module):
             deleted.append({configlet['name']: "checked"})
         data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
     return [changed, data]
+
+
+def task_info(module, taskId):
+    """
+    Retrieve task information.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with all information
+    taskId : int
+        Task ID getting from CVP.
+    """
+    return module.client.api.get_task_by_id(taskId)
 
 
 def main():
