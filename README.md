@@ -12,6 +12,7 @@
     - [Dependencies](#dependencies)
     - [Git installation for testing](#git-installation-for-testing)
     - [Git installation](#git-installation)
+    - [Docker for testing](#docker-for-testing)
   - [Example playbook](#example-playbook)
   - [Resources](#resources)
   - [License](#license)
@@ -26,6 +27,11 @@
 ## About
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#git-installation) of this readme.
+
+
+<p align="center">
+  <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
+</p>
 
 ## Modules overview
 
@@ -189,3 +195,5 @@ Support for this `arista.cvp` collection is provided by the community directly i
 Contributing pull requests are gladly welcomed for this repository. If you are planning a big change, please start a discussion first to make sure we’ll be able to merge it.
 
 You can also open an [issue](https://github.com/aristanetworks/ansible-avd/issues) to report any problem or to submit enhancement.
+
+A more complete [guide for contribution](contributing.md) is available in the repository
