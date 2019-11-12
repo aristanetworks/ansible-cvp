@@ -47,7 +47,7 @@ except ImportError:
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
-    HAS_FUZZYWUZZY = True
+    HAS_DIFFLIB = True
 except ImportError:
     HAS_DIFFLIB = False
     DIFFLIB_IMP_ERR = traceback.format_exc()
@@ -253,8 +253,8 @@ def configlet_action(module):
                         module.client.api.add_note_to_configlet(configlet['data']['key'], "## Managed by Ansible ##")
                         changed = True
                         updated.append({configlet['data']['name']: "success"})
-                        if 'taskIds' in updated:
-                            for taskId in updated['taskIds']:
+                        if 'taskIds' in update_resp:
+                            for taskId in update_resp['taskIds']:
                                 tasks.append(task_info(module=module, taskId=taskId))
 
         # Add any new configlets as required
@@ -276,8 +276,8 @@ def configlet_action(module):
                         module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
                         changed = True
                         new.append({configlet['name']: "success"})
-                        if 'taskIds' in new:
-                            for taskId in new['taskIds']:
+                        if 'taskIds' in new_resp:
+                            for taskId in new_resp['taskIds']:
                                 tasks.append(task_info(module=module, taskId=taskId))
 
         # Get any Pending Tasks in CVP
@@ -306,7 +306,7 @@ def configlet_action(module):
             updated.append({configlet['data']['name']: "checked"})
         for configlet in delete_configlet:
             deleted.append({configlet['name']: "checked"})
-        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
+        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': tasks}
     return [changed, data]
 
 
