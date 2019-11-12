@@ -230,8 +230,7 @@ def configlet_action(module):
                         changed = True
                         deleted.append({configlet['name']: "success"})
                         if 'taskIds' in delete_resp:
-                            for taskId in delete_resp['taskIds']:
-                                tasks.append(task_info(module=module, taskId=taskId))
+                            taskList = taskList + delete_resp['taskIds']
 
         # Update any configlets as required
         if len(update_configlet) > 0:
@@ -254,8 +253,7 @@ def configlet_action(module):
                         changed = True
                         updated.append({configlet['data']['name']: "success"})
                         if 'taskIds' in update_resp:
-                            for taskId in update_resp['taskIds']:
-                                tasks.append(task_info(module=module, taskId=taskId))
+                            taskList = taskList + update_resp['taskIds']
 
         # Add any new configlets as required
         if len(new_configlet) > 0:
@@ -277,27 +275,13 @@ def configlet_action(module):
                         changed = True
                         new.append({configlet['name']: "success"})
                         if 'taskIds' in new_resp:
-                            for taskId in new_resp['taskIds']:
-                                tasks.append(task_info(module=module, taskId=taskId))
+                            taskList = taskList + new_resp['taskIds']
+        # Collect task information for all generated tasks.
+        # Could be enhance with a call to get all pending tasks and then filtered by TaskId.
+        if len(taskList) > 0:
+            for taskId in taskList:
+                tasks.append(task_info(module=module, taskId=taskId))
 
-        # Get any Pending Tasks in CVP
-        # if changed:
-        #     # Allow CVP to generate Tasks
-        #     sleep(10)
-        #     # Build required data for tasks in CVP - work order Id, current task status, name
-        #     # description
-        #     tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
-        #                   'currentTaskName': 'currentTaskName', 'description': 'description',
-        #                   'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
-        #                   'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
-        #     tasks = module.client.api.get_tasks_by_status('Pending')
-        #     # Reduce task data to required fields
-        #     for task in tasks:
-        #         taskFacts = {}
-        #         for field in task.keys():
-        #             if field in tasksField:
-        #                 taskFacts[tasksField[field]] = task[field]
-        #         taskList.append(taskFacts)
         data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': tasks}
     else:
         for configlet in new_configlet:
