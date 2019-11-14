@@ -136,6 +136,7 @@ deletion_result:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import Connection
 from ansible.module_utils.cv_client import CvpClient
 from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 # from ansible.module_utils.legacy_cvp.cvp_client import CvpClient
@@ -143,7 +144,7 @@ from ansible.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 from treelib import Node, Tree
 import json
 
-def tree_to_list(json_data, myList):
+def tree_to_list(json_data, myList, starting = True):
     """
     Transform a tree structure into a list of object to create CVP.
     Because some object have to be created in a specific order on CVP side, 
@@ -167,7 +168,7 @@ def tree_to_list(json_data, myList):
         Ordered list of element to create on CVP
     """
     # Cast input to be encoded as JSON structure.
-    if isinstance(json_data,str):
+    if isinstance(json_data,str) and starting:
         json_data = json.loads(json_data)
     # If it is a dictionary object, 
     # it means we have to go through it to extract content
@@ -182,13 +183,13 @@ def tree_to_list(json_data, myList):
                         myList.append(k1)
                         for e in v2:
                             # Move to next element with a recursion
-                            tree_to_list(json_data=e, myList=myList)
+                            tree_to_list(json_data=e, myList=myList, starting=False)
     # We are facing a end of a branch with a list of leaves.
     elif isinstance(json_data, list):
         for entry in json_data:
             myList.append(entry)
     # We are facing a end of a branch with a single leaf.
-    elif isinstance(json_data, basestring):
+    elif isinstance(json_data, str):
         myList.append(json_data)
     return myList
 
@@ -707,7 +708,7 @@ def move_devices_to_container(module, intended, facts):
                                                                            device=device_cvpinfo,
                                                                            container=container_cvpinfo,
                                                                            create_task=save_topology)
-                if device_action['data']['status'] == 'success':
+                if save_topology and device_action['data']['status'] == 'success':
                     if 'taskIds' in device_action['data']:
                         for task in device_action['data']['taskIds']:
                             task_ids.append(task)
@@ -808,8 +809,8 @@ def attached_configlet_to_container(module, intended, facts):
         configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
-                                                                           create_task=True)
-        if configlet_action['data']['status'] == 'success':
+                                                                           create_task=save_topology)
+        if save_topology and configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
                     task_ids.append(task)

@@ -1119,3 +1119,44 @@ class CvpApi(object):
             # Catch an invalid task_id error and return None
             return None
         return task
+
+    def add_note_to_task(self, task_id, note):
+        ''' Add notes to the task.
+
+            Args:
+                task_id (str): Task ID
+                note (str): Note to add to the task
+        '''
+        self.log.debug('add_note_to_task: task_id: %s note: %s' %
+                       (task_id, note))
+        data = {'workOrderId': task_id, 'note': note}
+        self.clnt.post('/task/addNoteToTask.do', data=data,
+                       timeout=self.request_timeout)
+
+    def execute_task(self, task_id):
+        ''' Execute the task.  Note that if the task has failed then inspect
+            the task logs to determine why the task failed.  If you see:
+
+              Failure response received from the netElement: Unauthorized User
+
+            then it means that the netelement does not have the same user ID
+            and/or password as the CVP user executing the task.
+
+            Args:
+                task_id (str): Task ID
+        '''
+        self.log.debug('execute_task: task_id: %s' % task_id)
+        data = {'data': [task_id]}
+        return self.clnt.post('/task/executeTask.do', data=data,
+                              timeout=self.request_timeout)
+
+    def cancel_task(self, task_id):
+        ''' Cancel the task
+
+            Args:
+                task_id (str): Task ID
+        '''
+        self.log.debug('cancel_task: task_id: %s' % task_id)
+        data = {'data': [task_id]}
+        return self.clnt.post('/task/cancelTask.do', data=data,
+                       timeout=self.request_timeout)
