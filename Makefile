@@ -15,7 +15,7 @@ help: ## Display help message (*: main entry points / []: part of an entry point
 #########################################
 .PHONY: collection-build
 collection-build: ## Build arista.cvp collection locally
-	ansible-galaxy collection build --force arista/cvp
+	ansible-galaxy collection build --force ansible_collections/arista/cvp
 
 .PHONY: collection-install
 collection-install: ## Install arista.cvp collection to default location (~/.ansible/collections/ansible_collections)
@@ -27,34 +27,23 @@ collection-install: ## Install arista.cvp collection to default location (~/.ans
 # Code Validation using ansible-test 	#
 #########################################
 
-.PHONY: sanity sanity-lint sanity-import sanity-info
-sanity: sanity-build sanity-info-env sanity-lint sanity-import sanity-clean ## Run ansible-test sanity validation.
-sanity-info: sanity-build sanity-info-env sanity-clean ## Show information about ansible-test
-sanity-lint: sanity-build code-linting-ansible sanity-clean ## Run ansible-test sanity for code sanity
-sanity-import: sanity-build code-import-ansible sanity-clean ## Run ansible-test sanity for code import
+.PHONY: sanity
+sanity: sanity-info-env sanity-lint sanity-import ## Run ansible-test sanity validation.
 
-.PHONY: sanity-build
-sanity-build: ## Configure repository to run ansible-test
-	mkdir ansible_collections
-	cp -r arista ansible_collections
-
-.PHONY: sanity-info-env
-sanity-info-env:
+.PHONY: sanity-info
+sanity-info: ## Show information about ansible-test
 	cd ansible_collections/arista/cvp/ ; ansible-test env
 
-.PHONY: code-linting-ansible
-code-linting-ansible:
+.PHONY: sanity-lint
+sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
 	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --skip-test import
 
-.PHONY: code-import-ansible
-code-import-ansible:
+.PHONY: sanity-import
+sanity-import: ## Run ansible-test sanity for code import
 	cd ansible_collections/arista/cvp/ ; \
 	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --test import
 
-.PHONY: sanity-clean
-sanity-clean: ## Remove ansible-test setup from local repository
-	rm -rf ansible_collections
 
 #########################################
 # Docker actions					 	#
