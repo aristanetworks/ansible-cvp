@@ -2,7 +2,7 @@ name: Ansible Validation PR
 on: 
   pull_request:
     branches:
-      - '*release*'
+      - 'releases/*'
       - 'master'
 
 jobs:

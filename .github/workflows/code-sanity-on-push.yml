@@ -2,8 +2,8 @@ name: Code Sanity
 on: 
   push:
     branches:
-      - 'issue*'
-      - 'feature*'
+      - 'issues/*'
+      - 'features/*'
 
 jobs:
   python-linting:
