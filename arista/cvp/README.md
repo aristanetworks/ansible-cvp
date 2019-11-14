@@ -5,10 +5,6 @@
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#git-installation) of this readme.
 
 
-<p align="center">
-  <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
-</p>
-
 ## Modules overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
