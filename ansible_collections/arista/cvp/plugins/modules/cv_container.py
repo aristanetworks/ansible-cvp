@@ -742,12 +742,14 @@ def attached_configlet_to_container(module, intended, facts):
     task_ids = list()
     # List of configlets to attach to containers
     configlet_list = list()
+    # Define wether we want to save topology or not
+    save_topology = False if module.params['save_topology'] is False else True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one configlet defined, then we can start process
         # Get CVP information for target container.
         container_info_cvp = container_info(container_name=container_name, module=module)
-        container_info_facts = container_factinfo(container_name=container_name, facts=facts)
+        # container_info_facts = container_factinfo(container_name=container_name, facts=facts)
         if 'configlets' in container:
             # Extract list of configlet names
             for configlet in container['configlets']:
@@ -761,7 +763,7 @@ def attached_configlet_to_container(module, intended, facts):
         configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
-                                                                           create_task=True)
+                                                                           create_task=save_topology)
         if configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
