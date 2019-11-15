@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![GitHub](https://img.shields.io/github/license/aristanetworks/ansible-cvp)
+![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![collection version](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp)
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
@@ -57,10 +57,9 @@ This repository is built based on [new collections system](https://docs.ansible.
 
 This collection requires the following to be installed on the Ansible control machine:
 
-- python __`2.7`__
+- python `2.7` and `3.x`
 - ansible >= `2.9.0rc4`
 - requests >= `2.22.0`
-- fuzzywuzzy running `0.17.0` or later
 - treelib version `1.5.5` or later
 
 ### Git installation for testing
