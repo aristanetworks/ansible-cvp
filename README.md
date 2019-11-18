@@ -28,7 +28,6 @@
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#git-installation) of this readme.
 
-
 <p align="center">
   <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
 </p>
@@ -56,6 +55,7 @@ This repository is built based on [new collections system](https://docs.ansible.
 ### Dependencies
 
 This collection requires the following to be installed on the Ansible control machine:
+
 
 - python `2.7` and `3.x`
 - ansible >= `2.9.0rc4`
@@ -112,6 +112,7 @@ $ docker exec -it --rm ansible-cvp:latest3 sh
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
 
 All files part of [`examples`](examples/) are copied into the container.
+
 
 ## Example playbook
 
@@ -174,6 +175,8 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
+
 
 ## Resources
 
@@ -187,7 +190,9 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
+
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
+
 
 ## Contributing
 
@@ -196,3 +201,4 @@ Contributing pull requests are gladly welcomed for this repository. If you are p
 You can also open an [issue](https://github.com/aristanetworks/ansible-cvp/issues) to report any problem or to submit enhancement.
 
 A more complete [guide for contribution](contributing.md) is available in the repository
+
