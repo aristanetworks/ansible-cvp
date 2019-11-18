@@ -209,9 +209,17 @@ def device_action(module):
                         else:
                             reset.append({device['name']:'Reset-No_Tasks'})
         if len(new_device) > 0:
+            count_new_devices = len(new_device)  # Number of new devices to provision
+            count_new_device_provisionned = 0  # Number of new devices provisionned
+            action_save_topology = False
             # Provision (move from Undefined, add Configlets and Images) new Devices
             # new_device schema ([cvp_device,dest_container,ansible_device])
             for device in new_device:
+                # Test if we are managing last device to provision
+                # If no, then we do not create tasks and we do not save tempTopology
+                # If last device, we save topology and create tasks
+                count_new_device_provisionned += 1
+                action_save_topology = True if count_new_device_provisionned == count_new_devices else False
                 add_configlets = []
                 add_imageBundle = {}
                 if device['cvp_device']['parentContainerKey'] == 'undefined_container':
@@ -226,10 +234,12 @@ def device_action(module):
                                 add_imageBundle = {'name':imageBundle['name'],'key':imageBundle['key']}
                                 break
                     try:
-                        new_device_action = module.client.api.provision_device('Ansible',device['cvp_device'],
-                                                                                  device['container'],
-                                                                                  add_configlets,
-                                                                                  add_imageBundle)
+                        new_device_action = module.client.api.provision_device(app_name='Ansible',
+                                                                               device=device['cvp_device'],
+                                                                               container=device['container'],
+                                                                               configlets=add_configlets,
+                                                                               imageBundle=add_imageBundle,
+                                                                               create_task=action_save_topology)
                     except Exception as error:
                         errorMessage = str(error)
                         message = "New device %s cannot be added - Exception: %s"%(device['cvp_device']['name'],
