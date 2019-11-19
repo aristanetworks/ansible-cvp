@@ -113,7 +113,7 @@ def cv_facts(module):
     # Work through Devices list adding device specific information
     for device in facts['devices']:
         # Add designed config for device
-        device['config'] = module.client.api.get_device_configuration(device['key'])
+        # device['config'] = module.client.api.get_device_configuration(device['key'])
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
         device['parentContainerName']=container['name']
