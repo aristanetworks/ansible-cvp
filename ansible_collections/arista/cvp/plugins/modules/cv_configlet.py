@@ -37,17 +37,17 @@ from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import
 from ansible.module_utils.connection import Connection, ConnectionError
 from time import sleep
 # Required by compare function
-FUZZYWUZZY_IMP_ERR = None
-try:
-    from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
-    HAS_FUZZYWUZZY = True
-except ImportError:
-    HAS_TREELIB = False
-    FUZZYWUZZY_IMP_ERR = traceback.format_exc()
+# FUZZYWUZZY_IMP_ERR = None
+# try:
+#     from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
+#     HAS_FUZZYWUZZY = True
+# except ImportError:
+#     HAS_TREELIB = False
+#     FUZZYWUZZY_IMP_ERR = traceback.format_exc()
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
-    HAS_FUZZYWUZZY = True
+    HAS_DIFFLIB = True
 except ImportError:
     HAS_DIFFLIB = False
     DIFFLIB_IMP_ERR = traceback.format_exc()
@@ -305,8 +305,8 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
-    if not HAS_FUZZYWUZZY:
-        module.fail_json(msg='fuzzywuzzy required for this module')
+    # if not HAS_FUZZYWUZZY:
+    #     module.fail_json(msg='fuzzywuzzy required for this module')
     if not HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
 

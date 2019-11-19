@@ -17,7 +17,7 @@ exec 1>&2
 echo "Validating PEP8 compliance..."
 echo "------------------------------------------------------------------------------------------------------------"
 echo "  - Modules validation"
-python -m pylint --jobs 0 --reports n --output-format=parseable --max-line-length 160 --ignore E402,E741,W503,W504 arista/cvp/plugins/modules/*.py
+python -m pylint --jobs 0 --reports n --output-format=parseable --max-line-length 160 --ignore E402,E741,W503,W504 ansible_collections/arista/cvp/plugins/modules/*.py
 echo "------------------------------------------------------------------------------------------------------------"
 echo "  - Module Utils validation"
-python -m pylint --jobs 0 --reports n --output-format=parseable --max-line-length 160 --ignore E402,E741,W503,W504 arista/cvp/plugins/module_utils/*.py
+python -m pylint --jobs 0 --reports n --output-format=parseable --max-line-length 160 --ignore E402,E741,W503,W504 ansible_collections/arista/cvp/plugins/module_utils/*.py
