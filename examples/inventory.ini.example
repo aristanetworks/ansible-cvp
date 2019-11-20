@@ -1,21 +1,18 @@
-[cvp:children]
-development
-lab
+[cvp]
+cvp_2018  ansible_httpapi_port=443
+cvp_2019   ansible_httpapi_port=444
 
-[development]
-cvp_foster  ansible_httpapi_port=443
-cvp_grant   ansible_httpapi_port=444
+[2019]
+cvp_2019
 
-[lab]
-cvp_demo    ansible_host=1.1.1.2   ansible_httpapi_host=1.1.1.2
-
-[grant]
-cvp_grant
-
-[foster]
-cvp_foster
+[2018]
+cvp_2018
 
 [cvp:vars]
+ansible_user='ansible'
+ansible_password='ansible'
+ansible_host=1.1.1.1
+ansible_httpapi_host=1.1.1.1
 ansible_connection=httpapi
 ansible_httpapi_use_ssl=True
 ansible_httpapi_validate_certs=False
@@ -25,13 +22,3 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 # Configuration to get Virtual Env information
 ansible_python_interpreter=$(which python)
-
-[lab:vars]
-ansible_user='ansible'
-ansible_password='ansible'
-
-[development:vars]
-ansible_user='ansible'
-ansible_password='ansible'
-ansible_host=1.1.1.1
-ansible_httpapi_host=1.1.1.1
