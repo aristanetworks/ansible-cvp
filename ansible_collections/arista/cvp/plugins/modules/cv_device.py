@@ -414,10 +414,10 @@ def device_action(module):
             sleep(10)
             # Build required data for tasks in CVP - work order Id, current task status, name
             # description
-            tasksField = {'name': 'name', 'workOrderId': 'taskNo', 'workOrderState': 'status',
-                          'currentTaskName': 'currentAction', 'description': 'description',
-                          'workOrderUserDefinedStatus': 'displayedStutus', 'note': 'note',
-                          'taskStatus': 'actionStatus'}
+            tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
+                          'currentTaskName': 'currentTaskName', 'description': 'description',
+                          'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
+                          'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
             tasks = module.client.api.get_tasks_by_status('Pending')
             # if tasks IDs were created for device actions then return only those.
             createdTasks = []
