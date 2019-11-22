@@ -106,3 +106,4 @@ venv.bak/
 .vscode/*
 *.tar.gz
 */collections/*
+*.old

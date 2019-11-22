@@ -1,40 +1,63 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# coding: utf-8 -*-
 #
-# Copyright (c) 2019, Arista Networks EOS+
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+ANSIBLE_METADATA = {
+    'metadata_version': '1.0',
+    'status': ['preview'],
+    'supported_by': 'community'
+}
+
+# Required by Ansible and CVP
+import re
+import traceback
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible.module_utils.connection import Connection, ConnectionError
+from time import sleep
+# Required by compare function
+# FUZZYWUZZY_IMP_ERR = None
+# try:
+#     from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
+#     HAS_FUZZYWUZZY = True
+# except ImportError:
+#     HAS_TREELIB = False
+#     FUZZYWUZZY_IMP_ERR = traceback.format_exc()
+DIFFLIB_IMP_ERR = None
+try:
+    import difflib
+    HAS_DIFFLIB = True
+except ImportError:
+    HAS_DIFFLIB = False
+    DIFFLIB_IMP_ERR = traceback.format_exc()
+
+
 DOCUMENTATION = r'''
 ---
 module: cv_configlet
 version_added: "2.9"
-author: "EMEA AS Team(ansible-dev@arista.com)"
+author: EMEA AS Team (@aristanetworks)
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
   - CloudVison Portal Configlet compares the list of configlets and config in
@@ -49,21 +72,22 @@ options:
   configlets:
     description: List of configlets to managed on CVP server.
     required: true
-    default: null
+    type: dict
   cvp_facts:
     description: Facts extracted from CVP servers using cv_facts module
     required: true
-    default: null
+    type: dict
   configlet_filter:
     description: Filter to apply intended mode on a set of configlet.
                  If not used, then module only uses ADD mode. configlet_filter
                  list configlets that can be modified or deleted based
                  on configlets entries.
     required: false
-    default: null
+    default: ['none']
+    type: list
 '''
 
-EXAMPLE = r'''
+EXAMPLES = r'''
 ---
 - name: Test cv_configlet_v2
   hosts: cvp
@@ -90,16 +114,6 @@ EXAMPLE = r'''
       register: cvp_configlet
 '''
 
-# Required by Ansible and CVP
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-from ansible.module_utils.connection import Connection, ConnectionError
-import re
-from time import sleep
-# Required by compare function
-import difflib
-from fuzzywuzzy import fuzz # Library that uses Levenshtein Distance to calculate the differences between strings.
 
 def compare(fromText, toText, lines=10):
     """ Compare text string in 'fromText' with 'toText' and produce
@@ -116,10 +130,11 @@ def compare(fromText, toText, lines=10):
     """
     fromlines = fromText.splitlines(1)
     tolines = toText.splitlines(1)
-    diff = list(difflib.unified_diff(fromlines, tolines,n=lines))
+    diff = list(difflib.unified_diff(fromlines, tolines, n=lines))
     textComp = difflib.SequenceMatcher(None, fromText, toText)
-    diffRatio = round( textComp.quick_ratio()*100, 2)
-    return [diffRatio,diff]
+    diffRatio = round(textComp.quick_ratio() * 100, 2)
+    return [diffRatio, diff]
+
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
@@ -143,6 +158,7 @@ def connect(module):
         module.fail_json(msg=str(e))
     return client
 
+
 def configlet_action(module):
     ''' Compare configlets in "configlets" with configlets in "cvp_facts"
     if configlet exists in "cvp_facts" check config, if changed update
@@ -154,15 +170,15 @@ def configlet_action(module):
     '''
     # If any configlet changed updated 'changed' flag
     changed = False
-    #Compare configlets against cvp_facts-configlets
-    keep_configlet = [] # configlets with no changes
-    delete_configlet = [] # configlets to delete from CVP
+    # Compare configlets against cvp_facts-configlets
+    keep_configlet = []  # configlets with no changes
+    delete_configlet = []  # configlets to delete from CVP
     deleted = []
-    update_configlet = [] # configlets with config changes
+    update_configlet = []  # configlets with config changes
     updated = []
-    new_configlet = [] # configlets to add to CVP
+    new_configlet = []  # configlets to add to CVP
     new = []
-    taskList = [] # Tasks that have a pending status after function runs
+    taskList = []  # Tasks that have a pending status after function runs
 
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
@@ -171,15 +187,15 @@ def configlet_action(module):
         # include all configlets.
         if configlet['type'] == 'Static':
             if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
-                any(element in configlet['name'] for element in module.params['configlet_filter'])):
+               any(element in configlet['name'] for element in module.params['configlet_filter'])):
                 if configlet['name'] in module.params['configlets']:
                     ansible_configlet = module.params['configlets'][configlet['name']]
-                    configlet_compare = compare(configlet['config'],ansible_configlet)
+                    configlet_compare = compare(configlet['config'], ansible_configlet)
                     # compare function returns a floating point number
                     if configlet_compare[0] == 100.0:
                         keep_configlet.append(configlet)
                     else:
-                        update_configlet.append({'data':configlet,'config':ansible_configlet})
+                        update_configlet.append({'data': configlet, 'config': ansible_configlet})
                 else:
                     delete_configlet.append(configlet)
     # Look for new configlets, if a configlet is not CVP assume it is to be created
@@ -189,65 +205,65 @@ def configlet_action(module):
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
         if not found:
-            new_configlet.append({'name':str(ansible_configlet),
-                                  'config':str(module.params['configlets'][ansible_configlet])})
+            new_configlet.append({'name': str(ansible_configlet),
+                                  'config': str(module.params['configlets'][ansible_configlet])})
 
     # Only execute this section if ansible check_mode is false
     if not module.check_mode:
         # delete any configlets as required
         if len(delete_configlet) > 0:
             for configlet in delete_configlet:
-              try:
-                delete_resp =  module.client.api.delete_configlet(configlet['name'], configlet['key'])
-              except Exception as error:
-                errorMessage = re.split(':', str(error))[-1]
-                message = "Configlet %s cannot be deleted - %s"%(configlet['name'],errorMessage)
-                deleted.append({configlet['name']:message})
-              else:
-                if "error" in str(delete_resp).lower():
-                    message = "Configlet %s cannot be deleted - %s"%(configlet['name'],delete_resp['errorMessage'])
-                    deleted.append({configlet['name']:message})
+                try:
+                    delete_resp = module.client.api.delete_configlet(configlet['name'], configlet['key'])
+                except Exception as error:
+                    errorMessage = re.split(':', str(error))[-1]
+                    message = "Configlet %s cannot be deleted - %s" % (configlet['name'], errorMessage)
+                    deleted.append({configlet['name']: message})
                 else:
-                    changed = True
-                    deleted.append({configlet['name']:"success"})
+                    if "error" in str(delete_resp).lower():
+                        message = "Configlet %s cannot be deleted - %s" % (configlet['name'], delete_resp['errorMessage'])
+                        deleted.append({configlet['name']: message})
+                    else:
+                        changed = True
+                        deleted.append({configlet['name']: "success"})
 
         # Update any configlets as required
         if len(update_configlet) > 0:
             for configlet in update_configlet:
-              try:
-                update_resp = module.client.api.update_configlet(configlet['config'],
-                                                                 configlet['data']['key'],
-                                                                 configlet['data']['name'])
-              except Exception as error:
-                errorMessage = re.split(':', str(error))[-1]
-                message = "Configlet %s cannot be updated - %s"%(configlet['name'],errorMessage)
-                updated.append({configlet['name']:message})
-              else:
-                if "errorMessage" in str(update_resp):
-                    message = "Configlet %s cannot be updated - %s"%(configlet['name'],update_resp['errorMessage'])
-                    updated.append({configlet['data']['name']:message})
+                try:
+                    update_resp = module.client.api.update_configlet(configlet['config'],
+                                                                     configlet['data']['key'],
+                                                                     configlet['data']['name'])
+                except Exception as error:
+                    errorMessage = re.split(':', str(error))[-1]
+                    message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
+                    updated.append({configlet['name']: message})
                 else:
-                    module.client.api.add_note_to_configlet(configlet['data']['key'],"## Managed by Ansible ##")
-                    changed = True
-                    updated.append({configlet['data']['name']:"success"})
+                    if "errorMessage" in str(update_resp):
+                        message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                        updated.append({configlet['data']['name']: message})
+                    else:
+                        module.client.api.add_note_to_configlet(configlet['data']['key'], "## Managed by Ansible ##")
+                        changed = True
+                        updated.append({configlet['data']['name']: "success"})
 
         # Add any new configlets as required
         if len(new_configlet) > 0:
             for configlet in new_configlet:
-              try:
-                new_resp = module.client.api.add_configlet(configlet['name'],configlet['config'])
-              except Exception as error:
-                errorMessage = re.split(':', str(error))[-1]
-                message = "Configlet %s cannot be created - %s"%(configlet['name'],errorMessage)
-                created.append({configlet['name']:message})
-              else:
-                if "errorMessage" in str(new_resp):
-                    message = "Configlet %s cannot be created - %s"%(configlet['name'],new_resp['errorMessage'])
-                    new.append({configlet['name']:message})
+                try:
+                    new_resp = module.client.api.add_configlet(configlet['name'], configlet['config'])
+                except Exception as error:
+                    errorMessage = re.split(':', str(error))[-1]
+                    message = "Configlet %s cannot be created - %s" % (configlet['name'], errorMessage)
+                    new.append({configlet['name']: message})
                 else:
-                    module.client.api.add_note_to_configlet(new_resp,"## Managed by Ansible ##")
-                    changed = True
-                    new.append({configlet['name']:"success"})
+                    if "errorMessage" in str(new_resp):
+                        message = "Configlet %s cannot be created - %s" % (configlet['name'], new_resp['errorMessage'])
+                        new.append({configlet['name']: message})
+                    else:
+                        module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
+                        changed = True
+                        new.append({configlet['name']: "success"})
 
         # Get any Pending Tasks in CVP
         if changed:
@@ -255,48 +271,52 @@ def configlet_action(module):
             sleep(10)
             # Build required data for tasks in CVP - work order Id, current task status, name
             # description
-            tasksField = {'workOrderId':'workOrderId','workOrderState':'workOrderState',
-                  'currentTaskName':'currentTaskName','description':'description',
-                  'workOrderUserDefinedStatus':'workOrderUserDefinedStatus','note':'note',
-                  'taskStatus':'taskStatus', 'workOrderDetails': 'workOrderDetails'}
+            tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
+                          'currentTaskName': 'currentTaskName', 'description': 'description',
+                          'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
+                          'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
             tasks = module.client.api.get_tasks_by_status('Pending')
             # Reduce task data to required fields
             for task in tasks:
-                taskFacts= {}
+                taskFacts = {}
                 for field in task.keys():
                     if field in tasksField:
                         taskFacts[tasksField[field]] = task[field]
                 taskList.append(taskFacts)
-        data = {'new':new,'updated':updated,'deleted':deleted,'tasks':taskList}
+        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
     else:
         for configlet in new_configlet:
-            new.append({configlet['name']:"checked"})
+            new.append({configlet['name']: "checked"})
         for configlet in update_configlet:
-            updated.append({configlet['data']['name']:"checked"})
+            updated.append({configlet['data']['name']: "checked"})
         for configlet in delete_configlet:
-            deleted.append({configlet['name']:"checked"})
-        data = {'new':new,'updated':updated,'deleted':deleted,'tasks':taskList}
-    return [changed,data]
+            deleted.append({configlet['name']: "checked"})
+        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
+    return [changed, data]
 
 
 def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
-        configlets=dict(type='dict',required=True),
-        cvp_facts=dict(type='dict',required=True),
-        configlet_filter=dict(type='list', default='none')
-        )
+        configlets=dict(type='dict', required=True),
+        cvp_facts=dict(type='dict', required=True),
+        configlet_filter=dict(type='list', default='none'))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
-    result = dict(changed=False,data={})
+    # if not HAS_FUZZYWUZZY:
+    #     module.fail_json(msg='fuzzywuzzy required for this module')
+    if not HAS_DIFFLIB:
+        module.fail_json(msg='difflib required for this module')
+
+    result = dict(changed=False, data={})
     messages = dict(issues=False)
     # Connect to CVP instance
     module.client = connect(module)
 
     # Pass module params to configlet_action to act on configlet
-    result['changed'],result['data'] = configlet_action(module)
+    result['changed'], result['data'] = configlet_action(module)
     module.exit_json(**result)
 
 

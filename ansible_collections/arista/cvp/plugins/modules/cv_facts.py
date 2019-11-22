@@ -1,40 +1,43 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# coding: utf-8 -*-
 #
-# Copyright (c) 2019, Arista Networks AS-EMEA
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+ANSIBLE_METADATA = {
+    'metadata_version': '1.0',
+    'status': ['preview'],
+    'supported_by': 'community'
+}
+
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import Connection, ConnectionError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+
 DOCUMENTATION = r'''
 ---
 module: cv_facts
 version_added: "2.9"
-author: "EMEA AS Team(ansible-dev@arista.com)"
+author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns the list of devices, configlets, containers and images
@@ -42,25 +45,13 @@ description:
 
 EXAMPLES = r'''
 ---
-- name: Test cv_device
-  hosts: cvp
-  connection: local
-  gather_facts: no
-  collections:
-    - arista.cvp
-  tasks:
-      # Collect CVP Facts as init process
-    - name: "Gather CVP facts from {{inventory_hostname}}"
-      cv_facts:
-      register: cvp_facts
-      tags:
-        - always
+    # Collect CVP Facts as init process
+- name: "Gather CVP facts from {{inventory_hostname}}"
+  arista.cvp.cv_facts:
+  register: cvp_facts
+
 '''
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.connection import Connection, ConnectionError
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 
 def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
@@ -84,6 +75,7 @@ def connect(module):
         module.fail_json(msg=str(e))
     return client
 
+
 def cv_facts(module):
     ''' Connects to CVP device using user provided credentials from module.
     :param module: Ansible module with parameters and client connection.
@@ -92,13 +84,14 @@ def cv_facts(module):
     facts = {}
     # Get version data for CVP
     facts['cvp_info'] = module.client.api.get_cvp_info()
-    
+
     # Build required data for devices in CVP - Device Data, Config, Associated Container,
     # Associated Images, and Associated Configlets
-    deviceField = {'hostname':'name','fqdn':'fqdn','complianceCode':'complianceCode',
-                   'complianceIndication':'complianceIndication','version':'version',
-                   'ipAddress':'ipAddress','systemMacAddress':'key',
-                   'parentContainerKey':'parentContainerKey'}
+    deviceField = {'hostname': 'name', 'fqdn': 'fqdn', 'complianceCode': 'complianceCode',
+                   'complianceIndication': 'complianceIndication', 'version': 'version',
+                   'ipAddress': 'ipAddress', 'systemMacAddress': 'key',
+                   'parentContainerKey': 'parentContainerKey',
+                   'streamingStatus': 'streamingStatus'}
     facts['devices'] = []
 
     # Get Inventory Data for All Devices
@@ -114,10 +107,11 @@ def cv_facts(module):
     # Work through Devices list adding device specific information
     for device in facts['devices']:
         # Add designed config for device
-        device['config'] = module.client.api.get_device_configuration(device['key'])
+        if device['streamingStatus'] == "active":
+            device['config'] = module.client.api.get_device_configuration(device['key'])
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
-        device['parentContainerName']=container['name']
+        device['parentContainerName'] = container['name']
         # Add Device Specific Configlets
         configlets = module.client.api.get_configlets_by_device_id(device['key'])
         device['deviceSpecificConfiglets'] = []
@@ -136,8 +130,8 @@ def cv_facts(module):
 
     # Build required data for configlets in CVP - Configlet Name, Config, Associated Containers,
     # Associated Devices, and Configlet Type
-    configletField = {'name':'name','config':'config','type':'type','key':'key'}
-    facts['configlets']=[]
+    configletField = {'name': 'name', 'config': 'config', 'type': 'type', 'key': 'key'}
+    facts['configlets'] = []
 
     # Get List of all configlets
     configlets = module.client.api.get_configlets()['data']
@@ -146,7 +140,7 @@ def cv_facts(module):
         configletFacts = {}
         for field in configlet.keys():
             if field in configletField:
-                configletFacts[configletField[field]]=configlet[field]
+                configletFacts[configletField[field]] = configlet[field]
         facts['configlets'].append(configletFacts)
 
     # Work through Configlet list adding Configlet specific information
@@ -164,18 +158,18 @@ def cv_facts(module):
 
     # Build required data for containers in CVP - Container Name, parent container, Associated Configlets
     # Associated Devices, and Child Containers
-    containerField = {'name':'name','parentName':'parentName','childContainerId':'childContainerKey',
-                      'key':'key'}
+    containerField = {'name': 'name', 'parentName': 'parentName', 'childContainerId': 'childContainerKey',
+                      'key': 'key'}
     facts['containers'] = []
 
     # Get List of all Containers
     containers = module.client.api.get_containers()['data']
     # Reduce container data to required fields
     for container in containers:
-        containerFacts ={}
+        containerFacts = {}
         for field in container.keys():
             if field in containerField:
-                containerFacts[containerField[field]]=container[field]
+                containerFacts[containerField[field]] = container[field]
         facts['containers'].append(containerFacts)
 
     # Work through Container list adding Container specific information
@@ -197,7 +191,7 @@ def cv_facts(module):
             container['imageBundle'] = applied_images[0]['name']
 
     # Build required data for images in CVP - Image Name, certified, Image Components
-    imageField = {'name':'name','isCertifiedImageBundle':'certifified','imageIds':'imageNames','key':'key'}
+    imageField = {'name': 'name', 'isCertifiedImageBundle': 'certifified', 'imageIds': 'imageNames', 'key': 'key'}
     facts['imageBundles'] = []
 
     # Get List of all Image Bundles
@@ -212,23 +206,24 @@ def cv_facts(module):
 
     # Build required data for tasks in CVP - work order Id, current task status, name
     # description
-    tasksField = {'name':'name','workOrderId':'taskNo','workOrderState':'status',
-                  'currentTaskName':'currentAction','description':'description',
-                  'workOrderUserDefinedStatus':'displayedStutus','note':'note',
-                  'taskStatus':'actionStatus'}
+    tasksField = {'name': 'name', 'workOrderId': 'taskNo', 'workOrderState': 'status',
+                  'currentTaskName': 'currentAction', 'description': 'description',
+                  'workOrderUserDefinedStatus': 'displayedStutus', 'note': 'note',
+                  'taskStatus': 'actionStatus'}
     facts['tasks'] = []
 
     # Get List of all Tasks
     tasks = module.client.api.get_tasks()['data']
     # Reduce task data to required fields
     for task in tasks:
-        taskFacts= {}
+        taskFacts = {}
         for field in task.keys():
             if field in tasksField:
                 taskFacts[tasksField[field]] = task[field]
         facts['tasks'].append(taskFacts)
 
     return facts
+
 
 def main():
     """ main entry point for module execution
@@ -242,7 +237,7 @@ def main():
     module.client = connect(module)
 
     result['ansible_facts'] = cv_facts(module)
-    result['changed']=False
+    result['changed'] = False
 
     module.exit_json(**result)
 

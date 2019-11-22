@@ -13,6 +13,12 @@ Module comes with a set of options:
 - `topology`: Topology to build on Cloudvision.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `save_topology`: Boolean to save and create tasks on CVP.
+- `mode`: Define how module should work with container topology. Value can be:
+    - `merge`: Combine the new container topology with the existing topology.
+    - `override`: Discard the entire existing container topology and replace it with the new topology.
+    - `delete`: Discard the entire container topology provided in `topology` and keep other existing containers untouched.
+
+If __`mode`__ is set to __`delete`__, container topology shall be described starting from `Tenant`. A partial tree is currenly not supported.
 
 ## Usage
 
@@ -70,6 +76,7 @@ tasks:
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true
+        mode: merge
 ```
 
 __Result__
@@ -79,7 +86,7 @@ Below is an example of expected output
 ```json
 {
     "changed": false,
-    "cv_container": {
+    "data": {
         "attached_configlet": {
             "configlet_attached": 4,
             "list": [

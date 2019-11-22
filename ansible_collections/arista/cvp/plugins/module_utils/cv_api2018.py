@@ -1,34 +1,27 @@
+#!/usr/bin/env python
+# coding: utf-8 -*-
 #
-# Copyright (c) 2019, Arista Networks, Inc.
-# All rights reserved.
+# FIXME: required to pass ansible-test
+# GNU General Public License v3.0+
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# Copyright 2019 Arista Networks AS-EMEA
 #
-#   Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#   Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Neither the name of Arista Networks nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 ''' Class containing calls to CVP RESTful API.
 '''
 import os
@@ -36,7 +29,7 @@ import os
 # pylint: disable=redefined-builtin
 from io import open
 
-from cv_client_errors import CvpApiError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError
 
 try:
     from urllib import quote_plus as qplus
@@ -45,7 +38,7 @@ except (AttributeError, ImportError):
 
 
 class CvpApi(object):
-    ''' CvpApi class contains calls to CVP 2019.1.x RESTful API.  The RESTful API
+    ''' CvpApi class contains calls to CVP 2018.2.x RESTful API.  The RESTful API
         parameters are passed in as parameters to the method.  The results of
         the RESTful API call are converted from json to a dict and returned.
         Where needed minimal processing is performed on the results.
@@ -94,8 +87,8 @@ class CvpApi(object):
         return data
 
     # ~Device Related API Calls
-    
-    def get_inventory(self, start=0, end=0, provisioned = "true", query = None):
+
+    def get_inventory(self, start=0, end=0, provisioned="true", query=None):
         ''' Returns the a dict of the net elements known to CVP.
 
             Args:
@@ -108,8 +101,8 @@ class CvpApi(object):
                     are running a specific version of EOS.
         '''
         self.log.debug('get_inventory: called')
-        self.log.debug('2019 Inventory API Call')
-        data = self.clnt.get('/inventory/devices?provisioned=%s'%provisioned,
+        self.log.debug('2018 Inventory API Call')
+        data = self.clnt.get('/inventory/devices?provisioned=%s' % provisioned,
                              timeout=self.request_timeout)
         for dev in data:
             dev['key'] = dev['systemMacAddress']
@@ -151,13 +144,14 @@ class CvpApi(object):
         self.log.debug('Attempt to get net element data for %s' % device_id)
         try:
             element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
-                                  % qplus(device_id), timeout=self.request_timeout)
+                                         % qplus(device_id), timeout=self.request_timeout)
         except CvpApiError as e:
             # Catch an invalid task_id error and return None
             if 'errorMessage' in str(e):
                 self.log.debug('Device with id %s could not be found' % device_id)
                 return None
-                raise CvpApiError("get_net_element_info_by_device_id:%s" %e)
+                # pylint: disable=unreachable
+                raise CvpApiError("get_net_element_info_by_device_id:%s" % e)
         return element_info
 
     def get_device_by_name(self, fqdn):
@@ -247,8 +241,8 @@ class CvpApi(object):
         if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
             device['systemMacAddress'] = device['key']
         if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_configlets: key or systemMacAddress not found in device object %s - %s" %(device['name'],
-                                                                                                        device.keys()))
+            raise KeyError("update_configlets: key or systemMacAddress not found in device object %s - %s" % (device['name'],
+                                                                                                              device.keys()))
 
         # Get all the configlets assigned to the device.
         configlets = self.get_configlets_by_device_id(device['systemMacAddress'])
@@ -313,8 +307,8 @@ class CvpApi(object):
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
         except Exception as e:
-            self.log.debug('Device %s : %s'%(device['fqdn'],e))
-            raise Exception ("update_configlets_on_device:%s" %e)
+            self.log.debug('Device %s : %s' % (device['fqdn'], e))
+            raise Exception("update_configlets_on_device:%s" % e)
         configlets = []
         for configlet in self.get_configlets_by_device_id(device['systemMacAddress']):
             configlets.append(configlet['name'])
@@ -346,18 +340,18 @@ class CvpApi(object):
         if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
             device['systemMacAddress'] = device['key']
         if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" % device['name'])
         if len(add_imageBundle) > 0 and len(del_imageBundle) > 0:
-            raise Exception("Attempting to Delete and Add Imagebundles on %s" %device['name'])
+            raise Exception("Attempting to Delete and Add Imagebundles on %s" % device['name'])
         else:
             if 'key' in add_imageBundle.keys():
-                self.log.debug('Attempt to update %s on %s' %(add_imageBundle['name'], device['name']))
-                info = '%s Update image: %s on %s' %(app_name, add_imageBundle['name'], device['name'])
-                del_imageBundle = {'key':'','name':''}
+                self.log.debug('Attempt to update %s on %s' % (add_imageBundle['name'], device['name']))
+                info = '%s Update image: %s on %s' % (app_name, add_imageBundle['name'], device['name'])
+                del_imageBundle = {'key': '', 'name': ''}
             elif 'key' in del_imageBundle.keys():
-                self.log.debug('Attempt to remove %s on %s' %(del_imageBundle['name'], device['name']))
-                info = '%s Remove image: %s on %s' %(app_name, del_imageBundle['name'], device['name'])
-                add_imageBundle = {'key':'','name':''}
+                self.log.debug('Attempt to remove %s on %s' % (del_imageBundle['name'], device['name']))
+                info = '%s Remove image: %s on %s' % (app_name, del_imageBundle['name'], device['name'])
+                add_imageBundle = {'key': '', 'name': ''}
             else:
                 raise Exception("imageBundle_key check: No imageBundle specified")
             info_preview = '<b>Image Update:</b> on Device' + device['name']
@@ -383,14 +377,13 @@ class CvpApi(object):
             try:
                 self.clnt.post(url, data=data, timeout=self.request_timeout)
             except Exception as e:
-                raise Exception ("update_imageBundle_on_device:%s" %e)
-                self.log.debug('Device %s : %s'%(device['fqdn'],e))
+                # pylint: disable=unreachable
+                raise Exception("update_imageBundle_on_device:%s" % e)
+                self.log.debug('Device %s : %s' % (device['fqdn'], e))
             if create_task:
                 url = '/provisioning/v2/saveTopology.do'
                 tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
                 return tasks
-
-
 
     def reset_device(self, app_name, device, create_task=True):
         ''' Reset device by moving it to the Undefined Container.
@@ -409,19 +402,19 @@ class CvpApi(object):
                     Ex: {u'data': {u'status': u'success', u'taskIds': []}}
         '''
         info = '%s Reseting device %s moving it to Undefined' % (app_name,
-                                                        device['fqdn'])
+                                                                 device['fqdn'])
         self.log.debug('Attempting to Reset device %s moving it to Undefined'
                        % (device['fqdn']))
         # Allow for deviceId key name variations
         if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
             device['systemMacAddress'] = device['key']
         if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" % device['name'])
         # Allow for parentContainerId key name variations
         if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
             device['parentContainerId'] = device['parentContainerKey']
         if 'parentContainerId' not in device.keys():
-            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+            raise KeyError("parentContainerId not found in device object %s" % device['name'])
         data = {'data': [{'info': info,
                           'infoPreview': info,
                           'action': 'reset',
@@ -439,12 +432,12 @@ class CvpApi(object):
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
         except CvpApiError as e:
-            if any(txt in str(e) for txt in ['Data already exists','undefined container']):
+            if any(txt in str(e) for txt in ['Data already exists', 'undefined container']):
                 self.log.debug('Device %s already in container Undefined'
-                               %device['fqdn'])
+                               % device['fqdn'])
         except Exception as e:
-            self.log.debug('Reset Device %s : %s'%(device['fqdn'],e))
-            raise Exception ("reset_device:%s" %e)
+            self.log.debug('Reset Device %s : %s' % (device['fqdn'], e))
+            raise Exception("reset_device:%s" % e)
         if create_task:
             url = '/provisioning/v2/saveTopology.do'
             tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
@@ -473,19 +466,19 @@ class CvpApi(object):
         if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
             device['systemMacAddress'] = device['key']
         if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" % device['name'])
         # Allow for parentContainerId key name variations
         if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
             device['parentContainerId'] = device['parentContainerKey']
         if 'parentContainerId' not in device.keys():
-            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+            raise KeyError("parentContainerId not found in device object %s" % device['name'])
         # Add action for moving device to specified container
         try:
-            self.move_device_to_container('%s:provision_device'%app_name, device, container,
+            self.move_device_to_container('%s:provision_device' % app_name, device, container,
                                           create_task=False)
         except Exception as e:
-            self.log.debug('Provision Device - move %s : %s'%(device['fqdn'],e))
-            raise Exception ("provsion_device-move_to_container:%s" %e)
+            self.log.debug('Provision Device - move %s : %s' % (device['fqdn'], e))
+            raise Exception("provsion_device-move_to_container:%s" % e)
         # Don't save configlet action if there is an image bundle to add
         if 'key' in imageBundle.keys():
             configlet_task = False
@@ -497,8 +490,8 @@ class CvpApi(object):
             created_tasks = self.update_configlets_on_device(app_name, device, configlets, [],
                                                              configlet_task)
         except Exception as e:
-            self.log.debug('Provision Device - configlets %s : %s'%(device['fqdn'],e))
-            raise Exception ("provsion_device-update_configlets:%s" %e)
+            self.log.debug('Provision Device - configlets %s : %s' % (device['fqdn'], e))
+            raise Exception("provsion_device-update_configlets:%s" % e)
         # If configlet action created tasks then don't action imageBundles
         # Skip if no imageBundles specified
         if not configlet_task and 'key' in imageBundle.keys():
@@ -506,8 +499,8 @@ class CvpApi(object):
                 created_tasks = self.update_imageBundle_on_device(app_name, device, imageBundle, {},
                                                                   create_task)
             except Exception as e:
-                self.log.debug('Provision Device - imageBundle %s : %s'%(device['fqdn'],e))
-                raise Exception ("provsion_device-update_imageBundle:%s" %e)
+                self.log.debug('Provision Device - imageBundle %s : %s' % (device['fqdn'], e))
+                raise Exception("provsion_device-update_imageBundle:%s" % e)
         return created_tasks
 
     def apply_configlets_to_container(self, app_name, container, new_configlets, create_task=True):
@@ -612,8 +605,8 @@ class CvpApi(object):
         self.log.debug('v2 Inventory API Call')
         # Get the actual configlet config using getConfigletByName
         configlets = self.clnt.get('/configlet/getConfiglets.do?'
-                           'startIndex=%d&endIndex=%d' % (start, end),
-                           timeout=self.request_timeout)
+                                   'startIndex=%d&endIndex=%d' % (start, end),
+                                   timeout=self.request_timeout)
         if 'data' in configlets:
             for configlet in configlets['data']:
                 full_cfglt_data = self.get_configlet_by_name(
@@ -754,10 +747,10 @@ class CvpApi(object):
                           'childTasks': [],
                           'parentTask': '',
                           'toIdType': 'container'}]}
-        if operation is 'add':
+        if operation == 'add':
             data['data'][0]['toId'] = parent_key
             data['data'][0]['toName'] = parent_name
-        elif operation is 'delete':
+        elif operation == 'delete':
             data['data'][0]['fromId'] = parent_key
             data['data'][0]['fromName'] = parent_name
 
@@ -872,8 +865,7 @@ class CvpApi(object):
             container['name'] = container['Name']
             container['key'] = container['Key']
             full_cont_info = self.get_container_by_id(container['Key'])
-            if (full_cont_info is not None and
-                    container['Key'] != 'root'):
+            if (full_cont_info is not None and container['Key'] != 'root'):
                 container['parentName'] = full_cont_info['parentName']
                 full_parent_info = self.get_container_by_name(full_cont_info['parentName'])
                 if full_parent_info is not None:
@@ -901,7 +893,7 @@ class CvpApi(object):
         '''
         self.log.debug('Get info for container %s' % name)
         containers = self.clnt.get('/provisioning/searchTopology.do?queryParam=%s'
-                              '&startIndex=0&endIndex=0' % qplus(name))
+                                   '&startIndex=0&endIndex=0' % qplus(name))
         if containers['total'] > 0 and containers['containerList']:
             for container in containers['containerList']:
                 if container['name'] == name:
@@ -946,8 +938,8 @@ class CvpApi(object):
         self.log.debug('get_devices_in_container: by Id')
         devices = []
         all_elements = self.clnt.get('/provisioning/getNetElementList.do?'
-                                    'nodeId=%s&startIndex=0&endIndex=0&ignoreAdd=false'
-                                     %key,timeout=self.request_timeout)
+                                     'nodeId=%s&startIndex=0&endIndex=0&ignoreAdd=false'
+                                     % key, timeout=self.request_timeout)
         for device in all_elements["netElementList"]:
             devices.append(device)
         return devices
@@ -1006,12 +998,12 @@ class CvpApi(object):
         if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
             device['systemMacAddress'] = device['key']
         if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" %device['name'])
+            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" % device['name'])
         # Allow for parentContainerId key name variations
         if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
             device['parentContainerId'] = device['parentContainerKey']
         if 'parentContainerId' not in device.keys():
-            raise KeyError("parentContainerId not found in device object %s" %device['name'])
+            raise KeyError("parentContainerId not found in device object %s" % device['name'])
         from_id = device['parentContainerId']
         data = {'data': [{'info': info,
                           'infoPreview': info,
@@ -1032,15 +1024,15 @@ class CvpApi(object):
         except CvpApiError as e:
             if any(txt in str(e) for txt in ['Data already exists']):
                 self.log.debug('Device %s already in container %s'
-                               %(device['fqdn'],container['name']))
+                               % (device['fqdn'], container['name']))
         except Exception as e:
-            self.log.debug('Move %s to %s : %s'%(device['name'],container['name'],e))
-            raise Exception ("move_device:%s" %e)
+            self.log.debug('Move %s to %s : %s' % (device['name'], container['name'], e))
+            raise Exception("move_device:%s" % e)
         if create_task:
             url = '/provisioning/v2/saveTopology.do'
             tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
             return tasks
-    
+
     # ~Image Related API Calls
 
     def get_image_bundles(self, start=0, end=0):
@@ -1061,7 +1053,7 @@ class CvpApi(object):
         return self.clnt.get('/image/getImageBundles.do?queryparam=&'
                              'startIndex=%d&endIndex=%d' % (start, end),
                              timeout=self.request_timeout)
-    
+
     # ~Task Related API Calls
 
     def get_tasks(self, start=0, end=0):
@@ -1113,7 +1105,7 @@ class CvpApi(object):
         self.log.debug('get_task_by_id: task_id: %s' % task_id)
         try:
             task = self.clnt.get('/task/getTaskById.do?taskId=%s' % task_id,
-                                    timeout=self.request_timeout)
+                                 timeout=self.request_timeout)
         except CvpApiError as error:
             self.log.debug('Caught error: %s attempting to get task.' % error)
             # Catch an invalid task_id error and return None
@@ -1159,4 +1151,4 @@ class CvpApi(object):
         self.log.debug('cancel_task: task_id: %s' % task_id)
         data = {'data': [task_id]}
         return self.clnt.post('/task/cancelTask.do', data=data,
-                       timeout=self.request_timeout)
+                              timeout=self.request_timeout)
