@@ -25,7 +25,7 @@ __metaclass__ = type
 ANSIBLE_METADATA = {
     'metadata_version': '1.0',
     'status': ['preview'],
-    'supported_by': 'aristanetworks'
+    'supported_by': 'community'
 }
 
 # Required by Ansible and CVP
