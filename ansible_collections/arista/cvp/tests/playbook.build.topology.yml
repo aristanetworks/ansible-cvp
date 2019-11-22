@@ -14,13 +14,20 @@
         name: veos01
         configlets:
           - ANSIBLE_TESTING_VEOS
+<<<<<<< HEAD
           - veos01-basic-configuration
         parent_container: MLAG01
         imageBundle: []
+=======
+          - SYS_TelemetryBuilderV2_172.23.0.2_1
+          - veos01-basic-configuration
+          - SYS_TelemetryBuilderV2
+>>>>>>> Release grant v1.0.1 (#77)
       veos02:
         name: veos02
         configlets:
           - ANSIBLE_TESTING_VEOS
+<<<<<<< HEAD
           - veos02-basic-configuration
         parent_container: MLAG01
         imageBundle: []
@@ -30,6 +37,17 @@
           - veos03-basic-configuration
         parent_container: Spines
         imageBundle: []
+=======
+          - SYS_TelemetryBuilderV2_172.23.0.3_1
+          - SYS_TelemetryBuilderV2
+          - veos02-basic-configuration
+      veos03:
+        name: veos03
+        configlets:
+          - SYS_TelemetryBuilderV2_172.23.0.4_1
+          - SYS_TelemetryBuilderV2
+          - veos03-basic-configuration
+>>>>>>> Release grant v1.0.1 (#77)
     containers_provision:
         Fabric:
           parent_container: Tenant
