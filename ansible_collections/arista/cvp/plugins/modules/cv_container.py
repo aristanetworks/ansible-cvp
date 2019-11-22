@@ -830,6 +830,32 @@ def delete_topology(module, intended, facts):
     return [False, {'containers_deleted': "0"}]
 
 
+def get_tasks(taskIds, module):
+    """
+    Collect TASK INFO from CVP.
+
+    Parameters
+    ----------
+    taskIds : list
+        list of tasks ID to get.
+    module : AnsibleModule
+        Ansible Module with connection information.
+
+    Returns
+    -------
+    list
+        List of Task information.
+    """
+
+    tasksList = list()
+    # remove duplicate entries
+    taskIds = list(set(taskIds))
+    # Get task content from CVP
+    for taskId in taskIds:
+        tasksList.append(task_info(module=module, taskId=taskId))
+    return tasksList
+
+
 def main():
     """ main entry point for module execution
     """
@@ -845,8 +871,9 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
-    result = dict(changed=False, cv_container={})
-    result['cv_container']['tasks'] = list()
+    result = dict(changed=False, data={})
+    result['data']['taskIds'] = list()
+    result['data']['tasks'] = list()
     module.client = connect(module)
     deletion_process = None
     creation_process = None
@@ -858,33 +885,33 @@ def main():
                                                          intended=module.params['topology'],
                                                          facts=module.params['cvp_facts'])
                 if creation_process[0]:
-                    result['cv_container']['changed'] = True
-                    result['cv_container']['creation_result'] = creation_process[1]
+                    result['data']['changed'] = True
+                    result['data']['creation_result'] = creation_process[1]
                 # -> Start process to move devices to targetted containers
                 move_process = move_devices_to_container(module=module,
                                                          intended=module.params['topology'],
                                                          facts=module.params['cvp_facts'])
                 if move_process is not None:
-                    result['cv_container']['changed'] = True
+                    result['data']['changed'] = True
                     # If a list of task exists, we expose it
                     if 'taskIds' in move_process['moved_devices']:
                         for taskId in move_process['moved_devices']['taskIds']:
-                            result['cv_container']['tasks'].append(task_info(module=module, taskId=taskId))
+                            result['data']['taskIds'].append(taskId)
                     # move_process['moved_devices'].pop('taskIds',None)
-                    result['cv_container']['moved_result'] = move_process['moved_devices']
+                    result['data']['moved_result'] = move_process['moved_devices']
 
                 # -> Start process to move devices to targetted containers
                 attached_process = attached_configlet_to_container(module=module,
                                                                    intended=module.params['topology'],
                                                                    facts=module.params['cvp_facts'])
                 if attached_process is not None:
-                    result['cv_container']['changed'] = True
+                    result['data']['changed'] = True
                     # If a list of task exists, we expose it
                     if 'taskIds' in attached_process['attached_configlet']:
                         for taskId in attached_process['attached_configlet']['taskIds']:
-                            result['cv_container']['tasks'].append(task_info(module=module, taskId=taskId))
+                            result['data']['taskIds'].append(taskId)
                     # move_process['moved_devices'].pop('taskIds',None)
-                    result['cv_container']['attached_configlet'] = attached_process['attached_configlet']
+                    result['data']['attached_configlet'] = attached_process['attached_configlet']
 
         # If MODE is override we also delete containers with no device and not listed in our topology
         if module.params['mode'] == 'override':
@@ -898,8 +925,8 @@ def main():
                                                             intended=dict(),
                                                             facts=module.params['cvp_facts'])
             if deletion_process[0]:
-                result['cv_container']['changed'] = True
-                result['cv_container']['deletion_result'] = deletion_process[1]
+                result['data']['changed'] = True
+                result['data']['deletion_result'] = deletion_process[1]
 
         # If MODE is DELETE then we start process to delete topology
         elif module.params['mode'] == 'delete':
@@ -909,8 +936,14 @@ def main():
                                                             intended=module.params['topology'],
                                                             facts=module.params['cvp_facts'])
                 if deletion_topology_process[0]:
-                    result['cv_container']['changed'] = True
-                    result['cv_container']['deletion_result'] = deletion_topology_process[1]
+                    result['data']['changed'] = True
+                    result['data']['deletion_result'] = deletion_topology_process[1]
+
+        if len(result['data']['taskIds']) > 0:
+            result['data']['tasks'] = get_tasks(module=module, taskIds=result['data']['taskIds'])
+
+        # DEPRECATION: Make a copy to support old namespace.
+        result['cv_container'] = result['data']
 
     except CvpApiError as e:
         module.fail_json(msg=str(e))
