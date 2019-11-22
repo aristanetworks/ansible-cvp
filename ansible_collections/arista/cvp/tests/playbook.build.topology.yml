@@ -106,7 +106,7 @@
       cv_device:
         devices: "{{device_provision}}"
         cvp_facts: '{{FACTS.ansible_facts}}'
-        device_filter: ['veos']
+        device_filter: 'veos'
       register: DEVICE
 
     - name: '#08 - Display cv_device'
