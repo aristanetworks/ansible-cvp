@@ -182,9 +182,6 @@ def cv_facts(module):
         # Add applied Configlets
         container['configlets'] = []
         applied_configlets = module.client.api.get_configlets_by_container_id(container['key'])['configletList']
-        # FIXME: Issue #83 debug
-        # if container['name'] == 'MLAG01':
-        #     module.fail_json(msg=str(module.client.api.get_configlets_by_container_id(container['key'])))
         for configlet in applied_configlets:
             container['configlets'].append(configlet['name'])
         # Add applied Images
