@@ -99,14 +99,14 @@ The docker container approach for development can be used to ensure that everybo
 
 ```shell
 $ docker build -f Dockerfile-2.7 -t ansible-cvp:latest2.7 .
-$ docker exec -it --rm ansible-cvp:latest2.7 sh
+$ docker run -it --rm ansible-cvp:latest2.7 sh
 ```
 
 - Build Docker with __Python 3.x__
 
 ```shell
 $ docker build -f Dockerfile-3 -t ansible-cvp:latest3 .
-$ docker exec -it --rm ansible-cvp:latest3 sh
+$ docker run -it --rm ansible-cvp:latest3 sh
 ```
 
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
