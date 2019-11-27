@@ -1,0 +1,50 @@
+---
+- name: Build Testing topology using Dev CVP servers
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    - quiet: True
+  ### Configuration tasks
+  tasks:
+    - name: '#01 - Collect initial facts with default config from {{inventory_hostname}}'
+      cv_facts:
+      register: FACTS
+
+    - name: "#03 - Check if config key does not exists in devices"
+      assert:
+        that:
+          - "'config' not in item"
+        fail_msg: 'Config has been found in facts'
+        success_msg: "Configuration is absent from facts"
+        quiet: '{{quiet}}'
+      with_items:
+        - '{{FACTS.ansible_facts.devices}}'
+      # ignore_errors: yes
+
+    # - name: '#04 - Save FACTS to issue89.log'
+    #   copy: 
+    #     content: '{{ FACTS }}' 
+    #     dest: 'issue89.default.log'
+
+    - name: '#05 - Collect initial facts with gather_subset config from {{inventory_hostname}}'
+      cv_facts:
+        gather_subset:
+          config
+      register: FACTS
+
+    - name: "#07 - Check if config key does not exists in devices"
+      assert:
+        that:
+          - "'config' in item"
+        success_msg: "Config has been found in facts"
+        fail_msg: "Configuration is absent from facts"
+        quiet: '{{quiet}}'
+      with_items:
+        - ' {{FACTS.ansible_facts.devices}} '
+    #   ignore_errors: yes
+
+    # - name: '#08 - Save FACTS to issue89.config.log'
+    #   copy: 
+    #     content: '{{ FACTS }}' 
+    #     dest: 'issue89.config.log'

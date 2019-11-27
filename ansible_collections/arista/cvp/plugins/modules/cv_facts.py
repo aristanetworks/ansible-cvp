@@ -41,15 +41,36 @@ author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns the list of devices, configlets, containers and images
+options:
+  gather_subset:
+    description:
+      - When supplied, this argument will restrict the facts collected
+      - to a given subset.  Possible values for this argument include
+      - all, hardware, config, and interfaces.  Can specify a list of
+      - values to include a larger subset.  Values can also be used
+      - with an initial C(M(!)) to specify that a specific subset should
+      - not be collected.
+    required: false
+    default: ['default']
+    type: list
+    choices:
+      - default
+      - config
 '''
 
 EXAMPLES = r'''
 ---
-    # Collect CVP Facts as init process
+# Collect CVP Facts as init process without devices configuration
 - name: "Gather CVP facts from {{inventory_hostname}}"
   arista.cvp.cv_facts:
   register: cvp_facts
 
+# Collect CVP facts with devices configuration
+- name: "Gather CVP facts from {{inventory_hostname}}"
+  arista.cvp.cv_facts:
+    gather_subset:
+      config
+  register: cvp_facts
 '''
 
 
@@ -106,8 +127,8 @@ def cv_facts(module):
 
     # Work through Devices list adding device specific information
     for device in facts['devices']:
-        # Add designed config for device
-        if device['streamingStatus'] == "active":
+        # Add designed config for streaming devices (#61) only and if gather_subset is set to config (#89)
+        if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
             device['config'] = module.client.api.get_device_configuration(device['key'])
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
@@ -182,7 +203,7 @@ def cv_facts(module):
         # Add applied Configlets
         container['configlets'] = []
         applied_configlets = module.client.api.get_configlets_by_container_id(container['key'])['configletList']
-        for device in applied_devices:
+        for configlet in applied_configlets:
             container['configlets'].append(configlet['name'])
         # Add applied Images
         container['imageBundle'] = ""
@@ -228,7 +249,12 @@ def cv_facts(module):
 def main():
     """ main entry point for module execution
     """
-    argument_spec = dict()
+    argument_spec = dict(
+        gather_subset=dict(type='list',
+                           elements='str',
+                           required=False,
+                           choices=['default', 'config'],
+                           default='default'))
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
