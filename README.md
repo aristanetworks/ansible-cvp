@@ -87,8 +87,8 @@ $ cd ansible-cvp
 __Build and install collection__
 
 ```shell
-$ ansible-galaxy collection build --force arista/cvp
-$ ansible-galaxy collection install arista.cvp.*.tar.gz
+$ ansible-galaxy collection build --force ansible_collection/arista/cvp
+$ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
 ```
 
 ### Docker for testing
