@@ -27,33 +27,89 @@ ANSIBLE_METADATA = {
     'status': ['preview'],
     'supported_by': 'community'
 }
-
+import logging
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 
+
 DOCUMENTATION = r'''
 ---
-module: cv_facts
+module: cv_facts_v2
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
-  - Returns the list of devices, configlets, containers and images
+  - Returns list of devices, configlets, containers and images
+options:
+  gather_subset:
+    description:
+      - When supplied, this argument will restrict the facts collected
+      - to a given subset.  Possible values for this argument include
+      - all, hardware, config, and interfaces.  Can specify a list of
+      - values to include a larger subset.  Values can also be used
+      - with an initial C(M(!)) to specify that a specific subset should
+      - not be collected.
+    required: false
+    default: ['default']
+    type: list
+    choices:
+      - default
+      - config
+  facts:
+    description:
+      - List of facts to retrieve from CVP.
+      - By default, cv_facts returns facts for devices/configlets/containers/tasks
+      - Using this parameter allows user to limit scope to a subet of information.
+    required: false
+    default: ['all']
+    type: list
+    choices:
+      - all
+      - devices
+      - containers
+      - configlets
+      - tasks
 '''
 
 EXAMPLES = r'''
 ---
-    # Collect CVP Facts as init process
-- name: "Gather CVP facts from {{inventory_hostname}}"
-  arista.cvp.cv_facts:
-  register: cvp_facts
+  tasks:
+    - name: '#01 - Collect devices facts from {{inventory_hostname}}'
+      cv_facts_v2:
+        facts:
+          devices
+      register: FACTS_DEVICES
 
+    - name: '#02 - Collect devices facts (with config) from {{inventory_hostname}}'
+      cv_facts_v2:
+        gather_subset:
+          config
+        facts:
+          devices
+      register: FACTS_DEVICES_CONFIG
+
+    - name: '#03 - Collect confilgets facts from {{inventory_hostname}}'
+      cv_facts_v2:
+        facts:
+          configlets
+      register: FACTS_CONFIGLETS
+
+    - name: '#04 - Collect containers facts from {{inventory_hostname}}'
+      cv_facts_v2:
+        facts:
+          containers
+      register: FACTS_CONTAINERS
+
+    - name: '#10 - Collect ALL facts from {{inventory_hostname}}'
+      cv_facts_v2:
+      register: FACTS
 '''
 
 
-def connect(module):
+
+def connect(module, debug=False):
     ''' Connects to CVP device using user provided credentials from playbook.
     :param module: Ansible module with parameters and client connection.
     :return: CvpClient object with connection instantiated.
@@ -64,6 +120,8 @@ def connect(module):
     port = connection.get_option("port")
     user = connection.get_option("remote_user")
     pswd = connection.get_option("password")
+    if debug:
+        logging.debug('*** Connecting to CVP')
     try:
         client.connect([host],
                        user,
@@ -73,51 +131,53 @@ def connect(module):
                        )
     except CvpLoginError as e:
         module.fail_json(msg=str(e))
+
+    if debug:
+        logging.debug('*** Connected to CVP')
+
     return client
 
 
-def cv_facts(module):
-    ''' Connects to CVP device using user provided credentials from module.
-    :param module: Ansible module with parameters and client connection.
-    :return: CvpClient object with connection instantiated.
-    '''
-    facts = {}
-    # Get version data for CVP
-    facts['cvp_info'] = module.client.api.get_cvp_info()
+def facts_devices(module, facts, debug=False):
+    """
+    Collect facts of all devices.
 
-    # Build required data for devices in CVP - Device Data, Config, Associated Container,
-    # Associated Images, and Associated Configlets
-    deviceField = {'hostname': 'name', 'fqdn': 'fqdn', 'complianceCode': 'complianceCode',
-                   'complianceIndication': 'complianceIndication', 'version': 'version',
-                   'ipAddress': 'ipAddress', 'systemMacAddress': 'key',
-                   'parentContainerKey': 'parentContainerKey',
-                   'streamingStatus': 'streamingStatus'}
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where devices information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with devices content added.
+    """
+
     facts['devices'] = []
-
     # Get Inventory Data for All Devices
     inventory = module.client.api.get_inventory()
-    # Reduce device data to required fields
     for device in inventory:
-        deviceFacts = {}
-        for field in device.keys():
-            if field in deviceField:
-                deviceFacts[deviceField[field]] = device[field]
-        facts['devices'].append(deviceFacts)
-
-    # Work through Devices list adding device specific information
-    for device in facts['devices']:
+        if debug:
+            logging.debug('  -> Working on %s', device['hostname'])
         # Add designed config for device
-        if device['streamingStatus'] == "active":
+        if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
             device['config'] = module.client.api.get_device_configuration(device['key'])
+
         # Add parent container name
         container = module.client.api.get_container_by_id(device['parentContainerKey'])
         device['parentContainerName'] = container['name']
+
         # Add Device Specific Configlets
         configlets = module.client.api.get_configlets_by_device_id(device['key'])
         device['deviceSpecificConfiglets'] = []
         for configlet in configlets:
             if int(configlet['containerCount']) == 0:
                 device['deviceSpecificConfiglets'].append(configlet['name'])
+
         # Add ImageBundle Info
         device['imageBundle'] = ""
         deviceInfo = module.client.api.get_net_element_info_by_device_id(device['key'])
@@ -128,117 +188,219 @@ def cv_facts(module):
                 if deviceInfo['imageBundleMapper'].values()[0]['type'] == 'netelement':
                     device['imageBundle'] = deviceInfo['bundleName']
 
-    # Build required data for configlets in CVP - Configlet Name, Config, Associated Containers,
-    # Associated Devices, and Configlet Type
-    configletField = {'name': 'name', 'config': 'config', 'type': 'type', 'key': 'key'}
-    facts['configlets'] = []
+        # Add device to facts list
+        facts['devices'].append(device)
 
-    # Get List of all configlets
+    return facts
+
+
+def facts_configlets(module, facts, debug=False):
+    """
+    Collect facts of all configlets.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where configlets information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with configlets content added.
+    """
+
+    facts['configlets'] = []
     configlets = module.client.api.get_configlets()['data']
     # Reduce configlet data to required fields
     for configlet in configlets:
-        configletFacts = {}
-        for field in configlet.keys():
-            if field in configletField:
-                configletFacts[configletField[field]] = configlet[field]
-        facts['configlets'].append(configletFacts)
-
-    # Work through Configlet list adding Configlet specific information
-    for configlet in facts['configlets']:
-        # Add applied Devices
+        if debug:
+            logging.debug('  -> Working on %s', configlet['name'])
+        # Get list of devices attached to configlet.
         configlet['devices'] = []
         applied_devices = module.client.api.get_devices_by_configlet(configlet['name'])
         for device in applied_devices['data']:
             configlet['devices'].append(device['hostName'])
-        # Add applied Containers
+
+        # Get list of containers attached to configlet.
         configlet['containers'] = []
         applied_containers = module.client.api.get_containers_by_configlet(configlet['name'])
         for container in applied_containers['data']:
             configlet['containers'].append(container['containerName'])
 
-    # Build required data for containers in CVP - Container Name, parent container, Associated Configlets
-    # Associated Devices, and Child Containers
-    containerField = {'name': 'name', 'parentName': 'parentName', 'childContainerId': 'childContainerKey',
-                      'key': 'key'}
+        # Add configlet to facts list
+        facts['configlets'].append(configlet)
+
+    return facts
+
+
+def facts_containers(module, facts, debug=False):
+    """
+    Collect facts of all containers.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where containers information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with containers content added.
+    """
+
     facts['containers'] = []
 
     # Get List of all Containers
     containers = module.client.api.get_containers()['data']
-    # Reduce container data to required fields
     for container in containers:
-        containerFacts = {}
-        for field in container.keys():
-            if field in containerField:
-                containerFacts[containerField[field]] = container[field]
-        facts['containers'].append(containerFacts)
-
-    # Work through Container list adding Container specific information
-    for container in facts['containers']:
-        # Add applied Devices
+        if debug:
+            logging.debug('  -> Working on %s', container['name'])
         container['devices'] = []
+        # Get list of devices attached to container.
         applied_devices = module.client.api.get_devices_by_container_id(container['key'])
         for device in applied_devices:
             container['devices'].append(device['fqdn'])
-        # Add applied Configlets
+
+        # Get list of configlets attached to container.
         container['configlets'] = []
         applied_configlets = module.client.api.get_configlets_by_container_id(container['key'])['configletList']
-        for device in applied_devices:
+        for configlet in applied_configlets:
             container['configlets'].append(configlet['name'])
+
         # Add applied Images
         container['imageBundle'] = ""
         applied_images = module.client.api.get_image_bundle_by_container_id(container['key'])['imageBundleList']
         if len(applied_images) > 0:
             container['imageBundle'] = applied_images[0]['name']
 
-    # Build required data for images in CVP - Image Name, certified, Image Components
-    imageField = {'name': 'name', 'isCertifiedImageBundle': 'certifified', 'imageIds': 'imageNames', 'key': 'key'}
-    facts['imageBundles'] = []
-
-    # Get List of all Image Bundles
-    imageBundles = module.client.api.get_image_bundles()['data']
-    # Reduce image data to required fields
-    for imageBundle in imageBundles:
-        imageBundleFacts = {}
-        for field in imageBundle.keys():
-            if field in imageField:
-                imageBundleFacts[imageField[field]] = imageBundle[field]
-        facts['imageBundles'].append(imageBundleFacts)
-
-    # Build required data for tasks in CVP - work order Id, current task status, name
-    # description
-    tasksField = {'name': 'name', 'workOrderId': 'taskNo', 'workOrderState': 'status',
-                  'currentTaskName': 'currentAction', 'description': 'description',
-                  'workOrderUserDefinedStatus': 'displayedStutus', 'note': 'note',
-                  'taskStatus': 'actionStatus'}
-    facts['tasks'] = []
-
-    # Get List of all Tasks
-    tasks = module.client.api.get_tasks()['data']
-    # Reduce task data to required fields
-    for task in tasks:
-        taskFacts = {}
-        for field in task.keys():
-            if field in tasksField:
-                taskFacts[tasksField[field]] = task[field]
-        facts['tasks'].append(taskFacts)
+        # Add container to facts list
+        facts['containers'].append(container)
 
     return facts
 
 
-def main():
-    """ main entry point for module execution
+def facts_tasks(module, facts, debug=False):
     """
-    argument_spec = dict()
+    Collect facts of all tasks.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where tasks information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with tasks content added.
+    """
+
+    facts['tasks'] = []
+    # Get List of all Tasks
+    tasks = module.client.api.get_tasks()['data']
+    for task in tasks:
+        facts['tasks'].append(task)
+    return facts
+
+
+def facts_builder(module, debug=False):
+    """
+    Method to call every fact module for either devices/containers/configlets.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts structure to return by Ansible
+
+    """
+    facts = {}
+    # Get version data for CVP
+    if debug:
+        logging.debug('** Collecting CVP Information (version)')
+    facts['cvp_info'] = module.client.api.get_cvp_info()
+
+    # Extract devices facts
+    if 'all' in module.params['facts'] or 'devices' in module.params['facts']:
+        if debug:
+            logging.debug('** Collecting devices facts ...')
+        facts = facts_devices(module=module, facts=facts, debug=debug)
+
+    # Extract configlet information
+    if 'all' in module.params['facts'] or 'configlets' in module.params['facts']:
+        if debug:
+            logging.debug('** Collecting configlets facts ...')
+        facts = facts_configlets(module=module, facts=facts, debug=debug)
+
+    # Extract containers information
+    if 'all' in module.params['facts'] or 'containers' in module.params['facts']:
+        if debug:
+            logging.debug('** Collecting containers facts ...')
+        facts = facts_containers(module=module, facts=facts, debug=debug)
+
+    # Extract tasks information
+    if 'all' in module.params['facts'] or 'tasks' in module.params['facts']:
+        if debug:
+            logging.debug('** Collecting facts facts ...')
+        facts = facts_tasks(module=module, facts=facts, debug=debug)
+
+
+    # End of Facts module
+    if debug:
+        logging.debug('** All facts done')
+    return facts
+
+
+def main():
+    """ 
+    main entry point for module execution.
+    """
+    debug_module = True
+    if debug_module:
+        logging.basicConfig(format='%(asctime)s %(message)s', filename='cv_fact_v2.log', level=logging.DEBUG)
+
+    argument_spec = dict(
+        gather_subset=dict(type='list',
+                           elements='str',
+                           required=False,
+                           choices=['default', 'config'],
+                           default='default'),
+        facts=dict(type='list',
+                   elements='str',
+                   required=False,
+                   choices=['all','configlets','containers','devices','tasks','images'],
+                   default='all'))
+
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
+    # Forge standard Ansible output
     result = dict(changed=False, ansible_facts={})
 
-    module.client = connect(module)
+    # Connect to CVP Instance
+    module.client = connect(module, debug=debug_module)
 
-    result['ansible_facts'] = cv_facts(module)
-    result['changed'] = False
+    # Get Facts from CVP
+    result['ansible_facts'] = facts_builder(module, debug=debug_module)
 
+    # Standard Ansible outputs
     module.exit_json(**result)
 
 
