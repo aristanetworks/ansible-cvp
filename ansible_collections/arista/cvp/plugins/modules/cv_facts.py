@@ -57,6 +57,9 @@ options:
     choices:
       - default
       - config
+      - tasks_pending
+      - tasks_failed
+      - tasks_all
   facts:
     description:
       - List of facts to retrieve from CVP.
@@ -307,9 +310,31 @@ def facts_tasks(module, facts, debug=False):
     """
 
     facts['tasks'] = []
-    # Get List of all Tasks
-    tasks = module.client.api.get_tasks()['data']
+    tasks = []
+
+    # Get List of Tasks
+    if debug:
+        logging.debug('  -> Extracting tasks with %s', str(module.params['gather_subset']))
+
+    if 'tasks_pending' in module.params['gather_subset']:
+        # We only get pending tasks
+        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+
+    if 'tasks_all' in module.params['gather_subset']:
+        # User wants to get list of all tasks -- not default behavior
+        tasks.append(module.client.api.get_tasks()['data'])
+
+    if 'tasks_failed' in module.params['gather_subset']:
+        # User wants to get list of all tasks -- not default behavior
+        tasks.append(module.client.api.get_tasks_by_status(status='Failed'))
+
+    if 'default' in module.params['gather_subset']:
+        # By default we only extract pending tasks and not all tasks
+        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+
     for task in tasks:
+        if debug:
+            logging.debug('  -> Working on %s', task)
         facts['tasks'].append(task)
     return facts
 
@@ -329,8 +354,8 @@ def facts_builder(module, debug=False):
     -------
     dict
         facts structure to return by Ansible
-
     """
+
     facts = {}
     # Get version data for CVP
     if debug:
@@ -374,18 +399,28 @@ def main():
     """
     debug_module = True
     if debug_module:
-        logging.basicConfig(format='%(asctime)s %(message)s', filename='cv_fact_v2.log', level=logging.DEBUG)
+        logging.basicConfig(format='%(asctime)s %(message)s',
+                            filename='cv_fact_v2.log', level=logging.DEBUG)
 
     argument_spec = dict(
         gather_subset=dict(type='list',
                            elements='str',
                            required=False,
-                           choices=['default', 'config'],
+                           choices=['default',
+                                    'config',
+                                    'tasks_pending',
+                                    'tasks_all',
+                                    'tasks_failed'],
                            default='default'),
         facts=dict(type='list',
                    elements='str',
                    required=False,
-                   choices=['all','configlets','containers','devices','tasks','images'],
+                   choices=['all',
+                            'configlets',
+                            'containers',
+                            'devices',
+                            'tasks',
+                            'images'],
                    default='all'))
 
     module = AnsibleModule(argument_spec=argument_spec,
