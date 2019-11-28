@@ -395,7 +395,7 @@ def main():
     """
     main entry point for module execution.
     """
-    debug_module = True
+    debug_module = False
     if debug_module:
         logging.basicConfig(format='%(asctime)s %(message)s',
                             filename='cv_fact_v2.log', level=logging.DEBUG)
