@@ -35,21 +35,35 @@ from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import
 
 DOCUMENTATION = r'''
 ---
-module: cv_facts
+module: cv_facts_v1
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns the list of devices, configlets, containers and images
+options:
+  gather_subset:
+    description:
+      - When supplied, this argument will restrict the facts collected
+      - to a given subset.  Possible values for this argument include
+      - all, hardware, config, and interfaces.  Can specify a list of
+      - values to include a larger subset.  Values can also be used
+      - with an initial C(M(!)) to specify that a specific subset should
+      - not be collected.
+    required: false
+    default: ['default']
+    type: list
+    choices:
+      - default
+      - config
 '''
 
 EXAMPLES = r'''
 ---
     # Collect CVP Facts as init process
 - name: "Gather CVP facts from {{inventory_hostname}}"
-  arista.cvp.cv_facts:
+  arista.cvp.cv_facts_v1:
   register: cvp_facts
-
 '''
 
 
@@ -167,7 +181,6 @@ def cv_facts(module):
         for container in applied_containers['data']:
             configlet['containers'].append(container['containerName'])
         logging.debug('--> L156 - END OF CONFIGLET %s', configlet['name'])
-
 
     # Build required data for containers in CVP - Container Name, parent container, Associated Configlets
     # Associated Devices, and Child Containers

@@ -36,7 +36,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import
 
 DOCUMENTATION = r'''
 ---
-module: cv_facts_v2
+module: cv_facts
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
@@ -80,13 +80,13 @@ EXAMPLES = r'''
 ---
   tasks:
     - name: '#01 - Collect devices facts from {{inventory_hostname}}'
-      cv_facts_v2:
+      cv_facts:
         facts:
           devices
       register: FACTS_DEVICES
 
     - name: '#02 - Collect devices facts (with config) from {{inventory_hostname}}'
-      cv_facts_v2:
+      cv_facts:
         gather_subset:
           config
         facts:
@@ -94,22 +94,21 @@ EXAMPLES = r'''
       register: FACTS_DEVICES_CONFIG
 
     - name: '#03 - Collect confilgets facts from {{inventory_hostname}}'
-      cv_facts_v2:
+      cv_facts:
         facts:
           configlets
       register: FACTS_CONFIGLETS
 
     - name: '#04 - Collect containers facts from {{inventory_hostname}}'
-      cv_facts_v2:
+      cv_facts:
         facts:
           containers
       register: FACTS_CONTAINERS
 
     - name: '#10 - Collect ALL facts from {{inventory_hostname}}'
-      cv_facts_v2:
+      cv_facts:
       register: FACTS
 '''
-
 
 
 def connect(module, debug=False):
@@ -386,7 +385,6 @@ def facts_builder(module, debug=False):
             logging.debug('** Collecting facts facts ...')
         facts = facts_tasks(module=module, facts=facts, debug=debug)
 
-
     # End of Facts module
     if debug:
         logging.debug('** All facts done')
@@ -394,7 +392,7 @@ def facts_builder(module, debug=False):
 
 
 def main():
-    """ 
+    """
     main entry point for module execution.
     """
     debug_module = True
@@ -419,8 +417,7 @@ def main():
                             'configlets',
                             'containers',
                             'devices',
-                            'tasks',
-                            'images'],
+                            'tasks'],
                    default='all'))
 
     module = AnsibleModule(argument_spec=argument_spec,
