@@ -13,6 +13,8 @@ This module collects facts from CloudVision platform and return a dictionary for
 
 Module comes with 2 different options to allow user to select what information to retrieve from CVP:
 
+__Facts limitation:__
+
 - __`facts`__: A list of facts to retrieve from CVP. it can be one or more entries from the list:
     - `devices`
     - `containers`
@@ -20,11 +22,15 @@ Module comes with 2 different options to allow user to select what information t
     - `tasks`. 
 > If not specified, module will extract all this elements from CloudVision
 
+__Facts subset__
+
 - __`gather_subset`__: Allow user to extract an optional element from CloudVision.
     - `config`: Add device configuration in device facts. If not set, configuration is skipped. (applicable if `devices` is part of __facts__)
     - `tasks_pending`: Collect only facts from pending tasks on CloudVision. (applicable if `tasks` is part of __facts__)
     - `tasks_failed`: Collect only failed tasks information. (applicable if `tasks` is part of __facts__)
     - `tasks_all`: Collect all tasks information from CVP. (applicable if `tasks` is part of __facts__)
+
+Module supports inactive devices and 3rd part devices: When `gather_subset: config` is defined, only devices with flag `"streamingStatus": "active"` have their configuration collected into the facts.
 
 ## Usage
 
