@@ -86,7 +86,7 @@ Below is an example of expected output
 ```json
 {
     "changed": false,
-    "cv_container": {
+    "data": {
         "attached_configlet": {
             "configlet_attached": 4,
             "list": [

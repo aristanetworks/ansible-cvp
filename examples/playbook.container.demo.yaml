@@ -136,6 +136,7 @@
       debug:
         msg: "{{cv_container}}"
 
+
     - name: "RUN03 - Gather CVP facts from {{inventory_hostname}}"
       cv_facts:
       register: cvp_facts

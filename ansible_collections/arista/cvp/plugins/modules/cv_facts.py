@@ -25,7 +25,7 @@ __metaclass__ = type
 ANSIBLE_METADATA = {
     'metadata_version': '1.0',
     'status': ['preview'],
-    'supported_by': 'aristanetworks'
+    'supported_by': 'community'
 }
 
 from ansible.module_utils.basic import AnsibleModule
@@ -182,7 +182,7 @@ def cv_facts(module):
         # Add applied Configlets
         container['configlets'] = []
         applied_configlets = module.client.api.get_configlets_by_container_id(container['key'])['configletList']
-        for device in applied_devices:
+        for configlet in applied_configlets:
             container['configlets'].append(configlet['name'])
         # Add applied Images
         container['imageBundle'] = ""

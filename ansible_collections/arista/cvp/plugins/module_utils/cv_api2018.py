@@ -38,7 +38,7 @@ except (AttributeError, ImportError):
 
 
 class CvpApi(object):
-    ''' CvpApi class contains calls to CVP 2019.1.x RESTful API.  The RESTful API
+    ''' CvpApi class contains calls to CVP 2018.2.x RESTful API.  The RESTful API
         parameters are passed in as parameters to the method.  The results of
         the RESTful API call are converted from json to a dict and returned.
         Where needed minimal processing is performed on the results.
@@ -101,7 +101,7 @@ class CvpApi(object):
                     are running a specific version of EOS.
         '''
         self.log.debug('get_inventory: called')
-        self.log.debug('2019 Inventory API Call')
+        self.log.debug('2018 Inventory API Call')
         data = self.clnt.get('/inventory/devices?provisioned=%s' % provisioned,
                              timeout=self.request_timeout)
         for dev in data:
