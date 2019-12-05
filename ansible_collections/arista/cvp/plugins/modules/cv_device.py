@@ -544,10 +544,10 @@ def devices_reset(module):
                     reset.append({cvp_device['name']: message})
                 else:
                     changed = True
-                    if 'taskIds' in device_action.keys():
-                        for taskId in device_action['taskIds']:
+                    if 'taskIds' in str(device_action):
+                        for taskId in device_action['data']['taskIds']:
                             newTasks.append(taskId)
-                        reset.append({cvp_device['name']: 'Reset-%s' % device_action['tasksIds']})
+                            reset.append({cvp_device['name']: 'Reset-%s' % taskId})
                     else:
                         reset.append({cvp_device['name']: 'Reset-No_Tasks'})
     taskList = get_tasks(taskid_list=newTasks, module=module)
@@ -578,7 +578,8 @@ def main():
         result['changed'], result['data'] = device_action(module)
     elif module.params['state'] == 'absent':
         # Reset devices when user configured state=absent
-        result['changed'], result['data'] = devices_reset(module)
+        result['changed'] = True
+        result['data'] = devices_reset(module)
 
     module.exit_json(**result)
 
