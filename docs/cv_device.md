@@ -48,6 +48,8 @@ Below is a basic playbook to collect facts:
           - SYS_TelemetryBuilderV2_172.23.0.2_1
           - veos01-basic-configuration
           - SYS_TelemetryBuilderV2
+        parentContainerName: DC1_VEOS
+        imageBundle: []
   tasks:
     - name: 'Collecting facts from CVP {{inventory_hostname}}.'
       cv_facts:
