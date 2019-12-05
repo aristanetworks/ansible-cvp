@@ -86,13 +86,14 @@ options:
     default: ['none']
     type: list
   state:
-    description: 
+    description:
         - If absent, configlets will be removed from CVP if they are not binded
         - to either a container or a device.
         - If present, configlets will be created or updated.
     required: false
     default: 'present'
-    type: string
+    choices: ['present', 'absent']
+    type: str
 '''
 
 EXAMPLES = r'''
