@@ -32,6 +32,8 @@
   <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
+More documentation is available in [project's wiki pages](https://github.com/aristanetworks/ansible-cvp/wiki)
+
 ## Modules overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
@@ -87,8 +89,8 @@ $ cd ansible-cvp
 __Build and install collection__
 
 ```shell
-$ ansible-galaxy collection build --force arista/cvp
-$ ansible-galaxy collection install arista.cvp.*.tar.gz
+$ ansible-galaxy collection build --force ansible_collection/arista/cvp
+$ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
 ```
 
 ### Docker for testing
