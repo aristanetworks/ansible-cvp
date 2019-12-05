@@ -139,3 +139,5 @@ Whit this example, `veos01` device will be reset with initial configuration (ZTP
         # Wait 7 minutes for device to reboot
         wait: 420
 ```
+
+> In this scenario, tasks are returned by CVP only if we run reset. If you run playbook with no task execution and then rerun same playbook to execute task, CVP won't return it.
