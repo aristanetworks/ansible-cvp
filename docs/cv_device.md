@@ -13,6 +13,7 @@ Module comes with a set of options:
 - `devices`: List of devices to manage.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `devices_filter`: Filter to apply intended mode on a set of configlet. If not used, then module only uses ADD mode. device_filter list devices that can be modified or deleted based on configlets entries.
+- `state`: `absent` or `present`. Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
 
 ## Usage
 
@@ -96,3 +97,45 @@ Below is an example of expected output
 ```
 
 
+## Use cases
+
+### Reset devices to undefined container
+
+Whit this example, `veos01` device will be reset with initial configuration (ZTP mode) and move back to `undefined` container.
+
+```yaml
+---
+- name: Build Testing topology using Dev CVP servers
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    DEVEL_CONTAINERS:
+      staging:
+        parent_container: Tenant
+    DEVEL_DEVICES:
+      veos01:
+        name: veos01
+        configlets:
+          - DEV_VEOS01
+        imageBundle: []
+        parentContainerName: staging
+  tasks:
+    - name: 'Collect facts from {{inventory_hostname}}'
+      cv_facts:
+      register: facts
+
+    - name: 'Reset devices on {{inventory_hostname}}'
+      cv_device:
+        devices: '{{DEVEL_DEVICES}}'
+        cvp_facts: '{{facts.ansible_facts}}'
+        device_filter: ['veos01']
+        state: absent
+      register: devices_result
+
+    - name: 'Run tasks'
+      cv_task:
+        tasks: '{{devices_result.data.tasks}}'
+        # Wait 7 minutes for device to reboot
+        wait: 420
+```
