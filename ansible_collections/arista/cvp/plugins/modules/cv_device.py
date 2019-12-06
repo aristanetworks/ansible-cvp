@@ -563,7 +563,10 @@ def main():
         devices=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
         device_filter=dict(type='list', default='none'),
-        state=dict(type='str', choices=['present', 'absent'], default='present', required=False))
+        state=dict(type='str',
+                   choices=['present', 'absent'],
+                   default='present',
+                   required=True))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
