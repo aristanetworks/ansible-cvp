@@ -566,7 +566,7 @@ def main():
         state=dict(type='str',
                    choices=['present', 'absent'],
                    default='present',
-                   required=True))
+                   required=False))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
@@ -574,6 +574,9 @@ def main():
     messages = dict(issues=False)
     # Connect to CVP instance
     module.client = connect(module)
+
+    # if 'state' not in module.params:
+    #     module.params['state']=present
 
     if module.params['state'] == 'present':
         # Configure devices on CVP
