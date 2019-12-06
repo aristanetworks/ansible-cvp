@@ -13,7 +13,9 @@ Module comes with a set of options:
 - `devices`: List of devices to manage.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `devices_filter`: Filter to apply intended mode on a set of configlet. If not used, then module only uses ADD mode. device_filter list devices that can be modified or deleted based on configlets entries.
-- `state`: `absent` or `present`. Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
+- `state`: . Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
+    - `absent`: Reset devices.
+    - `present`: Configure devices.
 
 ## Usage
 
@@ -61,6 +63,7 @@ Below is a basic playbook to collect facts:
         devices: "{{devices_inventory}}"
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         device_filter: ['veos']
+        state: present
       register: cvp_device
 ```
 
