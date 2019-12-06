@@ -66,6 +66,14 @@ options:
     required: false
     default: ['none']
     type: list
+  state:
+    description:
+        - If absent, devices will be removed from CVP and moved back to undefined.
+        - If present, devices will be configured or updated.
+    required: false
+    default: 'present'
+    choices: ['present', 'absent']
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -450,13 +458,115 @@ def device_action(module):
     return [changed, data]
 
 
+def match_filter(device_filter='all', device_name=''):
+    """
+    Compare device name to device_filter
+
+    Parameters
+    ----------
+    device_filter : str, optional
+        Filter to test device name, by default 'all'
+    device_name : str,
+        Name of the device.
+
+    Returns
+    -------
+    bool
+        True if match filter, False otherwise.
+    """
+    if re.search(r"\ball\b", str(device_filter)) or (
+       any(element in device_name for element in device_filter)):
+        return True
+    return False
+
+
+def get_tasks(taskid_list, module):
+    """
+    Get tasks information from a list of tasks.
+
+    Parameters
+    ----------
+    taskid_list : list
+        List of task IDs to get.
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    list
+        List of tasks from CVP.
+    """
+    tasks = module.client.api.get_tasks_by_status('Pending')
+    task_list = list()
+    for task in tasks:
+        if task['workOrderId'] in taskid_list:
+            task_list.append(task)
+    return task_list
+
+
+def devices_reset(module):
+    """
+    Method to reset devices.
+
+    Reset all devices listed in module.params['devices'].
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    # If any configlet changed updated 'changed' flag
+    changed = False
+    # Compare configlets against cvp_facts-configlets
+    reset_device = []  # devices to factory reset
+    reset = []
+    newTasks = []  # Task Ids that have been identified during device actions
+    taskList = []  # Tasks that have a pending status after function runs
+
+    for cvp_device in module.params['cvp_facts']['devices']:
+        # Include only devices that match filter elements, "all" will
+        # include all devices.
+        if match_filter(device_filter=module.params['device_filter'], device_name=cvp_device['name']):
+            try:
+                device_action = module.client.api.reset_device("Ansible", cvp_device)
+            except Exception as error:
+                errorMessage = str(error)
+                message = "Device %s cannot be reset - %s" % (cvp_device['name'], errorMessage)
+                reset.append({cvp_device['name']: message})
+            else:
+                if "errorMessage" in str(device_action):
+                    message = "Device %s cannot be Reset - %s" % (cvp_device['name'], device_action['errorMessage'])
+                    reset.append({cvp_device['name']: message})
+                else:
+                    changed = True
+                    if 'taskIds' in str(device_action):
+                        for taskId in device_action['data']['taskIds']:
+                            newTasks.append(taskId)
+                            reset.append({cvp_device['name']: 'Reset-%s' % taskId})
+                    else:
+                        reset.append({cvp_device['name']: 'Reset-No_Tasks'})
+    taskList = get_tasks(taskid_list=newTasks, module=module)
+
+    data = {'reset': reset, 'tasks': taskList}
+    return data
+
+
 def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
         devices=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
-        device_filter=dict(type='list', default='none'))
+        device_filter=dict(type='list', default='none'),
+        state=dict(type='str',
+                   choices=['present', 'absent'],
+                   default='present',
+                   required=False))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
@@ -465,8 +575,18 @@ def main():
     # Connect to CVP instance
     module.client = connect(module)
 
-    # Pass module params to configlet_action to act on configlet
-    result['changed'], result['data'] = device_action(module)
+    # if 'state' not in module.params:
+    #     module.params['state']=present
+
+    if module.params['state'] == 'present':
+        # Configure devices on CVP
+        # Pass module params to configlet_action to act on configlet
+        result['changed'], result['data'] = device_action(module)
+    elif module.params['state'] == 'absent':
+        # Reset devices when user configured state=absent
+        result['changed'] = True
+        result['data'] = devices_reset(module)
+
     module.exit_json(**result)
 
 
