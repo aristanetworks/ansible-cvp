@@ -15,15 +15,21 @@
         configlets:
           - ANSIBLE_TESTING_VEOS
           - veos01-basic-configuration
+        parent_container: MLAG01
+        imageBundle: []
       veos02:
         name: veos02
         configlets:
           - ANSIBLE_TESTING_VEOS
           - veos02-basic-configuration
+        parent_container: MLAG01
+        imageBundle: []
       veos03:
         name: veos03
         configlets:
           - veos03-basic-configuration
+        parent_container: Spines
+        imageBundle: []
     containers_provision:
         Fabric:
           parent_container: Tenant

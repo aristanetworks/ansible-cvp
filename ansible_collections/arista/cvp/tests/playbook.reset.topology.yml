@@ -12,19 +12,22 @@
     device_provision:
       veos01:
         name: veos01
-        parentContainerName: staging
+        parent_container: staging
         configlets:
           - veos01-basic-configuration
+        imageBundle: []
       veos02:
         name: veos02
-        parentContainerName: staging
+        parent_container: staging
         configlets:
           - veos02-basic-configuration
+        imageBundle: []
       veos03:
         name: veos03
-        parentContainerName: staging
+        parent_container: staging
         configlets:
           - veos03-basic-configuration
+        imageBundle: []
     containers_provision:
         staging:
           parent_container: Tenant
@@ -50,6 +53,7 @@
         devices: "{{device_provision}}"
         cvp_facts: '{{FACTS.ansible_facts}}'
         device_filter: 'veos'
+        state: present
       register: DEVICE
 
     - name: '#03 - Display cv_device'
