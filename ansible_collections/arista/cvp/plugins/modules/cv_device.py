@@ -166,12 +166,12 @@ def device_action(module):
         # Include only devices that match filter elements, "all" will
         # include all devices.
         if re.search(r"\ball\b", str(module.params['device_filter'])) or (
-           any(element in cvp_device['name'] for element in module.params['device_filter'])):
+           any(element in cvp_device['hostname'] for element in module.params['device_filter'])):
             # Check to see if devcie is to be deleted (not in ansible list)
-            if cvp_device['name'] in module.params['devices']:
+            if cvp_device['hostname'] in module.params['devices']:
                 # Make sure the device is not in the Undefined container
                 if "undefined_container" != str(cvp_device['parentContainerKey']):
-                    ansible_device = module.params['devices'][cvp_device['name']]
+                    ansible_device = module.params['devices'][cvp_device['hostname']]
                     # Check assigned configlets
                     device_update = False
                     add_configlets = []
@@ -195,7 +195,7 @@ def device_action(module):
                             remove_imageBundle = str(cvp_device['imageBundle'])
                             device_update = True
                     if device_update:
-                        update_device.append({'name': cvp_device['name'],
+                        update_device.append({'name': cvp_device['hostname'],
                                               'configlets': [add_configlets, remove_configlets],
                                               'imageBundle': [add_imageBundle, remove_imageBundle],
                                               'device': cvp_device})
@@ -205,8 +205,8 @@ def device_action(module):
                 if cvp_device['parentContainerKey'] != 'undefined_container':
                     reset_device.append(cvp_device)
                 else:
-                    message = "Device %s cannot be reset - Already in Undefined container" % cvp_device['name']
-                    reset.append({cvp_device['name']: 'No_Reset-No_Tasks'})
+                    message = "Device %s cannot be reset - Already in Undefined container" % cvp_device['hostname']
+                    reset.append({cvp_device['hostname']: 'No_Reset-No_Tasks'})
 
     # Check for new devices
     # Device will be in the CVP Inventory and also in the Undefined container
@@ -220,7 +220,7 @@ def device_action(module):
            any(element in ansible_device['name'] for element in module.params['device_filter'])):
             # Check to see if devcie is to be added (not in CVP list)
             for s_device in module.params['cvp_facts']['devices']:
-                if str(ansible_device['name']) == str(s_device['name']):
+                if str(ansible_device['name']) == str(s_device['hostname']):
                     cvp_device_found = True
                     cvp_device = s_device
                     break
@@ -333,7 +333,7 @@ def device_action(module):
         if len(update_device) > 0:
             # Update Configlets and ImageBundles for Devices
             # Data passed in update_device
-            # {'name':cvp_device['name'],'configlets':[add_configlets,remove_configlets],
+            # {'name':cvp_device['hostname'],'configlets':[add_configlets,remove_configlets],
             # 'imageBundle':[add_imageBundle,remove_imageBundle],'device':cvp_device})
             for device in update_device:
                 add_configlets = []
@@ -531,25 +531,25 @@ def devices_reset(module):
     for cvp_device in module.params['cvp_facts']['devices']:
         # Include only devices that match filter elements, "all" will
         # include all devices.
-        if match_filter(device_filter=module.params['device_filter'], device_name=cvp_device['name']):
+        if match_filter(device_filter=module.params['device_filter'], device_name=cvp_device['hostname']):
             try:
                 device_action = module.client.api.reset_device("Ansible", cvp_device)
             except Exception as error:
                 errorMessage = str(error)
-                message = "Device %s cannot be reset - %s" % (cvp_device['name'], errorMessage)
-                reset.append({cvp_device['name']: message})
+                message = "Device %s cannot be reset - %s" % (cvp_device['hostname'], errorMessage)
+                reset.append({cvp_device['hostname']: message})
             else:
                 if "errorMessage" in str(device_action):
-                    message = "Device %s cannot be Reset - %s" % (cvp_device['name'], device_action['errorMessage'])
-                    reset.append({cvp_device['name']: message})
+                    message = "Device %s cannot be Reset - %s" % (cvp_device['hostname'], device_action['errorMessage'])
+                    reset.append({cvp_device['hostname']: message})
                 else:
                     changed = True
                     if 'taskIds' in str(device_action):
                         for taskId in device_action['data']['taskIds']:
                             newTasks.append(taskId)
-                            reset.append({cvp_device['name']: 'Reset-%s' % taskId})
+                            reset.append({cvp_device['hostname']: 'Reset-%s' % taskId})
                     else:
-                        reset.append({cvp_device['name']: 'Reset-No_Tasks'})
+                        reset.append({cvp_device['hostname']: 'Reset-No_Tasks'})
     taskList = get_tasks(taskid_list=newTasks, module=module)
 
     data = {'reset': reset, 'tasks': taskList}
