@@ -382,8 +382,14 @@ def facts_builder(module, debug=False):
     # Extract tasks information
     if 'all' in module.params['facts'] or 'tasks' in module.params['facts']:
         if debug:
-            logging.debug('** Collecting facts facts ...')
+            logging.debug('** Collecting tasks facts ...')
         facts = facts_tasks(module=module, facts=facts, debug=debug)
+
+    # Extract imageBundles information
+    if 'all' in module.params['facts'] or 'images' in module.params['facts']:
+        if debug:
+            logging.debug('** Collecting images facts ...')
+        facts['imageBundles'] = list()
 
     # End of Facts module
     if debug:
