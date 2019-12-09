@@ -2,7 +2,7 @@
 
 ## Descrpition
 
-__Module name:__ `cv_container`
+__Module name:__ `arista.cvp.cv_container`
 
 This module manage provisioning topology at container's level. it takes an intended topology, compare against facts from [`cv_facts`](cv_facts.md) and then __create__, __delete__ containers before assigning existing configlets and moving devices to containers.
 
@@ -64,15 +64,13 @@ vars:
             - veos02
 tasks:
     - name: "Gather CVP facts from {{inventory_hostname}}"
-      cv_facts:
+      arista.cvp.cv_facts:
       register: cvp_facts
       tags:
         - always
 
     - name: "Build Container topology on {{inventory_hostname}}"
-      tags:
-        - provision
-      cv_container:
+      arista.cvp.cv_container:
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         save_topology: true

@@ -2,7 +2,7 @@
 
 ## Descrpition
 
-__Module name:__ `cv_configlet`
+__Module name:__ `arista.cvp.cv_configlet`
 
 This module manage configlet content and definition. it takes an intended list of configlet with their content, compare against facts from [`cv_facts`](cv_facts.md) and then __create__, __delete__, __update__ configlets.
 
@@ -48,11 +48,11 @@ Below is a basic playbook to collect facts:
       Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
   tasks:
     - name: 'Collecting facts from CVP {{inventory_hostname}}.'
-      cv_facts:
+      arista.cvp.cv_facts:
       register: cvp_facts
 
     - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      cv_configlet:
+      arista.cvp.cv_configlet:
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlet_filter: ["New", "Test","base-chk","base-firewall"]

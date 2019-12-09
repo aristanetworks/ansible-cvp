@@ -2,7 +2,7 @@
 
 ## Descrpition
 
-__Module name:__ `cv_facts`
+__Module name:__ `arista.cvp.cv_facts`
 
 This module collects facts from CloudVision platform and return a dictionary for the following elements:
 
@@ -59,7 +59,7 @@ Below is a basic playbook to collect all facts:
 ```yaml
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
-      cv_facts:
+      arista.cvp.cv_facts:
 
     - name: "Print out facts from CVP"
       debug:
@@ -71,7 +71,7 @@ To only get a subset of facts with configlets:
 ```yaml
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
-      cv_facts:
+      arista.cvp.cv_facts:
         facts:
           configlets
 
@@ -85,7 +85,7 @@ Extracting device configuration in facts:
 ```yaml
   tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
-      cv_facts:
+      arista.cvp.cv_facts:
         facts:
           devices
         gather_subset:

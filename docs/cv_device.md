@@ -2,7 +2,7 @@
 
 ## Descrpition
 
-__Module name:__ `cv_device`
+__Module name:__ `arista.cvp.cv_device`
 
 This module manage devices from a Cloudvision stand point. It takes an intended list of devices with their configlets name and image bundle, compare against facts from [`cv_facts`](cv_facts.md) and then __attach__, __remove__ both configlets and image bundles.
 
@@ -55,13 +55,11 @@ Below is a basic playbook to collect facts:
         imageBundle: []
   tasks:
     - name: 'Collecting facts from CVP {{inventory_hostname}}.'
-      cv_facts:
+      arista.cvp.cv_facts:
       register: cvp_facts
 
     - name: "Configure devices on {{inventory_hostname}}"
-      tags: 
-        - provision
-      cv_device:
+      arista.cvp.cv_device:
         devices: "{{devices_inventory}}"
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         device_filter: ['veos']
