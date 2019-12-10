@@ -165,6 +165,7 @@ def facts_devices(module, facts, debug=False):
     for device in inventory:
         if debug:
             logging.debug('  -> Working on %s', device['hostname'])
+        device['name'] = device['hostname']
         # Add designed config for device
         if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
             device['config'] = module.client.api.get_device_configuration(device['key'])
