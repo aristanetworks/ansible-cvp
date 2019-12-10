@@ -313,23 +313,23 @@ def device_action(module):
                                                                                create_task=action_save_topology)
                     except Exception as error:
                         errorMessage = str(error)
-                        message = "New device %s cannot be added - Exception: %s" % (device['cvp_device']['name'],
+                        message = "New device %s cannot be added - Exception: %s" % (device['cvp_device']['hostname'],
                                                                                      errorMessage)
-                        new.append({device['cvp_device']['name']: message})
+                        new.append({device['cvp_device']['hostname']: message})
                     else:
                         if "errorMessage" in str(new_device_action):
-                            message = "New device %s cannot be added - Error: %s" % (device['cvp_device']['name'],
+                            message = "New device %s cannot be added - Error: %s" % (device['cvp_device']['hostname'],
                                                                                      new_device_action['errorMessage'])
-                            new.append({device['cvp_device']['name']: message})
+                            new.append({device['cvp_device']['hostname']: message})
                         else:
                             changed = True
                             if 'taskIds' in str(new_device_action):
                                 for taskId in new_device_action['data']['taskIds']:
                                     newTasks.append(taskId)
-                                new.append({device['cvp_device']['name']: "New_Device-%s"
+                                new.append({device['cvp_device']['hostname']: "New_Device-%s"
                                            % new_device_action['data']['taskIds']})
                             else:
-                                new.append({device['cvp_device']['name']: "New_Device-No_Specific_Tasks"})
+                                new.append({device['cvp_device']['hostname']: "New_Device-No_Specific_Tasks"})
         if len(update_device) > 0:
             # Update Configlets and ImageBundles for Devices
             # Data passed in update_device
