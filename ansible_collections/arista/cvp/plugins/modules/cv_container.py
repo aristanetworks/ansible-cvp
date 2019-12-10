@@ -31,6 +31,7 @@ ANSIBLE_METADATA = {
 
 import json
 import traceback
+import logging
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -44,6 +45,7 @@ except ImportError:
     HAS_TREELIB = False
     TREELIB_IMP_ERR = traceback.format_exc()
 
+MODULE_DEBUG = False
 
 DOCUMENTATION = r'''
 ---
@@ -149,7 +151,7 @@ def tree_to_list(json_data, myList):
                         myList.append(k1)
                         for e in v2:
                             # Move to next element with a recursion
-                            tree_to_list(json_data=e, myList=myList)
+                            tree_to_list(json_data=json.dumps(e), myList=myList)
     # We are facing a end of a branch with a list of leaves.
     elif isinstance(json_data, list):
         for entry in json_data:
@@ -868,6 +870,10 @@ def main():
                   default='merge',
                   choices=['merge', 'override', 'delete'])
     )
+
+    if MODULE_DEBUG:
+        logging.basicConfig(format='%(asctime)s %(message)s',
+                        filename='cv_container.log', level=logging.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
