@@ -31,10 +31,7 @@ ANSIBLE_METADATA = {
 
 import json
 import traceback
-<<<<<<< HEAD:ansible_collections/arista/cvp/plugins/modules/cv_container.py
 import logging
-=======
->>>>>>> Release grant v1.0.1 (#77):ansible_collections/arista/cvp/plugins/modules/cv_container.py
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
