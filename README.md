@@ -98,8 +98,12 @@ You can git clone this repository and use examples folder for testing. This fold
 
 ```shell
 $ git clone https://github.com/aristanetworks/ansible-cvp.git
-$ cd ansible-cvp/examples
-$ make build
+```
+
+Update your ansible.cfg to update collections_paths to point to local repository
+
+```ini
+collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/ansible/collections
 ```
 
 > It is highly recommended to use a python virtual-environment to not alter your production environment.

@@ -10,7 +10,7 @@ For the collection to be used you need to have installed:
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
 
-``shell
+```shell
 pip install requests>=2.22.0
 pip install treelib>=1.5.5
 ```
