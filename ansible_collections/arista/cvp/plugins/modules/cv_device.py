@@ -257,10 +257,8 @@ def device_action(module):
     # If Ansible check_modde is True then skip any actions and return predicted outcome
     if not module.check_mode:
         if len(reset_device) > 0:
-            print("\nReset Devices:")
             # Factory Reseting Devices and returning them to Undefined container
             for device in reset_device:
-                print("   %s" % device['name'])
                 try:
                     device_action = module.client.api.reset_device("Ansible", device)
                 except Exception as error:
