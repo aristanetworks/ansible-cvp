@@ -14,22 +14,22 @@
         name: veos01
         configlets:
           - ANSIBLE_TESTING_VEOS
-          - SYS_TelemetryBuilderV2_172.23.0.2_1
           - veos01-basic-configuration
-          - SYS_TelemetryBuilderV2
+        parent_container: MLAG01
+        imageBundle: []
       veos02:
         name: veos02
         configlets:
           - ANSIBLE_TESTING_VEOS
-          - SYS_TelemetryBuilderV2_172.23.0.3_1
-          - SYS_TelemetryBuilderV2
           - veos02-basic-configuration
+        parent_container: MLAG01
+        imageBundle: []
       veos03:
         name: veos03
         configlets:
-          - SYS_TelemetryBuilderV2_172.23.0.4_1
-          - SYS_TelemetryBuilderV2
           - veos03-basic-configuration
+        parent_container: Spines
+        imageBundle: []
     containers_provision:
         Fabric:
           parent_container: Tenant

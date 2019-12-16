@@ -1,0 +1,38 @@
+---
+dist: bionic
+
+# language: python
+# python: "2.7"
+
+stages:
+  - name: "Linting"
+  - name: "PR Validation"
+    if: type = pull_request
+  - name: Build
+    if: branch = master OR branch = /releases.*/
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  # Install Ansible.
+  - sudo make github-configure-ci
+  - sudo make setup-repository
+
+jobs:
+  include:
+    - stage: "Linting"
+      script:
+        - make linting
+    - stage: "PR Validation"
+      script:
+        - make sanity-info
+        - make sanity-lint
+        - make sanity-import
+    - stage: "Build"
+      script:
+        - make collection-build
+        - echo 'Publication process should append here'
+
+notifications:
+  email: false

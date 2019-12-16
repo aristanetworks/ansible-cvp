@@ -12,25 +12,22 @@
     device_provision:
       veos01:
         name: veos01
-        parentContainerName: staging
+        parent_container: staging
         configlets:
-          - SYS_TelemetryBuilderV2_172.23.0.2_1
           - veos01-basic-configuration
-          - SYS_TelemetryBuilderV2
+        imageBundle: []
       veos02:
         name: veos02
-        parentContainerName: staging
+        parent_container: staging
         configlets:
-          - SYS_TelemetryBuilderV2_172.23.0.3_1
-          - SYS_TelemetryBuilderV2
           - veos02-basic-configuration
+        imageBundle: []
       veos03:
         name: veos03
-        parentContainerName: staging
+        parent_container: staging
         configlets:
-          - SYS_TelemetryBuilderV2_172.23.0.4_1
-          - SYS_TelemetryBuilderV2
           - veos03-basic-configuration
+        imageBundle: []
     containers_provision:
         staging:
           parent_container: Tenant
@@ -56,6 +53,7 @@
         devices: "{{device_provision}}"
         cvp_facts: '{{FACTS.ansible_facts}}'
         device_filter: 'veos'
+        state: present
       register: DEVICE
 
     - name: '#03 - Display cv_device'

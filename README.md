@@ -1,5 +1,7 @@
 ![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![collection version](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp)
 
+# Ansible Modules for Arista CloudVision Platform
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -10,19 +12,17 @@
     - [Important notes.](#important-notes)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
-    - [Git installation for testing](#git-installation-for-testing)
+    - [Installation from ansible-galaxy](#installation-from-ansible-galaxy)
     - [Git installation](#git-installation)
+    - [Git installation for testing](#git-installation-for-testing)
     - [Docker for testing](#docker-for-testing)
-  - [Example playbook](#example-playbook)
+  - [Getting Started](#getting-started)
   - [Resources](#resources)
   - [License](#license)
   - [Ask a question](#ask-a-question)
   - [Contributing](#contributing)
 
 <!-- /code_chunk_output -->
-
-# Ansible Modules for Arista CloudVision Platform
-
 
 ## About
 
@@ -31,6 +31,8 @@
 <p align="center">
   <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
 </p>
+
+More documentation is available in [project's wiki pages](https://github.com/aristanetworks/ansible-cvp/wiki)
 
 ## Modules overview
 
@@ -42,7 +44,7 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 - [__arista.cvp.cv_device__](docs/cv_device.md) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/cv_task.md) - Run tasks created on CVP.
 
-This collection supports CVP version `2018.2.x` and `2019.1.x`
+This collection supports CVP version `2018.2.5` and `2019.1.x`
 
 ### Important notes.
 
@@ -62,17 +64,16 @@ This collection requires the following to be installed on the Ansible control ma
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
 
-### Git installation for testing
+### Installation from ansible-galaxy
 
-You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
+Ansible galaxy hosts all stable version of this collection. Installation from ansible-galaxy is the most convenient approach for consuming `arista.cvp` content
 
 ```shell
-$ git clone https://github.com/aristanetworks/ansible-cvp.git
-$ cd ansible-cvp/examples
-$ make build
+$ ansible-galaxy collection install arista.cvp
+Process install dependency map
+Starting collection install process
+Installing 'arista.cvp:1.0.1' to '~/.ansible/collections/ansible_collections/arista/cvp'
 ```
-
-> It is highly recommended to use a python virtual-environment to not alter your production environment.
 
 ### Git installation
 
@@ -87,9 +88,25 @@ $ cd ansible-cvp
 __Build and install collection__
 
 ```shell
-$ ansible-galaxy collection build --force arista/cvp
-$ ansible-galaxy collection install arista.cvp.*.tar.gz
+$ ansible-galaxy collection build --force ansible_collection/arista/cvp
+$ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
 ```
+
+### Git installation for testing
+
+You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
+
+```shell
+$ git clone https://github.com/aristanetworks/ansible-cvp.git
+```
+
+Update your ansible.cfg to update collections_paths to point to local repository
+
+```ini
+collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/ansible/collections
+```
+
+> It is highly recommended to use a python virtual-environment to not alter your production environment.
 
 ### Docker for testing
 
@@ -99,14 +116,14 @@ The docker container approach for development can be used to ensure that everybo
 
 ```shell
 $ docker build -f Dockerfile-2.7 -t ansible-cvp:latest2.7 .
-$ docker exec -it --rm ansible-cvp:latest2.7 sh
+$ docker run -it --rm ansible-cvp:latest2.7 sh
 ```
 
 - Build Docker with __Python 3.x__
 
 ```shell
 $ docker build -f Dockerfile-3 -t ansible-cvp:latest3 .
-$ docker exec -it --rm ansible-cvp:latest3 sh
+$ docker run -it --rm ansible-cvp:latest3 sh
 ```
 
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
@@ -114,7 +131,7 @@ $ docker exec -it --rm ansible-cvp:latest3 sh
 All files part of [`examples`](examples/) are copied into the container.
 
 
-## Example playbook
+## Getting Started
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
@@ -183,6 +200,7 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 - Ansible for [Arista Validated Design](https://github.com/aristanetworks/ansible-avd)
 - Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
+- Content for [demo using Arista Validated Design and `arista.cvp` collection.](https://github.com/titom73/ansible-avd-cloudvision-demo)
 
 ## License
 

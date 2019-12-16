@@ -85,6 +85,15 @@ options:
     required: false
     default: ['none']
     type: list
+  state:
+    description:
+        - If absent, configlets will be removed from CVP if they are not binded
+        - to either a container or a device.
+        - If present, configlets will be created or updated.
+    required: false
+    default: 'present'
+    choices: ['present', 'absent']
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -189,13 +198,16 @@ def configlet_action(module):
             if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
                any(element in configlet['name'] for element in module.params['configlet_filter'])):
                 if configlet['name'] in module.params['configlets']:
-                    ansible_configlet = module.params['configlets'][configlet['name']]
-                    configlet_compare = compare(configlet['config'], ansible_configlet)
-                    # compare function returns a floating point number
-                    if configlet_compare[0] == 100.0:
-                        keep_configlet.append(configlet)
-                    else:
-                        update_configlet.append({'data': configlet, 'config': ansible_configlet})
+                    if module.params['state'] == 'present':
+                        ansible_configlet = module.params['configlets'][configlet['name']]
+                        configlet_compare = compare(configlet['config'], ansible_configlet)
+                        # compare function returns a floating point number
+                        if configlet_compare[0] == 100.0:
+                            keep_configlet.append(configlet)
+                        else:
+                            update_configlet.append({'data': configlet, 'config': ansible_configlet})
+                    elif module.params['state'] == 'absent':
+                        delete_configlet.append(configlet)
                 else:
                     delete_configlet.append(configlet)
     # Look for new configlets, if a configlet is not CVP assume it is to be created
@@ -301,12 +313,15 @@ def main():
     argument_spec = dict(
         configlets=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
-        configlet_filter=dict(type='list', default='none'))
+        configlet_filter=dict(type='list', default='none'),
+        state=dict(type='str',
+                   choices=['present', 'absent'],
+                   default='present',
+                   required=False))
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
-    # if not HAS_FUZZYWUZZY:
-    #     module.fail_json(msg='fuzzywuzzy required for this module')
+
     if not HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
 

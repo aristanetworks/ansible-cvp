@@ -1,0 +1,56 @@
+---
+- name: Build Testing topology using Dev CVP servers
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    DEVEL_CONTAINERS:
+      staging:
+        parent_container: Tenant
+    DEVEL_DEVICES:
+      veos01:
+        name: veos01
+        configlets:
+          - DEV_VEOS01
+        imageBundle: []
+        parentContainerName: staging
+  tasks:
+    - name: 'Collect facts from {{inventory_hostname}}'
+      tags: [always]
+      cv_facts:
+      register: facts
+    - name: 'Create initial topology on {{inventory_hostname}}'
+      tags: [build]
+      cv_container:
+        topology: '{{DEVEL_CONTAINERS}}'
+        cvp_facts: '{{facts.ansible_facts}}'
+        save_topology: true
+    - name: 'Configure devices on {{inventory_hostname}}'
+      tags: [build]
+      cv_device:
+        devices: '{{DEVEL_DEVICES}}'
+        cvp_facts: '{{facts.ansible_facts}}'
+        device_filter: ['veos01']
+        state: present
+      register: devices_result
+    - name: 'Run tasks'
+      tags: [build]
+      cv_task:
+        tasks: '{{devices_result.data.tasks}}'
+        # Wait 5 minutes for device to reboot
+        wait: 300
+
+    - name: 'Reset devices on {{inventory_hostname}}'
+      tags: [reset]
+      cv_device:
+        devices: '{{DEVEL_DEVICES}}'
+        cvp_facts: '{{facts.ansible_facts}}'
+        device_filter: ['veos01']
+        state: absent
+      register: devices_result
+    - name: 'Run tasks'
+      tags: [reset]
+      cv_task:
+        tasks: '{{devices_result.data.tasks}}'
+        # Wait 7 minutes for device to reboot
+        wait: 420
