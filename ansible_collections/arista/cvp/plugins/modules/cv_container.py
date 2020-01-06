@@ -45,7 +45,11 @@ except ImportError:
     HAS_TREELIB = False
     TREELIB_IMP_ERR = traceback.format_exc()
 
-MODULE_DEBUG = False
+# List of Ansible default containers
+BUILTIN_CONTAINERS = ['Tenant', 'Undefined', 'root']
+
+# Activate or not debug mode for logging & development
+DEBUG_MODULE = False
 
 DOCUMENTATION = r'''
 ---
@@ -474,7 +478,9 @@ def is_empty(module, container_name, facts):
 
 
 def is_container_empty(module, container_name):
+    logging.debug('* is_container_empty - get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
+    logging.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
             return False
@@ -542,6 +548,7 @@ def delete_unused_containers(module, intended, facts):
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
+                logging.debug('* delete_unused_containers - %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
@@ -793,7 +800,7 @@ def delete_topology(module, intended, facts):
     facts : list
         List of containers extracted from CVP using cv_facts.
     """
-    default_containers = ['Tenant', 'Undefined', 'root']
+    # default_containers = ['Tenant', 'Undefined', 'root']
     count_container_deletion = 0
     container_to_delete = list()
 
@@ -805,22 +812,28 @@ def delete_topology(module, intended, facts):
     container_intended_tree = tree_build_from_dict(containers=intended)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
+    logging.debug('* delete_topology - container_intended_ordered_list %s', container_intended_ordered_list)
+
     container_to_delete = list()
     for cvp_container in container_cvp_ordered_list:
-        # Only container with no devices can be deleted.
-        # If container is not empty, no reason to go further.
-        if is_empty(module=module, container_name=cvp_container, facts=facts) or is_container_empty(module=module, container_name=cvp_container):
-            # Check if a container is not present in intended topology.
-            if cvp_container in container_intended_ordered_list:
-                container_to_delete.append(cvp_container)
+        # Do not run test on built-in containers
+        if cvp_container not in BUILTIN_CONTAINERS:
+            # Only container with no devices can be deleted.
+            # If container is not empty, no reason to go further.
+            if is_empty(module=module, container_name=cvp_container, facts=facts) or is_container_empty(module=module, container_name=cvp_container):
+                # Check if a container is not present in intended topology.
+                if cvp_container in container_intended_ordered_list:
+                    container_to_delete.append(cvp_container)
 
     for cvp_container in reversed(container_cvp_ordered_list):
         # Check if container is not in intended topology and not a default container.
-        if cvp_container in container_to_delete and cvp_container not in default_containers:
+        if cvp_container in container_to_delete and cvp_container not in BUILTIN_CONTAINERS:
             # Get container fact for parentName
+            logging.debug('* delete_topology - get_container_facts %s', cvp_container)
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
+                logging.debug('* delete_topology - %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
@@ -871,9 +884,9 @@ def main():
                   choices=['merge', 'override', 'delete'])
     )
 
-    if MODULE_DEBUG:
+    if DEBUG_MODULE:
         logging.basicConfig(format='%(asctime)s %(message)s',
-                        filename='cv_container.log', level=logging.DEBUG)
+                            filename='cv_container_v2.log', level=logging.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
