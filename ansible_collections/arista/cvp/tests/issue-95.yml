@@ -1,0 +1,63 @@
+---
+- name: Build Testing topology using Dev CVP servers
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  tasks:
+### Start cv_facts_v2 testing ##################################################
+    - name: '#01 - Collect devices facts from {{inventory_hostname}}'
+      cv_facts:
+        facts:
+          devices
+      register: FACTS_DEVICES
+
+    - name: '#02 - Collect devices facts (with config) from {{inventory_hostname}}'
+      cv_facts:
+        gather_subset:
+          config
+        facts:
+          devices
+      register: FACTS_DEVICES_CONFIG
+
+    - name: '#03 - Collect confilgets facts from {{inventory_hostname}}'
+      cv_facts:
+        facts:
+          configlets
+      register: FACTS_CONFIGLETS
+
+    - name: '#04 - Collect containers facts from {{inventory_hostname}}'
+      cv_facts:
+        facts:
+          containers
+      register: FACTS_CONTAINERS
+
+    - name: '#05 - Collect pending tasks facts from {{inventory_hostname}}'
+      cv_facts:
+        gather_subset:
+          tasks_pending
+        facts:
+          tasks
+      register: FACTS_TASKS_PENDING
+
+    - name: '#06 - Collect failed tasks facts from {{inventory_hostname}}'
+      cv_facts:
+        gather_subset:
+          tasks_failed
+        facts:
+          tasks
+      register: FACTS_TASKS_FAILED
+
+    - name: '#05 - Collect default tasks facts from {{inventory_hostname}}'
+      cv_facts:
+        facts:
+          tasks
+      register: FACTS_TASKS
+
+    - name: '#10 - Collect ALL facts from {{inventory_hostname}}'
+      cv_facts:
+      register: FACTS
+
+    - name: '#11 - Save FACTS to cv_facts_v2.output.log'
+      copy: 
+        content: '{{ FACTS }}' 
+        dest: 'cv_facts_v2.json'
