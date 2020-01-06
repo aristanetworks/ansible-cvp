@@ -37,7 +37,7 @@ RUN ansible-galaxy collection build --force arista/cvp && \
     for i in *.tar.gz; do ansible-galaxy collection install $i -p /usr/share/ansible/collections; done
 
 WORKDIR /playbooks
-ADD examples/* ./
+ADD examples/inventory.ini.example ./
 RUN cp inventory.ini.example inventory.ini
 
 VOLUME /playbooks

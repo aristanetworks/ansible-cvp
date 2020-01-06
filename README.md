@@ -59,8 +59,8 @@ This repository is built based on [new collections system](https://docs.ansible.
 This collection requires the following to be installed on the Ansible control machine:
 
 
-- python `2.7` and `3.x`
-- ansible >= `2.9.0rc4`
+- python `2.7` (legacy) and `3.7`
+- ansible >= `2.9.0`
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
 
@@ -112,19 +112,15 @@ collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/
 
 The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
 
-- Build Docker with __Python 2.7__
+- Build Docker image
 
 ```shell
-$ docker build -f Dockerfile-2.7 -t ansible-cvp:latest2.7 .
-$ docker run -it --rm ansible-cvp:latest2.7 sh
+$ make build-docker
+$ make run-docker
 ```
 
-- Build Docker with __Python 3.x__
+Image will be created using current branc as tag. If it is run in master branch, then latest git tag will be used as docker tag.
 
-```shell
-$ docker build -f Dockerfile-3 -t ansible-cvp:latest3 .
-$ docker run -it --rm ansible-cvp:latest3 sh
-```
 
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
 
@@ -135,7 +131,7 @@ All files part of [`examples`](examples/) are copied into the container.
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
-Some playbook examples are provided in [__`examples`__](examples/) folder with information about how to built a test environment.
+A [complete end to end demo](https://github.com/titom73/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
 
 Below is a very basic example to build a container tology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
 
@@ -208,9 +204,7 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
-
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
-
 
 ## Contributing
 
