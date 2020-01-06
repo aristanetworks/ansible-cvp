@@ -187,8 +187,8 @@ def facts_devices(module, facts, debug=False):
         if "imageBundleMapper" in deviceInfo:
             # There should only be one ImageBudle but its id is not decernable
             # If the Image is applied directly to the device its type will be 'netelement'
-            if len(deviceInfo['imageBundleMapper'].values()) > 0:
-                if deviceInfo['imageBundleMapper'].values()[0]['type'] == 'netelement':
+            if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
+                if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
                     device['imageBundle'] = deviceInfo['bundleName']
 
         # Add device to facts list

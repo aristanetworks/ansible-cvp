@@ -155,7 +155,7 @@ def tree_to_list(json_data, myList):
                         myList.append(k1)
                         for e in v2:
                             # Move to next element with a recursion
-                            tree_to_list(json_data=e, myList=myList)
+                            tree_to_list(json_data=json.dumps(e), myList=myList)
     # We are facing a end of a branch with a list of leaves.
     elif isinstance(json_data, list):
         for entry in json_data:
