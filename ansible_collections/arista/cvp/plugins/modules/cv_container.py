@@ -113,6 +113,24 @@ EXAMPLES = r'''
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 
+def get_root_container(containers_fact):
+    """
+    Extract name of the root conainer provided by cv_facts.
+
+    Parameters
+    ----------
+    containers_fact : list
+        List of containers to read from cv_facts
+
+    Returns
+    -------
+    string
+        Name of the root container, if not found, return Tenant as default value
+    """
+    for container in containers_fact:
+        if container['key'] == 'root':
+            return container['name']
+    return 'Tenant'
 
 def tree_to_list(json_data, myList):
     """
@@ -271,7 +289,8 @@ def tree_build_from_list(containers):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    tree.create_node("Tenant", "Tenant")
+    root_container = get_root_container(containers_fact=containers)
+    tree.create_node(root_container, root_container)
     # Iterate for first level of containers directly attached under root.
     for cvp_container in containers:
         if cvp_container['parentName'] is None:
