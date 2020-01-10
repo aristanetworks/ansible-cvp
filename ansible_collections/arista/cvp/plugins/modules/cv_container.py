@@ -113,10 +113,11 @@ EXAMPLES = r'''
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 
+
 def create_builtin_containers(facts, debug=False):
     """
     Update builtin containers with root container name
-    
+
     Parameters
     ----------
     facts : dict
@@ -126,6 +127,7 @@ def create_builtin_containers(facts, debug=False):
     """
     root = get_root_container(containers_fact=facts['containers'], debug=debug)
     builtin_containers.append(root)
+
 
 def get_root_container(containers_fact, debug=True):
     """
@@ -150,6 +152,7 @@ def get_root_container(containers_fact, debug=True):
             logging.debug('  -> CloudVision ROOT container has name %s', container['Name'])
             return container['Name']
     return 'Tenant'
+
 
 def tree_to_list(json_data, myList, debug=False):
     """
@@ -489,7 +492,7 @@ def create_new_containers(module, intended, facts, debug=False):
     # Get root container of topology
     topology_root = get_root_container(containers_fact=facts['containers'])
     # Build ordered list of containers to create: from Tenant to leaves.
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root,debug=debug)
+    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
     # Parse ordered list of container and chek if they are configured on CVP.
     # If not, then call container creation process.
