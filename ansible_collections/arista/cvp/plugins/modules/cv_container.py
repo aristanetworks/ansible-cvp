@@ -866,8 +866,9 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
                     task_ids.append(task)
-            attached_configlet.append(configlet_list)
-            attached['configlet_attached'] = attached['configlet_attached'] + 1
+            if len(configlet_list) > 0:
+                attached_configlet.append(configlet_list)
+                attached['configlet_attached'] = attached['configlet_attached'] + 1
     # Build ansible output messages.
     attached['list'] = attached_configlet
     attached['taskIds'] = task_ids
