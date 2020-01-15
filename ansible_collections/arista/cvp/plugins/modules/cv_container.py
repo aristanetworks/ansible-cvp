@@ -70,11 +70,6 @@ options:
     description: Facts from CVP collected by cv_facts module
     required: true
     type: dict
-  save_topology:
-    description: Allow to save topology or not
-    required: false
-    default: True
-    type: bool
   mode:
     description: Allow to save topology or not
     required: false
@@ -730,7 +725,8 @@ def move_devices_to_container(module, intended, facts, debug=False):
     # List of created taskIds to pass to cv_tasks
     task_ids = list()
     # Define wether we want to save topology or not
-    save_topology = False if module.params['save_topology'] is False else True
+    # Force to True as per issue115
+    save_topology = True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one device defined, then we can start process
@@ -841,7 +837,8 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
     # List of configlets to attach to containers
     configlet_list = list()
     # Define wether we want to save topology or not
-    save_topology = False if module.params['save_topology'] is False else True
+    # Force to True as per issue115
+    save_topology = True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
         # If we have at least one configlet defined, then we can start process
@@ -862,7 +859,7 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
                                                                            create_task=save_topology)
-        if configlet_action['data']['status'] == 'success':
+        if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
                     task_ids.append(task)
@@ -972,9 +969,8 @@ def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
-        topology=dict(type='dict', required=True),
-        cvp_facts=dict(type='dict', required=True),
-        save_topology=dict(type='bool', default=True),    # Enable or disable task creation
+        topology=dict(type='dict', required=True),    # Topology to configure on CV side.
+        cvp_facts=dict(type='dict', required=True),   # Facts from cv_facts module.
         mode=dict(type='str',
                   required=False,
                   default='merge',
