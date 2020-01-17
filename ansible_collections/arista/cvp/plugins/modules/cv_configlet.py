@@ -299,10 +299,13 @@ def configlet_action(module):
     else:
         for configlet in new_configlet:
             new.append({configlet['name']: "checked"})
+            changed = True
         for configlet in update_configlet:
             updated.append({configlet['data']['name']: "checked"})
+            changed = True
         for configlet in delete_configlet:
             deleted.append({configlet['name']: "checked"})
+            changed = True
         data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
     return [changed, data]
 
