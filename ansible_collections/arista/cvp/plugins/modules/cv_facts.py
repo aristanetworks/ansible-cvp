@@ -318,19 +318,19 @@ def facts_tasks(module, facts, debug=False):
 
     if 'tasks_pending' in module.params['gather_subset']:
         # We only get pending tasks
-        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Pending'))
 
     if 'tasks_all' in module.params['gather_subset']:
         # User wants to get list of all tasks -- not default behavior
-        tasks.append(module.client.api.get_tasks()['data'])
+        tasks.extend(module.client.api.get_tasks()['data'])
 
     if 'tasks_failed' in module.params['gather_subset']:
         # User wants to get list of all tasks -- not default behavior
-        tasks.append(module.client.api.get_tasks_by_status(status='Failed'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Failed'))
 
     if 'default' in module.params['gather_subset']:
         # By default we only extract pending tasks and not all tasks
-        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Pending'))
 
     for task in tasks:
         if debug:
