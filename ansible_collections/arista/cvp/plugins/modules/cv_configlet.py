@@ -139,7 +139,7 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
     """
     fromlines = fromText.splitlines(1)
     tolines = toText.splitlines(1)
-    diff = list(difflib.unified_diff(fromlines, tolines,  fromName, toName, n=lines))
+    diff = list(difflib.unified_diff(fromlines, tolines, fromName, toName, n=lines))
     textComp = difflib.SequenceMatcher(None, fromText, toText)
     diffRatio = round(textComp.quick_ratio() * 100, 2)
     return [diffRatio, diff]
@@ -206,7 +206,7 @@ def configlet_action(module):
                         if configlet_compare[0] == 100.0:
                             keep_configlet.append(configlet)
                         else:
-                            update_configlet.append({'data': configlet, 'config': ansible_configlet,'diff':''.join(configlet_compare[1])})
+                            update_configlet.append({'data': configlet, 'config': ansible_configlet, 'diff': ''.join(configlet_compare[1])})
                     elif module.params['state'] == 'absent':
                         delete_configlet.append(configlet)
                 else:
