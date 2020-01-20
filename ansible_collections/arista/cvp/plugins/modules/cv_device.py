@@ -407,13 +407,13 @@ def build_existing_devices_list(module):
 
     Parameters
     ----------
-    module : [type]
-        [description]
+    module : AnsibleModule
+        Ansible module.
 
     Returns
     -------
-    [type]
-        [description]
+    list
+        List of existing devices on CV
     """
     # Get variable from module
     devices_filter = module.params['device_filter']
@@ -476,13 +476,13 @@ def build_new_devices_list(module):
 
     Parameters
     ----------
-    module : [type]
-        [description]
+    module : AnsibleModule
+        Ansible module.
 
     Returns
     -------
-    [type]
-        [description]
+    list
+        List of new devices to provision on CV.
     """
     # Get variable from module
     devices_filter = module.params['device_filter']
@@ -574,6 +574,7 @@ def devices_update(module, mode='overide'):
     >>> devices_update(module=module)
     {
         "taskIds": [ 108 ],
+        "updated_devices": 1,
         "updated": [
             {
                 "DC1-SPINE1": "Configlets-['108']"
@@ -595,12 +596,16 @@ def devices_update(module, mode='overide'):
     """
     if DEBUG_MODULE:
         logging.debug(' * devices_update - Entering devices_update')
+    # List of devices to update: already provisioned on CV and part of module input.
     devices_update = build_existing_devices_list(module=module)
+    # Counter of number of updated devices.
     devices_updated = 0
+    # List of devices updated.
     result_update = list()
+    # List of generated taskIds
     result_tasks_generated = list()
-    newTasks = []  # Task Ids that have been identified during device actions
-    taskList = []  # Tasks that have a pending status after function runs
+    # newTasks = []  # Task Ids that have been identified during device actions
+    # taskList = []  # Tasks that have a pending status after function runs
 
     if DEBUG_MODULE:
         logging.debug(' * devices_update - entering update function', str(devices_update))
@@ -652,16 +657,15 @@ def devices_update(module, mode='overide'):
                 else:
                     changed = True
                     if 'taskIds' in str(device_action):
+                        devices_updated += 1
                         for taskId in device_action['data']['taskIds']:
                             result_tasks_generated.append(taskId)
                         result_update.append({device_update['name']: "Configlets-%s" % device_action['data']['taskIds']})
                     else:
                         result_update.append({device_update['name']: "Configlets-No_Specific_Tasks"})
-    # Get CVP Information about generated tasks
-    tasks_cvp = tasks_get_fitlered(taskid_list=result_tasks_generated, module=module)
 
     # Build response structure
-    data = {'updated': result_update, 'tasksIds': result_tasks_generated}
+    data = {'updated_devices': device_updated ,'updated': result_update, 'tasksIds': result_tasks_generated}
 
     if DEBUG_MODULE:
         logging.info('devices_update - result output: %s', str(data))
@@ -749,6 +753,7 @@ def devices_action(module):
                 "workOrderState": "ACTIVE"
             }
         ],
+        "updated_devices": 1,
         "updated": [
             {
                 "DC1-SPINE1": "Configlets-['108']"
