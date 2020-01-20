@@ -810,7 +810,8 @@ def devices_action(module):
 
 
 def main():
-    """ main entry point for module execution
+    """
+    Module entry point.
     """
     argument_spec = dict(
         devices=dict(type='dict',
