@@ -72,7 +72,7 @@ options:
                  list devices that can be modified or deleted based
                  on configlets entries.
     required: false
-    default: ['none']
+    default: ['all']
     type: list
   state:
     description:
@@ -345,7 +345,7 @@ def is_in_filter(hostname_filter=None, hostname="eos"):
 
     # W102 Workaround to avoid list as default value.
     if hostname_filter is None:
-        hostname_filter = ['all']
+        hostname_filter = ["all"]
 
     if "all" in hostname_filter:
         return True
@@ -505,7 +505,9 @@ def build_existing_devices_list(module):
                         )
                     device_ansible = devices_ansible[cvp_device["hostname"]]
                     # Get CV facts part of structure
-                    device_ansible["cv_configlets"] = configlets_get_from_facts(cvp_device=cvp_device)
+                    device_ansible["cv_configlets"] = configlets_get_from_facts(
+                        cvp_device=cvp_device
+                    )
                     # TODO: imageBundle MUST be implemented later.
                     # Add device to the list
                     devices_info.append(device_ansible)
@@ -618,7 +620,9 @@ def configlet_prepare_cvp_update(configlet_name_list, facts):
     return configlets_structure
 
 
-### Device Actions ###
+# ------------------------------------------------------------- #
+# Device Actions #
+# ------------------------------------------------------------- #
 
 
 def devices_new(module):
@@ -666,18 +670,13 @@ def devices_new(module):
 
     if DEBUG_MODULE:
         logging.debug(" * devices_new - Entering devices_new")
-        logging.debug(
-            " * devices_new - entering update function"
-        )
-        logging.debug(" * devices_new - devices_new is %s",
-                      str(device_provision)
-        )
+        logging.debug(" * devices_new - entering update function")
+        logging.debug(" * devices_new - devices_new is %s", str(device_provision))
 
     for device_update in device_provision:
         if DEBUG_MODULE:
             logging.info(
-                " * devices_new - provisioning device: %s",
-                str(device_update["name"])
+                " * devices_new - provisioning device: %s", str(device_update["name"])
             )
         # Test if we are managing last device to provision
         # If no, then we do not create tasks and we do not save tempTopology
@@ -697,22 +696,19 @@ def devices_new(module):
         # Transform output to be CV compliant:
         # [{name: configlet_name, key: configlet_key_from_cv_facts}]
         configlets_add = configlet_prepare_cvp_update(
-            configlet_name_list=configlets_add,
-            facts=module.params["cvp_facts"]
+            configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
         )
 
         # Collect container information
         container_facts = container_get_facts(
-            container_name=device_update["parentContainerName"],
-            module=module
+            container_name=device_update["parentContainerName"], module=module
         )
         if len(container_facts) == 0:
             module.fail_json("Error - container does not exists on CV side.")
 
         # Get device facts from cv facts
         device_facts = device_get_from_facts(
-            module=module,
-            device_name=device_update["name"]
+            module=module, device_name=device_update["name"]
         )
         if len(device_facts) == 0:
             module.fail_json("Error - device does not exists on CV side.")
@@ -757,9 +753,7 @@ def devices_new(module):
                         }
                     )
                 else:
-                    result_update.append(
-                        {device_update["name"]: "not provisionned"}
-                    )
+                    result_update.append({device_update["name"]: "not provisionned"})
 
     # Build response structure
     data = {
@@ -912,9 +906,7 @@ def devices_update(module, mode="overide"):
     # taskList = []  # Tasks that have a pending status after function runs
 
     if DEBUG_MODULE:
-        logging.debug(
-            " * devices_update - entering update function"
-        )
+        logging.debug(" * devices_update - entering update function")
         logging.debug(" * devices_update - devices_update is %s", str(devices_update))
 
     for device_update in devices_update:
@@ -928,44 +920,39 @@ def devices_update(module, mode="overide"):
         if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
             configlets_delete = get_unique_from_list(
                 source_list=device_update["cv_configlets"],
-                compare_list=device_update["configlets"]
+                compare_list=device_update["configlets"],
             )
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
             configlets_delete = configlet_prepare_cvp_update(
-                configlet_name_list=configlets_delete,
-                facts=module.params["cvp_facts"]
+                configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
             )
 
             # In any case build list of configlet to attach to device
             # Get list of configlets to delete: in facts but not on ansible inputs
             configlets_add = get_unique_from_list(
                 source_list=device_update["configlets"],
-                compare_list=device_update["cv_configlets"]
+                compare_list=device_update["cv_configlets"],
             )
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
             configlets_add = configlet_prepare_cvp_update(
-                configlet_name_list=configlets_add,
-                facts=module.params["cvp_facts"]
+                configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
             )
 
             # Get device facts from cv facts
             device_facts = device_get_from_facts(
-                module=module,
-                device_name=device_update["name"]
+                module=module, device_name=device_update["name"]
             )
             if len(device_facts) == 0:
                 module.fail_json("Error - device does not exists on CV side.")
 
             if DEBUG_MODULE:
                 logging.info(
-                    " * devices_update - configlet add: %s",
-                    str(configlets_add)
+                    " * devices_update - configlet add: %s", str(configlets_add)
                 )
                 logging.info(
-                    " * devices_update - configlet delete: %s",
-                    str(configlets_delete)
+                    " * devices_update - configlet delete: %s", str(configlets_delete)
                 )
 
             # Execute configlet update on device
@@ -1065,10 +1052,7 @@ def devices_reset(module):
             hostname=cvp_device["hostname"],
         ):
             try:
-                device_action = module.client.api.reset_device(
-                    "Ansible",
-                    cvp_device
-                )
+                device_action = module.client.api.reset_device("Ansible", cvp_device)
             except Exception as error:
                 errorMessage = str(error)
                 message = "Device %s cannot be reset - %s" % (
@@ -1088,9 +1072,7 @@ def devices_reset(module):
                     if "taskIds" in str(device_action):
                         for taskId in device_action["data"]["taskIds"]:
                             newTasks.append(taskId)
-                            reset.append(
-                                {cvp_device["hostname"]: "Reset-%s" % taskId}
-                            )
+                            reset.append({cvp_device["hostname"]: "Reset-%s" % taskId})
                     else:
                         reset.append({cvp_device["hostname"]: "Reset-No_Tasks"})
     data = {"reset": reset, "reset_taskIds": newTasks}
@@ -1237,10 +1219,7 @@ def main():
         cvp_facts=dict(type="dict", required=True),
         device_filter=dict(type="list", default="all"),
         state=dict(
-            type="str",
-            choices=["present", "absent"],
-            default="present",
-            required=False
+            type="str", choices=["present", "absent"], default="present", required=False
         ),
     )
 
@@ -1251,10 +1230,7 @@ def main():
             level=logging.DEBUG,
         )
 
-    module = AnsibleModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True
-    )
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
     module.client = connect(module)
 
