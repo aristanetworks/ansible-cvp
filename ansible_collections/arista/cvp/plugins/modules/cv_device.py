@@ -216,11 +216,51 @@ def configlets_get_from_facts(cvp_device):
     return []
 
 
+def container_get_facts(container_name, module):
+    """
+    Extract facts for a given container.
+    
+    Parameters
+    ----------
+    container_name : string
+        Container name to look for
+    module : AnsibleModule
+        Ansible module.
+    
+    Returns
+    -------
+    dict
+        [description]
+    """
+    if 'cvp_facts' in module.params:
+        if 'containers' in module.params['cvp_facts']:
+            for container in module.params['cvp_facts']['containers']:
+                if container_name == container['Name']:
+                    return container
+    return []
+
+
 def configlet_get_fact_key(configlet_name, cvp_facts):
+    """
+    Get Configlet ID provided by CVP in facts.
+    
+    Parameters
+    ----------
+    configlet_name : string
+        Name of configlet to look for the key field
+    cvp_facts : dict
+        Dictionary from cv_facts
+
+    Returns
+    -------
+    string
+        Key value of the configlet.
+    """
     for configlet in cvp_facts['configlets']:
         if configlet_name == configlet['name']:
             return configlet['key']
     return None
+
 
 def tasks_get_fitlered(taskid_list, module):
     """
@@ -486,7 +526,7 @@ def build_new_devices_list(module):
     devices_ansible = module.params['devices']
     device_info = dict()
     devices_info = list()
-    facts_devices = facts_devices(module)
+    # facts_devices = facts_devices(module)
     # Loop in Input devices to see if it is part of CV Facts
     for ansible_device_hostname, ansible_device in devices_ansible.items():
         if is_in_filter(hostname_filter=devices_filter,
@@ -502,15 +542,7 @@ def build_new_devices_list(module):
                                    'cv_configlets': [],
                                    'imageBundle': ansible_device['imageBundle'],
                                    'message': 'Device will be provisionned'}
-                # Device not in undefined container
-                else:
-                    message = "Device %s cannot be provisioned - Telemetry Only" % ansible_device['name']
-                    device_info = {'message': message}
-            # Device not in CV Facts entries
-            else:
-                    message = "Device %s cannot be provisioned - Not in CV facts" % ansible_device['name']
-                    device_info = {'message': message}
-            devices_info.append(device_info)
+                    devices_info.append(device_info)
     return devices_info
 
 
@@ -557,9 +589,193 @@ def configlet_prepare_cvp_update(configlet_name_list, facts):
 
 
 def devices_new(module):
+    """
+    Method to manage device provisionning.
+
+    Example:
+    ----------
+    >>> devices_new(module=module)
+    {
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    # if DEBUG_MODULE:
+    #     logging.debug(' * devices_new - Entering devices_new')
+    # List of devices to update: already provisioned on CV and part of module input.
+    device_provision = build_new_devices_list(module=module)
+    # Get number of new devices to provision
+    count_new_devices = len(device_provision)
+    # Counter of number of updated devices.
+    device_provisioned_result = 0
+    device_provisioned = 0
+    # List of devices updated.
+    result_update = list()
+    # List of generated taskIds
+    result_tasks_generatedtaskId = list()
+    # newTasks = []  # Task Ids that have been identified during device actions
+    # taskList = []  # Tasks that have a pending status after function runs
+
     if DEBUG_MODULE:
-        logging.error(' * devices_new - not yet supported')
-    pass
+        logging.debug(' * devices_new - Entering devices_new')
+        logging.debug(' * devices_new - entering update function', str(device_provision))
+        logging.debug(' * devices_new - devices_new is %', str(device_provision))
+
+    for device_update in device_provision:
+        if DEBUG_MODULE:
+            logging.info(' * devices_new - provisioning device: %s', str(device_update['name']))
+        # Test if we are managing last device to provision
+        # If no, then we do not create tasks and we do not save tempTopology
+        # If last device, we save topology and create tasks
+        device_provisioned += 1
+        action_save_topology = True if device_provisioned == count_new_devices else False
+
+        imageBundle_attached = dict() # Not yet managed
+
+        # Get list of configlets to delete: in facts but not on ansible inputs
+        configlets_add = get_unique_from_list(source_list=device_update['configlets'],
+                                              compare_list=device_update['cv_configlets'])
+        # Transform output to be CV compliant:
+        # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+        configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add,
+                                                      facts=module.params['cvp_facts'])
+
+        # Collect container information
+        container_facts = container_get_facts(container_name=device_update['parentContainerName'], module=module)
+        if len(container_facts) == 0:
+            module.fail_json('Error - container does not exists on CV side.')
+
+        # Get device facts from cv facts
+        device_facts = device_get_from_facts(module=module, device_name=device_update['name'])
+        if len(device_facts) == 0:
+            module.fail_json('Error - device does not exists on CV side.')
+
+        if DEBUG_MODULE:
+            logging.info(' * devices_new - configlet add: %s', str(configlets_add))
+
+        # Execute configlet update on device
+        try:
+            device_action = module.client.api.provision_device(app_name='Ansible',
+                                                               device=device_facts,
+                                                               container=container_facts,
+                                                               configlets=configlets_add,
+                                                               imageBundle=imageBundle_attached,
+                                                               create_task=action_save_topology)
+        except Exception as error:
+            errorMessage = str(error)
+            message = "Device %s cannot be provisionned - %s" % (device_update['name'], errorMessage)
+            result_update.append({device_update['name']: message})
+        else:
+            # Capture and report error message sent by CV during update
+            if "errorMessage" in str(device_action):
+                message = "Device %s cannot be provisionned - %s" % (device_update['name'], device_action['errorMessage'])
+                result_update.append({device_update['name']: message})
+            else:
+                changed = True
+                if 'taskIds' in str(device_action):
+                    device_provisioned_result += 1
+                    result_tasks_generatedtaskId += device_action['data']['taskIds']
+                    result_update.append({device_update['name']: "provisionning-tasks-%s" % str(device_action['data']['taskIds'])})
+                else:
+                    result_update.append({device_update['name']: "not provisionned"})
+
+    # Build response structure
+    data = {'provisionned_devices': device_provisioned_result ,'provisionned': result_update, 'added_tasksIds': result_tasks_generatedtaskId}
+
+    if DEBUG_MODULE:
+        logging.info('devices_new - result output: %s', str(data))
+
+    return data
+
+
+def devices_move(module):
+    """
+    Method to move device from one container to another.
+
+    Example:
+    ----------
+    >>> devices_move(module=module)
+    {
+        "moved_taskIds": [],
+        "moved_devices": 1,
+        "moved": [
+            {
+                "DC1-SPINE1": "device-move-no-specifc-tasks"
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    # Get already provisionned devices from module inputs
+    devices_update = build_existing_devices_list(module=module)
+    devices_moved = 0
+    result_move = list()
+    result_tasks_generated = list()
+    device_action = dict()
+    changed = False
+    if DEBUG_MODULE:
+        logging.debug(' * devices_move - Entering devices_move')
+    for device_update in devices_update:
+        device_facts = device_get_from_facts(module=module, device_name=device_update['name'])
+        if DEBUG_MODULE:
+            logging.info(' * devices_move - updating device: %s', str(device_update))
+            logging.info(' * devices_move - device facts: %s', str(device_facts))
+        if device_facts['containerName'] != device_update['parentContainerName']:
+            container_facts = container_get_facts(container_name=device_update['parentContainerName'], module=module)
+            if DEBUG_MODULE:
+                logging.info(' * devices_move - container facts: %s', str(container_facts))
+            # Execute configlet update on device
+            try:
+                device_action = module.client.api.move_device_to_container(app_name='Ansible',
+                                                                           device=device_facts,
+                                                                           container=container_facts,
+                                                                           create_task=True)
+            except Exception as error:
+                errorMessage = str(error)
+                message = "Device %s cannot be moved - %s" % (device_update['name'], errorMessage)
+
+            changed = True
+            devices_moved += 1
+            if 'taskIds' in str(device_action):
+                for taskId in device_action['data']['taskIds']:
+                    result_tasks_generated.append(taskId)
+                result_move.append({device_update['name']: "device-move-%s" % device_action['data']['taskIds']})
+            else:
+                result_move.append({device_update['name']: "device-move-no-specifc-tasks"})
+
+    # Build response structure
+    data = {'moved_devices': devices_moved ,'moved': result_move, 'moved_tasksIds': result_tasks_generated}
+
+    if DEBUG_MODULE:
+        logging.info('devices_move - result output: %s', str(data))
+
+    return data
 
 
 def devices_update(module, mode='overide'):
@@ -570,7 +786,7 @@ def devices_update(module, mode='overide'):
     ----------
     >>> devices_update(module=module)
     {
-        "taskIds": [ 108 ],
+        "updated_taskIds": [ 108 ],
         "updated_devices": 1,
         "updated": [
             {
@@ -612,25 +828,29 @@ def devices_update(module, mode='overide'):
         if DEBUG_MODULE:
             logging.info(' * devices_update - updating device: %s', str(device_update['name']))
         # Start configlet update
+        # Get list of configlet to update: in ansible inputs and not in facts
+        configlets_delete = []
         if is_list_diff(device_update['configlets'], device_update['cv_configlets']):
-            # Get list of configlet to update: in ansible inputs and not in facts
             configlets_delete = get_unique_from_list(source_list=device_update['cv_configlets'],
-                                                     compare_list=device_update['configlets'])
+                                                        compare_list=device_update['configlets'])
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
             configlets_delete = configlet_prepare_cvp_update(configlet_name_list=configlets_delete,
-                                                             facts=module.params['cvp_facts'])
+                                                                facts=module.params['cvp_facts'])
 
+            # In any case build list of configlet to attach to device
             # Get list of configlets to delete: in facts but not on ansible inputs
             configlets_add = get_unique_from_list(source_list=device_update['configlets'],
-                                                  compare_list=device_update['cv_configlets'])
+                                                    compare_list=device_update['cv_configlets'])
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
             configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add,
-                                                          facts=module.params['cvp_facts'])
+                                                            facts=module.params['cvp_facts'])
 
             # Get device facts from cv facts
             device_facts = device_get_from_facts(module=module, device_name=device_update['name'])
+            if len(device_facts) == 0:
+                module.fail_json('Error - device does not exists on CV side.')
 
             if DEBUG_MODULE:
                 logging.info(' * devices_update - configlet add: %s', str(configlets_add))
@@ -639,9 +859,9 @@ def devices_update(module, mode='overide'):
             # Execute configlet update on device
             try:
                 device_action = module.client.api.update_configlets_on_device(app_name='Ansible',
-                                                                              device=device_facts,
-                                                                              add_configlets=configlets_add,
-                                                                              del_configlets=configlets_delete)
+                                                                                device=device_facts,
+                                                                                add_configlets=configlets_add,
+                                                                                del_configlets=configlets_delete)
             except Exception as error:
                 errorMessage = str(error)
                 message = "Device %s Configlets cannot be updated - %s" % (device_update['name'], errorMessage)
@@ -662,7 +882,7 @@ def devices_update(module, mode='overide'):
                         result_update.append({device_update['name']: "Configlets-No_Specific_Tasks"})
 
     # Build response structure
-    data = {'updated_devices': device_updated ,'updated': result_update, 'tasksIds': result_tasks_generated}
+    data = {'updated_devices': devices_updated ,'updated': result_update, 'updated_tasksIds': result_tasks_generated}
 
     if DEBUG_MODULE:
         logging.info('devices_update - result output: %s', str(data))
@@ -728,7 +948,7 @@ def devices_reset(module):
                             reset.append({cvp_device['hostname']: 'Reset-%s' % taskId})
                     else:
                         reset.append({cvp_device['hostname']: 'Reset-No_Tasks'})
-    data = {'reset': reset, 'taskIds': newTasks}
+    data = {'reset': reset, 'reset_taskIds': newTasks}
     return data
 
 
@@ -741,7 +961,7 @@ def devices_action(module):
     Structure output:
     >>> devices_action(module)
     {
-    "changed": "False",
+    "changed": "True",
     "data": {
         "tasks": [
             {
@@ -750,7 +970,19 @@ def devices_action(module):
                 "workOrderState": "ACTIVE"
             }
         ],
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1
         "updated_devices": 1,
+        "updated_tasksIds": [
+            "108"
+        ]
         "updated": [
             {
                 "DC1-SPINE1": "Configlets-['108']"
@@ -760,7 +992,6 @@ def devices_action(module):
             "108"
         ]
     }
-}
 
     Parameters
     ----------
@@ -781,11 +1012,22 @@ def devices_action(module):
     results['changed'] = False
     results['data'] = dict()
     results['data']['tasks'] = list()
+    results['data']['tasksIds'] = list()
 
     if DEBUG_MODULE:
         logging.debug(' * devices_action - parameters: %s', str(topology_state))
 
     if topology_state == 'present':
+        # provision devices that need to be updated
+        if DEBUG_MODULE:
+            logging.debug(' * devices_action - Provisionning devices')
+        result_add = devices_new(module=module)
+        if DEBUG_MODULE:
+            logging.debug('   - devices_action - Provisionning results is: %s', str(result_add))
+        results['data'].update(result_add)
+        if len(result_add['added_tasksIds']) > 0:
+            results['data']['tasksIds'] += result_add['added_tasksIds']
+
         # update devices that need to be updated
         if DEBUG_MODULE:
             logging.debug(' * devices_action - Updating devices')
@@ -793,8 +1035,21 @@ def devices_action(module):
         if DEBUG_MODULE:
             logging.debug('   - devices_action - Update results is: %s', str(result_update))
         results['data'].update(result_update)
+        if len(result_update['updated_tasksIds']) > 0:
+            results['data']['tasksIds'] += result_update['updated_tasksIds']
+
+        # move devices that needs to be moved to another container.
+        if DEBUG_MODULE:
+            logging.debug(' * devices_action - Moving devices')
+        result_move = devices_move(module=module)
+        if DEBUG_MODULE:
+            logging.debug('   - devices_action - Move results is: %s', str(result_move))
+        results['data'].update(result_move)
+        if len(result_move['moved_tasksIds']) > 0:
+            results['data']['tasksIds'] += result_update['moved_tasksIds']
+
         # Get CV info for generated tasks
-        tasks_generated = tasks_get_fitlered(taskid_list=result_update['tasksIds'], module=module)
+        tasks_generated = tasks_get_fitlered(taskid_list=results['data']['tasksIds'], module=module)
         results['data']['tasks'] = results['data']['tasks'] + tasks_generated
 
     # Call reset function to restart ZTP process on devices.
@@ -808,6 +1063,10 @@ def devices_action(module):
         results['data'].update(result_reset)
         tasks_generated = tasks_get_fitlered(taskid_list=result_update['tasksIds'], module=module)
         results['data']['tasks'].append(tasks_generated)
+
+    # Check if we have to update changed flag
+    if len(results['data']['tasks']) > 0 or int(results['data']['moved_devices']) > 0:
+        results['changed'] = True
 
     if DEBUG_MODULE:
             logging.debug('   - devices_action - final result is: %s', str(results))
