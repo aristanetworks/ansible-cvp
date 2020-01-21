@@ -37,7 +37,7 @@ from time import sleep
 
 DOCUMENTATION = r'''
 ---
-module: cv_device
+module: cv_device_v1
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
