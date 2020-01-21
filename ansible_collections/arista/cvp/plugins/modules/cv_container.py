@@ -330,7 +330,7 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
     for cvp_container in containers:
         if cvp_container['parentName'] is None:
             continue
-        elif cvp_container['parentName'] in [root]:
+        if cvp_container['parentName'] in [root]:
             previously_created.append(cvp_container['name'])
             tree.create_node(cvp_container['name'], cvp_container['name'], parent=cvp_container['parentName'])
     # Loop since expected tree is not equal to number of entries in container topology
