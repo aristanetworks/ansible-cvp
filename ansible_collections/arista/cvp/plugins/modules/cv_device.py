@@ -88,7 +88,7 @@ options:
         - If merge, Add listed configlets to device and do not touch already configured configlets.
     required: false
     default: 'override'
-    choices: ['override', 'merge']
+    choices: ['override', 'merge', 'delete']
     type: str
 """
 
@@ -958,6 +958,22 @@ def devices_update(module, mode="override"):
                     configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
                 )
 
+        # Start configlet update in delete mode: remove listed configlets to device and do not update already attached devices.
+        if mode == 'delete':
+            # Get list of currently configured configlets and new ones
+            configlets_add = [x for x in device_update["cv_configlets"] if x not in device_update["configlets"]]
+            # Transform output to be CV compliant:
+            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+            configlets_add = configlet_prepare_cvp_update(
+                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
+                )
+            configlets_delete = device_update["configlets"]
+            # Transform output to be CV compliant:
+            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+            configlets_delete = configlet_prepare_cvp_update(
+                configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
+            )
+
         if len(device_facts) == 0:
             module.fail_json("Error - device does not exists on CV side.")
 
@@ -1209,7 +1225,7 @@ def main():
         configlet_mode=dict(type='str',
                             required=False,
                             default='override',
-                            choices=['merge', 'override'])
+                            choices=['merge', 'override', 'delete'])
                         )
 
     if DEBUG_MODULE:
