@@ -16,6 +16,10 @@ Module comes with a set of options:
 - `state`: . Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
     - `absent`: Reset devices.
     - `present`: Configure devices.
+- `configlet_fitler`: Allow user to select behaviour to apply on configlets attached to a device:
+    - `override`: (default) Configure list provided by user and remove any other configlets attached to device.
+    - `merge`: add configlets listed by user to the device and do not touch existing configlets.
+    - `delete`: Remove list of configlets from device and let other unchanged.
 
 ## Usage
 
@@ -73,29 +77,37 @@ Below is an example of expected output
 
 ```json
 {
-    "changed": true, 
+    "changed": "True",
     "data": {
-        "new": [], 
-        "reset": [], 
         "tasks": [
             {
-                "actionStatus": "ACTIVE", 
-                "currentAction": "Submit", 
-                "description": "Ansible Configlet Update: on Device veos01", 
-                "displayedStutus": "Pending", 
-                "name": "", 
-                "note": "", 
-                "status": "ACTIVE", 
-                "taskNo": "128"
+                "workOrderId": "108",
+                "name": "",
+                "workOrderState": "ACTIVE"
             }
+        ],
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1,
+        "updated_devices": 1,
+        "updated_tasksIds": [
+            "108"
         ],
         "updated": [
             {
-                "veos01": "Configlets-[u'128']"
+                "DC1-SPINE1": "Configlets-['108']"
             }
+        ],
+        "tasksIds": [
+            "108"
         ]
-    }, 
-    "failed": false
+    }
 }
 ```
 
