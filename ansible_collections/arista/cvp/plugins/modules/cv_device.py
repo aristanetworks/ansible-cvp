@@ -82,6 +82,14 @@ options:
     default: 'present'
     choices: ['present', 'absent']
     type: str
+  configlet_mode:
+    description:
+        - If override, Add listed configlets and remove all unlisted ones.
+        - If merge, Add listed configlets to device and do not touch already configured configlets.
+    required: false
+    default: 'override'
+    choices: ['override', 'merge']
+    type: str
 """
 
 EXAMPLES = r"""
@@ -119,6 +127,16 @@ EXAMPLES = r"""
       cv_device:
         devices: "{{devices_inventory}}"
         cvp_facts: '{{cvp_facts.ansible_facts}}'
+        device_filter: ['veos']
+      register: cvp_device
+
+    - name: "Add configlet to device on {{inventory_hostname}}"
+      tags:
+        - provision
+      cv_device:
+        devices: "{{devices_inventory}}"
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        configlet_mode: merge
         device_filter: ['veos']
       register: cvp_device
 """
@@ -845,9 +863,13 @@ def devices_move(module):
     return data
 
 
-def devices_update(module, mode="overide"):
+def devices_update(module, mode="override"):
     """
     Method to manage configlet update for device.
+
+    This method supports 2 different modes to manage configlets:
+    - override: Configure configlets listed by user and remove not listed ones.
+    - merge: Only add listed configlets to existing and configured configlets.
 
     Example:
     ----------
@@ -867,7 +889,7 @@ def devices_update(module, mode="overide"):
     module : AnsibleModule
         Ansible Module.
     mode : str, optional
-        Mode to use to play with configlet, by default 'overide'
+        Mode to use to play with configlet, by default 'override'
 
     Returns
     -------
@@ -884,6 +906,10 @@ def devices_update(module, mode="overide"):
     result_update = list()
     # List of generated taskIds
     result_tasks_generated = list()
+    # Structure to list configlets to delete
+    configlets_delete = list()
+    # Structure to list configlets to configure on device.
+    configlets_add = list()
 
     if DEBUG_MODULE:
         logging.debug(" * devices_update - entering update function")
@@ -893,78 +919,87 @@ def devices_update(module, mode="overide"):
             logging.info(
                 " * devices_update - updating device: %s", str(device_update["name"])
             )
-        # Start configlet update
-        # Get list of configlet to update: in ansible inputs and not in facts
-        configlets_delete = []
-        if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
-            configlets_delete = get_unique_from_list(
-                source_list=device_update["cv_configlets"],
-                compare_list=device_update["configlets"],
-            )
-            # Transform output to be CV compliant:
-            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
-            configlets_delete = configlet_prepare_cvp_update(
-                configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
-            )
+        # Get device facts from cv facts
+        device_facts = device_get_from_facts(
+            module=module, device_name=device_update["name"]
+        )
+        # Start configlet update in override mode
+        if mode == 'override':
+            # Get list of configlet to update: in ansible inputs and not in facts
+            if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+                configlets_delete = get_unique_from_list(
+                    source_list=device_update["cv_configlets"],
+                    compare_list=device_update["configlets"],
+                )
+                # Transform output to be CV compliant:
+                # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+                configlets_delete = configlet_prepare_cvp_update(
+                    configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
+                )
 
-            # In any case build list of configlet to attach to device
-            # Get list of configlets to delete: in facts but not on ansible inputs
-            configlets_add = get_unique_from_list(
-                source_list=device_update["configlets"],
-                compare_list=device_update["cv_configlets"],
-            )
+                # In any case build list of configlet to attach to device
+                # Get list of configlets to delete: in facts but not on ansible inputs
+                configlets_add = get_unique_from_list(
+                    source_list=device_update["configlets"],
+                    compare_list=device_update["cv_configlets"],
+                )
+                # Transform output to be CV compliant:
+                # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+                configlets_add = configlet_prepare_cvp_update(
+                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
+                )
+        # Start configlet update in merge mode: add configlets to device and do not update already attached devices.
+        if mode == 'merge':
+            # Get list of currently configured configlets and new ones
+            configlets_add = device_update["configlets"] + device_update["cv_configlets"]
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
             configlets_add = configlet_prepare_cvp_update(
-                configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
-            )
-
-            # Get device facts from cv facts
-            device_facts = device_get_from_facts(
-                module=module, device_name=device_update["name"]
-            )
-            if len(device_facts) == 0:
-                module.fail_json("Error - device does not exists on CV side.")
-
-            # Execute configlet update on device
-            try:
-                device_action = module.client.api.update_configlets_on_device(
-                    app_name="Ansible",
-                    device=device_facts,
-                    add_configlets=configlets_add,
-                    del_configlets=configlets_delete,
+                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
                 )
-            except Exception as error:
-                errorMessage = str(error)
-                message = "Device %s Configlets cannot be updated - %s" % (
+
+        if len(device_facts) == 0:
+            module.fail_json("Error - device does not exists on CV side.")
+
+        # Execute configlet update on device
+        try:
+            device_action = module.client.api.update_configlets_on_device(
+                app_name="Ansible",
+                device=device_facts,
+                add_configlets=configlets_add,
+                del_configlets=configlets_delete,
+            )
+        except Exception as error:
+            errorMessage = str(error)
+            message = "Device %s Configlets cannot be updated - %s" % (
+                device_update["name"],
+                errorMessage,
+            )
+            result_update.append({device_update["name"]: message})
+        else:
+            # Capture and report error message sent by CV during update
+            if "errorMessage" in str(device_action):
+                message = "Device %s Configlets cannot be Updated - %s" % (
                     device_update["name"],
-                    errorMessage,
+                    device_action["errorMessage"],
                 )
                 result_update.append({device_update["name"]: message})
             else:
-                # Capture and report error message sent by CV during update
-                if "errorMessage" in str(device_action):
-                    message = "Device %s Configlets cannot be Updated - %s" % (
-                        device_update["name"],
-                        device_action["errorMessage"],
+                changed = True
+                if "taskIds" in str(device_action):
+                    devices_updated += 1
+                    for taskId in device_action["data"]["taskIds"]:
+                        result_tasks_generated.append(taskId)
+                    result_update.append(
+                        {
+                            device_update["name"]: "Configlets-%s"
+                            % device_action["data"]["taskIds"]
+                        }
                     )
-                    result_update.append({device_update["name"]: message})
                 else:
-                    changed = True
-                    if "taskIds" in str(device_action):
-                        devices_updated += 1
-                        for taskId in device_action["data"]["taskIds"]:
-                            result_tasks_generated.append(taskId)
-                        result_update.append(
-                            {
-                                device_update["name"]: "Configlets-%s"
-                                % device_action["data"]["taskIds"]
-                            }
-                        )
-                    else:
-                        result_update.append(
-                            {device_update["name"]: "Configlets-No_Specific_Tasks"}
-                        )
+                    result_update.append(
+                        {device_update["name"]: "Configlets-No_Specific_Tasks"}
+                    )
 
     # Build response structure
     data = {
@@ -1105,6 +1140,7 @@ def devices_action(module):
     cvp_facts = module.params["cvp_facts"]
     topology_devices = module.params["devices"]
     topology_state = module.params["state"]
+    configlet_mode = module.params['configlet_mode']
 
     results = dict()
     results["changed"] = False
@@ -1123,7 +1159,7 @@ def devices_action(module):
             results["data"]["tasksIds"] += result_add["added_tasksIds"]
 
         # update devices that need to be updated
-        result_update = devices_update(module=module)
+        result_update = devices_update(module=module, mode=configlet_mode)
         results["data"].update(result_update)
         if len(result_update["updated_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_update["updated_tasksIds"]
@@ -1170,7 +1206,11 @@ def main():
         state=dict(
             type="str", choices=["present", "absent"], default="present", required=False
         ),
-    )
+        configlet_mode=dict(type='str',
+                            required=False,
+                            default='override',
+                            choices=['merge', 'override'])
+                        )
 
     if DEBUG_MODULE:
         logging.basicConfig(
