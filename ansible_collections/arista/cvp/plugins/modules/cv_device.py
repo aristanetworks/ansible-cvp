@@ -480,26 +480,15 @@ def build_existing_devices_list(module):
         if is_in_filter(
             hostname_filter=devices_filter, hostname=cvp_device["hostname"]
         ):
-            if DEBUG_MODULE:
-                logging.debug(" * build_existing_devices_list - device is in filter")
-
             # Check if device is in module input
             if is_device_target(
                 hostname=cvp_device["hostname"], device_list=devices_ansible
             ):
-                if DEBUG_MODULE:
-                    logging.debug(
-                        " * build_existing_devices_list - device is in target"
-                    )
                 # Target device not in 'undefined' container
                 if (
                     is_in_container(device=cvp_device, container="undefined_container")
                     is not True
                 ):
-                    if DEBUG_MODULE:
-                        logging.debug(
-                            " * build_existing_devices_list - device is not in undefined_container"
-                        )
                     device_ansible = devices_ansible[cvp_device["hostname"]]
                     # Get CV facts part of structure
                     device_ansible["cv_configlets"] = configlets_get_from_facts(
@@ -668,7 +657,6 @@ def devices_new(module):
     if DEBUG_MODULE:
         logging.debug(" * devices_new - Entering devices_new")
         logging.debug(" * devices_new - entering update function")
-        logging.debug(" * devices_new - devices_new is %s", str(device_provision))
 
     for device_update in device_provision:
         if DEBUG_MODULE:
@@ -709,9 +697,6 @@ def devices_new(module):
         )
         if len(device_facts) == 0:
             module.fail_json("Error - device does not exists on CV side.")
-
-        if DEBUG_MODULE:
-            logging.info(" * devices_new - configlet add: %s", str(configlets_add))
 
         # Execute configlet update on device
         try:
@@ -801,21 +786,18 @@ def devices_move(module):
     changed = False
     if DEBUG_MODULE:
         logging.debug(" * devices_move - Entering devices_move")
+
     for device_update in devices_update:
         device_facts = device_get_from_facts(
             module=module, device_name=device_update["name"]
         )
         if DEBUG_MODULE:
             logging.info(" * devices_move - updating device: %s", str(device_update))
-            logging.info(" * devices_move - device facts: %s", str(device_facts))
+
         if device_facts["containerName"] != device_update["parentContainerName"]:
             container_facts = container_get_facts(
                 container_name=device_update["parentContainerName"], module=module
             )
-            if DEBUG_MODULE:
-                logging.info(
-                    " * devices_move - container facts: %s", str(container_facts)
-                )
             # Execute configlet update on device
             try:
                 device_action = module.client.api.move_device_to_container(
@@ -899,12 +881,9 @@ def devices_update(module, mode="overide"):
     result_update = list()
     # List of generated taskIds
     result_tasks_generated = list()
-    # newTasks = []  # Task Ids that have been identified during device actions
-    # taskList = []  # Tasks that have a pending status after function runs
 
     if DEBUG_MODULE:
         logging.debug(" * devices_update - entering update function")
-        logging.debug(" * devices_update - devices_update is %s", str(devices_update))
 
     for device_update in devices_update:
         if DEBUG_MODULE:
@@ -943,14 +922,6 @@ def devices_update(module, mode="overide"):
             )
             if len(device_facts) == 0:
                 module.fail_json("Error - device does not exists on CV side.")
-
-            if DEBUG_MODULE:
-                logging.info(
-                    " * devices_update - configlet add: %s", str(configlets_add)
-                )
-                logging.info(
-                    " * devices_update - configlet delete: %s", str(configlets_delete)
-                )
 
             # Execute configlet update on device
             try:
@@ -1143,35 +1114,19 @@ def devices_action(module):
 
     if topology_state == "present":
         # provision devices that need to be updated
-        if DEBUG_MODULE:
-            logging.debug(" * devices_action - Provisionning devices")
         result_add = devices_new(module=module)
-        if DEBUG_MODULE:
-            logging.debug(
-                "   - devices_action - Provisionning results is: %s", str(result_add)
-            )
         results["data"].update(result_add)
         if len(result_add["added_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_add["added_tasksIds"]
 
         # update devices that need to be updated
-        if DEBUG_MODULE:
-            logging.debug(" * devices_action - Updating devices")
         result_update = devices_update(module=module)
-        if DEBUG_MODULE:
-            logging.debug(
-                "   - devices_action - Update results is: %s", str(result_update)
-            )
         results["data"].update(result_update)
         if len(result_update["updated_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_update["updated_tasksIds"]
 
         # move devices that needs to be moved to another container.
-        if DEBUG_MODULE:
-            logging.debug(" * devices_action - Moving devices")
         result_move = devices_move(module=module)
-        if DEBUG_MODULE:
-            logging.debug("   - devices_action - Move results is: %s", str(result_move))
         results["data"].update(result_move)
         if len(result_move["moved_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_update["moved_tasksIds"]
@@ -1184,13 +1139,7 @@ def devices_action(module):
 
     # Call reset function to restart ZTP process on devices.
     elif topology_state == "absent":
-        if DEBUG_MODULE:
-            logging.debug(" * devices_action - Reseting devices")
         result_reset = devices_reset(module)
-        if DEBUG_MODULE:
-            logging.debug(
-                "   - devices_action - Reset results is: %s", str(result_reset)
-            )
         results["changed"] = True
         results["data"].update(result_reset)
         tasks_generated = tasks_get_fitlered(
