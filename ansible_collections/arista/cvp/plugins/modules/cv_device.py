@@ -954,9 +954,7 @@ def devices_update(module, mode="override"):
             configlets_add = device_update["configlets"] + device_update["cv_configlets"]
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
-            configlets_add = configlet_prepare_cvp_update(
-                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
-                )
+            configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add, facts=module.params["cvp_facts"])
 
         # Start configlet update in delete mode: remove listed configlets to device and do not update already attached devices.
         if mode == 'delete':
@@ -964,9 +962,7 @@ def devices_update(module, mode="override"):
             configlets_add = [x for x in device_update["cv_configlets"] if x not in device_update["configlets"]]
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
-            configlets_add = configlet_prepare_cvp_update(
-                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
-                )
+            configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add, facts=module.params["cvp_facts"])
             configlets_delete = device_update["configlets"]
             # Transform output to be CV compliant:
             # [{name: configlet_name, key: configlet_key_from_cv_facts}]
@@ -1229,11 +1225,9 @@ def main():
                         )
 
     if DEBUG_MODULE:
-        logging.basicConfig(
-            format="%(asctime)s %(message)s",
-            filename="cv_device_v2.log",
-            level=logging.DEBUG,
-        )
+        logging.basicConfig(format="%(asctime)s %(message)s",
+                            filename="cv_device_v2.log",
+                            level=logging.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
