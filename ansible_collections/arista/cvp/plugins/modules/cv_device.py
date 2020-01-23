@@ -1218,13 +1218,13 @@ def main():
         configlet_mode=dict(type='str',
                             required=False,
                             default='override',
-                            choices=['merge', 'override', 'delete'])
-                        )
+                            choices=['merge', 'override', 'delete']
+        )
+    )
 
     if DEBUG_MODULE:
         logging.basicConfig(format="%(asctime)s %(message)s",
-                            filename="cv_device_v2.log",
-                            level=logging.DEBUG)
+                            filename="cv_device_v2.log", level=logging.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
