@@ -1218,9 +1218,7 @@ def main():
         configlet_mode=dict(type='str',
                             required=False,
                             default='override',
-                            choices=['merge', 'override', 'delete']
-        )
-    )
+                            choices=['merge', 'override', 'delete']))
 
     if DEBUG_MODULE:
         logging.basicConfig(format="%(asctime)s %(message)s",
