@@ -20,22 +20,30 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
+    "metadata_version": "1.0",
+    "status": ["preview"],
+    "supported_by": "community",
 }
 
 import re
+import logging
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import (
+    CvpLoginError,
+    CvpApiError,
+)
 from time import sleep
 
-DOCUMENTATION = r'''
+# Activate or not debug mode for logging & development
+DEBUG_MODULE = True
+
+DOCUMENTATION = r"""
 ---
 module: cv_device
 version_added: "2.9"
@@ -64,7 +72,7 @@ options:
                  list devices that can be modified or deleted based
                  on configlets entries.
     required: false
-    default: ['none']
+    default: ['all']
     type: list
   state:
     description:
@@ -74,9 +82,17 @@ options:
     default: 'present'
     choices: ['present', 'absent']
     type: str
-'''
+  configlet_mode:
+    description:
+        - If override, Add listed configlets and remove all unlisted ones.
+        - If merge, Add listed configlets to device and do not touch already configured configlets.
+    required: false
+    default: 'override'
+    choices: ['override', 'merge', 'delete']
+    type: str
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 ---
 - name: Test cv_device
   hosts: cvp
@@ -113,14 +129,33 @@ EXAMPLES = r'''
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         device_filter: ['veos']
       register: cvp_device
-'''
+
+    - name: "Add configlet to device on {{inventory_hostname}}"
+      tags:
+        - provision
+      cv_device:
+        devices: "{{devices_inventory}}"
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        configlet_mode: merge
+        device_filter: ['veos']
+      register: cvp_device
+"""
 
 
 def connect(module):
-    ''' Connects to CVP device using user provided credentials from playbook.
-    :param module: Ansible module with parameters and client connection.
-    :return: CvpClient object with connection instantiated.
-    '''
+    """
+    Connects to CVP device using user provided credentials from playbook.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    CvpClient
+        CvpClient object with connection instantiated.
+    """
     client = CvpClient()
     connection = Connection(module._socket_path)
     host = connection.get_option("host")
@@ -128,357 +163,127 @@ def connect(module):
     user = connection.get_option("remote_user")
     pswd = connection.get_option("password")
     try:
-        client.connect([host],
-                       user,
-                       pswd,
-                       protocol="https",
-                       port=port,
-                       )
+        client.connect(
+            [host], user, pswd, protocol="https", port=port,
+        )
     except CvpLoginError as e:
         module.fail_json(msg=str(e))
     return client
 
 
-def device_action(module):
-    ''' Compare devices in "devices" with devices in "cvp_facts"
-    if device exists in "cvp_facts" check images and configlets, if changed update
-    if device does not exist in "cvp_facts" add to CVP
-    if configlet in "cvp_facts" but not in "configlets" remove from CVP if
-    not applied to a device or container.
-    :param module: Ansible module with parameters and client connection.
-    :return: data: dict of module actions and taskIDs
-    '''
-    # If any configlet changed updated 'changed' flag
-    changed = False
-    # Compare configlets against cvp_facts-configlets
-    unchanged_device = []  # devices with no changes
-    reset_device = []  # devices to factory reset
-    reset = []
-    update_device = []  # devices with configlet or image changes
-    updated = []
-    new_device = []  # devices to add to CVP requires container ID from cv_facts
-    new = []
-    newTasks = []  # Task Ids that have been identified during device actions
-    taskList = []  # Tasks that have a pending status after function runs
-
-    # Check for existing devices
-    for cvp_device in module.params['cvp_facts']['devices']:
-        # Include only devices that match filter elements, "all" will
-        # include all devices.
-        if re.search(r"\ball\b", str(module.params['device_filter'])) or (
-           any(element in cvp_device['hostname'] for element in module.params['device_filter'])):
-            # Check to see if devcie is to be deleted (not in ansible list)
-            if cvp_device['hostname'] in module.params['devices']:
-                # Make sure the device is not in the Undefined container
-                if "undefined_container" != str(cvp_device['parentContainerKey']):
-                    ansible_device = module.params['devices'][cvp_device['hostname']]
-                    # Check assigned configlets
-                    device_update = False
-                    add_configlets = []
-                    remove_configlets = []
-                    for configlet in cvp_device['deviceSpecificConfiglets']:
-                        if configlet not in ansible_device['configlets']:
-                            remove_configlets.append(configlet)
-                            device_update = True
-                    for configlet in ansible_device['configlets']:
-                        if configlet not in cvp_device['deviceSpecificConfiglets']:
-                            add_configlets.append(configlet)
-                            device_update = True
-                    # Check assigned images
-                    add_imageBundle = ''
-                    remove_imageBundle = ''
-                    if 'imageBundle' in ansible_device and str(cvp_device['imageBundle']) != str(ansible_device['imageBundle']):
-                        if str(ansible_device['imageBundle']) != "":
-                            add_imageBundle = str(ansible_device['imageBundle'])
-                            device_update = True
-                        else:
-                            remove_imageBundle = str(cvp_device['imageBundle'])
-                            device_update = True
-                    if device_update:
-                        update_device.append({'name': cvp_device['hostname'],
-                                              'configlets': [add_configlets, remove_configlets],
-                                              'imageBundle': [add_imageBundle, remove_imageBundle],
-                                              'device': cvp_device})
-            # If device not in ansible list and not excluded by filter reset it
-            else:
-                # Assume device has already been reset if its in the Undefined container
-                if cvp_device['parentContainerKey'] != 'undefined_container':
-                    reset_device.append(cvp_device)
-                else:
-                    message = "Device %s cannot be reset - Already in Undefined container" % cvp_device['hostname']
-                    reset.append({cvp_device['hostname']: 'No_Reset-No_Tasks'})
-
-    # Check for new devices
-    # Device will be in the CVP Inventory and also in the Undefined container
-    # Non provisioned device (telemetry only) will not be in a container
-    for ansible_name in module.params['devices']:
-        cvp_device_found = False
-        ansible_device = module.params['devices'][ansible_name]
-        # Include only devices that match filter elements, "all" will
-        # include all devices.
-        if re.search(r"\ball\b", str(module.params['device_filter'])) or (
-           any(element in ansible_device['name'] for element in module.params['device_filter'])):
-            # Check to see if devcie is to be added (not in CVP list)
-            for s_device in module.params['cvp_facts']['devices']:
-                if str(ansible_device['name']) == str(s_device['hostname']):
-                    cvp_device_found = True
-                    cvp_device = s_device
-                    break
-            # If the device is in CVP check which container it is in only devices in "Undefined"
-            # can be provisioned, the rest should be handled by cv_container
-            if cvp_device_found:
-                # Make sure the new device is in the Undefined container
-                if "undefined_container" == str(cvp_device['parentContainerKey']):
-                    # Get destination container details from CVP facts
-                    for dest_container in module.params['cvp_facts']['containers']:
-                        if dest_container['name'] == ansible_device['parentContainerName']:
-                            # Create New device update to add configlets and imageBundles
-                            if len(ansible_device['configlets']) > 0:
-                                ansible_configlets = ansible_device['configlets']
-                            else:
-                                ansible_configlets = []
-                            if len(ansible_device['imageBundle']) > 0:
-                                ansible_imageBundle = ansible_device['imageBundle']
-                            else:
-                                ansible_imageBundle = []
-                            # Create new device details
-                            new_device.append({'cvp_device': cvp_device, 'container': dest_container,
-                                               'ansible_device': ansible_device,
-                                               'configlets': ansible_configlets,
-                                               'imageBundle': ansible_imageBundle})
-                            break
-                elif "" == str(cvp_device['parentContainerKey']):
-                    message = "Device %s cannot be provisioned - Telemetry Only" % ansible_device['name']
-                    new.append({ansible_device['name']: message})
-            else:
-                message = "Device %s cannot be provisioned - Not in CVP Inventory" % (ansible_device['name'])
-                new.append({ansible_device['name']: message})
-    # Action Devices as required
-    # If Ansible check_modde is True then skip any actions and return predicted outcome
-    if not module.check_mode:
-        if len(reset_device) > 0:
-            # Factory Reseting Devices and returning them to Undefined container
-            for device in reset_device:
-                try:
-                    device_action = module.client.api.reset_device("Ansible", device)
-                except Exception as error:
-                    errorMessage = str(error)
-                    message = "Device %s cannot be reset - %s" % (device['name'], errorMessage)
-                    reset.append({device['name']: message})
-                else:
-                    if "errorMessage" in str(device_action):
-                        message = "Device %s cannot be Reset - %s" % (device['name'], device_action['errorMessage'])
-                        reset.append({device['name']: message})
-                    else:
-                        changed = True
-                        if 'taskIds' in device_action.keys():
-                            for taskId in device_action['taskIds']:
-                                newTasks.append(taskId)
-                            reset.append({device['name']: 'Reset-%s' % device_action['tasksIds']})
-                        else:
-                            reset.append({device['name']: 'Reset-No_Tasks'})
-        if len(new_device) > 0:
-            count_new_devices = len(new_device)  # Number of new devices to provision
-            count_new_device_provisionned = 0  # Number of new devices provisionned
-            action_save_topology = False
-            # Provision (move from Undefined, add Configlets and Images) new Devices
-            # new_device schema ([cvp_device,dest_container,ansible_device])
-            for device in new_device:
-                # Test if we are managing last device to provision
-                # If no, then we do not create tasks and we do not save tempTopology
-                # If last device, we save topology and create tasks
-                count_new_device_provisionned += 1
-                action_save_topology = True if count_new_device_provisionned == count_new_devices else False
-                add_configlets = []
-                add_imageBundle = {}
-                if device['cvp_device']['parentContainerKey'] == 'undefined_container':
-                    if len(device['configlets']) > 0:
-                        for add_configlet in device['configlets']:
-                            for configlet in module.params['cvp_facts']['configlets']:
-                                if add_configlet == configlet['name']:
-                                    add_configlets.append({'name': add_configlet, 'key': configlet['key']})
-                    if len(device['imageBundle']) > 0:
-                        for imageBundle in module.params['cvp_facts']['imageBundles']:
-                            if str(device['imageBundle']) == str(imageBundle['name']):
-                                add_imageBundle = {'name': imageBundle['name'], 'key': imageBundle['key']}
-                                break
-                    try:
-                        new_device_action = module.client.api.provision_device(app_name='Ansible',
-                                                                               device=device['cvp_device'],
-                                                                               container=device['container'],
-                                                                               configlets=add_configlets,
-                                                                               imageBundle=add_imageBundle,
-                                                                               create_task=action_save_topology)
-                    except Exception as error:
-                        errorMessage = str(error)
-                        message = "New device %s cannot be added - Exception: %s" % (device['cvp_device']['hostname'],
-                                                                                     errorMessage)
-                        new.append({device['cvp_device']['hostname']: message})
-                    else:
-                        if "errorMessage" in str(new_device_action):
-                            message = "New device %s cannot be added - Error: %s" % (device['cvp_device']['hostname'],
-                                                                                     new_device_action['errorMessage'])
-                            new.append({device['cvp_device']['hostname']: message})
-                        else:
-                            changed = True
-                            if 'taskIds' in str(new_device_action):
-                                for taskId in new_device_action['data']['taskIds']:
-                                    newTasks.append(taskId)
-                                new.append({device['cvp_device']['hostname']: "New_Device-%s"
-                                           % new_device_action['data']['taskIds']})
-                            else:
-                                new.append({device['cvp_device']['hostname']: "New_Device-No_Specific_Tasks"})
-        if len(update_device) > 0:
-            # Update Configlets and ImageBundles for Devices
-            # Data passed in update_device
-            # {'name':cvp_device['hostname'],'configlets':[add_configlets,remove_configlets],
-            # 'imageBundle':[add_imageBundle,remove_imageBundle],'device':cvp_device})
-            for device in update_device:
-                add_configlets = []
-                del_configlets = []
-                add_imageBundle = {}
-                del_imageBundle = {}
-                update_configlets = False
-                update_imageBundle = False
-                # Update Configlets
-                if len(device['configlets'][0]) > 0:
-                    update_configlets = True
-                    for add_configlet in device['configlets'][0]:
-                        for configlet in module.params['cvp_facts']['configlets']:
-                            if add_configlet == configlet['name']:
-                                add_configlets.append({'name': add_configlet, 'key': configlet['key']})
-                if len(device['configlets'][1]) > 0:
-                    update_configlets = True
-                    for del_configlet in device['configlets'][1]:
-                        for configlet in module.params['cvp_facts']['configlets']:
-                            if del_configlet == configlet['name']:
-                                del_configlets.append({'name': del_configlet, 'key': configlet['key']})
-                if update_configlets:
-                    try:
-                        device_action = module.client.api.update_configlets_on_device('Ansible',
-                                                                                      device['device'],
-                                                                                      add_configlets,
-                                                                                      del_configlets)
-                    except Exception as error:
-                        errorMessage = str(error)
-                        message = "Device %s Configlets cannot be updated - %s" % (device['name'], errorMessage)
-                        updated.append({device['name']: message})
-                    else:
-                        if "errorMessage" in str(device_action):
-                            message = "Device %s Configlets cannot be Updated - %s" % (device['name'], device_action['errorMessage'])
-                            updated.append({device['name']: message})
-                        else:
-                            changed = True
-                            if 'taskIds' in str(device_action):
-                                for taskId in device_action['data']['taskIds']:
-                                    newTasks.append(taskId)
-                                updated.append({device['name']: "Configlets-%s" % device_action['data']['taskIds']})
-                            else:
-                                updated.append({device['name']: "Configlets-No_Specific_Tasks"})
-
-                # Update ImageBundles
-                # There can only be one ImageBundle per device so accept only the first entry in list
-                if len(device['imageBundle'][0]) > 0:
-                    update_imageBundle = True
-                    for imageBundle in module.params['cvp_facts']['imageBundles']:
-                        if str(device['imageBundle'][0]) == str(imageBundle['name']):
-                            add_imageBundle = {'name': imageBundle['name'], 'key': imageBundle['key']}
-                            break
-                if len(device['imageBundle'][1]) > 0:
-                    update_imageBundle = True
-                    for imageBundle in module.params['cvp_facts']['imageBundles']:
-                        if str(device['imageBundle'][1]) == str(imageBundle['name']):
-                            del_imageBundle = {'name': imageBundle['name'], 'key': imageBundle['key']}
-                            break
-                # Apply imageBundle updates to device if required
-                if update_imageBundle:
-                    try:
-                        device_action = module.client.api.update_imageBundle_on_device('Ansible',
-                                                                                       device['device'],
-                                                                                       add_imageBundle,
-                                                                                       del_imageBundle)
-                    except Exception as error:
-                        errorMessage = str(error)
-                        message = "Device %s imageBundle cannot be updated - Exception: %s" % (device['name'], errorMessage)
-                        updated.append({device['name']: message})
-                    else:
-                        if "errorMessage" in str(device_action):
-                            message = "Device %s imageBundle cannot be updated - Error: %s" % (device['name'], device_action['errorMessage'])
-                            updated.append({device['name']: message})
-                        else:
-                            changed = True
-                            if 'taskIds' in str(device_action):
-                                for taskId in device_action['data']['taskIds']:
-                                    newTasks.append(taskId)
-                                updated.append({device['name']: "imageBundle-%s" % device_action['data']['taskIds']})
-                            else:
-                                updated.append({device['name']: "imageBundle-No_Specific_Tasks"})
-
-        # Get any Pending Tasks in CVP
-        if changed:
-            # Allow CVP to generate Tasks
-            sleep(10)
-            # Build required data for tasks in CVP - work order Id, current task status, name
-            # description
-            tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
-                          'currentTaskName': 'currentTaskName', 'description': 'description',
-                          'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
-                          'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
-            tasks = module.client.api.get_tasks_by_status('Pending')
-            # if tasks IDs were created for device actions then return only those.
-            createdTasks = []
-            if len(newTasks) > 0:
-                for taskId in newTasks:
-                    for task in tasks:
-                        if taskId == task['workOrderId']:
-                            createdTasks.append(task)
-            else:
-                createdTasks = tasks
-            # Reduce task data to required fields
-            for task in createdTasks:
-                taskFacts = {}
-                for field in task.keys():
-                    if field in tasksField:
-                        taskFacts[tasksField[field]] = task[field]
-                taskList.append(taskFacts)
-        data = {'new': new, 'updated': updated, 'reset': reset, 'tasks': taskList}
-    else:
-        # Only display action results as Ansible check_mode is active
-        for device in new_device:
-            new.append({device[0]['name']: "checked"})
-        for device in update_device:
-            updated.append({device['name']: "checked",
-                            'configlets': device['configlets'],
-                            'imageBundle': device['imageBundle']})
-        for device in reset_device:
-            reset.append({device['name']: "checked"})
-        data = {'new': new, 'updated': updated, 'reset': reset, 'tasks': taskList}
-    return [changed, data]
+# ------------------------------------------------------------- #
+# GET functions #
+# ------------------------------------------------------------- #
 
 
-def match_filter(device_filter='all', device_name=''):
+def device_get_from_facts(module, device_name):
     """
-    Compare device name to device_filter
+    Get device information from CVP facts.
 
     Parameters
     ----------
-    device_filter : str, optional
-        Filter to test device name, by default 'all'
-    device_name : str,
-        Name of the device.
+    module : AnsibleModule
+        Ansible module.
+    device_name : string
+        Hostname to search in facts.
 
     Returns
     -------
-    bool
-        True if match filter, False otherwise.
+    dict
+        Device facts if found, else None.
     """
-    if re.search(r"\ball\b", str(device_filter)) or (
-       any(element in device_name for element in device_filter)):
-        return True
-    return False
+    for device in module.params["cvp_facts"]["devices"]:
+        if device["hostname"] == device_name:
+            return device
+    return None
 
 
-def get_tasks(taskid_list, module):
+def facts_devices(module):
+    """
+    Extract Facts of all devices from cv_facts.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict:
+        Facts of all devices
+    """
+    if "cvp_facts" in module.params:
+        if "devices" in module.params["cvp_facts"]:
+            return module.params["cvp_facts"]["devices"]
+    return []
+
+
+def configlets_get_from_facts(cvp_device):
+    """
+    Return list of devices's attached configlets from CV Facts.
+
+    Parameters
+    ----------
+    cvp_device : dict
+        Device facts from CV.
+
+    Returns
+    -------
+    list
+        List of existing device's configlets.
+    """
+    if "deviceSpecificConfiglets" in cvp_device:
+        return cvp_device["deviceSpecificConfiglets"]
+    return []
+
+
+def container_get_facts(container_name, module):
+    """
+    Extract facts for a given container.
+
+    Parameters
+    ----------
+    container_name : string
+        Container name to look for
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict
+        [description]
+    """
+    if "cvp_facts" in module.params:
+        if "containers" in module.params["cvp_facts"]:
+            for container in module.params["cvp_facts"]["containers"]:
+                if container_name == container["Name"]:
+                    return container
+    return []
+
+
+def configlet_get_fact_key(configlet_name, cvp_facts):
+    """
+    Get Configlet ID provided by CVP in facts.
+
+    Parameters
+    ----------
+    configlet_name : string
+        Name of configlet to look for the key field
+    cvp_facts : dict
+        Dictionary from cv_facts
+
+    Returns
+    -------
+    string
+        Key value of the configlet.
+    """
+    for configlet in cvp_facts["configlets"]:
+        if configlet_name == configlet["name"]:
+            return configlet["key"]
+    return None
+
+
+def tasks_get_fitlered(taskid_list, module):
     """
     Get tasks information from a list of tasks.
 
@@ -494,12 +299,728 @@ def get_tasks(taskid_list, module):
     list
         List of tasks from CVP.
     """
-    tasks = module.client.api.get_tasks_by_status('Pending')
+    tasks = module.client.api.get_tasks_by_status("Pending")
     task_list = list()
     for task in tasks:
-        if task['workOrderId'] in taskid_list:
+        if task["workOrderId"] in taskid_list:
             task_list.append(task)
     return task_list
+
+
+def get_unique_from_list(source_list, compare_list):
+    """
+    Extract unique entries from list.
+
+    Compare source_list to compare_list and return entries from source_list
+    and not in compare_list.
+
+    Parameters
+    ----------
+    source_list : list
+        Input list to compare to base list
+    compare_list : list
+        Base list to compare input list to.
+
+    Returns
+    -------
+    list
+        List of unique entries
+    """
+    unique_entries = list()
+    for entry in source_list:
+        if entry not in compare_list:
+            unique_entries.append(entry)
+    return unique_entries
+
+
+# ------------------------------------------------------------- #
+# Test Functions #
+# ------------------------------------------------------------- #
+
+
+def is_in_filter(hostname_filter=None, hostname="eos"):
+    """
+    Check if device is part of the filter or not.
+
+    Parameters
+    ----------
+    hostname_filter : list, optional
+        Device filter, by default ['all']
+    hostname : str
+        Device hostname to compare against filter.
+
+    Returns
+    -------
+    boolean
+        True if device hostname is part of filter. False if not.
+    """
+    if DEBUG_MODULE:
+        logging.info(" * is_in_filter - filter is %s", str(hostname_filter))
+        logging.info(" * is_in_filter - hostname is %s", str(hostname))
+
+    # W102 Workaround to avoid list as default value.
+    if hostname_filter is None:
+        hostname_filter = ["all"]
+
+    if "all" in hostname_filter:
+        return True
+    elif any(element in hostname for element in hostname_filter):
+        return True
+    if DEBUG_MODULE:
+        logging.info(" * is_in_filter - NOT matched")
+    return False
+
+
+def is_in_container(device, container="undefined_container"):
+    """
+    Check if device is attached to given container.
+
+    Parameters
+    ----------
+    device : dict
+        Device information from cv_facts
+    container : str, optional
+        Container name to check if device is attached to, by default 'undefined_container'
+
+    Returns
+    -------
+    boolean
+        True if attached to container, False if not.
+    """
+    if "parentContainerKey" in device:
+        if container == device["parentContainerKey"]:
+            return True
+    return False
+
+
+def is_device_target(hostname, device_list):
+    """
+    Check if CV Device is part of devices listed in module inputs.
+
+    Parameters
+    ----------
+    hostname : string
+        CV Device hostname
+    device_list : dict
+        Device list provided as module input.
+
+    Returns
+    -------
+    boolean
+        True if hostname is in device_list. False if not.
+    """
+    if hostname in device_list.keys():
+        return True
+    return False
+
+
+def is_list_diff(list1, list2):
+    """
+    Check if 2 list have some differences.
+
+    Parameters
+    ----------
+    list1 : list
+        First list to compare.
+    list2 : list
+        Second list to compare.
+
+    Returns
+    -------
+    boolean
+        True if lists have diffs. False if not.
+    """
+    has_diff = False
+    for entry1 in list1:
+        if entry1 not in list2:
+            has_diff = True
+    for entry2 in list2:
+        if entry2 not in list1:
+            has_diff = True
+    return has_diff
+
+
+# ------------------------------------------------------------- #
+# Module dedicated functions #
+# ------------------------------------------------------------- #
+
+
+def build_existing_devices_list(module):
+    """
+    Build List of existing devices to update.
+
+    Structure output:
+    >>> configlets_get_from_facts(cvp_device)
+    {
+        [
+            {
+                "name": "veos01",
+                "configlets": [
+                    "cv_device_test01",
+                    "SYS_TelemetryBuilderV2_172.23.0.2_1",
+                    "veos01-basic-configuration",
+                    "SYS_TelemetryBuilderV2"
+                ],
+                "cv_configlets": [
+                    "cv_device_test01",
+                    "SYS_TelemetryBuilderV2_172.23.0.2_1"
+                ],
+                "parentContainerName": "DC1_VEOS",
+                "imageBundle": []
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    list
+        List of existing devices on CV
+    """
+    # Get variable from module
+    devices_filter = module.params["device_filter"]
+    devices_ansible = module.params["devices"]
+    devices_info = list()
+    facts_device = facts_devices(module)
+    if DEBUG_MODULE:
+        logging.debug(
+            " * build_existing_devices_list - device filter is: %s", str(devices_filter)
+        )
+    for cvp_device in facts_device:
+        if DEBUG_MODULE:
+            logging.debug(
+                " * build_existing_devices_list - start %s", str(cvp_device["hostname"])
+            )
+        if is_in_filter(
+            hostname_filter=devices_filter, hostname=cvp_device["hostname"]
+        ):
+            # Check if device is in module input
+            if is_device_target(
+                hostname=cvp_device["hostname"], device_list=devices_ansible
+            ):
+                # Target device not in 'undefined' container
+                if (
+                    is_in_container(device=cvp_device, container="undefined_container")
+                    is not True
+                ):
+                    device_ansible = devices_ansible[cvp_device["hostname"]]
+                    # Get CV facts part of structure
+                    device_ansible["cv_configlets"] = configlets_get_from_facts(
+                        cvp_device=cvp_device
+                    )
+                    # TODO: imageBundle MUST be implemented later.
+                    # Add device to the list
+                    devices_info.append(device_ansible)
+    if DEBUG_MODULE:
+        logging.info(
+            " * build_existing_devices_list - devices_info: %s", str(devices_info)
+        )
+    return devices_info
+
+
+def build_new_devices_list(module):
+    """
+    Build List of new devices to register in CV.
+
+    Structure output:
+    >>> configlets_get_from_facts(cvp_device)
+    {
+        [
+            {
+                "name": "veos01",
+                "configlets": [
+                    "cv_device_test01",
+                    "SYS_TelemetryBuilderV2_172.23.0.2_1",
+                    "veos01-basic-configuration",
+                    "SYS_TelemetryBuilderV2"
+                ],
+                "cv_configlets": [],
+                "parentContainerName": "DC1_VEOS",
+                "imageBundle": []
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    list
+        List of new devices to provision on CV.
+    """
+    # Get variable from module
+    devices_filter = module.params["device_filter"]
+    devices_ansible = module.params["devices"]
+    device_info = dict()
+    devices_info = list()
+    # facts_devices = facts_devices(module)
+    # Loop in Input devices to see if it is part of CV Facts
+    for ansible_device_hostname, ansible_device in devices_ansible.items():
+        if is_in_filter(
+            hostname_filter=devices_filter, hostname=ansible_device_hostname
+        ):
+            cvp_device = device_get_from_facts(
+                module=module, device_name=ansible_device_hostname
+            )
+            if len(cvp_device) >= 0:
+                if is_in_container(device=cvp_device, container="undefined_container"):
+                    device_info = {
+                        "name": ansible_device_hostname,
+                        "parentContainerName": ansible_device["parentContainerName"],
+                        "configlets": ansible_device["configlets"],
+                        "cv_configlets": [],
+                        "imageBundle": ansible_device["imageBundle"],
+                        "message": "Device will be provisionned",
+                    }
+                    devices_info.append(device_info)
+    return devices_info
+
+
+def configlet_prepare_cvp_update(configlet_name_list, facts):
+    """
+    Build configlets strcuture to configure CV.
+
+    CV requires to get a specific list of dict to add/delete configlets
+    attached to device. This function create this specific structure.
+
+    Example:
+    ----------
+    >>> configlet_prepare_cvp_update(configlet_name_list, facts)
+    [
+        {
+            'name': MyConfiglet,
+            'key': <<KEY Extracted from cv_facts>>
+        }
+    ]
+
+    Parameters
+    ----------
+    configlet_name_list : list
+        List of configlets name to build
+    facts : dict
+        Dict from cv_facts
+
+    Returns
+    -------
+    list
+        List of dictionary required to be passed to CV.
+    """
+    configlets_structure = list()
+    for configlet_name in configlet_name_list:
+        configlet_data = dict()
+        configlet_key = configlet_get_fact_key(
+            configlet_name=configlet_name, cvp_facts=facts
+        )
+        configlet_data["name"] = configlet_name
+        configlet_data["key"] = configlet_key
+        configlets_structure.append(configlet_data)
+    return configlets_structure
+
+
+# ------------------------------------------------------------- #
+# Device Actions #
+# ------------------------------------------------------------- #
+
+
+def devices_new(module):
+    """
+    Method to manage device provisionning.
+
+    Example:
+    ----------
+    >>> devices_new(module=module)
+    {
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    # if DEBUG_MODULE:
+    #     logging.debug(' * devices_new - Entering devices_new')
+    # List of devices to update: already provisioned on CV and part of module input.
+    device_provision = build_new_devices_list(module=module)
+    # Get number of new devices to provision
+    count_new_devices = len(device_provision)
+    # Counter of number of updated devices.
+    device_provisioned_result = 0
+    device_provisioned = 0
+    # List of devices updated.
+    result_update = list()
+    # List of generated taskIds
+    result_tasks_generatedtaskId = list()
+
+    if DEBUG_MODULE:
+        logging.debug(" * devices_new - Entering devices_new")
+        logging.debug(" * devices_new - entering update function")
+
+    for device_update in device_provision:
+        if DEBUG_MODULE:
+            logging.info(
+                " * devices_new - provisioning device: %s", str(device_update["name"])
+            )
+        # Test if we are managing last device to provision
+        # If no, then we do not create tasks and we do not save tempTopology
+        # If last device, we save topology and create tasks
+        device_provisioned += 1
+        action_save_topology = (
+            True if device_provisioned == count_new_devices else False
+        )
+
+        imageBundle_attached = dict()  # TODO: Not yet managed
+
+        # Get list of configlets to delete: in facts but not on ansible inputs
+        configlets_add = get_unique_from_list(
+            source_list=device_update["configlets"],
+            compare_list=device_update["cv_configlets"],
+        )
+        # Transform output to be CV compliant:
+        # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+        configlets_add = configlet_prepare_cvp_update(
+            configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
+        )
+
+        # Collect container information
+        container_facts = container_get_facts(
+            container_name=device_update["parentContainerName"], module=module
+        )
+        if len(container_facts) == 0:
+            module.fail_json("Error - container does not exists on CV side.")
+
+        # Get device facts from cv facts
+        device_facts = device_get_from_facts(
+            module=module, device_name=device_update["name"]
+        )
+        if len(device_facts) == 0:
+            module.fail_json("Error - device does not exists on CV side.")
+
+        # Execute configlet update on device
+        try:
+            device_action = module.client.api.provision_device(
+                app_name="Ansible",
+                device=device_facts,
+                container=container_facts,
+                configlets=configlets_add,
+                imageBundle=imageBundle_attached,
+                create_task=action_save_topology,
+            )
+        except Exception as error:
+            errorMessage = str(error)
+            message = "Device %s cannot be provisionned - %s" % (
+                device_update["name"],
+                errorMessage,
+            )
+            result_update.append({device_update["name"]: message})
+        else:
+            # Capture and report error message sent by CV during update
+            if "errorMessage" in str(device_action):
+                message = "Device %s cannot be provisionned - %s" % (
+                    device_update["name"],
+                    device_action["errorMessage"],
+                )
+                result_update.append({device_update["name"]: message})
+            else:
+                changed = True
+                if "taskIds" in str(device_action):
+                    device_provisioned_result += 1
+                    result_tasks_generatedtaskId += device_action["data"]["taskIds"]
+                    result_update.append(
+                        {
+                            device_update["name"]: "provisionning-tasks-%s"
+                            % str(device_action["data"]["taskIds"])
+                        }
+                    )
+                else:
+                    result_update.append({device_update["name"]: "not provisionned"})
+
+    # Build response structure
+    data = {
+        "provisionned_devices": device_provisioned_result,
+        "provisionned": result_update,
+        "added_tasksIds": result_tasks_generatedtaskId,
+    }
+
+    if DEBUG_MODULE:
+        logging.info("devices_new - result output: %s", str(data))
+
+    return data
+
+
+def devices_move(module):
+    """
+    Method to move device from one container to another.
+
+    Example:
+    ----------
+    >>> devices_move(module=module)
+    {
+        "moved_taskIds": [],
+        "moved_devices": 1,
+        "moved": [
+            {
+                "DC1-SPINE1": "device-move-no-specifc-tasks"
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    # Get already provisionned devices from module inputs
+    devices_update = build_existing_devices_list(module=module)
+    devices_moved = 0
+    result_move = list()
+    result_tasks_generated = list()
+    device_action = dict()
+    changed = False
+    if DEBUG_MODULE:
+        logging.debug(" * devices_move - Entering devices_move")
+
+    for device_update in devices_update:
+        device_facts = device_get_from_facts(
+            module=module, device_name=device_update["name"]
+        )
+        if DEBUG_MODULE:
+            logging.info(" * devices_move - updating device: %s", str(device_update))
+
+        if device_facts["containerName"] != device_update["parentContainerName"]:
+            container_facts = container_get_facts(
+                container_name=device_update["parentContainerName"], module=module
+            )
+            # Execute configlet update on device
+            try:
+                device_action = module.client.api.move_device_to_container(
+                    app_name="Ansible",
+                    device=device_facts,
+                    container=container_facts,
+                    create_task=True,
+                )
+            except Exception as error:
+                errorMessage = str(error)
+                message = "Device %s cannot be moved - %s" % (
+                    device_update["name"],
+                    errorMessage,
+                )
+
+            changed = True
+            devices_moved += 1
+            if "taskIds" in str(device_action):
+                for taskId in device_action["data"]["taskIds"]:
+                    result_tasks_generated.append(taskId)
+                result_move.append(
+                    {
+                        device_update["name"]: "device-move-%s"
+                        % device_action["data"]["taskIds"]
+                    }
+                )
+            else:
+                result_move.append(
+                    {device_update["name"]: "device-move-no-specifc-tasks"}
+                )
+
+    # Build response structure
+    data = {
+        "moved_devices": devices_moved,
+        "moved": result_move,
+        "moved_tasksIds": result_tasks_generated,
+    }
+
+    if DEBUG_MODULE:
+        logging.info("devices_move - result output: %s", str(data))
+
+    return data
+
+
+def devices_update(module, mode="override"):
+    """
+    Method to manage configlet update for device.
+
+    This method supports 2 different modes to manage configlets:
+    - override: Configure configlets listed by user and remove not listed ones.
+    - merge: Only add listed configlets to existing and configured configlets.
+
+    Example:
+    ----------
+    >>> devices_update(module=module)
+    {
+        "updated_taskIds": [ 108 ],
+        "updated_devices": 1,
+        "updated": [
+            {
+                "DC1-SPINE1": "Configlets-['108']"
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+    mode : str, optional
+        Mode to use to play with configlet, by default 'override'
+
+    Returns
+    -------
+    dict
+        Dict result with tasks and information.
+    """
+    if DEBUG_MODULE:
+        logging.debug(" * devices_update - Entering devices_update")
+    # List of devices to update: already provisioned on CV and part of module input.
+    devices_update = build_existing_devices_list(module=module)
+    # Counter of number of updated devices.
+    devices_updated = 0
+    # List of devices updated.
+    result_update = list()
+    # List of generated taskIds
+    result_tasks_generated = list()
+    # Structure to list configlets to delete
+    configlets_delete = list()
+    # Structure to list configlets to configure on device.
+    configlets_add = list()
+
+    if DEBUG_MODULE:
+        logging.debug(" * devices_update - entering update function")
+
+    for device_update in devices_update:
+        if DEBUG_MODULE:
+            logging.info(
+                " * devices_update - updating device: %s", str(device_update["name"])
+            )
+        # Get device facts from cv facts
+        device_facts = device_get_from_facts(
+            module=module, device_name=device_update["name"]
+        )
+        # Start configlet update in override mode
+        if mode == 'override':
+            # Get list of configlet to update: in ansible inputs and not in facts
+            if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+                configlets_delete = get_unique_from_list(
+                    source_list=device_update["cv_configlets"],
+                    compare_list=device_update["configlets"],
+                )
+                # Transform output to be CV compliant:
+                # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+                configlets_delete = configlet_prepare_cvp_update(
+                    configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
+                )
+
+                # In any case build list of configlet to attach to device
+                # Get list of configlets to delete: in facts but not on ansible inputs
+                configlets_add = get_unique_from_list(
+                    source_list=device_update["configlets"],
+                    compare_list=device_update["cv_configlets"],
+                )
+                # Transform output to be CV compliant:
+                # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+                configlets_add = configlet_prepare_cvp_update(
+                    configlet_name_list=configlets_add, facts=module.params["cvp_facts"]
+                )
+        # Start configlet update in merge mode: add configlets to device and do not update already attached devices.
+        if mode == 'merge':
+            # Get list of currently configured configlets and new ones
+            configlets_add = device_update["configlets"] + device_update["cv_configlets"]
+            # Transform output to be CV compliant:
+            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+            configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add, facts=module.params["cvp_facts"])
+
+        # Start configlet update in delete mode: remove listed configlets to device and do not update already attached devices.
+        if mode == 'delete':
+            # Get list of currently configured configlets and new ones
+            configlets_add = [x for x in device_update["cv_configlets"] if x not in device_update["configlets"]]
+            # Transform output to be CV compliant:
+            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+            configlets_add = configlet_prepare_cvp_update(configlet_name_list=configlets_add, facts=module.params["cvp_facts"])
+            configlets_delete = device_update["configlets"]
+            # Transform output to be CV compliant:
+            # [{name: configlet_name, key: configlet_key_from_cv_facts}]
+            configlets_delete = configlet_prepare_cvp_update(
+                configlet_name_list=configlets_delete, facts=module.params["cvp_facts"]
+            )
+
+        if len(device_facts) == 0:
+            module.fail_json("Error - device does not exists on CV side.")
+
+        # Execute configlet update on device
+        try:
+            device_action = module.client.api.update_configlets_on_device(
+                app_name="Ansible",
+                device=device_facts,
+                add_configlets=configlets_add,
+                del_configlets=configlets_delete,
+            )
+        except Exception as error:
+            errorMessage = str(error)
+            message = "Device %s Configlets cannot be updated - %s" % (
+                device_update["name"],
+                errorMessage,
+            )
+            result_update.append({device_update["name"]: message})
+        else:
+            # Capture and report error message sent by CV during update
+            if "errorMessage" in str(device_action):
+                message = "Device %s Configlets cannot be Updated - %s" % (
+                    device_update["name"],
+                    device_action["errorMessage"],
+                )
+                result_update.append({device_update["name"]: message})
+            else:
+                changed = True
+                if "taskIds" in str(device_action):
+                    devices_updated += 1
+                    for taskId in device_action["data"]["taskIds"]:
+                        result_tasks_generated.append(taskId)
+                    result_update.append(
+                        {
+                            device_update["name"]: "Configlets-%s"
+                            % device_action["data"]["taskIds"]
+                        }
+                    )
+                else:
+                    result_update.append(
+                        {device_update["name"]: "Configlets-No_Specific_Tasks"}
+                    )
+
+    # Build response structure
+    data = {
+        "updated_devices": devices_updated,
+        "updated": result_update,
+        "updated_tasksIds": result_tasks_generated,
+    }
+
+    if DEBUG_MODULE:
+        logging.info("devices_update - result output: %s", str(data))
+
+    return data
 
 
 def devices_reset(module):
@@ -507,6 +1028,18 @@ def devices_reset(module):
     Method to reset devices.
 
     Reset all devices listed in module.params['devices'].
+
+    Example:
+    ----------
+    >>> devices_reset(module=module)
+    {
+        "taskIds": [ 108 ],
+        "reset": [
+            {
+                "DC1-SPINE1": "Reset-['108']"
+            }
+        ]
+    }
 
     Parameters
     ----------
@@ -526,67 +1059,178 @@ def devices_reset(module):
     newTasks = []  # Task Ids that have been identified during device actions
     taskList = []  # Tasks that have a pending status after function runs
 
-    for cvp_device in module.params['cvp_facts']['devices']:
+    for cvp_device in module.params["cvp_facts"]["devices"]:
         # Include only devices that match filter elements, "all" will
         # include all devices.
-        if match_filter(device_filter=module.params['device_filter'], device_name=cvp_device['hostname']):
+        if is_in_filter(
+            hostname_fitler=module.params["device_filter"],
+            hostname=cvp_device["hostname"],
+        ):
             try:
                 device_action = module.client.api.reset_device("Ansible", cvp_device)
             except Exception as error:
                 errorMessage = str(error)
-                message = "Device %s cannot be reset - %s" % (cvp_device['hostname'], errorMessage)
-                reset.append({cvp_device['hostname']: message})
+                message = "Device %s cannot be reset - %s" % (
+                    cvp_device["hostname"],
+                    errorMessage,
+                )
+                reset.append({cvp_device["hostname"]: message})
             else:
                 if "errorMessage" in str(device_action):
-                    message = "Device %s cannot be Reset - %s" % (cvp_device['hostname'], device_action['errorMessage'])
-                    reset.append({cvp_device['hostname']: message})
+                    message = "Device %s cannot be Reset - %s" % (
+                        cvp_device["hostname"],
+                        device_action["errorMessage"],
+                    )
+                    reset.append({cvp_device["hostname"]: message})
                 else:
                     changed = True
-                    if 'taskIds' in str(device_action):
-                        for taskId in device_action['data']['taskIds']:
+                    if "taskIds" in str(device_action):
+                        for taskId in device_action["data"]["taskIds"]:
                             newTasks.append(taskId)
-                            reset.append({cvp_device['hostname']: 'Reset-%s' % taskId})
+                            reset.append({cvp_device["hostname"]: "Reset-%s" % taskId})
                     else:
-                        reset.append({cvp_device['hostname']: 'Reset-No_Tasks'})
-    taskList = get_tasks(taskid_list=newTasks, module=module)
-
-    data = {'reset': reset, 'tasks': taskList}
+                        reset.append({cvp_device["hostname"]: "Reset-No_Tasks"})
+    data = {"reset": reset, "reset_taskIds": newTasks}
     return data
 
 
+def devices_action(module):
+    """
+    Manage all actions related to devices.
+
+    Action ordonancer and output bui
+
+    Structure output:
+    >>> devices_action(module)
+    {
+    "changed": "True",
+    "data": {
+        "tasks": [
+            {
+                "workOrderId": "108",
+                "name": "",
+                "workOrderState": "ACTIVE"
+            }
+        ],
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1
+        "updated_devices": 1,
+        "updated_tasksIds": [
+            "108"
+        ]
+        "updated": [
+            {
+                "DC1-SPINE1": "Configlets-['108']"
+            }
+        ],
+        "tasksIds": [
+            "108"
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible Module.
+
+    Returns
+    -------
+    dict
+        Json structure to stdout to ansible.
+    """
+    # change_mode = module.params['configlet_mode']
+    cvp_facts = module.params["cvp_facts"]
+    topology_devices = module.params["devices"]
+    topology_state = module.params["state"]
+    configlet_mode = module.params['configlet_mode']
+
+    results = dict()
+    results["changed"] = False
+    results["data"] = dict()
+    results["data"]["tasks"] = list()
+    results["data"]["tasksIds"] = list()
+
+    if DEBUG_MODULE:
+        logging.debug(" * devices_action - parameters: %s", str(topology_state))
+
+    if topology_state == "present":
+        # provision devices that need to be updated
+        result_add = devices_new(module=module)
+        results["data"].update(result_add)
+        if len(result_add["added_tasksIds"]) > 0:
+            results["data"]["tasksIds"] += result_add["added_tasksIds"]
+
+        # update devices that need to be updated
+        result_update = devices_update(module=module, mode=configlet_mode)
+        results["data"].update(result_update)
+        if len(result_update["updated_tasksIds"]) > 0:
+            results["data"]["tasksIds"] += result_update["updated_tasksIds"]
+
+        # move devices that needs to be moved to another container.
+        result_move = devices_move(module=module)
+        results["data"].update(result_move)
+        if len(result_move["moved_tasksIds"]) > 0:
+            results["data"]["tasksIds"] += result_update["moved_tasksIds"]
+
+        # Get CV info for generated tasks
+        tasks_generated = tasks_get_fitlered(
+            taskid_list=results["data"]["tasksIds"], module=module
+        )
+        results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
+
+    # Call reset function to restart ZTP process on devices.
+    elif topology_state == "absent":
+        result_reset = devices_reset(module)
+        results["changed"] = True
+        results["data"].update(result_reset)
+        tasks_generated = tasks_get_fitlered(
+            taskid_list=result_update["tasksIds"], module=module
+        )
+        results["data"]["tasks"].append(tasks_generated)
+
+    # Check if we have to update changed flag
+    if len(results["data"]["tasks"]) > 0 or int(results["data"]["moved_devices"]) > 0:
+        results["changed"] = True
+
+    if DEBUG_MODULE:
+        logging.debug("   - devices_action - final result is: %s", str(results))
+    return results
+
+
 def main():
-    """ main entry point for module execution
+    """
+    Module entry point.
     """
     argument_spec = dict(
-        devices=dict(type='dict', required=True),
-        cvp_facts=dict(type='dict', required=True),
-        device_filter=dict(type='list', default='none'),
-        state=dict(type='str',
-                   choices=['present', 'absent'],
-                   default='present',
-                   required=False))
+        devices=dict(type="dict", required=True),
+        cvp_facts=dict(type="dict", required=True),
+        device_filter=dict(type="list", default="all"),
+        state=dict(
+            type="str", choices=["present", "absent"], default="present", required=False
+        ),
+        configlet_mode=dict(type='str',
+                            required=False,
+                            default='override',
+                            choices=['merge', 'override', 'delete']))
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=True)
-    result = dict(changed=False, data={})
-    messages = dict(issues=False)
+    if DEBUG_MODULE:
+        logging.basicConfig(format="%(asctime)s %(message)s",
+                            filename="cv_device_v2.log", level=logging.DEBUG)
+
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
     module.client = connect(module)
 
-    # if 'state' not in module.params:
-    #     module.params['state']=present
-
-    if module.params['state'] == 'present':
-        # Configure devices on CVP
-        # Pass module params to configlet_action to act on configlet
-        result['changed'], result['data'] = device_action(module)
-    elif module.params['state'] == 'absent':
-        # Reset devices when user configured state=absent
-        result['changed'] = True
-        result['data'] = devices_reset(module)
-
+    result = devices_action(module=module)
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
