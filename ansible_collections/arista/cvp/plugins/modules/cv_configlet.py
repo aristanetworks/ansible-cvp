@@ -243,9 +243,10 @@ def configlet_action(module):
         if len(update_configlet) > 0:
             for configlet in update_configlet:
                 try:
-                    update_resp = module.client.api.update_configlet(configlet['config'],
-                                                                     configlet['data']['key'],
-                                                                     configlet['data']['name'])
+                    update_resp = module.client.api.update_configlet(config=configlet['config'],
+                                                                     key=configlet['data']['key'],
+                                                                     name=configlet['data']['name'],
+                                                                     wait_task_ids=True)
                 except Exception as error:
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)

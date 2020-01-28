@@ -22,7 +22,7 @@ RUN apk add --update --no-cache ca-certificates \
                                 py-pip \
                                 libffi-dev \
                                 sshpass \
-                                libssl1.0 \
+                                libssl1.1 \
                                 openssl-dev &&\
                                 pip install --upgrade pip && \
                                 pip install -r requirements.txt &&\
@@ -37,7 +37,7 @@ RUN ansible-galaxy collection build --force arista/cvp && \
     for i in *.tar.gz; do ansible-galaxy collection install $i -p /usr/share/ansible/collections; done
 
 WORKDIR /playbooks
-ADD examples/* ./
+ADD examples/inventory.ini.example ./
 RUN cp inventory.ini.example inventory.ini
 
 VOLUME /playbooks

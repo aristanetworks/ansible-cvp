@@ -187,8 +187,8 @@ def facts_devices(module, facts, debug=False):
         if "imageBundleMapper" in deviceInfo:
             # There should only be one ImageBudle but its id is not decernable
             # If the Image is applied directly to the device its type will be 'netelement'
-            if len(deviceInfo['imageBundleMapper'].values()) > 0:
-                if deviceInfo['imageBundleMapper'].values()[0]['type'] == 'netelement':
+            if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
+                if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
                     device['imageBundle'] = deviceInfo['bundleName']
 
         # Add device to facts list
@@ -318,19 +318,19 @@ def facts_tasks(module, facts, debug=False):
 
     if 'tasks_pending' in module.params['gather_subset']:
         # We only get pending tasks
-        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Pending'))
 
     if 'tasks_all' in module.params['gather_subset']:
         # User wants to get list of all tasks -- not default behavior
-        tasks.append(module.client.api.get_tasks()['data'])
+        tasks.extend(module.client.api.get_tasks()['data'])
 
     if 'tasks_failed' in module.params['gather_subset']:
         # User wants to get list of all tasks -- not default behavior
-        tasks.append(module.client.api.get_tasks_by_status(status='Failed'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Failed'))
 
     if 'default' in module.params['gather_subset']:
         # By default we only extract pending tasks and not all tasks
-        tasks.append(module.client.api.get_tasks_by_status(status='Pending'))
+        tasks.extend(module.client.api.get_tasks_by_status(status='Pending'))
 
     for task in tasks:
         if debug:

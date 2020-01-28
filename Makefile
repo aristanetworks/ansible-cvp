@@ -1,6 +1,6 @@
 CURRENT_DIR = $(shell pwd)
 DOCKER_NAME ?= ansible-cvp
-DOCKER_TAG ?= latest
+DOCKER_TAG ?= $(shell sh .github/version.sh)
 # ansible-test path
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
@@ -55,6 +55,14 @@ build-docker2.7: ## Build docker image for python 2.7
 .PHONY: build-docker3
 build-docker3: ## Build docker image for python 3.0
 	docker build -f Dockerfile-3 -t $(DOCKER_NAME):$(DOCKER_TAG) .
+
+.PHONY: build-docker
+build-docker: ## Build docker image based on latest supported Python version
+	docker build -f Dockerfile-3 -t $(DOCKER_NAME):$(DOCKER_TAG) .
+
+.PHONY: run-docker
+run-docker: ## Connect to docker container
+	docker run -it --rm $(DOCKER_NAME):$(DOCKER_TAG) sh
 
 #########################################
 # Misc Actions 							#

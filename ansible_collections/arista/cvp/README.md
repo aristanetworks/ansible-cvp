@@ -4,11 +4,26 @@
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks.
 
-## Installation
+## Requirements
 
-For the collection to be used you need to have installed:
+__Arista CloudVision:__
+
+- CloudVision 2018.2.5 or later
+
+__Python:__
+
+- Python 3.6.8 or later
+
+__Additional Python Libraries required:__
+
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
+
+__Supported Ansible Versions:__
+
+    ansible 2.9 or later
+
+## Installation
 
 ```shell
 pip install requests>=2.22.0
@@ -21,7 +36,7 @@ Ansible galaxy hosts all stable version of this collection. Installation from an
 $ ansible-galaxy collection install arista.cvp
 Process install dependency map
 Starting collection install process
-Installing 'arista.cvp:1.0.1' to '~/.ansible/collections/ansible_collections/arista/cvp'
+Installing 'arista.cvp:1.0.3' to '~/.ansible/collections/ansible_collections/arista/cvp'
 ```
 
 ## Modules overview
