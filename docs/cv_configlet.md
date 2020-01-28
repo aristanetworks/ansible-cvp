@@ -63,23 +63,30 @@ __Result__
 
 Below is an example of expected output
 
-```json
-{
-    "cvp_configlet": {
-        "changed": true, 
-        "data": {
-            "deleted": [], 
-            "new": [
-                {
-                    "Test_Configlet": "success"
-                }
-            ], 
-            "tasks": [], 
-            "updated": []
-        }, 
-        "failed": false
-    }
-}
+```yaml
+msg:
+  changed: true
+  data:
+    deleted: []
+    new: []
+    tasks: []
+    updated:
+    - another_configlet: success
+    - common_configlet: success
+  diff:
+    prepared: |-
+      another_configlet:
+      --- CVP
+      +++ Ansible
+      @@ -1 +1 @@
+      -alias a971 show version+alias b61 show version
+
+      common_configlet:
+      --- CVP
+      +++ Ansible
+      @@ -1 +1 @@
+      -alias a971 show version+alias b61 show version
+  failed: false
 ```
 
 
