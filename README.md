@@ -88,7 +88,7 @@ $ cd ansible-cvp
 __Build and install collection__
 
 ```shell
-$ ansible-galaxy collection build --force ansible_collection/arista/cvp
+$ ansible-galaxy collection build --force ansible_collections/arista/cvp
 $ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
 ```
 
@@ -119,7 +119,7 @@ $ make build-docker
 $ make run-docker
 ```
 
-Image will be created using current branc as tag. If it is run in master branch, then latest git tag will be used as docker tag.
+Image will be created using current branch as tag. If it is run in master branch, then latest git tag will be used as docker tag.
 
 
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
@@ -133,7 +133,7 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 
 A [complete end to end demo](https://github.com/titom73/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
 
-Below is a very basic example to build a container tology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
+Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
 
 ```yaml
 ---
