@@ -141,7 +141,7 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
     tolines = toText.splitlines(1)
     diff = list(difflib.unified_diff(fromlines, tolines, fromName, toName, n=lines))
     textComp = difflib.SequenceMatcher(None, fromText, toText)
-    diffRatio = round(textComp.quick_ratio() * 100, 2)
+    diffRatio = round(textComp.ratio() * 100, 2)
     return [diffRatio, diff]
 
 
