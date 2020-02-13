@@ -5,8 +5,7 @@ jobs:
     name: Run Python Linting
     runs-on: ubuntu-latest
     steps:
-      - name: Init
-        run: ls -la
+      - uses: actions/checkout@v2
       - name: Install development requirements
         run: make setup-repository
       - name: Pylint
