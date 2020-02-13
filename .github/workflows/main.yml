@@ -1,0 +1,13 @@
+name: Code Quality
+on: push
+jobs:
+  code_linting:
+    name: Run Python Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install development requirements
+        run: make setup-repository
+      - name: Pylint
+        run: make linting
+      - name: 3rd step
+        run: echo 'This is a 3rd step'

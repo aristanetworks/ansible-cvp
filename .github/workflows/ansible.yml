@@ -1,0 +1,16 @@
+
+name: Ansible Test
+on:
+  pull_request:
+    branches:
+      - releases/**
+jobs:
+  ansible_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Ubuntu
+        run: make github-configure-ci
+      - name: Install requirements
+        run: make setup-repository
+      - name: Ansible Test Sanity
+        run: make sanity-lint
