@@ -110,7 +110,6 @@ EXAMPLES = r'''
       register: FACTS
 '''
 
-DEBUG_MODULE = True
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
 MODULE_LOGGER.info('Start cv_facts module execution')
 

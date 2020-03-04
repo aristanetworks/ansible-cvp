@@ -32,6 +32,7 @@ ANSIBLE_METADATA = {
 import json
 import traceback
 import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -109,6 +110,10 @@ EXAMPLES = r'''
 '''
 
 
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container')
+MODULE_LOGGER.info('Start cv_container module execution')
+
+
 def create_builtin_containers(facts, debug=False):
     """
     Update builtin containers with root container name
@@ -141,10 +146,10 @@ def get_root_container(containers_fact, debug=True):
         Name of the root container, if not found, return Tenant as default value
     """
     for container in containers_fact:
-        logging.debug('  -> CloudVision container %s', str(container))
+        MODULE_LOGGER.debug('  -> CloudVision container %s', str(container))
         if container['Key'] == 'root':
             # if debug:
-            logging.debug('  -> CloudVision ROOT container has name %s', container['Name'])
+            MODULE_LOGGER.info('  -> CloudVision ROOT container has name %s', container['Name'])
             return container['Name']
     return 'Tenant'
 
@@ -249,7 +254,7 @@ def tree_build_from_dict(containers=None, root='Tenant', debug=False):
     previously_created = list()
     # Create root node to mimic CVP behavior
     if debug:
-        logging.debug('  -> tree_build_from_dict - containers list is %s', str(containers))
+        MODULE_LOGGER.debug('  -> tree_build_from_dict - containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
@@ -318,8 +323,7 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    if debug:
-        logging.debug('  -> tree_build_from_list - containers list is %s', str(containers))
+    MODULE_LOGGER.debug('  -> tree_build_from_list - containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for cvp_container in containers:
@@ -543,9 +547,9 @@ def is_empty(module, container_name, facts, debug=False):
 
 
 def is_container_empty(module, container_name, debug=False):
-    logging.debug('* is_container_empty - get_devices_in_container %s', container_name)
+    MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
-    logging.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
+    MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
             return False
@@ -620,7 +624,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                logging.debug('* delete_unused_containers - %s', container_fact['name'])
+                MODULE_LOGGER.debug('* delete_unused_containers - %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
@@ -904,7 +908,7 @@ def delete_topology(module, intended, facts, debug=False):
     container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
-    logging.debug('* delete_topology - container_intended_ordered_list %s', container_intended_ordered_list)
+    MODULE_LOGGER.debug('* delete_topology - container_intended_ordered_list %s', container_intended_ordered_list)
 
     container_to_delete = list()
     for cvp_container in container_cvp_ordered_list:
@@ -921,11 +925,11 @@ def delete_topology(module, intended, facts, debug=False):
         # Check if container is not in intended topology and not a default container.
         if cvp_container in container_to_delete and cvp_container not in builtin_containers:
             # Get container fact for parentName
-            logging.debug('* delete_topology - get_container_facts %s', cvp_container)
+            MODULE_LOGGER.debug('* delete_topology - get_container_facts %s', cvp_container)
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                logging.debug('* delete_topology - %s', container_fact['name'])
+                MODULE_LOGGER.debug('* delete_topology - %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
@@ -978,8 +982,8 @@ def main():
     )
 
     if DEBUG_MODULE:
-        logging.basicConfig(format='%(asctime)s %(message)s',
-                            filename='cv_container.log', level=logging.DEBUG)
+        MODULE_LOGGER.basicConfig(format='%(asctime)s %(message)s',
+                            filename='cv_container.log', level=MODULE_LOGGER.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
