@@ -32,7 +32,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 
 DOCUMENTATION = r'''
 ---
@@ -110,8 +110,12 @@ EXAMPLES = r'''
       register: FACTS
 '''
 
+DEBUG_MODULE = True
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
+MODULE_LOGGER.info('Start cv_facts module execution')
 
-def connect(module, debug=False):
+
+def connect(module):
     ''' Connects to CVP device using user provided credentials from playbook.
     :param module: Ansible module with parameters and client connection.
     :return: CvpClient object with connection instantiated.
@@ -122,8 +126,7 @@ def connect(module, debug=False):
     port = connection.get_option("port")
     user = connection.get_option("remote_user")
     pswd = connection.get_option("password")
-    if debug:
-        logging.debug('*** Connecting to CVP')
+    MODULE_LOGGER.info('Connecting to CVP')
     try:
         client.connect([host],
                        user,
@@ -134,13 +137,12 @@ def connect(module, debug=False):
     except CvpLoginError as e:
         module.fail_json(msg=str(e))
 
-    if debug:
-        logging.debug('*** Connected to CVP')
+    MODULE_LOGGER.debug('*** Connected to CVP')
 
     return client
 
 
-def facts_devices(module, facts, debug=False):
+def facts_devices(module, facts):
     """
     Collect facts of all devices.
 
@@ -163,8 +165,7 @@ def facts_devices(module, facts, debug=False):
     # Get Inventory Data for All Devices
     inventory = module.client.api.get_inventory()
     for device in inventory:
-        if debug:
-            logging.debug('  -> Working on %s', device['hostname'])
+        MODULE_LOGGER.debug('  -> Working on %s', device['hostname'])
         device['name'] = device['hostname']
         # Add designed config for device
         if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
@@ -197,7 +198,7 @@ def facts_devices(module, facts, debug=False):
     return facts
 
 
-def facts_configlets(module, facts, debug=False):
+def facts_configlets(module, facts):
     """
     Collect facts of all configlets.
 
@@ -220,8 +221,7 @@ def facts_configlets(module, facts, debug=False):
     configlets = module.client.api.get_configlets()['data']
     # Reduce configlet data to required fields
     for configlet in configlets:
-        if debug:
-            logging.debug('  -> Working on %s', configlet['name'])
+        MODULE_LOGGER.debug('  -> Working on %s', configlet['name'])
         # Get list of devices attached to configlet.
         configlet['devices'] = []
         applied_devices = module.client.api.get_devices_by_configlet(configlet['name'])
@@ -240,7 +240,7 @@ def facts_configlets(module, facts, debug=False):
     return facts
 
 
-def facts_containers(module, facts, debug=False):
+def facts_containers(module, facts):
     """
     Collect facts of all containers.
 
@@ -264,8 +264,7 @@ def facts_containers(module, facts, debug=False):
     # Get List of all Containers
     containers = module.client.api.get_containers()['data']
     for container in containers:
-        if debug:
-            logging.debug('  -> Working on %s', container['name'])
+        MODULE_LOGGER.debug('  -> Working on %s', container['name'])
         container['devices'] = []
         # Get list of devices attached to container.
         applied_devices = module.client.api.get_devices_by_container_id(container['key'])
@@ -290,7 +289,7 @@ def facts_containers(module, facts, debug=False):
     return facts
 
 
-def facts_tasks(module, facts, debug=False):
+def facts_tasks(module, facts):
     """
     Collect facts of all tasks.
 
@@ -313,8 +312,8 @@ def facts_tasks(module, facts, debug=False):
     tasks = []
 
     # Get List of Tasks
-    if debug:
-        logging.debug('  -> Extracting tasks with %s', str(module.params['gather_subset']))
+    MODULE_LOGGER.debug('  -> Extracting tasks with %s',
+                        str(module.params['gather_subset']))
 
     if 'tasks_pending' in module.params['gather_subset']:
         # We only get pending tasks
@@ -333,13 +332,12 @@ def facts_tasks(module, facts, debug=False):
         tasks.extend(module.client.api.get_tasks_by_status(status='Pending'))
 
     for task in tasks:
-        if debug:
-            logging.debug('  -> Working on %s', task)
+        MODULE_LOGGER.debug('  -> Working on %s', task)
         facts['tasks'].append(task)
     return facts
 
 
-def facts_builder(module, debug=False):
+def facts_builder(module):
     """
     Method to call every fact module for either devices/containers/configlets.
 
@@ -358,43 +356,36 @@ def facts_builder(module, debug=False):
 
     facts = {}
     # Get version data for CVP
-    if debug:
-        logging.debug('** Collecting CVP Information (version)')
+    MODULE_LOGGER.info('** Collecting CVP Information (version)')
     facts['cvp_info'] = module.client.api.get_cvp_info()
 
     # Extract devices facts
     if 'all' in module.params['facts'] or 'devices' in module.params['facts']:
-        if debug:
-            logging.debug('** Collecting devices facts ...')
-        facts = facts_devices(module=module, facts=facts, debug=debug)
+        MODULE_LOGGER.info('** Collecting devices facts ...')
+        facts = facts_devices(module=module, facts=facts)
 
     # Extract configlet information
     if 'all' in module.params['facts'] or 'configlets' in module.params['facts']:
-        if debug:
-            logging.debug('** Collecting configlets facts ...')
-        facts = facts_configlets(module=module, facts=facts, debug=debug)
+        MODULE_LOGGER.info('** Collecting configlets facts ...')
+        facts = facts_configlets(module=module, facts=facts)
 
     # Extract containers information
     if 'all' in module.params['facts'] or 'containers' in module.params['facts']:
-        if debug:
-            logging.debug('** Collecting containers facts ...')
-        facts = facts_containers(module=module, facts=facts, debug=debug)
+        MODULE_LOGGER.info('** Collecting containers facts ...')
+        facts = facts_containers(module=module, facts=facts)
 
     # Extract tasks information
     if 'all' in module.params['facts'] or 'tasks' in module.params['facts']:
-        if debug:
-            logging.debug('** Collecting tasks facts ...')
-        facts = facts_tasks(module=module, facts=facts, debug=debug)
+        MODULE_LOGGER.info('** Collecting tasks facts ...')
+        facts = facts_tasks(module=module, facts=facts)
 
     # Extract imageBundles information
     if 'all' in module.params['facts'] or 'images' in module.params['facts']:
-        if debug:
-            logging.debug('** Collecting images facts ...')
+        MODULE_LOGGER.info('** Collecting images facts ...')
         facts['imageBundles'] = list()
 
     # End of Facts module
-    if debug:
-        logging.debug('** All facts done')
+    MODULE_LOGGER.info('** All facts done')
     return facts
 
 
@@ -402,11 +393,6 @@ def main():
     """
     main entry point for module execution.
     """
-    debug_module = False
-    if debug_module:
-        logging.basicConfig(format='%(asctime)s %(message)s',
-                            filename='cv_fact_v2.log', level=logging.DEBUG)
-
     argument_spec = dict(
         gather_subset=dict(type='list',
                            elements='str',
@@ -434,10 +420,10 @@ def main():
     result = dict(changed=False, ansible_facts={})
 
     # Connect to CVP Instance
-    module.client = connect(module, debug=debug_module)
+    module.client = connect(module)
 
     # Get Facts from CVP
-    result['ansible_facts'] = facts_builder(module, debug=debug_module)
+    result['ansible_facts'] = facts_builder(module)
 
     # Standard Ansible outputs
     module.exit_json(**result)
