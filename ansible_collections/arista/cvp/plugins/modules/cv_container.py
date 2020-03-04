@@ -550,6 +550,7 @@ def is_empty(module, container_name, facts, debug=False):
 def is_container_empty(module, container_name, debug=False):
     MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
+    MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
             logging.debug(
@@ -632,7 +633,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                logging.debug('* delete_unused_containers - %s', container_fact['name'])
+                MODULE_LOGGER.debug('* delete_unused_containers - %s', container_fact['name'])
                 response = None
                 try:
                     response = process_container(module=module,
@@ -640,7 +641,8 @@ def delete_unused_containers(module, intended, facts, debug=False):
                                                  parent=container_fact['parentName'],
                                                  action='delete')
                 except:  # noqa E722
-                    logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+                    MODULE_LOGGER.error(
+                        "Unexpected error: %s", str(sys.exc_info()[0]))
                     continue
                 if response[0]:
                     count_container_deletion += 1
