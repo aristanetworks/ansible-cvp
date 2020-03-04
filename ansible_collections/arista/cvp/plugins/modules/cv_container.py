@@ -981,10 +981,6 @@ def main():
                   choices=['merge', 'override', 'delete'])
     )
 
-    if DEBUG_MODULE:
-        MODULE_LOGGER.basicConfig(format='%(asctime)s %(message)s',
-                            filename='cv_container.log', level=MODULE_LOGGER.DEBUG)
-
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
     result = dict(changed=False, data={})
