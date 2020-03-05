@@ -29,6 +29,7 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
+import sys
 import json
 import traceback
 import logging
@@ -49,7 +50,7 @@ except ImportError:
 builtin_containers = ['Undefined', 'root']
 
 # Activate or not debug mode for logging & development
-DEBUG_MODULE = True
+DEBUG_MODULE = False
 
 DOCUMENTATION = r'''
 ---
@@ -545,11 +546,16 @@ def is_empty(module, container_name, facts, debug=False):
 def is_container_empty(module, container_name, debug=False):
     logging.debug('* is_container_empty - get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
-    logging.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
+            logging.debug(
+                '* is_container_empty - Found devices in container %s', str(container_name))
             return False
+        logging.debug(
+            '* is_container_empty - No devices found in container %s', str(container_name))
         return True
+    logging.debug(
+        '* is_container_empty - No devices found in container %s (default behavior)', str(container_name))
     return False
 
 
@@ -607,10 +613,12 @@ def delete_unused_containers(module, intended, facts, debug=False):
     for cvp_container in container_cvp_ordered_list:
         # Only container with no devices can be deleted.
         # If container is not empty, no reason to go further.
-        if is_empty(module=module, container_name=cvp_container, facts=facts) or is_container_empty(module=module, container_name=cvp_container):
+        if is_container_empty(module=module, container_name=cvp_container):
             # Check if a container is not present in intended topology.
             if cvp_container not in container_intended_ordered_list:
                 container_to_delete.append(cvp_container)
+
+    logging.debug('* delete_unused_containers - List of containers to delete: %s', str(container_to_delete))
 
     # Read cvp_container from end. If containers are part of container_to_delete, then delete container
     for cvp_container in reversed(container_to_delete):
@@ -621,10 +629,15 @@ def delete_unused_containers(module, intended, facts, debug=False):
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
                 logging.debug('* delete_unused_containers - %s', container_fact['name'])
-                response = process_container(module=module,
+                response = None
+                try:
+                    response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
                                              action='delete')
+                except:
+                    logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+                    continue
                 if response[0]:
                     count_container_deletion += 1
     if count_container_deletion > 0:
