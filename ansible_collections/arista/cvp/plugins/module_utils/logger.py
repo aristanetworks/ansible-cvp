@@ -40,8 +40,8 @@ LOGGING_LEVEL = os.getenv('ANSIBLE_CVP_LOG_LEVEL', 'info')
 LOGLEVEL = LEVELS.get(LOGGING_LEVEL, logging.NOTSET)
 
 # Set loglevel for urllib3
-LOGGING_LEVEL_URLLIB3 = os.getenv('ANSIBLE_CVP_LOG_LEVEL', 'info')
-LOGLEVEL_URLLIB3 = LEVELS.get(LOGGING_LEVEL, logging.WARNING)
+LOGGING_LEVEL_URLLIB3 = os.getenv('ANSIBLE_CVP_LOG_APICALL', 'warning')
+LOGLEVEL_URLLIB3 = LEVELS.get(LOGGING_LEVEL_URLLIB3, logging.WARNING)
 
 # Get filename to write logs / default /temp/arista.cvp.debug.log
 LOGGING_FILENAME = os.getenv(
