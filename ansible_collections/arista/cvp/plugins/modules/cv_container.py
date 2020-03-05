@@ -632,9 +632,9 @@ def delete_unused_containers(module, intended, facts, debug=False):
                 response = None
                 try:
                     response = process_container(module=module,
-                                                container=container_fact['name'],
-                                                parent=container_fact['parentName'],
-                                                action='delete')
+                                                 container=container_fact['name'],
+                                                 parent=container_fact['parentName'],
+                                                 action='delete')
                 except:
                     logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
                     continue
