@@ -147,10 +147,10 @@ def get_root_container(containers_fact, debug=True):
         Name of the root container, if not found, return Tenant as default value
     """
     for container in containers_fact:
-        MODULE_LOGGER.debug('  -> CloudVision container %s', str(container))
+        MODULE_LOGGER.debug('working on container %s', str(container))
         if container['Key'] == 'root':
             # if debug:
-            MODULE_LOGGER.info('  -> CloudVision ROOT container has name %s', container['Name'])
+            MODULE_LOGGER.info('! ROOT container has name %s', container['Name'])
             return container['Name']
     return 'Tenant'
 
@@ -254,8 +254,7 @@ def tree_build_from_dict(containers=None, root='Tenant', debug=False):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    if debug:
-        MODULE_LOGGER.debug('  -> tree_build_from_dict - containers list is %s', str(containers))
+    MODULE_LOGGER.debug('containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
@@ -324,7 +323,7 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    MODULE_LOGGER.debug('  -> tree_build_from_list - containers list is %s', str(containers))
+    MODULE_LOGGER.debug('containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for cvp_container in containers:
@@ -548,19 +547,19 @@ def is_empty(module, container_name, facts, debug=False):
 
 
 def is_container_empty(module, container_name, debug=False):
-    MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', container_name)
+    MODULE_LOGGER.debug('get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
     MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
-            logging.debug(
-                '* is_container_empty - Found devices in container %s', str(container_name))
+            MODULE_LOGGER.info(
+                'Found devices in container %s', str(container_name))
             return False
-        logging.debug(
-            '* is_container_empty - No devices found in container %s', str(container_name))
+        MODULE_LOGGER.info(
+            'No devices found in container %s', str(container_name))
         return True
-    logging.debug(
-        '* is_container_empty - No devices found in container %s (default behavior)', str(container_name))
+    MODULE_LOGGER.debug(
+        'No devices found in container %s (default behavior)', str(container_name))
     return False
 
 
@@ -623,7 +622,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
             if cvp_container not in container_intended_ordered_list:
                 container_to_delete.append(cvp_container)
 
-    logging.debug('* delete_unused_containers - List of containers to delete: %s', str(container_to_delete))
+    MODULE_LOGGER.info('List of containers to delete: %s', str(container_to_delete))
 
     # Read cvp_container from end. If containers are part of container_to_delete, then delete container
     for cvp_container in reversed(container_to_delete):
@@ -633,7 +632,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                MODULE_LOGGER.debug('* delete_unused_containers - %s', container_fact['name'])
+                MODULE_LOGGER.info('container: %s', container_fact['name'])
                 response = None
                 try:
                     response = process_container(module=module,
@@ -923,7 +922,7 @@ def delete_topology(module, intended, facts, debug=False):
     container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
-    MODULE_LOGGER.debug('* delete_topology - container_intended_ordered_list %s', container_intended_ordered_list)
+    MODULE_LOGGER.info('container_intended_ordered_list %s', container_intended_ordered_list)
 
     container_to_delete = list()
     # Check if containers can be deleted (i.e. no attached devices)
@@ -937,18 +936,18 @@ def delete_topology(module, intended, facts, debug=False):
                 if cvp_container in container_intended_ordered_list:
                     container_to_delete.append(cvp_container)
 
-    logging.debug('* delete_topology - container_to_delete %s', str(container_to_delete))
+    MODULE_LOGGER.debug('containers_to_delete %s', str(container_to_delete))
 
     for cvp_container in reversed(container_to_delete):
-        logging.debug('* delete_topology - deletion of cvp_container %s', str(cvp_container))
+        MODULE_LOGGER.debug('deletion of cvp_container %s', str(cvp_container))
         # Check if container is not in intended topology and not a default container.
         if cvp_container in container_to_delete and cvp_container not in builtin_containers:
             # Get container fact for parentName
-            MODULE_LOGGER.debug('* delete_topology - get_container_facts %s', cvp_container)
+            MODULE_LOGGER.debug('get_container_facts %s', cvp_container)
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                MODULE_LOGGER.debug('* delete_topology - %s', container_fact['name'])
+                MODULE_LOGGER.debug('container name: %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
