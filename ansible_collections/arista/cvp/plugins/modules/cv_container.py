@@ -635,7 +635,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
                                                  container=container_fact['name'],
                                                  parent=container_fact['parentName'],
                                                  action='delete')
-                except:
+                except:  # noqa E722
                     logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
                     continue
                 if response[0]:
