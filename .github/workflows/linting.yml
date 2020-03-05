@@ -1,0 +1,19 @@
+name: Code Quality
+on: [push]
+jobs:
+  code_linting:
+    name: Run YAML Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Lint group_vars'
+        uses: ibiqlik/action-yamllint@master
+        with:
+          file_or_dir: ./group_vars/*.yml
+          config_file: ./.github/yamllintrc
+      - name: 'Lint Inventory'
+        uses: ibiqlik/action-yamllint@master
+        with:
+          file_or_dir: ./*.yml
+
+

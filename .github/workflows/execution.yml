@@ -1,0 +1,33 @@
+name: Ansible Code Execution
+on: [push]
+jobs:
+  ansible_ci:
+    name: Run Ansible Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Install Python dependencies'
+        run: make setup-repository
+      - name: 'Install collections'
+        run: make install
+      - name: 'Check ansible syntax'
+        run: |
+          ansible-playbook dc1-fabric-deploy-cvp.yml --syntax-check
+          ansible-playbook dc1-fabric-reset-cvp.yml --syntax-check
+          ansible-playbook dc1-ztp-configuration.yml --syntax-check
+      - name: 'Run a generate playbook to test AVD variables'
+        run: |
+          ansible-playbook dc1-fabric-deploy-cvp.yml --tags generate
+      - name: 'Build AVD & CVP content'
+        run: |
+          ansible-playbook dc1-fabric-deploy-cvp.yml --tags build
+      - name: 'Save Python libs version'
+        run: |
+          pip freeze
+          pip freeze > intended/pip-version.txt
+      - name: 'Remove collections'
+        run: make uninstall
+      - uses: actions/upload-artifact@v1
+        with:
+          name: intended-files
+          path: intended/
