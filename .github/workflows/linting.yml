@@ -1,19 +1,27 @@
-name: Code Quality
-on: [push]
+name: Code Linting
+on: 
+  push:
+    branches-ignore:
+      - master
+    tags-ignore:
+      - '*'
 jobs:
-  code_linting:
+  'lint-yaml':
     name: Run YAML Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: 'Lint group_vars'
+      - name: 'Lint Ansible Galaxy'
         uses: ibiqlik/action-yamllint@master
         with:
-          file_or_dir: ./group_vars/*.yml
+          file_or_dir: ./ansible_collections/arista/cvp/*.yml
           config_file: ./.github/yamllintrc
-      - name: 'Lint Inventory'
-        uses: ibiqlik/action-yamllint@master
-        with:
-          file_or_dir: ./*.yml
-
-
+  'lint-python':
+    name: Run PYTHON Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Lint Python code in plugins'
+        run: |
+          make setup-repository
+          make linting
