@@ -895,7 +895,7 @@ class CvpApi(object):
                 container (dict): Container info in dictionary format or None
         '''
         self.log.debug('Get info for container %s' % name)
-        logging.debug(
+        self.log.debug(
             '* cv_api2019 - get_container_by_name - container name is: %s', str(name))
         containers = self.clnt.get('/provisioning/searchTopology.do?queryParam=%s'
                                    '&startIndex=0&endIndex=0' % qplus(name))
