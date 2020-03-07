@@ -445,7 +445,7 @@ def device_action(module):
     else:
         # Only display action results as Ansible check_mode is active
         for device in new_device:
-            new.append({device[0]['name']: "checked"})
+            new.append({device['ansible_device']['name']: "checked"})
         for device in update_device:
             updated.append({device['name']: "checked",
                             'configlets': device['configlets'],
