@@ -29,6 +29,8 @@ ANSIBLE_METADATA = {
 }
 
 import time
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -85,6 +87,9 @@ EXAMPLES = '''
     tasks: "{{ tasks }}"
     wait: 60
 '''
+
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
+MODULE_LOGGER.info('Start cv_tasks module execution')
 
 
 def connect(module):
@@ -170,9 +175,11 @@ def task_action(module):
     actionable_tasks = [t for t in tasks if actionable(get_state(t))]
 
     if len(actionable_tasks) == 0:
+        MODULE_LOGGER.info('No actionable tasks found on CVP')
         warnings.append("No actionable tasks found on CVP")
         return changed, data, warnings
 
+    MODULE_LOGGER.info('Execute actionable tasks on CVP')
     for task in actionable_tasks:
         if state_is_different(task, state):
             apply_state(cvp, task, state)

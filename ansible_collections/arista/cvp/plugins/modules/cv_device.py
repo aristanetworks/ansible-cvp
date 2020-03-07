@@ -29,6 +29,8 @@ ANSIBLE_METADATA = {
 }
 
 import re
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -114,6 +116,9 @@ EXAMPLES = r'''
         device_filter: ['veos']
       register: cvp_device
 '''
+
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
+MODULE_LOGGER.info('Start cv_device module execution')
 
 
 def connect(module):
