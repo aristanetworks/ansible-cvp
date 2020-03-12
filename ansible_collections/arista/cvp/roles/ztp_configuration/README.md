@@ -60,14 +60,14 @@ Below is a basic playbook running `arista.cvp.ztp_configuration` role
       default:
         registration: 'http://10.255.0.1/ztp/bootstrap'
         gateway: 10.255.0.3
-        nameservers: 
+        nameservers:
           - '10.255.0.3'
       general:
         subnets:
           - network: 10.255.0.0
             netmask: 255.255.255.0
             gateway: 10.255.0.3
-            nameservers: 
+            nameservers:
               - '10.255.0.3'
             start: 10.255.0.200
             end: 10.255.0.250
@@ -85,7 +85,7 @@ Below is a basic playbook running `arista.cvp.ztp_configuration` role
   tasks:
   - name: 'Execute ZTP configuration role'
     import_role:
-      name: arista.cvp.ztp-setup
+      name: arista.cvp.ztp_configuration
 ```
 
 Inventory is configured like below:
