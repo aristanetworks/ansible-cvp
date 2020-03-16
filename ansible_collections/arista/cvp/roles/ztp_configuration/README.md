@@ -2,6 +2,7 @@ ztp-setup
 =========
 
 Ansible role to provision and configure Zero Touch Provisioning on a CloudVision server. Role will do the following:
+
 - Activate DHCPd service on CloudVision.
 - Create `/etc/dhcp/dhcpd.conf` file with relevant information.
 - Reload `dhcpd` service to apply changes.
@@ -9,7 +10,16 @@ Ansible role to provision and configure Zero Touch Provisioning on a CloudVision
 Requirements
 ------------
 
-None
+- dhcp server installed on remote server.
+
+Supported Platforms
+-------------------
+
+Below is a list of platforms where DHCPd configuration has been tested:
+
+- Arista Cloudvision 2019.
+- Centos 7
+- Centos 8
 
 Role Variables
 --------------
@@ -31,7 +41,7 @@ ztp:
         lease_time:   <Maximum lease time before device loose IP. Renewal is max/2>
   clients:            <List of clients on a mac-address basis>
     - name:           <*Hostname to provide when device do a DHCP request>
-      mac:            <*Mac address of the host>
+      mac:            <*Mac address of the host. Mac address value MUST be protected by either single or dual quotes>
       ip4:            <*IP Address of the host>
       registration:   <Registration URL to use for the host. If not set, default value will be applied>
       gateway:        <Gateway to use for the host. If not set, default value will be applied>
@@ -74,13 +84,13 @@ Below is a basic playbook running `arista.cvp.ztp_configuration` role
             lease_time: 300
       clients:
         - name: DC1-SPINE1
-          mac: 0c:1d:c0:1d:62:01
+          mac: '0c:1d:c0:1d:62:01'
           ip4: 10.255.0.11
         - name: DC1-SPINE2
-          mac: 0c:1d:c0:1d:62:02
+          mac: '0c:1d:c0:1d:62:02'
           ip4: 10.255.0.12
         - name: DC1-LEAF1A
-          mac: 0c:1d:c0:1d:62:11
+          mac: '0c:1d:c0:1d:62:11'
           ip4: 10.255.0.13
   tasks:
   - name: 'Execute ZTP configuration role'
@@ -101,6 +111,8 @@ all:
           ansible_user: root
           ansible_password: password
 ```
+
+If you are not using `root` user, please also add `ansible_become_pass`
 
 ## License
 
