@@ -12,7 +12,6 @@ Module comes with a set of options:
 
 - `topology`: Topology to build on Cloudvision.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
-- `save_topology`: Boolean to save and create tasks on CVP.
 - `mode`: Define how module should work with container topology. Value can be:
     - `merge`: Combine the new container topology with the existing topology.
     - `override`: Discard the entire existing container topology and replace it with the new topology.
@@ -73,7 +72,6 @@ tasks:
       arista.cvp.cv_container:
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
-        save_topology: true
         mode: merge
 ```
 
@@ -203,5 +201,3 @@ Below is an example of expected output
     "failed": false
 }
 ```
-
-
