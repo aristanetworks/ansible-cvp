@@ -8,7 +8,7 @@
     backup: yes
   notify: "restart dhcpd"
 
-- name: Check & activate DHCP service on "{{ inventory_hostname }}"
+- name: Check & activate DHCP service
   service:
     name: dhcpd
     enabled: yes

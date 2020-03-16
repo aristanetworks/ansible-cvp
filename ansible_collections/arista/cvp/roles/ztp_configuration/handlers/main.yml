@@ -1,7 +1,7 @@
 ---
 # handlers file for ztp_configuration
 
-- name: Restart DHCP service on {{inventory_hostname}}
+- name: Restart DHCP service
   service:
     name: dhcpd
     state: restarted
