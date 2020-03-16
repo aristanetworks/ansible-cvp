@@ -19,9 +19,9 @@ subnet {{subnet.network}} netmask {{subnet.netmask}} {
 
 # Per host definition
 {% for client in ztp.clients %}
-host {{client.name}} {
-    option host-name "{{client.name}}";
-    hardware ethernet {{client.mac}};
+host {{ client.name }} {
+    option host-name "{{ client.name }}";
+    hardware ethernet {{ client.mac|string }};
     fixed-address {{client.ip4}};
     option bootfile-name "{{ztp.default.registration}}";
 {% if client.gateway is defined %}
