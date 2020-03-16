@@ -12,3 +12,4 @@
   service:
     name: dhcpd
     enabled: yes
+    state: started
