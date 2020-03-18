@@ -617,6 +617,13 @@ class CvpApi(object):
                 configlet['config'] = full_cfglt_data['config']
         return configlets
 
+    def get_configlets_and_mappers(self):
+        '''
+        Return a list of all defined configlets and associated mappers
+        '''
+        self.log.debug('getConfigletsAndAssociatedMappers')
+        return self.clnt.get('/configlet/getConfigletsAndAssociatedMappers.do')
+
     def get_devices_by_configlet(self, configlet_name, start=0, end=0):
         ''' Returns a list of devices to which the named configlet is applied.
 
