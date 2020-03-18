@@ -35,7 +35,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import
 from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
     find_hostname_by_mac,
     find_containerName_by_containerId
-    )
+)
 import ansible_collections.arista.cvp.plugins.module_utils.logger
 
 DOCUMENTATION = r'''
@@ -308,7 +308,7 @@ def facts_configlets(module, facts):
                     # If mapper is for container
                     if mapper['type'] == 'container':
                         container_name = find_containerName_by_containerId(containers_list=containers,
-                                                                            container_id=mapper['objectId'])
+                                                                           container_id=mapper['objectId'])
                         if container_name is not None:
                             MODULE_LOGGER.debug(
                                 'found mapping to container %s', str(container_name))
