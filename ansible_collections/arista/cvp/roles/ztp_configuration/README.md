@@ -1,5 +1,5 @@
-ztp-setup
-=========
+zto_configuration role
+=======================
 
 Ansible role to provision and configure Zero Touch Provisioning on a CloudVision server. Role will do the following:
 
@@ -17,7 +17,7 @@ Supported Platforms
 
 Below is a list of platforms where DHCPd configuration has been tested:
 
-- Arista Cloudvision 2019.
+- Arista Cloudvision 2019 and onward.
 - Centos 7
 - Centos 8
 
@@ -26,26 +26,26 @@ Role Variables
 
 ```yaml
 ztp:
-  default:            <Section with default value for hosts configuration>
-    registration:     <*default URL to get Script to register to CV or initial configuration>
-    gateway:          <Gateway to use by default if not set per device>
-    nameservers:      <List of default NS to use on a per host basis>
-  general:            <Section to define subnets parameters>
+  default:            < Section with default value for hosts configuration >
+    registration:     < * Default URL to get Script to register to CV or initial configuration >
+    gateway:          < Gateway to use by default if not set per device >
+    nameservers:      < List of default NS to use on a per host basis >
+  general:            < Section to define subnets parameters >
     subnets:
-      - network:      <*Subnet where DHCP will listen for request>
-        netmask:      <*Netmask of given subnet>
-        gateway:      <Gateway to configure for given subnet>
-        nameservers:  <List of name-servers to configure for given subnet>
-        start:        <First IP available in the pool>
-        end:          <Last IP available in the pool>
-        lease_time:   <Maximum lease time before device loose IP. Renewal is max/2>
-  clients:            <List of clients on a mac-address basis>
-    - name:           <*Hostname to provide when device do a DHCP request>
-      mac:            <*Mac address of the host. Mac address value MUST be protected by either single or dual quotes>
-      ip4:            <*IP Address of the host>
-      registration:   <Registration URL to use for the host. If not set, default value will be applied>
-      gateway:        <Gateway to use for the host. If not set, default value will be applied>
-      nameservers:    <List of NS to use for the host. If not set, default value will be applied>
+      - network:      < * Subnet where DHCP will listen for request >
+        netmask:      < * Netmask of given subnet >
+        gateway:      < Gateway to configure for given subnet >
+        nameservers:  < List of name-servers to configure for given subnet >
+        start:        < First IP available in the pool >
+        end:          < Last IP available in the pool >
+        lease_time:   < Maximum lease time before device loose IP. Renewal is max/2 >
+  clients:            < List of clients on a mac-address basis >
+    - name:           < * Hostname to provide when device do a DHCP request >
+      mac:            < * Mac address of the host. Mac address value MUST be protected by either single or dual quotes >
+      ip4:            < * IP Address of the host >
+      registration:   < Registration URL to use for the host. If not set, default value will be applied >
+      gateway:        < Gateway to use for the host. If not set, default value will be applied >
+      nameservers:    < List of NS to use for the host. If not set, default value will be applied >
 ```
 
 Variables with `*` are mandatory, others are optional and might be skipped if not needed in your setup.
