@@ -103,7 +103,7 @@ requests__](#pull-requests), but please respect the following restrictions:
 
 ## Branches
 
-- Current development branch: __`releases/grant-v1.x`__
+- Current development branch: __`releases/v1.0.x`__
 - Stable branch: `master`
 - Branch namespace for issues: `issues/<IssueID>-<issue-name-shorten>`
 - Branch namespace for Feature: `features/<IssueID>-<issue-name-shorten>`
@@ -145,7 +145,7 @@ merged:
 
    # Navigate to the newly cloned directory
    cd ansible-cvp
-   
+
    # Assign the original repo to a remote called "upstream"
    git remote add upstream https://github.com/aristanetworks/ansible-cvp.git
    ```
