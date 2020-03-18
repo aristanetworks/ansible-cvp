@@ -32,6 +32,10 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
+    find_hostname_by_mac,
+    find_containerName_by_containerId
+    )
 import ansible_collections.arista.cvp.plugins.module_utils.logger
 
 DOCUMENTATION = r'''
@@ -197,9 +201,9 @@ def facts_devices(module, facts):
     return facts
 
 
-def facts_configlets(module, facts):
+def facts_configlets_v1(module, facts):
     """
-    Collect facts of all configlets.
+    DEPRECATED - Collect facts of all configlets.
 
     Parameters
     ----------
@@ -217,25 +221,102 @@ def facts_configlets(module, facts):
     """
 
     facts['configlets'] = []
+    MODULE_LOGGER.info('Collecting facts v1')
     configlets = module.client.api.get_configlets()['data']
     # Reduce configlet data to required fields
     for configlet in configlets:
         MODULE_LOGGER.debug('  -> Working on %s', configlet['name'])
         # Get list of devices attached to configlet.
         configlet['devices'] = []
+        MODULE_LOGGER.debug('  -> collecting list of attached devices to configlet: %s', str(configlet))
         applied_devices = module.client.api.get_devices_by_configlet(configlet['name'])
         for device in applied_devices['data']:
             configlet['devices'].append(device['hostName'])
 
         # Get list of containers attached to configlet.
         configlet['containers'] = []
-        applied_containers = module.client.api.get_containers_by_configlet(configlet['name'])
+        MODULE_LOGGER.debug(
+            '  -> collecting list of attached containers to configlet: %s', str(configlet))
+        applied_containers = module.client.api.get_containers_by_configlet(
+            configlet['name'])
         for container in applied_containers['data']:
             configlet['containers'].append(container['containerName'])
 
         # Add configlet to facts list
         facts['configlets'].append(configlet)
+    MODULE_LOGGER.info('All configlet facts collected')
 
+    return facts
+
+
+def facts_configlets(module, facts):
+    """
+    WORK IN PROGRESS - Collect facts of all configlets.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where configlets information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with configlets content added.
+    """
+    facts['configlets'] = []
+    MODULE_LOGGER.info('Collecting facts v2')
+    configlets_and_mappers = module.client.api.get_configlets_and_mappers()[
+        'data']
+    # Load data to match ID with human readable name
+    inventory = list()
+    containers = list()
+    if 'devices' in facts:
+        MODULE_LOGGER.info('Devices part of facts, using cached version')
+        inventory = facts['devices']
+    else:
+        MODULE_LOGGER.warning(
+            'Devices not part of facts, collecting CV version')
+        inventory = module.client.api.get_inventory()
+    if 'containers' in facts:
+        MODULE_LOGGER.info('Containers part of facts, using cached version')
+        containers = facts['containers']
+    else:
+        MODULE_LOGGER.warning(
+            'Containers not part of facts, collecting CV version')
+        containers = module.client.api.get_containers()['data']
+
+    # Create list of configlets
+    if 'configlets' in configlets_and_mappers:
+        for configlet in configlets_and_mappers['configlets']:
+            configlet['devices'] = list()
+            configlet['containers'] = list()
+            # Parse mapper section to locate potential mappings to devices and containers.
+            MODULE_LOGGER.info('building list of mapping with devices and containers for configlet %s', str(configlet['name']))
+            for mapper in configlets_and_mappers['configletMappers']:
+                # If mapper is tied to our configlet
+                if mapper['configletId'] == configlet['key']:
+                    # If mapper is for device
+                    if mapper['type'] == 'netelement':
+                        device_hostname = find_hostname_by_mac(inventory=inventory, mac_address=mapper['objectId'])
+                        if device_hostname is not None:
+                            MODULE_LOGGER.debug('found mapping to device %s', str(device_hostname))
+                            configlet['devices'].append(device_hostname)
+                    # If mapper is for container
+                    if mapper['type'] == 'container':
+                        container_name = find_containerName_by_containerId(containers_list=containers,
+                                                                            container_id=mapper['objectId'])
+                        if container_name is not None:
+                            MODULE_LOGGER.debug(
+                                'found mapping to container %s', str(container_name))
+                            configlet['containers'].append(container_name)
+            facts['configlets'].append(configlet)
+    else:
+        MODULE_LOGGER.error('No configlet found on CVP')
+    MODULE_LOGGER.info('All configlets facts collected')
     return facts
 
 
@@ -363,15 +444,15 @@ def facts_builder(module):
         MODULE_LOGGER.info('** Collecting devices facts ...')
         facts = facts_devices(module=module, facts=facts)
 
-    # Extract configlet information
-    if 'all' in module.params['facts'] or 'configlets' in module.params['facts']:
-        MODULE_LOGGER.info('** Collecting configlets facts ...')
-        facts = facts_configlets(module=module, facts=facts)
-
     # Extract containers information
     if 'all' in module.params['facts'] or 'containers' in module.params['facts']:
         MODULE_LOGGER.info('** Collecting containers facts ...')
         facts = facts_containers(module=module, facts=facts)
+
+    # Extract configlet information
+    if 'all' in module.params['facts'] or 'configlets' in module.params['facts']:
+        MODULE_LOGGER.info('** Collecting configlets facts ...')
+        facts = facts_configlets(module=module, facts=facts)
 
     # Extract tasks information
     if 'all' in module.params['facts'] or 'tasks' in module.params['facts']:
