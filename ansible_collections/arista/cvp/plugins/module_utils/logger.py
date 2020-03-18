@@ -49,7 +49,7 @@ LOGGING_FILENAME = os.getenv(
 
 # set a format which is simpler for console use
 formatter = logging.Formatter(
-    '%(name)-12s: %(levelname)-s - func: %(funcName)-12s (L:%(lineno)-3d) - %(message)s')
+    '%(asctime)s - %(name)-12s: %(levelname)-s - func: %(funcName)-12s (L:%(lineno)-3d) - %(message)s')
 
 # set up ROOT handler to use logging with file rotation.
 handler = logging.handlers.RotatingFileHandler(
