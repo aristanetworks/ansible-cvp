@@ -2,7 +2,7 @@ name: Collection Publication
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
 jobs:
   local_build:
     name: Build Ansible CVP Collection
