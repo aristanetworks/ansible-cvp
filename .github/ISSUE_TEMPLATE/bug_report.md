@@ -12,9 +12,13 @@ Verify first that your issue/request is not already reported on GitHub. -->
 
 ## Issue Type
 
-<!--- Pick one below and delete the rest -->
-- Bug Report
-- Documentation Report
+<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] Documentation Report
+- [ ] Code style update (formatting, renaming)
+- [ ] Refactoring (no functional changes)
+- [ ] Other (please describe):
+
 
 ## Summary
 
@@ -42,18 +46,17 @@ $ pip freeze
 
 ## OS / Environment
 
-__EOS Version__
-
-<!-- Define which version of EOS and which platform you are using -->
-
 __Cloudvision version__
 
 <!-- Define which CVP version is your target -->
 
+__EOS Version__
+
+<!-- Define which version of EOS and which platform you are using -->
+
 __OS running Ansible__
 
 <!-- Define which OS and version you use to run ansible -->
-
 
 
 ## Steps to reproduce
@@ -62,7 +65,7 @@ For new features, show how the feature would be used. -->
 
 <!--- Paste example playbooks or commands between quotes below -->
 ```yaml
-
+---
 ```
 
 <!--- You can also paste gist.github.com links for larger files -->
@@ -80,5 +83,5 @@ $
 
 <!--- Paste verbatim command output between quotes below -->
 ```shell
-
+$
 ```
