@@ -31,6 +31,7 @@ ANSIBLE_METADATA = {
 
 import re
 import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -39,9 +40,6 @@ from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import
     CvpApiError,
 )
 from time import sleep
-
-# Activate or not debug mode for logging & development
-DEBUG_MODULE = True
 
 DOCUMENTATION = r"""
 ---
@@ -357,9 +355,8 @@ def is_in_filter(hostname_filter=None, hostname="eos"):
     boolean
         True if device hostname is part of filter. False if not.
     """
-    if DEBUG_MODULE:
-        logging.info(" * is_in_filter - filter is %s", str(hostname_filter))
-        logging.info(" * is_in_filter - hostname is %s", str(hostname))
+    MODULE_LOGGER.debug(" * is_in_filter - filter is %s", str(hostname_filter))
+    MODULE_LOGGER.debug(" * is_in_filter - hostname is %s", str(hostname))
 
     # W102 Workaround to avoid list as default value.
     if hostname_filter is None:
@@ -369,8 +366,7 @@ def is_in_filter(hostname_filter=None, hostname="eos"):
         return True
     elif any(element in hostname for element in hostname_filter):
         return True
-    if DEBUG_MODULE:
-        logging.info(" * is_in_filter - NOT matched")
+    MODULE_LOGGER.debug(" * is_in_filter - NOT matched")
     return False
 
 
@@ -489,15 +485,9 @@ def build_existing_devices_list(module):
     devices_ansible = module.params["devices"]
     devices_info = list()
     facts_device = facts_devices(module)
-    if DEBUG_MODULE:
-        logging.debug(
-            " * build_existing_devices_list - device filter is: %s", str(devices_filter)
-        )
+    MODULE_LOGGER.debug(" * build_existing_devices_list - device filter is: %s", str(devices_filter))
     for cvp_device in facts_device:
-        if DEBUG_MODULE:
-            logging.debug(
-                " * build_existing_devices_list - start %s", str(cvp_device["hostname"])
-            )
+        MODULE_LOGGER.debug(" * build_existing_devices_list - start %s", str(cvp_device["hostname"]))
         if is_in_filter(
             hostname_filter=devices_filter, hostname=cvp_device["hostname"]
         ):
@@ -518,10 +508,7 @@ def build_existing_devices_list(module):
                     # TODO: imageBundle MUST be implemented later.
                     # Add device to the list
                     devices_info.append(device_ansible)
-    if DEBUG_MODULE:
-        logging.info(
-            " * build_existing_devices_list - devices_info: %s", str(devices_info)
-        )
+    MODULE_LOGGER.info(" * build_existing_devices_list - devices_info: %s", str(devices_info))
     return devices_info
 
 
@@ -675,15 +662,11 @@ def devices_new(module):
     # List of generated taskIds
     result_tasks_generatedtaskId = list()
 
-    if DEBUG_MODULE:
-        logging.debug(" * devices_new - Entering devices_new")
-        logging.debug(" * devices_new - entering update function")
+    MODULE_LOGGER.debug(" * devices_new - Entering devices_new")
+    MODULE_LOGGER.debug(" * devices_new - entering update function")
 
     for device_update in device_provision:
-        if DEBUG_MODULE:
-            logging.info(
-                " * devices_new - provisioning device: %s", str(device_update["name"])
-            )
+        MODULE_LOGGER.info(" * devices_new - provisioning device: %s", str(device_update["name"]))
         # Test if we are managing last device to provision
         # If no, then we do not create tasks and we do not save tempTopology
         # If last device, we save topology and create tasks
@@ -765,8 +748,7 @@ def devices_new(module):
         "added_tasksIds": result_tasks_generatedtaskId,
     }
 
-    if DEBUG_MODULE:
-        logging.info("devices_new - result output: %s", str(data))
+    MODULE_LOGGER.info("devices_new - result output: %s", str(data))
 
     return data
 
@@ -805,15 +787,13 @@ def devices_move(module):
     result_tasks_generated = list()
     device_action = dict()
     changed = False
-    if DEBUG_MODULE:
-        logging.debug(" * devices_move - Entering devices_move")
+    MODULE_LOGGER.debug(" * devices_move - Entering devices_move")
 
     for device_update in devices_update:
         device_facts = device_get_from_facts(
             module=module, device_name=device_update["name"]
         )
-        if DEBUG_MODULE:
-            logging.info(" * devices_move - updating device: %s", str(device_update))
+        MODULE_LOGGER.info(" * devices_move - updating device: %s", str(device_update))
 
         if device_facts["containerName"] != device_update["parentContainerName"]:
             container_facts = container_get_facts(
@@ -857,8 +837,7 @@ def devices_move(module):
         "moved_tasksIds": result_tasks_generated,
     }
 
-    if DEBUG_MODULE:
-        logging.info("devices_move - result output: %s", str(data))
+    MODULE_LOGGER.info("devices_move - result output: %s", str(data))
 
     return data
 
@@ -896,8 +875,7 @@ def devices_update(module, mode="override"):
     dict
         Dict result with tasks and information.
     """
-    if DEBUG_MODULE:
-        logging.debug(" * devices_update - Entering devices_update")
+    MODULE_LOGGER.debug(" * devices_update - Entering devices_update")
     # List of devices to update: already provisioned on CV and part of module input.
     devices_update = build_existing_devices_list(module=module)
     # Counter of number of updated devices.
@@ -911,14 +889,10 @@ def devices_update(module, mode="override"):
     # Structure to list configlets to configure on device.
     configlets_add = list()
 
-    if DEBUG_MODULE:
-        logging.debug(" * devices_update - entering update function")
+    MODULE_LOGGER.debug(" * devices_update - entering update function")
 
     for device_update in devices_update:
-        if DEBUG_MODULE:
-            logging.info(
-                " * devices_update - updating device: %s", str(device_update["name"])
-            )
+        MODULE_LOGGER.info(" * devices_update - updating device: %s", str(device_update["name"]))
         # Get device facts from cv facts
         device_facts = device_get_from_facts(
             module=module, device_name=device_update["name"]
@@ -1020,8 +994,7 @@ def devices_update(module, mode="override"):
         "updated_tasksIds": result_tasks_generated,
     }
 
-    if DEBUG_MODULE:
-        logging.info("devices_update - result output: %s", str(data))
+    MODULE_LOGGER.info("devices_update - result output: %s", str(data))
 
     return data
 
@@ -1160,8 +1133,7 @@ def devices_action(module):
     results["data"]["tasks"] = list()
     results["data"]["tasksIds"] = list()
 
-    if DEBUG_MODULE:
-        logging.debug(" * devices_action - parameters: %s", str(topology_state))
+    MODULE_LOGGER.debug(" * devices_action - parameters: %s", str(topology_state))
 
     if topology_state == "present":
         # provision devices that need to be updated
@@ -1202,8 +1174,7 @@ def devices_action(module):
     if len(results["data"]["tasks"]) > 0 or int(results["data"]["moved_devices"]) > 0:
         results["changed"] = True
 
-    if DEBUG_MODULE:
-        logging.debug("   - devices_action - final result is: %s", str(results))
+    MODULE_LOGGER.debug("   - devices_action - final result is: %s", str(results))
     return results
 
 
@@ -1223,9 +1194,8 @@ def main():
                             default='override',
                             choices=['merge', 'override', 'delete']))
 
-    if DEBUG_MODULE:
-        logging.basicConfig(format="%(asctime)s %(message)s",
-                            filename="cv_device_v2.log", level=logging.DEBUG)
+    MODULE_LOGGER.basicConfig(format="%(asctime)s %(message)s",
+                              filename="cv_device_v2.log", level=logging.DEBUG)
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
