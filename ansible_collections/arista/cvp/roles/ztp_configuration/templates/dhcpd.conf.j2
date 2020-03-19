@@ -1,0 +1,40 @@
+# {{ ansible_managed }} - {{ inventory_hostname }}
+# Subnet of ZTP interface
+{% for subnet in ztp.general.subnets %}
+subnet {{ subnet.network }} netmask {{ subnet.netmask }} {
+    range {{ subnet.start }} {{ subnet.end }};
+{%     if subnet.gateway is defined %}
+    option routers {{ subnet.gateway }};
+{%     endif %}
+{%     if subnet.nameservers is defined and subnet.nameservers is iterable %}
+    option domain-name-servers {% for nameserver in subnet.nameservers %}{{ nameserver }}{% if not loop.last %}, {% endif %}{% endfor %};
+{%     endif %}
+{%     if subnet.registration is defined %}
+    option bootfile-name "{{ subnet.registration }}";
+{%     endif %}
+{%     if subnet.lease_time is defined %}
+    max-lease-time {{ subnet.lease_time }};
+{%     endif %}
+}
+{% endfor %}
+
+# Per host definition
+{% for client in ztp.clients %}
+host {{ client.name }} {
+    option host-name "{{ client.name }}";
+    hardware ethernet {{ client.mac | string }};
+    fixed-address {{client.ip4}};
+    option bootfile-name "{{ ztp.default.registration }}";
+{%     if client.gateway is defined %}
+    option routers {{ client.gateway }};
+{%     elif ztp.default.gateway is defined %}
+    option routers {{ ztp.default.gateway }};
+{%     endif %}
+{%     if client.nameservers is defined and subnet.nameservers is iterable %}
+    option domain-name-servers {% for nameserver in client.nameservers %}{{ nameserver }}{% if not loop.last %}, {% endif %}{% endfor %};
+{%     elif ztp.default.nameservers is defined and ztp.default.nameservers is iterable %}
+    option domain-name-servers {% for nameserver in ztp.default.nameservers %}{{ nameserver }}{% if not loop.last %}, {% endif %}{% endfor %};
+{%     endif %}
+}
+
+{% endfor %}

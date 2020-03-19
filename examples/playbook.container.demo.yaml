@@ -60,7 +60,6 @@
       cv_container:
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
-        save_topology: true
         mode: 'merge'
       register: cv_container
 
@@ -97,7 +96,6 @@
         topology: '{{container_delete}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
         mode: 'delete'
-        save_topology: true
       register: cv_container
 
     - name: "RUN02 - Check if ROOM02 container exists"

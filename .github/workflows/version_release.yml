@@ -1,0 +1,25 @@
+name: Collection Publication
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  local_build:
+    name: Build Ansible CVP Collection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Configure runner'
+        run: |
+          echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+          make setup-repository
+      - name: 'Ansible Galaxy build'
+        run: |
+          make collection-build
+          ls -al
+          mkdir artifacts/
+          mv *.tar.gz artifacts
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ansible-cvp-${{env.RELEASE_VERSION}}
+          path: './artifacts/'

@@ -29,6 +29,8 @@ ANSIBLE_METADATA = {
 }
 
 import re
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -114,6 +116,9 @@ EXAMPLES = r'''
         device_filter: ['veos']
       register: cvp_device
 '''
+
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
+MODULE_LOGGER.info('Start cv_device module execution')
 
 
 def connect(module):
@@ -445,7 +450,7 @@ def device_action(module):
     else:
         # Only display action results as Ansible check_mode is active
         for device in new_device:
-            new.append({device[0]['name']: "checked"})
+            new.append({device['ansible_device']['name']: "checked"})
         for device in update_device:
             updated.append({device['name']: "checked",
                             'configlets': device['configlets'],

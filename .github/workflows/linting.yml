@@ -1,0 +1,29 @@
+name: Code Linting
+on: 
+  push:
+    branches-ignore:
+      - master
+    tags-ignore:
+      - '*'
+    paths:
+      - 'ansible_collections/arista/cvp/*'
+jobs:
+  'lint-yaml':
+    name: Run YAML Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Lint Ansible Galaxy'
+        uses: ibiqlik/action-yamllint@master
+        with:
+          file_or_dir: ./ansible_collections/arista/cvp/*.yml
+          config_file: ./.github/yamllintrc
+  'lint-python':
+    name: Run PYTHON Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Lint Python code in plugins'
+        run: |
+          make setup-repository
+          make linting
