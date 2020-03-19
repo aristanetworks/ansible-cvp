@@ -1194,9 +1194,6 @@ def main():
                             default='override',
                             choices=['merge', 'override', 'delete']))
 
-    MODULE_LOGGER.basicConfig(format="%(asctime)s %(message)s",
-                              filename="cv_device_v2.log", level=logging.DEBUG)
-
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
     # Connect to CVP instance
     module.client = connect(module)
