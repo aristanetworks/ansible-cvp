@@ -821,24 +821,34 @@ def attached_configlet_to_container(module, intended, facts):
     save_topology = True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
+        MODULE_LOGGER.info('work with container %s', str(container_name))
         # If we have at least one configlet defined, then we can start process
         # Get CVP information for target container.
         container_info_cvp = container_info(container_name=container_name, module=module)
         # container_info_facts = container_factinfo(container_name=container_name, facts=facts)
         if 'configlets' in container:
+            MODULE_LOGGER.debug('container has a list of containers to configure: %s', str(container['configlets']))
             # Extract list of configlet names
             for configlet in container['configlets']:
+                MODULE_LOGGER.debug('collecting information for configlet %s', str(configlet))
                 # Get CVP information for device.
                 configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)
                 # Configlet information is saved for later deployment
                 configlet_list.append(configlet_cvpinfo)
+                MODULE_LOGGER.debug('configlet_list is now: %s', str(configlet_list))
         # Create call to attach list of containers
         # Initiate a move to desired container.
         # Task is created but not executed.
+        configlets_name = list()
+        for configlet in configlet_list:
+            configlets_name.append(configlet['name'])
+        MODULE_LOGGER.info('Apply %s to %s', str(configlets_name), str(container_info_cvp['name']))
         configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
                                                                            create_task=save_topology)
+        # Release list of configlet to configure (#165)
+        configlet_list = list()
         if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
