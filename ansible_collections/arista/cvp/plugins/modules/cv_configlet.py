@@ -87,7 +87,7 @@ options:
     type: list
   state:
     description:
-        - If absent, configlets will be removed from CVP if they are not binded
+        - If absent, configlets will be removed from CVP if they are not bound
         - to either a container or a device.
         - If present, configlets will be created or updated.
     required: false
