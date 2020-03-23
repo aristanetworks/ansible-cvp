@@ -22,11 +22,11 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-
 import re
 import logging
 
 LOGGER = logging.getLogger('arista.cvp.cv_tools')
+
 
 def isIterable(testing_object=None):
     """

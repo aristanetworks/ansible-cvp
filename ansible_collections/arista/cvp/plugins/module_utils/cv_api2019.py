@@ -147,7 +147,7 @@ class CvpApi(object):
         try:
             element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
                                          % qplus(device_id), timeout=self.request_timeout)
-        except CvpApiError as e:
+        except CvpApiError as e:  # pylint: disable=invalid-name
             # Catch an invalid task_id error and return None
             if 'errorMessage' in str(e):
                 self.log.debug('Device with id %s could not be found' % device_id)
@@ -309,7 +309,7 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Device %s : %s' % (device['fqdn'], e))
             raise Exception("update_configlets_on_device:%s" % e)
         configlets = []
@@ -322,7 +322,7 @@ class CvpApi(object):
             tasks = {}
         return tasks
 
-    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):
+    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):  # pylint: disable=invalid-name
         ''' Remove the image bundle from the specified container.
 
             Args:
@@ -379,7 +379,7 @@ class CvpApi(object):
                    'format=topology&queryParam=&nodeId=root')
             try:
                 self.clnt.post(url, data=data, timeout=self.request_timeout)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=invalid-name
                 # pylint: disable=unreachable
                 raise Exception("update_imageBundle_on_device:%s" % e)
                 self.log.debug('Device %s : %s' % (device['fqdn'], e))
@@ -434,11 +434,11 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except CvpApiError as e:
+        except CvpApiError as e:  # pylint: disable=invalid-name
             if any(txt in str(e) for txt in ['Data already exists', 'undefined container']):
                 self.log.debug('Device %s already in container Undefined'
                                % device['fqdn'])
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Reset Device %s : %s' % (device['fqdn'], e))
             raise Exception("reset_device:%s" % e)
         if create_task:
@@ -446,7 +446,7 @@ class CvpApi(object):
             tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
             return tasks
 
-    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):
+    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):  # pylint: disable=invalid-name
         '''Move a device from the undefined container to a target container.
             Optionally apply device-specific configlets and an imageBundle.
 
@@ -479,7 +479,7 @@ class CvpApi(object):
         try:
             self.move_device_to_container('%s:provision_device' % app_name, device, container,
                                           create_task=False)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Provision Device - move %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-move_to_container:%s" % e)
         # Don't save configlet action if there is an image bundle to add
@@ -492,7 +492,7 @@ class CvpApi(object):
         try:
             created_tasks = self.update_configlets_on_device(app_name, device, configlets, [],
                                                              configlet_task)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Provision Device - configlets %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-update_configlets:%s" % e)
         # If configlet action created tasks then don't action imageBundles
@@ -501,7 +501,7 @@ class CvpApi(object):
             try:
                 created_tasks = self.update_imageBundle_on_device(app_name, device, imageBundle, {},
                                                                   create_task)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=invalid-name
                 self.log.debug('Provision Device - imageBundle %s : %s' % (device['fqdn'], e))
                 raise Exception("provsion_device-update_imageBundle:%s" % e)
         return created_tasks
