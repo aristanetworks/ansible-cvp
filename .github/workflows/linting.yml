@@ -6,7 +6,7 @@ on:
     tags-ignore:
       - '*'
     paths:
-      - 'ansible_collections/arista/cvp/*'
+      - 'ansible_collections/arista/cvp/**'
 jobs:
   'lint-yaml':
     name: Run YAML Linting
