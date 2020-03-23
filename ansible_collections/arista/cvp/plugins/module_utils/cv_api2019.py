@@ -582,6 +582,84 @@ class CvpApi(object):
         else:
             return data
 
+    # pylint: disable=too-many-locals
+    # pylint: disable=invalid-name
+    def remove_configlets_from_container(self, app_name, container,
+                                         del_configlets, create_task=True):
+        ''' Remove the configlets from the container.
+            Args:
+                app_name (str): The application name to use in info field.
+                container (dict): The container dict
+                del_configlets (list): List of configlet name and key pairs
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'35']}}
+        '''
+        self.log.debug(
+            'remove_configlets_from_container: container: %s names: %s' %
+            (container, del_configlets))
+
+        # Get all the configlets assigned to the device.
+        configlets = self.get_configlets_by_container_id(container['key'])
+
+        # Get a list of the names and keys of the configlets.  Do not add
+        # configlets that are on the delete list.
+        keep_names = []
+        keep_keys = []
+        for configlet in configlets['configletList']:
+            key = configlet['key']
+            if next((ent for ent in del_configlets if ent['key'] == key),
+                    None) is None:
+                keep_names.append(configlet['name'])
+                keep_keys.append(key)
+
+        # Remove the names and keys of the configlets to keep and build a
+        # list of the configlets to remove.
+        del_names = []
+        del_keys = []
+        for entry in del_configlets:
+            del_names.append(entry['name'])
+            del_keys.append(entry['key'])
+
+        info = '%s Configlet Remove: from Container %s' % (app_name,
+                                                           container['name'])
+        info_preview = '<b>Configlet Remove:</b> from Container' + container[
+            'name']
+        data = {'data': [{'info': info,
+                          'infoPreview': info_preview,
+                          'note': '',
+                          'action': 'associate',
+                          'nodeType': 'configlet',
+                          'nodeId': '',
+                          'configletList': keep_keys,
+                          'configletNamesList': keep_names,
+                          'ignoreConfigletNamesList': del_names,
+                          'ignoreConfigletList': del_keys,
+                          'configletBuilderList': [],
+                          'configletBuilderNamesList': [],
+                          'ignoreConfigletBuilderList': [],
+                          'ignoreConfigletBuilderNamesList': [],
+                          'toId': container['key'],
+                          'toIdType': 'container',
+                          'fromId': '',
+                          'nodeName': '',
+                          'fromName': '',
+                          'toName': container['name'],
+                          'nodeIpAddress': '',
+                          'nodeTargetIpAddress': '',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        self.log.debug(
+            'remove_configlets_from_container: saveTopology data:\n%s'
+            % data['data'])
+        self._add_temp_action(data)
+        if create_task:
+            return self._save_topology_v2([])
+        return data
+
     # ~Configlet Related API Calls
 
     def get_configlet_by_name(self, name):
