@@ -801,7 +801,23 @@ def configlet_factinfo(configlet_name, facts):
 
 def configure_configlet_to_container(module, intended, facts):
     """
-    Attached existing configlet to desired containers based on topology.
+    Manage mechanism to attach and detach configlets from container.
+
+    Addition process:
+    -----------------
+    - if configlet from intended match filter: configlet is attached
+    - if configlet from intended does not match filter: configlet is
+    ignored
+    - configlet_filter = ['none'] filtering is ignored and configlet is
+    attached
+
+    Deletion process:
+    -----------------
+    - if configlet is not part of intended and filter is not matched: we do
+    not remove it
+    - if configlet is not part of intended and filter is matched: we
+    detach configlet.
+    - configlet_filter = ['none'], configet is ignored and not detached
 
     Parameters
     ----------
@@ -897,7 +913,7 @@ def configure_configlet_to_container(module, intended, facts):
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
                 if match_filter is False and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']:
-                    MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s)', str(
+                    MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s), skipped', str(
                         configlet_filter), str(container_info_cvp['configlets']))
                     continue
                 # If configlet is not part of intended list and match filter: we remove
@@ -905,7 +921,7 @@ def configure_configlet_to_container(module, intended, facts):
                     container_name=container_name, facts=facts)
                 # If there is no configlet found in facts, just skipping this section.
                 if 'configlets' not in container_factsinfo:
-                    MODULE_LOGGER.warning('container %s has no configlets attached - skipped', str(container))
+                    MODULE_LOGGER.info('container %s has no configlets attached - skipped', str(container))
                     continue
                 if match_filter and configlet not in ['configlets']:
                     MODULE_LOGGER.debug(
@@ -1040,7 +1056,8 @@ def get_tasks(taskIds, module):
 
 
 def main():
-    """ main entry point for module execution
+    """
+    Main entry point for module execution.
     """
     argument_spec = dict(
         topology=dict(type='dict', required=True),          # Topology to configure on CV side.

@@ -47,7 +47,7 @@ def isIterable(testing_object=None):
         return False
 
 
-def match_filter(input, filter, default_always='all', default_none='none'):
+def match_filter(input, filter, default_always='all'):
     """
     Function to test if an object match userdefined filter.
 
@@ -68,8 +68,8 @@ def match_filter(input, filter, default_always='all', default_none='none'):
 
     Returns
     -------
-    [type]
-        [description]
+    bool
+        True if input matchs filter, False in other situation
     """
 
     # W102 Workaround to avoid list as default value.
