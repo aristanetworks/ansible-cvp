@@ -904,7 +904,7 @@ def configure_configlet_to_container(module, intended, facts):
             container_name=container_name, facts=facts)
         MODULE_LOGGER.info('get container info: %s for container %s', str(
             container_info_cvp), str(container_name))
-        if 'configlets' in container_info_cvp:
+        if container_info_cvp is not None and 'configlets' in container_info_cvp:
             for configlet in container_info_cvp['configlets']:
                 # If configlet matchs filter, we just remove attachement.
                 match_filter = cv_tools.match_filter(
