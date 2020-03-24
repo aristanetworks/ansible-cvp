@@ -48,13 +48,13 @@ __List of available modules:__
 
 __List of available roles:__
 
-- [__arista.cvp.ztp_configuration__](ansible_collections/arista/cvp/roles/ztp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 
 This collection supports CVP version `2018.2.5` and `2019.1.x`
 
 ### Important notes.
 
-This repository is built based on [new collections system](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#developing-collections) introduced by ansible starting version __2.9__. 
+This repository is built based on [new collections system](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#developing-collections) introduced by ansible starting version __2.9__.
 
 > It means that it is required to run at least ansible `2.9.0rc4` to be able to use this collection.
 
