@@ -908,7 +908,7 @@ def configure_configlet_to_container(module, intended, facts):
             for configlet in container_info_cvp['configlets']:
                 # If configlet matchs filter, we just remove attachement.
                 match_filter = cv_tools.match_filter(
-                    input=configlet, filter=configlet_filter, default_none='all', default_always='none')
+                    input=configlet, filter=configlet_filter, default_always='none')
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
