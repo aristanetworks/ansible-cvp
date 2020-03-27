@@ -1,0 +1,40 @@
+! Configured from Ansible Playbook device.demo 
+!
+hostname CTL1-EXT-PRDSW-001
+!
+ip routing
+!
+! Build Management VRF if not default
+vrf definition MGMNT
+   description ManagementVRF
+   rd 64900:00001
+exit
+!
+no ip routing vrf MGMNT
+ip route vrf MGMNT 0.0.0.0/0 192.168.30.1
+!
+! Build Management Config
+!
+management api http-commands
+protocol unix-socket
+ cors allowed-origin all
+ no shutdown
+vrf  MGMNT
+   no shutdown
+   exit
+!
+interface Management 1
+description CTL1-EXT-PRDSW-001-MGMNT
+  vrf forwarding MGMNT
+ ip address 192.168.30.117/24
+exit
+!
+! Create Spanning Tree Config
+! Configure SpanningTree from the start in case of loops
+spanning-tree mode MSTP
+spanning-tree portfast bpduguard default
+spanning-tree priority 49152
+!
+! Virtual MAC for vARP
+ip virtual-router mac-address 00:1C:73:ee:01:01
+!

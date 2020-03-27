@@ -1,0 +1,23 @@
+---
+- name: Get devices for cv_facts module.
+  hosts: cvp_servers
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  vars:
+    - verbose: False
+    - deviceFilter: "CTL1-EXT-PRDSW-001"
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      cv_facts:
+        facts: 
+          devices
+      register: cv_facts_devices
+
+    - name: "Print out facts from CVP"
+      debug:
+        msg: "{{item}}"
+      with_items:
+        - "{{cv_facts_devices.ansible_facts}}"
+      
