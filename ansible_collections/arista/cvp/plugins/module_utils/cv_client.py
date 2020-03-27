@@ -89,6 +89,7 @@ import logging
 import inspect
 import traceback
 from logging.handlers import SysLogHandler
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from itertools import cycle
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, CvpRequestError, CvpSessionLogOutError
 REQUESTS_IMP_ERR = None
@@ -144,8 +145,8 @@ class CvpClient(object):
         self.headers = {'Accept': 'application/json',
                         'Content-Type': 'application/json'}
 
-        self.log = logging.getLogger(logger)
-        self.set_log_level(log_level)
+        self.log = logging.getLogger('arista.cvp.cv_client')
+        self.log.info('Start cv_client API execution')
         if syslog:
             # Enables sending logging messages to the local syslog server.
             self.log.addHandler(SysLogHandler())
@@ -284,6 +285,7 @@ class CvpClient(object):
         self._create_session(all_nodes=True)
         # Verify that we can connect to at least one node
         if not self.session:
+            self.log.error(' error connecting cvp: %s', str(self.error_msg))
             raise CvpLoginError(self.error_msg)
         else:
             # Instantiate the CvpApi class
