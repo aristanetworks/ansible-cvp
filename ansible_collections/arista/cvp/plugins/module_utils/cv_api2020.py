@@ -28,6 +28,10 @@ import os
 # This import is for proper file IO handling support for both Python 2 and 3
 # pylint: disable=redefined-builtin
 from io import open
+<<<<<<< HEAD
+import logging
+=======
+>>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
 
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
@@ -894,6 +898,11 @@ class CvpApi(object):
                 container (dict): Container info in dictionary format or None
         '''
         self.log.debug('Get info for container %s' % name)
+<<<<<<< HEAD
+        self.log.debug(
+            '* cv_api2020 - get_container_by_name - container name is: %s', str(name))
+=======
+>>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
         containers = self.clnt.get('/provisioning/searchTopology.do?queryParam=%s'
                                    '&startIndex=0&endIndex=0' % qplus(name))
         if containers['total'] > 0 and containers['containerList']:
@@ -923,9 +932,17 @@ class CvpApi(object):
         '''
         self.log.debug('get_devices_in_container: called')
         devices = []
+<<<<<<< HEAD
+        logging.debug('* cv_api2020 - container name is: %s', str(name))
+        container = self.get_container_by_name(name)
+        logging.debug('* cv_api2020 - container is: %s', str(container))
+        if container:
+            all_devices = self.get_inventory(0, 0)
+=======
         container = self.get_container_by_name(name)
         if container:
             all_devices = self.get_inventory(0, 0, name)
+>>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
             for device in all_devices:
                 if device['parentContainerId'] == container['key']:
                     devices.append(device)
