@@ -130,7 +130,7 @@ def create_builtin_containers(facts):
 
 def get_root_container(containers_fact, debug=True):
     """
-    Extract name of the root conainer provided by cv_facts.
+    Extract name of the root container provided by cv_facts.
 
     Parameters
     ----------
@@ -247,17 +247,24 @@ def tree_build_from_dict(containers=None, root='Tenant'):
     previously_created = list()
     # Create root node to mimic CVP behavior
     MODULE_LOGGER.debug('containers list is %s', str(containers))
+    MODULE_LOGGER.debug('root container is set to: %s', str(root))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
         if container_info['parent_container'] in [root]:
             previously_created.append(container_name)
             tree.create_node(container_name, container_name, parent=container_info['parent_container'])
+            MODULE_LOGGER.debug(
+                'create root tree entry with: %s', str(container_name))
     # Loop since expected tree is not equal to number of entries in container topology
-    while len(tree.all_nodes()) < len(containers) + 1:
+    while (len(tree.all_nodes()) < len(containers)):
+        MODULE_LOGGER.debug(
+            ' Tree has size: %s - Containers has size: %s', str(len(tree.all_nodes())), str(len(containers)))
         for container_name, container_info in containers.items():
             if tree.contains(container_info['parent_container']) and container_info['parent_container'] not in [root]:
                 try:
+                    MODULE_LOGGER.debug(
+                        'create new node with: %s', str(container_name))
                     tree.create_node(container_name, container_name, parent=container_info['parent_container'])
                 except:  # noqa E722
                     continue
@@ -320,6 +327,7 @@ def tree_build_from_list(containers, root='Tenant'):
         if cvp_container['parentName'] is None:
             continue
         if cvp_container['parentName'] in [root]:
+            MODULE_LOGGER.debug('found container attached to %s: %s', str(root), str(cvp_container))
             previously_created.append(cvp_container['name'])
             tree.create_node(cvp_container['name'], cvp_container['name'], parent=cvp_container['parentName'])
     # Loop since expected tree is not equal to number of entries in container topology
@@ -864,6 +872,35 @@ def attached_configlet_to_container(module, intended, facts):
     return result
 
 
+def locate_relative_root_container(containers_topology):
+    """
+    Function to locate root container of partial topology
+
+    In case user provides a partial topology, it is required to locate root of
+    this topology and not CVP root container. it is useful in case of a partial
+    deletion and not complete tree.
+
+    Parameters
+    ----------
+    containers_topology : dict
+        User's defined intended topology
+
+    Returns
+    -------
+    string
+        Name of the relative root container. None if not found.
+    """
+    if type(containers_topology) is list:
+        MODULE_LOGGER.critical('! ERROR - container_topology is a list -- expected a dict')
+    else:
+        MODULE_LOGGER.info('container_topology is a dict as expected')
+    MODULE_LOGGER.debug('relative intended topology is: %s', str(containers_topology))
+    for container_name, container in containers_topology.items():
+        if container['parent_container'] not in containers_topology.keys():
+            return container_name
+    return None
+
+
 def delete_topology(module, intended, facts):
     """
     Delete CVP Topology when state is set to absent.
@@ -883,13 +920,23 @@ def delete_topology(module, intended, facts):
 
     # Get root container for current topology
     topology_root = get_root_container(containers_fact=facts['containers'])
-
+    # First try to get relative topology root container.
+    topology_root_relative = locate_relative_root_container(containers_topology=intended)
+    # If not found for any reason, fallback to CVP root container.
+    if topology_root_relative is None:
+        topology_root_relative = get_root_container(
+            containers_fact=facts['containers'])
+    MODULE_LOGGER.info('relative topology root is: %s', str(topology_root))
     # Build a tree of containers configured on CVP
-    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root)
+    MODULE_LOGGER.info('build tree topology from facts topology')
+    container_cvp_tree = tree_build_from_list(
+        containers=facts['containers'], root=topology_root)
     container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
 
     # Build a tree of containers expected to be deleted from CVP
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
+    MODULE_LOGGER.info('build tree topology from intended topology')
+    container_intended_tree = tree_build_from_dict(
+        containers=intended, root=topology_root_relative)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
     MODULE_LOGGER.info('container_intended_ordered_list %s', container_intended_ordered_list)
