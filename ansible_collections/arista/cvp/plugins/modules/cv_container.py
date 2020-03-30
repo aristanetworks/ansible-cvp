@@ -58,7 +58,7 @@ version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
-  - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
+  - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
 options:
@@ -161,7 +161,7 @@ def tree_to_list(json_data, myList):
     Example:
     --------
         >>> containers = {"Tenant": {"children": [{"Fabric": {"children": [{"Leaves": {"children": ["MLAG01", "MLAG02"]}}, "Spines"]}}]}}
-        >>> print tree_to_list(containers=containers, myList=lsit())
+        >>> print tree_to_list(containers=containers, myList=list())
         [u'Tenant', u'Fabric', u'Leaves', u'MLAG01', u'MLAG02', u'Spines']
 
     Parameters
@@ -169,7 +169,7 @@ def tree_to_list(json_data, myList):
     json_data : [type]
         [description]
     myList : list
-        Ordered list of element to create on CVP / recusrive function
+        Ordered list of element to create on CVP / recursive function
 
     Returns
     -------
@@ -483,7 +483,7 @@ def create_new_containers(module, intended, facts):
     # Build ordered list of containers to create: from Tenant to leaves.
     container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
-    # Parse ordered list of container and chek if they are configured on CVP.
+    # Parse ordered list of container and check if they are configured on CVP.
     # If not, then call container creation process.
     for container_name in container_intended_ordered_list:
         found = False
@@ -502,7 +502,7 @@ def create_new_containers(module, intended, facts):
             # If a container has been created, increment creation counter
             if response[0]:
                 count_container_creation += 1
-    # Build module message to retur for creation.
+    # Build module message to return for creation.
     if count_container_creation > 0:
         return [True, {'containers_created': "" + str(count_container_creation) + ""}]
     return [False, {'containers_created': "0"}]
@@ -643,7 +643,7 @@ def container_info(container_name, module):
     container_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
     Returns
     -------
     dict: Dict of container info from CVP or exit with failure if no info for
@@ -667,7 +667,7 @@ def device_info(device_name, module):
     device_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
     Returns
     -------
     dict: Dict of device info from CVP or exit with failure if no info for
@@ -763,7 +763,7 @@ def container_factinfo(container_name, facts):
     configlet_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
 
     Returns
     -------
@@ -785,7 +785,7 @@ def configlet_factinfo(configlet_name, facts):
     configlet_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
 
     Returns
     -------
