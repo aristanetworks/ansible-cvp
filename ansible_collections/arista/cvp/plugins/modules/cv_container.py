@@ -890,10 +890,6 @@ def locate_relative_root_container(containers_topology):
     string
         Name of the relative root container. None if not found.
     """
-    if type(containers_topology) is list:
-        MODULE_LOGGER.critical('! ERROR - container_topology is a list -- expected a dict')
-    else:
-        MODULE_LOGGER.info('container_topology is a dict as expected')
     MODULE_LOGGER.debug('relative intended topology is: %s', str(containers_topology))
     for container_name, container in containers_topology.items():
         if container['parent_container'] not in containers_topology.keys():
