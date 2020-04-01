@@ -117,6 +117,8 @@ all:
 
 If you are not using `root` user, please also add `ansible_become_pass`
 
+SSH connection is managed by [`paramiko`](http://www.paramiko.org/).
+
 ## License
 
 Project is published under [Apache 2.0 License](../../../../../LICENSE)

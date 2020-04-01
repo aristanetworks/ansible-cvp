@@ -1,2 +1,4 @@
 ---
 # defaults file for ztp-setup
+# Configure default connection parameter.
+ansible_connection: paramiko
