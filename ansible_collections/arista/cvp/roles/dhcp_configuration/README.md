@@ -9,18 +9,19 @@ Ansible role to provision and configure Zero Touch Provisioning on a CloudVision
 
 ## Requirements
 
-- dhcp server installed on remote server.
+No specific requirements to use this role.
 
 ## Tested Platforms
 
 Below is a list of platforms where DHCPd configuration has been tested:
 
 - Centos 7 / 8
+- Ubuntu 18.02
 - Arista Cloudvision 2019 and onward (for lab purpose)
 
 This role should work on any platform running [ISC-DHCP server](https://www.isc.org/dhcp/).
 
-> If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environement.
+> If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
 
 ## Role Variables
 
@@ -61,13 +62,14 @@ No dependency required for this role.
 
 ## Example Playbook
 
-Below is a basic playbook running `arista.cvp.ztp_configuration` role
+Below is a basic playbook running `arista.cvp.dhcp_configuration` role
 
 ```yaml
 ---
 - name: Configure DHCP service on CloudVision
-  hosts: ztp_server
-  gather_facts: no
+  hosts: dhcp_server
+  collection:
+    - arista.cvp
   vars:
     ztp:
       default:
@@ -96,9 +98,9 @@ Below is a basic playbook running `arista.cvp.ztp_configuration` role
           mac: '0c:1d:c0:1d:62:11'
           ip4: 10.255.0.13
   tasks:
-  - name: 'Execute ZTP configuration role'
+  - name: 'Execute DHCP configuration role'
     import_role:
-      name: arista.cvp.ztp_configuration
+      name: arista.cvp.dhcp_configuration
 ```
 
 Inventory is configured like below:
@@ -109,7 +111,7 @@ all:
   children:
     CVP:
       hosts:
-        cv_ztp:
+        dhcp_server:
           ansible_host: 1.1.1.1
           ansible_user: root
           ansible_password: password

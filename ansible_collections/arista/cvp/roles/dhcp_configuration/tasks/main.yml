@@ -1,5 +1,12 @@
 ---
 # tasks file for ztp-setup
+- name: gather os specific variables for Centos / Red Hat OS
+  include_vars: "centos.yml"
+  when: ansible_distribution == "CentOS" or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: gather os specific variables for Debian / Ubuntu OS
+  include_vars: "debian.yml"
+  when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
 - name: Install packages
   become: true
@@ -18,6 +25,6 @@
 - name: Check & activate DHCP service
   become: true
   service:
-    name: dhcpd
+    name: '{{dhcp_service}}'
     enabled: yes
     state: started
