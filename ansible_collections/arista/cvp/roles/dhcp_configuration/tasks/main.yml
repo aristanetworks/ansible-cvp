@@ -1,14 +1,22 @@
 ---
 # tasks file for ztp-setup
+
+- name: Install packages
+  become: true
+  package:
+    name: "{{ dhcp_packages }}"
+    state: "{{ dhcp_packages_state }}"
+
 - name: 'Generate DHCPd configuration file'
   become: true
   template:
     src: 'dhcpd.conf.j2'
-    dest: /etc/dhcp/dhcpd.conf
+    dest: '{{dhcp_config}}'
     backup: yes
   notify: "restart dhcpd"
 
 - name: Check & activate DHCP service
+  become: true
   service:
     name: dhcpd
     enabled: yes
