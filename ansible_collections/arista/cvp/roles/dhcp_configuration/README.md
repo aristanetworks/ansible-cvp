@@ -1,19 +1,17 @@
-dhcp_configuration role
-=======================
+# dhcp_configuration role
 
 Ansible role to provision and configure Zero Touch Provisioning on a CloudVision server. Role will do the following:
 
+- Install DHCP package
 - Activate DHCPd service on CloudVision.
 - Create `/etc/dhcp/dhcpd.conf` file with relevant information.
 - Reload `dhcpd` service to apply changes.
 
-Requirements
-------------
+## Requirements
 
 - dhcp server installed on remote server.
 
-Tested Platforms
--------------------
+## Tested Platforms
 
 Below is a list of platforms where DHCPd configuration has been tested:
 
@@ -24,10 +22,14 @@ This role should work on any platform running [ISC-DHCP server](https://www.isc.
 
 > If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environement.
 
-Role Variables
---------------
+## Role Variables
 
 ```yaml
+dhcp_packages: []     < List of packages to install as part of DHCP service. (default is ['dhcp'])>
+dhcp_packages_state:  < Flag to install or remove DHCP package. (default is present)>
+dhcp_config_dir:      < Folder where dhcp config is saved. (default is /etc/dhcp/)>
+dhcp_config:          < Configuration file for DHCP service. (default is {{ dhcp_config_dir }}/dhcpd.conf)>
+dhcp_service:         < Name of the service running on the system for DHCP. (default is dhcpd)>
 ztp:
   default:            < Section with default value for hosts configuration >
     registration:     < * Default URL to get Script to register to CV or initial configuration >
@@ -53,13 +55,11 @@ ztp:
 
 Variables with `*` are mandatory, others are optional and might be skipped if not needed in your setup.
 
-Dependencies
-------------
+## Dependencies
 
 No dependency required for this role.
 
-Example Playbook
-----------------
+## Example Playbook
 
 Below is a basic playbook running `arista.cvp.ztp_configuration` role
 
@@ -115,7 +115,7 @@ all:
           ansible_password: password
 ```
 
-If you are not using `root` user, please also add `ansible_become_pass`
+If you are not using `root` user, please also add `ansible_become_password`. By default, `ansible_become_password` is set to be equal to `ansible_password`
 
 SSH connection is managed by [`paramiko`](http://www.paramiko.org/).
 
