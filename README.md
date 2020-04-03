@@ -38,11 +38,17 @@ More documentation is available in [project's wiki pages](https://github.com/ari
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
+__List of available modules:__
+
 - [__arista.cvp.cv_facts__](docs/cv_facts.md) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](docs/cv_configlet.md) -  Manage configlet configured on CVP.
 - [__arista.cvp.cv_container__](docs/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
 - [__arista.cvp.cv_device__](docs/cv_device.md) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/cv_task.md) - Run tasks created on CVP.
+
+__List of available roles:__
+
+- [__arista.cvp.ztp_configuration__](ansible_collections/arista/cvp/roles/ztp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 
 This collection supports CVP version `2018.2.5` and `2019.1.x`
 
@@ -169,7 +175,6 @@ Below is a very basic example to build a container topology on a CloudVision pla
       cv_container:
         topology: '{{containers_provision}}'
         cvp_facts: '{{cvp_facts.ansible_facts}}'
-        save_topology: true
 ```
 
 As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.

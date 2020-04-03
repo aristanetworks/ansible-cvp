@@ -31,6 +31,8 @@ ANSIBLE_METADATA = {
 # Required by Ansible and CVP
 import re
 import traceback
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
@@ -122,6 +124,9 @@ EXAMPLES = r'''
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
       register: cvp_configlet
 '''
+
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
+MODULE_LOGGER.info('Start cv_configlet module execution')
 
 
 def compare(fromText, toText, fromName='', toName='', lines=10):

@@ -5,18 +5,18 @@
 
 <!-- code_chunk_output -->
 
-- [Ansible & CloudVision examples](#ansible-cloudvision-examples)
+- [Ansible & CloudVision examples](#ansible--cloudvision-examples)
   - [About](#about)
   - [Build and install ansible collection.](#build-and-install-ansible-collection)
     - [Automated Make approach](#automated-make-approach)
     - [Step by step approach](#step-by-step-approach)
   - [Run playbooks](#run-playbooks)
     - [Update inventory](#update-inventory)
-  - [Collect CloudVision Facts with `cv_facts`](#collect-cloudvision-facts-with-cv_facts)
-  - [Manage Configlets with `cv_configlet`](#manage-configlets-with-cv_configlet)
-  - [Manage Containers with `cv_container`](#manage-containers-with-cv_container)
-  - [Manage Devices with `cv_device`](#manage-devices-with-cv_device)
-  - [Manage tasks with `cv_task`](#manage-tasks-with-cv_task)
+  - [Collect CloudVision Facts with `cv_facts`](#collect-cloudvision-facts-with-cvfacts)
+  - [Manage Configlets with `cv_configlet`](#manage-configlets-with-cvconfiglet)
+  - [Manage Containers with `cv_container`](#manage-containers-with-cvcontainer)
+  - [Manage Devices with `cv_device`](#manage-devices-with-cvdevice)
+  - [Manage tasks with `cv_task`](#manage-tasks-with-cvtask)
 
 <!-- /code_chunk_output -->
 

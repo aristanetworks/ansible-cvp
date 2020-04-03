@@ -29,9 +29,11 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
+import sys
 import json
 import traceback
 import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
@@ -48,8 +50,6 @@ except ImportError:
 # List of Ansible default containers
 builtin_containers = ['Undefined', 'root']
 
-# Activate or not debug mode for logging & development
-DEBUG_MODULE = False
 
 DOCUMENTATION = r'''
 ---
@@ -109,7 +109,11 @@ EXAMPLES = r'''
 '''
 
 
-def create_builtin_containers(facts, debug=False):
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container')
+MODULE_LOGGER.info('Start cv_container module execution')
+
+
+def create_builtin_containers(facts):
     """
     Update builtin containers with root container name
 
@@ -120,7 +124,7 @@ def create_builtin_containers(facts, debug=False):
     debug : bool, optional
         Activate debug output, by default False
     """
-    root = get_root_container(containers_fact=facts['containers'], debug=debug)
+    root = get_root_container(containers_fact=facts['containers'])
     builtin_containers.append(root)
 
 
@@ -132,8 +136,6 @@ def get_root_container(containers_fact, debug=True):
     ----------
     containers_fact : list
         List of containers to read from cv_facts
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -141,15 +143,15 @@ def get_root_container(containers_fact, debug=True):
         Name of the root container, if not found, return Tenant as default value
     """
     for container in containers_fact:
-        logging.debug('  -> CloudVision container %s', str(container))
+        MODULE_LOGGER.debug('working on container %s', str(container))
         if container['Key'] == 'root':
             # if debug:
-            logging.debug('  -> CloudVision ROOT container has name %s', container['Name'])
+            MODULE_LOGGER.info('! ROOT container has name %s', container['Name'])
             return container['Name']
     return 'Tenant'
 
 
-def tree_to_list(json_data, myList, debug=False):
+def tree_to_list(json_data, myList):
     """
     Transform a tree structure into a list of object to create CVP.
 
@@ -168,8 +170,6 @@ def tree_to_list(json_data, myList, debug=False):
         [description]
     myList : list
         Ordered list of element to create on CVP / recusrive function
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -203,7 +203,7 @@ def tree_to_list(json_data, myList, debug=False):
     return myList
 
 
-def tree_build_from_dict(containers=None, root='Tenant', debug=False):
+def tree_build_from_dict(containers=None, root='Tenant'):
     """
     Build a tree based on a unsorted dictConfig(config).
 
@@ -236,8 +236,6 @@ def tree_build_from_dict(containers=None, root='Tenant', debug=False):
         Container topology to create on CVP, by default None
     root: string, optional
         Name of container to consider as root for topology, by default Tenant
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -248,8 +246,7 @@ def tree_build_from_dict(containers=None, root='Tenant', debug=False):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    if debug:
-        logging.debug('  -> tree_build_from_dict - containers list is %s', str(containers))
+    MODULE_LOGGER.debug('containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
@@ -267,7 +264,7 @@ def tree_build_from_dict(containers=None, root='Tenant', debug=False):
     return tree.to_json()
 
 
-def tree_build_from_list(containers, root='Tenant', debug=False):
+def tree_build_from_list(containers, root='Tenant'):
     """
     Build a tree based on a unsorted list.
 
@@ -306,8 +303,6 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
         Container topology to create on CVP, by default None
     root: string, optional
         Name of container to consider as root for topology, by default Tenant
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -318,14 +313,13 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
     tree = Tree()  # Create the base node
     previously_created = list()
     # Create root node to mimic CVP behavior
-    if debug:
-        logging.debug('  -> tree_build_from_list - containers list is %s', str(containers))
+    MODULE_LOGGER.debug('containers list is %s', str(containers))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for cvp_container in containers:
         if cvp_container['parentName'] is None:
             continue
-        elif cvp_container['parentName'] in [root]:
+        if cvp_container['parentName'] in [root]:
             previously_created.append(cvp_container['name'])
             tree.create_node(cvp_container['name'], cvp_container['name'], parent=cvp_container['parentName'])
     # Loop since expected tree is not equal to number of entries in container topology
@@ -339,7 +333,7 @@ def tree_build_from_list(containers, root='Tenant', debug=False):
     return tree.to_json()
 
 
-def tree_build(containers=None, root='Tenant', debug=False):
+def tree_build(containers=None, root='Tenant'):
     """
     Triage function to build a tree.
 
@@ -351,17 +345,16 @@ def tree_build(containers=None, root='Tenant', debug=False):
         Containers' structure to use to build tree, by default None
     root: string, optional
         Name of container to consider as root for topology, by default Tenant
-    debug : bool, optional
-        Activate debug logging, by default False
+
     """
     if isinstance(containers, dict):
-        return tree_build_from_dict(containers=containers, root=root, debug=debug)
+        return tree_build_from_dict(containers=containers, root=root)
     elif isinstance(containers, list):
-        return tree_build_from_list(containers=containers, root=root, debug=debug)
+        return tree_build_from_list(containers=containers, root=root)
     return None
 
 
-def isIterable(testing_object=None, debug=False):
+def isIterable(testing_object=None):
     """
     Test if an object is iterable or not.
 
@@ -371,8 +364,7 @@ def isIterable(testing_object=None, debug=False):
     ----------
     testing_object : any, optional
         Object to test if it is iterable or not, by default None
-    debug : bool, optional
-        Activate debug logging, by default False
+
     """
     try:
         some_object_iterator = iter(testing_object)
@@ -381,7 +373,7 @@ def isIterable(testing_object=None, debug=False):
         return False
 
 
-def connect(module, debug=False):
+def connect(module):
     """
     Create a connection to CVP server to use API
 
@@ -389,8 +381,6 @@ def connect(module, debug=False):
     ----------
     module : AnsibleModule
         Object representing Ansible module structure with a CvpClient connection
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -416,7 +406,7 @@ def connect(module, debug=False):
     return client
 
 
-def process_container(module, container, parent, action, debug=False):
+def process_container(module, container, parent, action):
     """
     Execute action on CVP side to create / delete container.
 
@@ -430,8 +420,6 @@ def process_container(module, container, parent, action, debug=False):
         Name of parent of container to manage
     action : string
         Action to run on container. Must be one of: 'show/add/delete'
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     containers = module.client.api.get_containers()
     # Ensure the parent exists
@@ -468,7 +456,7 @@ def process_container(module, container, parent, action, debug=False):
             return [False, {'container': "Not Found"}]
 
 
-def create_new_containers(module, intended, facts, debug=False):
+def create_new_containers(module, intended, facts):
     """
     Create missing container to CVP Topology.
 
@@ -480,14 +468,12 @@ def create_new_containers(module, intended, facts, debug=False):
         List of expected containers based on following structure:
     facts : dict
         Facts from CVP collected by cv_facts module
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     count_container_creation = 0
     # Get root container of topology
     topology_root = get_root_container(containers_fact=facts['containers'])
     # Build ordered list of containers to create: from Tenant to leaves.
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
+    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
     # Parse ordered list of container and chek if they are configured on CVP.
     # If not, then call container creation process.
@@ -514,7 +500,7 @@ def create_new_containers(module, intended, facts, debug=False):
     return [False, {'containers_created': "0"}]
 
 
-def is_empty(module, container_name, facts, debug=False):
+def is_empty(module, container_name, facts):
     """
     Check if container can be removed safely.
 
@@ -530,8 +516,6 @@ def is_empty(module, container_name, facts, debug=False):
         Name of the container to look for.
     facts : dict
         Facts from CVP collected by cv_facts module
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     is_empty = True
     not_empty = False
@@ -542,18 +526,24 @@ def is_empty(module, container_name, facts, debug=False):
     return is_empty
 
 
-def is_container_empty(module, container_name, debug=False):
-    logging.debug('* is_container_empty - get_devices_in_container %s', container_name)
+def is_container_empty(module, container_name):
+    MODULE_LOGGER.debug('get_devices_in_container %s', container_name)
     container_status = module.client.api.get_devices_in_container(container_name)
-    logging.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
+    MODULE_LOGGER.debug('* is_container_empty - get_devices_in_container %s', str(container_status))
     if container_status is not None:
         if isIterable(container_status) and len(container_status) > 0:
+            MODULE_LOGGER.info(
+                'Found devices in container %s', str(container_name))
             return False
+        MODULE_LOGGER.info(
+            'No devices found in container %s', str(container_name))
         return True
+    MODULE_LOGGER.debug(
+        'No devices found in container %s (default behavior)', str(container_name))
     return False
 
 
-def get_container_facts(container_name='Tenant', facts=None, debug=False):
+def get_container_facts(container_name='Tenant', facts=None):
     """
     Get FACTS information for a container.
 
@@ -563,8 +553,6 @@ def get_container_facts(container_name='Tenant', facts=None, debug=False):
         Name of the container to look for, by default 'Tenant'
     facts : dict, optional
         CVP facts information, by default None
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     for container in facts['containers']:
         if container['name'] == container_name:
@@ -572,7 +560,7 @@ def get_container_facts(container_name='Tenant', facts=None, debug=False):
     return None
 
 
-def delete_unused_containers(module, intended, facts, debug=False):
+def delete_unused_containers(module, intended, facts):
     """
     Delete containers from CVP Topology when not defined in intended.
 
@@ -584,8 +572,6 @@ def delete_unused_containers(module, intended, facts, debug=False):
         List of expected containers based on following structure:
     facts : list
         List of containers extracted from CVP using cv_facts.
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     # default_containers = ['Tenant', 'Undefined', 'root']
     count_container_deletion = 0
@@ -595,36 +581,44 @@ def delete_unused_containers(module, intended, facts, debug=False):
     topology_root = get_root_container(containers_fact=facts['containers'])
 
     # Build a tree of containers configured on CVP
-    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root, debug=debug)
-    container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list(), debug=debug)
+    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root)
+    container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
 
     # Build a tree of containers expected to be configured on CVP
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
-    container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list(), debug=debug)
+    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
+    container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
     container_to_delete = list()
     # Build a list of container configured on CVP and not on intended.
     for cvp_container in container_cvp_ordered_list:
         # Only container with no devices can be deleted.
         # If container is not empty, no reason to go further.
-        if is_empty(module=module, container_name=cvp_container, facts=facts) or is_container_empty(module=module, container_name=cvp_container):
+        if is_container_empty(module=module, container_name=cvp_container):
             # Check if a container is not present in intended topology.
             if cvp_container not in container_intended_ordered_list:
                 container_to_delete.append(cvp_container)
 
+    MODULE_LOGGER.info('List of containers to delete: %s', str(container_to_delete))
+
     # Read cvp_container from end. If containers are part of container_to_delete, then delete container
-    for cvp_container in reversed(container_cvp_ordered_list):
+    for cvp_container in reversed(container_to_delete):
         # Check if container is not in intended topology and not a default container.
         if cvp_container in container_to_delete and cvp_container not in builtin_containers:
             # Get container fact for parentName
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                logging.debug('* delete_unused_containers - %s', container_fact['name'])
-                response = process_container(module=module,
-                                             container=container_fact['name'],
-                                             parent=container_fact['parentName'],
-                                             action='delete')
+                MODULE_LOGGER.info('container: %s', container_fact['name'])
+                response = None
+                try:
+                    response = process_container(module=module,
+                                                 container=container_fact['name'],
+                                                 parent=container_fact['parentName'],
+                                                 action='delete')
+                except:  # noqa E722
+                    MODULE_LOGGER.error(
+                        "Unexpected error: %s", str(sys.exc_info()[0]))
+                    continue
                 if response[0]:
                     count_container_deletion += 1
     if count_container_deletion > 0:
@@ -632,7 +626,7 @@ def delete_unused_containers(module, intended, facts, debug=False):
     return [False, {'containers_deleted': "0"}]
 
 
-def container_info(container_name, module, debug=False):
+def container_info(container_name, module):
     """
     Get dictionary of container info from CVP.
 
@@ -642,9 +636,6 @@ def container_info(container_name, module, debug=False):
         Name of the container to look for on CVP side.
     module : AnsibleModule
         Ansible module to get access to cvp cient.
-    debug : bool, optional
-        Activate debug logging, by default False
-
     Returns
     -------
     dict: Dict of container info from CVP or exit with failure if no info for
@@ -659,7 +650,7 @@ def container_info(container_name, module, debug=False):
     return container_info
 
 
-def device_info(device_name, module, debug=False):
+def device_info(device_name, module):
     """
     Get dictionary of device info from CVP.
 
@@ -669,9 +660,6 @@ def device_info(device_name, module, debug=False):
         Name of the container to look for on CVP side.
     module : AnsibleModule
         Ansible module to get access to cvp cient.
-    debug : bool, optional
-        Activate debug logging, by default False
-
     Returns
     -------
     dict: Dict of device info from CVP or exit with failure if no info for
@@ -698,7 +686,7 @@ def task_info(module, taskId):
     return module.client.api.get_task_by_id(taskId)
 
 
-def move_devices_to_container(module, intended, facts, debug=False):
+def move_devices_to_container(module, intended, facts):
     """
     Move devices to desired containers based on topology.
 
@@ -710,8 +698,6 @@ def move_devices_to_container(module, intended, facts, debug=False):
         List of expected containers based on following structure:
     facts : list
         List of containers extracted from CVP using cv_facts.
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     # Initialize response structure
     # Result return for Ansible
@@ -760,7 +746,7 @@ def move_devices_to_container(module, intended, facts, debug=False):
     return result
 
 
-def container_factinfo(container_name, facts, debug=False):
+def container_factinfo(container_name, facts):
     """
     Get dictionary of configlet info from CVP.
 
@@ -770,8 +756,6 @@ def container_factinfo(container_name, facts, debug=False):
         Name of the container to look for on CVP side.
     module : AnsibleModule
         Ansible module to get access to cvp cient.
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -784,7 +768,7 @@ def container_factinfo(container_name, facts, debug=False):
     return None
 
 
-def configlet_factinfo(configlet_name, facts, debug=False):
+def configlet_factinfo(configlet_name, facts):
     """
     Get dictionary of configlet info from CVP.
 
@@ -794,8 +778,6 @@ def configlet_factinfo(configlet_name, facts, debug=False):
         Name of the container to look for on CVP side.
     module : AnsibleModule
         Ansible module to get access to cvp cient.
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -808,7 +790,7 @@ def configlet_factinfo(configlet_name, facts, debug=False):
     return None
 
 
-def attached_configlet_to_container(module, intended, facts, debug=False):
+def attached_configlet_to_container(module, intended, facts):
     """
     Attached existing configlet to desired containers based on topology.
 
@@ -820,8 +802,6 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
         List of expected containers based on following structure:
     facts : list
         List of containers extracted from CVP using cv_facts.
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     # Initialize response structure
     #  Result return for Ansible
@@ -841,24 +821,34 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
     save_topology = True
     # Read complete intended topology to locate devices
     for container_name, container in intended.items():
+        MODULE_LOGGER.info('work with container %s', str(container_name))
         # If we have at least one configlet defined, then we can start process
         # Get CVP information for target container.
         container_info_cvp = container_info(container_name=container_name, module=module)
         # container_info_facts = container_factinfo(container_name=container_name, facts=facts)
         if 'configlets' in container:
+            MODULE_LOGGER.debug('container has a list of containers to configure: %s', str(container['configlets']))
             # Extract list of configlet names
             for configlet in container['configlets']:
+                MODULE_LOGGER.debug('collecting information for configlet %s', str(configlet))
                 # Get CVP information for device.
                 configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)
                 # Configlet information is saved for later deployment
                 configlet_list.append(configlet_cvpinfo)
+                MODULE_LOGGER.debug('configlet_list is now: %s', str(configlet_list))
         # Create call to attach list of containers
         # Initiate a move to desired container.
         # Task is created but not executed.
+        configlets_name = list()
+        for configlet in configlet_list:
+            configlets_name.append(configlet['name'])
+        MODULE_LOGGER.info('Apply %s to %s', str(configlets_name), str(container_info_cvp['name']))
         configlet_action = module.client.api.apply_configlets_to_container(app_name="ansible_cv_container",
                                                                            new_configlets=configlet_list,
                                                                            container=container_info_cvp,
                                                                            create_task=save_topology)
+        # Release list of configlet to configure (#165)
+        configlet_list = list()
         if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
             if 'taskIds' in configlet_action['data']:
                 for task in configlet_action['data']['taskIds']:
@@ -874,9 +864,9 @@ def attached_configlet_to_container(module, intended, facts, debug=False):
     return result
 
 
-def delete_topology(module, intended, facts, debug=False):
+def delete_topology(module, intended, facts):
     """
-    Delete CVP Topology.
+    Delete CVP Topology when state is set to absent.
 
     Parameters
     ----------
@@ -886,8 +876,6 @@ def delete_topology(module, intended, facts, debug=False):
         List of expected containers based on following structure:
     facts : list
         List of containers extracted from CVP using cv_facts.
-    debug : bool, optional
-        Activate debug logging, by default False
     """
     # default_containers = ['Tenant', 'Undefined', 'root']
     count_container_deletion = 0
@@ -897,17 +885,18 @@ def delete_topology(module, intended, facts, debug=False):
     topology_root = get_root_container(containers_fact=facts['containers'])
 
     # Build a tree of containers configured on CVP
-    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root, debug=debug)
+    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root)
     container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
 
     # Build a tree of containers expected to be deleted from CVP
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root, debug=debug)
+    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
-    logging.debug('* delete_topology - container_intended_ordered_list %s', container_intended_ordered_list)
+    MODULE_LOGGER.info('container_intended_ordered_list %s', container_intended_ordered_list)
 
     container_to_delete = list()
-    for cvp_container in container_cvp_ordered_list:
+    # Check if containers can be deleted (i.e. no attached devices)
+    for cvp_container in container_intended_ordered_list:
         # Do not run test on built-in containers
         if cvp_container not in builtin_containers:
             # Only container with no devices can be deleted.
@@ -917,15 +906,18 @@ def delete_topology(module, intended, facts, debug=False):
                 if cvp_container in container_intended_ordered_list:
                     container_to_delete.append(cvp_container)
 
-    for cvp_container in reversed(container_cvp_ordered_list):
+    MODULE_LOGGER.debug('containers_to_delete %s', str(container_to_delete))
+
+    for cvp_container in reversed(container_to_delete):
+        MODULE_LOGGER.debug('deletion of cvp_container %s', str(cvp_container))
         # Check if container is not in intended topology and not a default container.
         if cvp_container in container_to_delete and cvp_container not in builtin_containers:
             # Get container fact for parentName
-            logging.debug('* delete_topology - get_container_facts %s', cvp_container)
+            MODULE_LOGGER.debug('get_container_facts %s', cvp_container)
             container_fact = get_container_facts(container_name=cvp_container, facts=facts)
             # Check we have a result. Even if we should always have a match here.
             if container_fact is not None:
-                logging.debug('* delete_topology - %s', container_fact['name'])
+                MODULE_LOGGER.debug('container name: %s', container_fact['name'])
                 response = process_container(module=module,
                                              container=container_fact['name'],
                                              parent=container_fact['parentName'],
@@ -937,7 +929,7 @@ def delete_topology(module, intended, facts, debug=False):
     return [False, {'containers_deleted': "0"}]
 
 
-def get_tasks(taskIds, module, debug=False):
+def get_tasks(taskIds, module):
     """
     Collect TASK INFO from CVP.
 
@@ -947,8 +939,6 @@ def get_tasks(taskIds, module, debug=False):
         list of tasks ID to get.
     module : AnsibleModule
         Ansible Module with connection information.
-    debug : bool, optional
-        Activate debug logging, by default False
 
     Returns
     -------
@@ -977,10 +967,6 @@ def main():
                   choices=['merge', 'override', 'delete'])
     )
 
-    if DEBUG_MODULE:
-        logging.basicConfig(format='%(asctime)s %(message)s',
-                            filename='cv_container.log', level=logging.DEBUG)
-
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
     result = dict(changed=False, data={})
@@ -997,16 +983,14 @@ def main():
             if (isIterable(module.params['topology']) and module.params['topology'] is not None):
                 creation_process = create_new_containers(module=module,
                                                          intended=module.params['topology'],
-                                                         facts=module.params['cvp_facts'],
-                                                         debug=DEBUG_MODULE)
+                                                         facts=module.params['cvp_facts'])
                 if creation_process[0]:
                     result['data']['changed'] = True
                     result['data']['creation_result'] = creation_process[1]
                 # -> Start process to move devices to targetted containers
                 move_process = move_devices_to_container(module=module,
                                                          intended=module.params['topology'],
-                                                         facts=module.params['cvp_facts'],
-                                                         debug=DEBUG_MODULE)
+                                                         facts=module.params['cvp_facts'])
                 if move_process is not None:
                     result['data']['changed'] = True
                     # If a list of task exists, we expose it
@@ -1019,8 +1003,7 @@ def main():
                 # -> Start process to move devices to targetted containers
                 attached_process = attached_configlet_to_container(module=module,
                                                                    intended=module.params['topology'],
-                                                                   facts=module.params['cvp_facts'],
-                                                                   debug=DEBUG_MODULE)
+                                                                   facts=module.params['cvp_facts'])
                 if attached_process is not None:
                     result['data']['changed'] = True
                     # If a list of task exists, we expose it
@@ -1036,13 +1019,11 @@ def main():
             if (isIterable(module.params['topology']) and module.params['topology'] is not None):
                 deletion_process = delete_unused_containers(module=module,
                                                             intended=module.params['topology'],
-                                                            facts=module.params['cvp_facts'],
-                                                            debug=DEBUG_MODULE)
+                                                            facts=module.params['cvp_facts'])
             else:
                 deletion_process = delete_unused_containers(module=module,
                                                             intended=dict(),
-                                                            facts=module.params['cvp_facts'],
-                                                            debug=DEBUG_MODULE)
+                                                            facts=module.params['cvp_facts'])
             if deletion_process[0]:
                 result['data']['changed'] = True
                 result['data']['deletion_result'] = deletion_process[1]
@@ -1053,8 +1034,7 @@ def main():
             if (isIterable(module.params['topology']) and module.params['topology'] is not None):
                 deletion_topology_process = delete_topology(module=module,
                                                             intended=module.params['topology'],
-                                                            facts=module.params['cvp_facts'],
-                                                            debug=DEBUG_MODULE)
+                                                            facts=module.params['cvp_facts'])
                 if deletion_topology_process[0]:
                     result['data']['changed'] = True
                     result['data']['deletion_result'] = deletion_topology_process[1]

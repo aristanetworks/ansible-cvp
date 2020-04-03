@@ -9,6 +9,9 @@
   - [Feature Requests](#feature-requests)
   - [Using the issue tracker](#using-the-issue-tracker)
   - [Branches](#branches)
+    - [Current active branches](#current-active-branches)
+    - [Branch namespaces](#branch-namespaces)
+    - [Branches for Bug Fixes only](#branches-for-bug-fixes-only)
   - [Pull requests](#pull-requests)
 
 <!-- /code_chunk_output -->
@@ -103,11 +106,20 @@ requests__](#pull-requests), but please respect the following restrictions:
 
 ## Branches
 
-- Current development branch: __`releases/grant-v1.x`__
+### Current active branches
+
+- Current development branch: __`releases/v1.1.x`__
 - Stable branch: `master`
+
+### Branch namespaces
+
 - Branch namespace for issues: `issues/<IssueID>-<issue-name-shorten>`
-- Branch namespace for Feature: `features/<IssueID>-<issue-name-shorten>`
-- Branch namespace for release & development: `releases/<release_id>`
+- Branch namespace for new features: `features/<IssueID>-<issue-name-shorten>`
+- Branch namespace for releases & development: `releases/<release_id>`
+
+### Branches for Bug Fixes only
+
+- Branch `releases/v1.0.x`: Bug Fixes only (cherry-picking or specific PR)
 
 ## Pull requests
 
@@ -145,7 +157,7 @@ merged:
 
    # Navigate to the newly cloned directory
    cd ansible-cvp
-   
+
    # Assign the original repo to a remote called "upstream"
    git remote add upstream https://github.com/aristanetworks/ansible-cvp.git
    ```
@@ -156,6 +168,8 @@ merged:
    git checkout <dev-branch>
    git pull upstream <dev-branch>
    ```
+
+> Please refer to [branches section](#branches) to get current branch to use as `<dev-branch>`
 
 3. Create a new topic branch (off the main project development branch) to
    contain your feature, change, or fix:

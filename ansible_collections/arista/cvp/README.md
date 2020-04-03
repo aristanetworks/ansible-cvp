@@ -80,9 +80,8 @@ This collection supports CVP version >= `2018.2.5`
     - name: "Building Container topology on {{inventory_hostname}}"
       tags: [provision]
       arista.cvp.cv_container:
-          topology: '{{CVP_CONTAINERS}}'
-          cvp_facts: '{{CVP_FACTS.ansible_facts}}'
-          save_topology: true
+        topology: '{{CVP_CONTAINERS}}'
+        cvp_facts: '{{CVP_FACTS.ansible_facts}}'
 ```
 
 ### Create Configlets on CloudVision

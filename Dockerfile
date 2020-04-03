@@ -21,8 +21,7 @@ RUN apk add --update --no-cache ca-certificates \
                                 py-pip \
                                 libffi-dev \
                                 sshpass \
-                                libssl1.1 \
-                                openssl-dev &&\
+                                libressl-dev &&\
                                 pip install --upgrade pip && \
                                 pip install -r requirements.txt &&\
                                 apk del -r --purge gcc make g++ &&\
