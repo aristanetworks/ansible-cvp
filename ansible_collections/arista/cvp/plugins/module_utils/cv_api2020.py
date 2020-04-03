@@ -25,14 +25,10 @@ __metaclass__ = type
 ''' Class containing calls to CVP RESTful API.
 '''
 import os
+import logging
 # This import is for proper file IO handling support for both Python 2 and 3
 # pylint: disable=redefined-builtin
 from io import open
-<<<<<<< HEAD
-import logging
-=======
->>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
-
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 
@@ -70,6 +66,7 @@ class CvpApi(object):
     '''
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-lines
+    # pylint: disable=invalid-name
 
     def __init__(self, clnt, request_timeout=30):
         ''' Initialize the class.
@@ -136,6 +133,7 @@ class CvpApi(object):
                 dev['containerName'] = ''
         return data
 
+    # pylint: disable=invalid-name
     def get_net_element_info_by_device_id(self, device_id):
         ''' Return a dict of info about a device in CVP.
 
@@ -585,6 +583,84 @@ class CvpApi(object):
         else:
             return data
 
+    # pylint: disable=too-many-locals
+    # pylint: disable=invalid-name
+    def remove_configlets_from_container(self, app_name, container,
+                                         del_configlets, create_task=True):
+        ''' Remove the configlets from the container.
+            Args:
+                app_name (str): The application name to use in info field.
+                container (dict): The container dict
+                del_configlets (list): List of configlet name and key pairs
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'35']}}
+        '''
+        self.log.debug(
+            'remove_configlets_from_container: container: %s names: %s' %
+            (container, del_configlets))
+
+        # Get all the configlets assigned to the device.
+        configlets = self.get_configlets_by_container_id(container['key'])
+
+        # Get a list of the names and keys of the configlets.  Do not add
+        # configlets that are on the delete list.
+        keep_names = []
+        keep_keys = []
+        for configlet in configlets['configletList']:
+            key = configlet['key']
+            if next((ent for ent in del_configlets if ent['key'] == key),
+                    None) is None:
+                keep_names.append(configlet['name'])
+                keep_keys.append(key)
+
+        # Remove the names and keys of the configlets to keep and build a
+        # list of the configlets to remove.
+        del_names = []
+        del_keys = []
+        for entry in del_configlets:
+            del_names.append(entry['name'])
+            del_keys.append(entry['key'])
+
+        info = '%s Configlet Remove: from Container %s' % (app_name,
+                                                           container['name'])
+        info_preview = '<b>Configlet Remove:</b> from Container' + container[
+            'name']
+        data = {'data': [{'info': info,
+                          'infoPreview': info_preview,
+                          'note': '',
+                          'action': 'associate',
+                          'nodeType': 'configlet',
+                          'nodeId': '',
+                          'configletList': keep_keys,
+                          'configletNamesList': keep_names,
+                          'ignoreConfigletNamesList': del_names,
+                          'ignoreConfigletList': del_keys,
+                          'configletBuilderList': [],
+                          'configletBuilderNamesList': [],
+                          'ignoreConfigletBuilderList': [],
+                          'ignoreConfigletBuilderNamesList': [],
+                          'toId': container['key'],
+                          'toIdType': 'container',
+                          'fromId': '',
+                          'nodeName': '',
+                          'fromName': '',
+                          'toName': container['name'],
+                          'nodeIpAddress': '',
+                          'nodeTargetIpAddress': '',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        self.log.debug(
+            'remove_configlets_from_container: saveTopology data:\n%s'
+            % data['data'])
+        self._add_temp_action(data)
+        if create_task:
+            return self._save_topology_v2([])
+        return data
+
     # ~Configlet Related API Calls
 
     def get_configlet_by_name(self, name):
@@ -619,6 +695,13 @@ class CvpApi(object):
                     configlet['name'])
                 configlet['config'] = full_cfglt_data['config']
         return configlets
+
+    def get_configlets_and_mappers(self):
+        '''
+        Return a list of all defined configlets and associated mappers
+        '''
+        self.log.debug('getConfigletsAndAssociatedMappers')
+        return self.clnt.get('/configlet/getConfigletsAndAssociatedMappers.do')
 
     def get_devices_by_configlet(self, configlet_name, start=0, end=0):
         ''' Returns a list of devices to which the named configlet is applied.
@@ -898,11 +981,8 @@ class CvpApi(object):
                 container (dict): Container info in dictionary format or None
         '''
         self.log.debug('Get info for container %s' % name)
-<<<<<<< HEAD
         self.log.debug(
             '* cv_api2020 - get_container_by_name - container name is: %s', str(name))
-=======
->>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
         containers = self.clnt.get('/provisioning/searchTopology.do?queryParam=%s'
                                    '&startIndex=0&endIndex=0' % qplus(name))
         if containers['total'] > 0 and containers['containerList']:
@@ -932,17 +1012,11 @@ class CvpApi(object):
         '''
         self.log.debug('get_devices_in_container: called')
         devices = []
-<<<<<<< HEAD
         logging.debug('* cv_api2020 - container name is: %s', str(name))
         container = self.get_container_by_name(name)
         logging.debug('* cv_api2020 - container is: %s', str(container))
         if container:
             all_devices = self.get_inventory(0, 0)
-=======
-        container = self.get_container_by_name(name)
-        if container:
-            all_devices = self.get_inventory(0, 0, name)
->>>>>>> b4f9045164e57fc78e5f420844e6b0d442fe98d0
             for device in all_devices:
                 if device['parentContainerId'] == container['key']:
                     devices.append(device)
