@@ -1,5 +1,17 @@
 # Manage Provisionning topology
 
+- [Manage Provisionning topology](#manage-provisionning-topology)
+  - [Descrpition](#descrpition)
+  - [Options](#options)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Build Topology](#build-topology)
+      - [Merge inputs example](#merge-inputs-example)
+      - [Merge result example](#merge-result-example)
+    - [Delete Topology](#delete-topology)
+      - [Delete inputs example](#delete-inputs-example)
+      - [Delete result example](#delete-result-example)
+
 ## Descrpition
 
 __Module name:__ `arista.cvp.cv_container`
@@ -13,15 +25,15 @@ Module comes with a set of options:
 - `topology`: Topology to build on Cloudvision.
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `mode`: Define how module should work with container topology. Value can be:
-    - `merge`: Combine the new container topology with the existing topology.
-    - `override`: Discard the entire existing container topology and replace it with the new topology.
-    - `delete`: Discard the entire container topology provided in `topology` and keep other existing containers untouched.
+  - `merge`: Combine the new container topology with the existing topology.
+  - `override`: Discard the entire existing container topology and replace it with the new topology.
+  - `delete`: Discard the entire container topology provided in `topology` and keep other existing containers untouched.
 
-If __`mode`__ is set to __`delete`__, container topology shall be described starting from `Tenant`. A partial tree is currenly not supported.
+If __`mode`__ is set to __`delete`__, container topology can be a partial tree starting [`v1.0.6`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.6). If using version `=< 1.0.5`, topology shall be described starting from `Tenant`.
 
 ## Usage
 
-__Authentication__
+### Authentication
 
 This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
@@ -39,9 +51,11 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-__Inputs__
+### Build Topology
 
-Below is a basic playbook to collect facts:
+#### Merge inputs example
+
+Below is a basic playbook to create a containers topology:
 
 ```yaml
 vars:
@@ -75,7 +89,7 @@ tasks:
         mode: merge
 ```
 
-__Result__
+#### Merge result example
 
 Below is an example of expected output
 
@@ -199,5 +213,69 @@ Below is an example of expected output
         ]
     },
     "failed": false
+}
+```
+
+### Delete Topology
+
+To delete a topology you can either define a complete topology bound to `Tenants` or a partial tree.
+
+#### Delete inputs example
+
+```yaml
+- name: Container Management in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.avd
+    - arista.cvp
+  vars:
+    run_tasks: false
+    run_mode: delete
+    CVP_CONTAINERS:
+      POD01:
+        parent_container: Leafs
+
+  tasks:
+    - name: "collect CV facts on {{inventory_hostname}}"
+      arista.cvp.cv_facts:
+      register: CVP_FACTS
+
+    - name: 'running cv_container in {{run_mode}} on {{inventory_hostname}}'
+      arista.cvp.cv_container:
+        cvp_facts: "{{CVP_FACTS.ansible_facts}}"
+        topology: "{{CVP_CONTAINERS}}"
+        mode: '{{run_mode}}'
+      register: result
+
+    - debug:
+        msg: '{{result}}'
+```
+
+#### Delete result example
+
+```json
+{
+    "msg": {
+        "changed": true,
+        "cv_container": {
+            "changed": true,
+            "deletion_result": {
+                "containers_deleted": "1"
+            },
+            "taskIds": [],
+            "tasks": []
+        },
+        "data": {
+            "changed": true,
+            "deletion_result": {
+                "containers_deleted": "1"
+            },
+            "taskIds": [],
+            "tasks": []
+        },
+        "failed": false
+    }
 }
 ```

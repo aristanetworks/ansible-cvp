@@ -58,7 +58,7 @@ version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
-  - CloudVison Portal Configlet configuration requires a dictionary of containers with their parent,
+  - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
 options:
@@ -130,7 +130,7 @@ def create_builtin_containers(facts):
 
 def get_root_container(containers_fact, debug=True):
     """
-    Extract name of the root conainer provided by cv_facts.
+    Extract name of the root container provided by cv_facts.
 
     Parameters
     ----------
@@ -161,7 +161,7 @@ def tree_to_list(json_data, myList):
     Example:
     --------
         >>> containers = {"Tenant": {"children": [{"Fabric": {"children": [{"Leaves": {"children": ["MLAG01", "MLAG02"]}}, "Spines"]}}]}}
-        >>> print tree_to_list(containers=containers, myList=lsit())
+        >>> print tree_to_list(containers=containers, myList=list())
         [u'Tenant', u'Fabric', u'Leaves', u'MLAG01', u'MLAG02', u'Spines']
 
     Parameters
@@ -169,7 +169,7 @@ def tree_to_list(json_data, myList):
     json_data : [type]
         [description]
     myList : list
-        Ordered list of element to create on CVP / recusrive function
+        Ordered list of element to create on CVP / recursive function
 
     Returns
     -------
@@ -247,17 +247,24 @@ def tree_build_from_dict(containers=None, root='Tenant'):
     previously_created = list()
     # Create root node to mimic CVP behavior
     MODULE_LOGGER.debug('containers list is %s', str(containers))
+    MODULE_LOGGER.debug('root container is set to: %s', str(root))
     tree.create_node(root, root)
     # Iterate for first level of containers directly attached under root.
     for container_name, container_info in containers.items():
         if container_info['parent_container'] in [root]:
             previously_created.append(container_name)
             tree.create_node(container_name, container_name, parent=container_info['parent_container'])
+            MODULE_LOGGER.debug(
+                'create root tree entry with: %s', str(container_name))
     # Loop since expected tree is not equal to number of entries in container topology
-    while len(tree.all_nodes()) < len(containers) + 1:
+    while (len(tree.all_nodes()) < len(containers)):
+        MODULE_LOGGER.debug(
+            ' Tree has size: %s - Containers has size: %s', str(len(tree.all_nodes())), str(len(containers)))
         for container_name, container_info in containers.items():
             if tree.contains(container_info['parent_container']) and container_info['parent_container'] not in [root]:
                 try:
+                    MODULE_LOGGER.debug(
+                        'create new node with: %s', str(container_name))
                     tree.create_node(container_name, container_name, parent=container_info['parent_container'])
                 except:  # noqa E722
                     continue
@@ -320,6 +327,7 @@ def tree_build_from_list(containers, root='Tenant'):
         if cvp_container['parentName'] is None:
             continue
         if cvp_container['parentName'] in [root]:
+            MODULE_LOGGER.debug('found container attached to %s: %s', str(root), str(cvp_container))
             previously_created.append(cvp_container['name'])
             tree.create_node(cvp_container['name'], cvp_container['name'], parent=cvp_container['parentName'])
     # Loop since expected tree is not equal to number of entries in container topology
@@ -475,7 +483,7 @@ def create_new_containers(module, intended, facts):
     # Build ordered list of containers to create: from Tenant to leaves.
     container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
-    # Parse ordered list of container and chek if they are configured on CVP.
+    # Parse ordered list of container and check if they are configured on CVP.
     # If not, then call container creation process.
     for container_name in container_intended_ordered_list:
         found = False
@@ -494,7 +502,7 @@ def create_new_containers(module, intended, facts):
             # If a container has been created, increment creation counter
             if response[0]:
                 count_container_creation += 1
-    # Build module message to retur for creation.
+    # Build module message to return for creation.
     if count_container_creation > 0:
         return [True, {'containers_created': "" + str(count_container_creation) + ""}]
     return [False, {'containers_created': "0"}]
@@ -635,7 +643,7 @@ def container_info(container_name, module):
     container_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
     Returns
     -------
     dict: Dict of container info from CVP or exit with failure if no info for
@@ -659,7 +667,7 @@ def device_info(device_name, module):
     device_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
     Returns
     -------
     dict: Dict of device info from CVP or exit with failure if no info for
@@ -755,7 +763,7 @@ def container_factinfo(container_name, facts):
     configlet_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
 
     Returns
     -------
@@ -777,7 +785,7 @@ def configlet_factinfo(configlet_name, facts):
     configlet_name : string
         Name of the container to look for on CVP side.
     module : AnsibleModule
-        Ansible module to get access to cvp cient.
+        Ansible module to get access to cvp client.
 
     Returns
     -------
@@ -864,6 +872,31 @@ def attached_configlet_to_container(module, intended, facts):
     return result
 
 
+def locate_relative_root_container(containers_topology):
+    """
+    Function to locate root container of partial topology
+
+    In case user provides a partial topology, it is required to locate root of
+    this topology and not CVP root container. it is useful in case of a partial
+    deletion and not complete tree.
+
+    Parameters
+    ----------
+    containers_topology : dict
+        User's defined intended topology
+
+    Returns
+    -------
+    string
+        Name of the relative root container. None if not found.
+    """
+    MODULE_LOGGER.debug('relative intended topology is: %s', str(containers_topology))
+    for container_name, container in containers_topology.items():
+        if container['parent_container'] not in containers_topology.keys():
+            return container_name
+    return None
+
+
 def delete_topology(module, intended, facts):
     """
     Delete CVP Topology when state is set to absent.
@@ -883,13 +916,23 @@ def delete_topology(module, intended, facts):
 
     # Get root container for current topology
     topology_root = get_root_container(containers_fact=facts['containers'])
-
+    # First try to get relative topology root container.
+    topology_root_relative = locate_relative_root_container(containers_topology=intended)
+    # If not found for any reason, fallback to CVP root container.
+    if topology_root_relative is None:
+        topology_root_relative = get_root_container(
+            containers_fact=facts['containers'])
+    MODULE_LOGGER.info('relative topology root is: %s', str(topology_root))
     # Build a tree of containers configured on CVP
-    container_cvp_tree = tree_build_from_list(containers=facts['containers'], root=topology_root)
+    MODULE_LOGGER.info('build tree topology from facts topology')
+    container_cvp_tree = tree_build_from_list(
+        containers=facts['containers'], root=topology_root)
     container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
 
     # Build a tree of containers expected to be deleted from CVP
-    container_intended_tree = tree_build_from_dict(containers=intended, root=topology_root)
+    MODULE_LOGGER.info('build tree topology from intended topology')
+    container_intended_tree = tree_build_from_dict(
+        containers=intended, root=topology_root_relative)
     container_intended_ordered_list = tree_to_list(json_data=container_intended_tree, myList=list())
 
     MODULE_LOGGER.info('container_intended_ordered_list %s', container_intended_ordered_list)

@@ -1,6 +1,14 @@
 # Manage Configlet content
 
-## Descrpition
+- [Manage Configlet content](#manage-configlet-content)
+  - [Description](#description)
+  - [Options](#options)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Inputs example](#inputs-example)
+    - [Result example](#result-example)
+
+## Description
 
 __Module name:__ `arista.cvp.cv_configlet`
 
@@ -14,12 +22,12 @@ Module comes with a set of options:
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `configlet_filter`: Filter to apply configlet management. If configured, module will add/update/delete configlets matching entries. If not matching, module will ignore configlet configured on CVP. If option is not set, module will only work in `add` mode
 - `state`: Provide an option to delete configlets from CloudVision. Default value is present and it is an optional field.
-    - `present`: Create / update configlets from CV.
-    - `absent`: remove configlets from CV.
+  - `present`: Create / update configlets from CV.
+  - `absent`: remove configlets from CV.
 
 ## Usage
 
-__Authentication__
+### Authentication
 
 This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
@@ -37,7 +45,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-__Inputs__
+### Inputs example
 
 Below is a basic playbook to collect facts:
 
@@ -59,7 +67,7 @@ Below is a basic playbook to collect facts:
       register: cvp_configlet
 ```
 
-__Result__
+### Result example
 
 Below is an example of expected output
 
@@ -88,5 +96,3 @@ msg:
       -alias a971 show version+alias b61 show version
   failed: false
 ```
-
-
