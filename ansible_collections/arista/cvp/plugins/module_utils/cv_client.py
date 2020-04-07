@@ -4,7 +4,7 @@
 # FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2020 Arista Networks AS-EMEA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -218,6 +218,12 @@ class CvpClient(object):
                     self.apiName = 'cv_api2019'
                     if init:
                         from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi
+                elif int(self.splitVersion[0]) == 2020:
+                    self.log.info('Setting API version to 2020')
+                    self.apiVersion = '2020'
+                    self.apiName = 'cv_api2020'
+                    if init:
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2020 import CvpApi
                 else:
                     self.log.error('Unable to set API version')
             else:
