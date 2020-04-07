@@ -1,30 +1,36 @@
-zto_configuration role
-=======================
+# dhcp_configuration role
 
 Ansible role to provision and configure Zero Touch Provisioning on a CloudVision server. Role will do the following:
 
+- Install DHCP package
 - Activate DHCPd service on CloudVision.
 - Create `/etc/dhcp/dhcpd.conf` file with relevant information.
 - Reload `dhcpd` service to apply changes.
 
-Requirements
-------------
+## Requirements
 
-- dhcp server installed on remote server.
+No specific requirements to use this role.
 
-Supported Platforms
--------------------
+## Tested Platforms
 
 Below is a list of platforms where DHCPd configuration has been tested:
 
-- Arista Cloudvision 2019 and onward.
-- Centos 7
-- Centos 8
+- Centos 7 / 8
+- Ubuntu 18.02
+- Arista Cloudvision 2019 and onward (for lab purpose)
 
-Role Variables
---------------
+This role should work on any platform running [ISC-DHCP server](https://www.isc.org/dhcp/).
+
+> If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
+
+## Role Variables
 
 ```yaml
+dhcp_packages: []     < List of packages to install as part of DHCP service. (default is ['dhcp'])>
+dhcp_packages_state:  < Flag to install or remove DHCP package. (default is present)>
+dhcp_config_dir:      < Folder where dhcp config is saved. (default is /etc/dhcp/)>
+dhcp_config:          < Configuration file for DHCP service. (default is {{ dhcp_config_dir }}/dhcpd.conf)>
+dhcp_service:         < Name of the service running on the system for DHCP. (default is dhcpd)>
 ztp:
   default:            < Section with default value for hosts configuration >
     registration:     < * Default URL to get Script to register to CV or initial configuration >
@@ -50,21 +56,20 @@ ztp:
 
 Variables with `*` are mandatory, others are optional and might be skipped if not needed in your setup.
 
-Dependencies
-------------
+## Dependencies
 
 No dependency required for this role.
 
-Example Playbook
-----------------
+## Example Playbook
 
-Below is a basic playbook running `arista.cvp.ztp_configuration` role
+Below is a basic playbook running `arista.cvp.dhcp_configuration` role
 
 ```yaml
 ---
-- name: Configure ZTP service on CloudVision
-  hosts: ztp_server
-  gather_facts: no
+- name: Configure DHCP service on CloudVision
+  hosts: dhcp_server
+  collection:
+    - arista.cvp
   vars:
     ztp:
       default:
@@ -93,9 +98,9 @@ Below is a basic playbook running `arista.cvp.ztp_configuration` role
           mac: '0c:1d:c0:1d:62:11'
           ip4: 10.255.0.13
   tasks:
-  - name: 'Execute ZTP configuration role'
+  - name: 'Execute DHCP configuration role'
     import_role:
-      name: arista.cvp.ztp_configuration
+      name: arista.cvp.dhcp_configuration
 ```
 
 Inventory is configured like below:
@@ -106,13 +111,15 @@ all:
   children:
     CVP:
       hosts:
-        cv_ztp:
+        dhcp_server:
           ansible_host: 1.1.1.1
           ansible_user: root
           ansible_password: password
 ```
 
-If you are not using `root` user, please also add `ansible_become_pass`
+If you are not using `root` user, please also add `ansible_become_password`. By default, `ansible_become_password` is set to be equal to `ansible_password`
+
+SSH connection is managed by [`paramiko`](http://www.paramiko.org/).
 
 ## License
 
