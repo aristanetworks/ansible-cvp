@@ -440,7 +440,7 @@ class CvpClient(object):
                 CvpRequestError: A CvpRequestError is raised if the request
                     is not properly constructed.
                 CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-                    reponse from server indicates session was logged out.
+                    response from server indicates session was logged out.
                 HTTPError: A HTTPError is raised if there was an invalid HTTP
                     response.
                 ReadTimeout: A ReadTimeout is raised if there was a request
@@ -506,7 +506,7 @@ class CvpClient(object):
                 CvpRequestError: A CvpRequestError is raised if the request
                     is not properly constructed.
                 CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-                    reponse from server indicates session was logged out.
+                    response from server indicates session was logged out.
                 HTTPError: A HTTPError is raised if there was an invalid HTTP
                     response.
                 ReadTimeout: A ReadTimeout is raised if there was a request
@@ -594,7 +594,7 @@ class CvpClient(object):
                 CvpRequestError: A CvpRequestError is raised if the request
                     is not properly constructed.
                 CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-                    reponse from server indicates session was logged out.
+                    response from server indicates session was logged out.
                 HTTPError: A HTTPError is raised if there was an invalid HTTP
                     response.
                 ReadTimeout: A ReadTimeout is raised if there was a request
@@ -709,7 +709,7 @@ class CvpClient(object):
                 CvpRequestError: A CvpRequestError is raised if the request
                     is not properly constructed.
                 CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-                    reponse from server indicates session was logged out.
+                    response from server indicates session was logged out.
                 HTTPError: A HTTPError is raised if there was an invalid HTTP
                     response.
                 ReadTimeout: A ReadTimeout is raised if there was a request
@@ -748,7 +748,7 @@ class CvpClient(object):
                 CvpRequestError: A CvpRequestError is raised if the request
                     is not properly constructed.
                 CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-                    reponse from server indicates session was logged out.
+                    response from server indicates session was logged out.
                 HTTPError: A HTTPError is raised if there was an invalid HTTP
                     response.
                 ReadTimeout: A ReadTimeout is raised if there was a request
