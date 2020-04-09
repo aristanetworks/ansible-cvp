@@ -408,7 +408,9 @@ class CvpClient(object):
 
         joutput = response.json()
         # CVPRAC deviation related to issue #177
-        if self._finditem(obj=joutput, key='errorCode'):
+        errorCode_result = self._finditem(obj=joutput, key='errorCode')
+        if errorCode_result:
+            err_msg = errorCode_result
             if 'errorMessage' in joutput:
                 err_msg = joutput['errorMessage']
             else:
