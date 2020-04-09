@@ -343,6 +343,41 @@ class CvpClient(object):
             self.session = None
         return return_error
 
+    def _finditem(self, obj, key):
+        """
+        Find a key in a a nested list/dict.
+
+        Parameters
+        ----------
+        obj : dict or list
+            Object to iterate to locate key
+        key : string
+            Name of the key to locate in dict or list.
+
+        Returns
+        -------
+        string
+            Value of found key or None if not found.
+        """
+        # print('  * obj is:'+str(type(obj)))
+        if isinstance(obj, dict):
+            if key in obj:
+                return obj[key]
+            for k, v in obj.items():
+                if isinstance(v, dict) or isinstance(v, list):
+                    item = self._finditem(v, key)
+                    if item is not None:
+                        return item
+
+        if isinstance(obj, list):
+            if key in obj:
+                return obj[key]
+            for i in obj:
+                if isinstance(i, list) or isinstance(i, dict):
+                    item = self._finditem(i, key)
+                    if item is not None:
+                        return item
+
     def _is_good_response(self, response, prefix):
         ''' Check for errors in a response from a GET or POST request.
             The response argument contains a response object from a GET or POST
@@ -371,8 +406,9 @@ class CvpClient(object):
             msg = ('%s: Request Error: session logged out' % prefix)
             raise CvpSessionLogOutError(msg)
 
-        if 'errorCode' in response.text:
-            joutput = response.json()
+        joutput = response.json()
+        # CVPRAC deviation related to issue #177
+        if self._finditem(obj=joutput, key='errorCode'):
             if 'errorMessage' in joutput:
                 err_msg = joutput['errorMessage']
             else:
