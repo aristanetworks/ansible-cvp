@@ -173,150 +173,373 @@ def connect(module):
     return client
 
 
-def configlet_action(module):
-    ''' Compare configlets in "configlets" with configlets in "cvp_facts"
-    if configlet exists in "cvp_facts" check config, if changed update
-    if configlet does not exist in "cvp_facts" add to CVP
-    if configlet in "cvp_facts" but not in "configlets" remove from CVP if
-    not applied to a device or container.
-    :param module: Ansible module with parameters and client connection.
-    :return: data: dict of module actions and taskIDs
-    '''
-    # If any configlet changed updated 'changed' flag
-    changed = False
-    # Compare configlets against cvp_facts-configlets
-    keep_configlet = []  # configlets with no changes
-    delete_configlet = []  # configlets to delete from CVP
-    deleted = []
-    update_configlet = []  # configlets with config changes
-    updated = []
-    new_configlet = []  # configlets to add to CVP
-    new = []
-    taskList = []  # Tasks that have a pending status after function runs
-    diff = ""
+def build_configlets_list(module):
+    """
+    Generate list of configlets per action type.
+
+    Examples:
+    ---------
+    >>> intend_list = build_configlets_list(module=module)
+    >>> print(intend_list)
+    {
+        'create': [
+            {
+                'data': {
+                    'name': 'configletName',
+                    ...
+                },
+                'config': '...'
+            }
+        ],
+        'keep': [
+            {
+                'data': {
+                    'name': 'configletName',
+                    ...
+                }
+            }
+        ],
+        'delete': [
+            {
+                'data': {
+                    'name': 'configletName',
+                    ...
+                }
+            }
+        ],
+        'update': [
+            {
+                'data': {
+                    'name': 'configletName',
+                    ...
+                },
+                'config': '...',
+                'diff': ''
+            }
+        ]
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict
+        dictionnary of list on per action type
+    """
+    # Structure to store list for create / update / delete actions.
+    intend = dict()
+    # Place to save configlets to create
+    intend['create'] = list()
+    # Place to save configlets to keep on Cloudvision
+    intend['keep'] = list()
+    # Place to save configlets to update on Cloudvision
+    intend['update'] = list()
+    # Place to save configlets to delete from CV
+    intend['delete'] = list()
 
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
         # their derived configlets
-        # Include only configlets that match filter elements "all" will
-        # include all configlets.
+        # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
             if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
                any(element in configlet['name'] for element in module.params['configlet_filter'])):
+                # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
+                    # Scenario where configlet module is set to create.
                     if module.params['state'] == 'present':
                         ansible_configlet = module.params['configlets'][configlet['name']]
-                        configlet_compare = compare(configlet['config'], ansible_configlet, 'CVP', 'Ansible')
+                        configlet_compare = compare(
+                            configlet['config'], ansible_configlet, 'CVP', 'Ansible')
                         # compare function returns a floating point number
                         if configlet_compare[0] == 1.0:
-                            keep_configlet.append(configlet)
+                            intend['keep'].append({'data': configlet})
                         else:
-                            update_configlet.append({'data': configlet, 'config': ansible_configlet, 'diff': ''.join(configlet_compare[1])})
+                            intend['update'].append(
+                                {'data': configlet, 'config': ansible_configlet, 'diff': ''.join(configlet_compare[1])})
+                    # Mark configlet to be removed as module mode is absent
                     elif module.params['state'] == 'absent':
-                        delete_configlet.append(configlet)
+                        intend['delete'].append({'data': configlet})
+                # Configlet is not in expected topology and match filter.
                 else:
-                    delete_configlet.append(configlet)
-    # Look for new configlets, if a configlet is not CVP assume it is to be created
+                    intend['delete'].append({'data': configlet})
+
+    # Look for new configlets, if a configlet is not CVP assume it has to be created
     for ansible_configlet in module.params['configlets']:
         found = False
         for cvp_configlet in module.params['cvp_facts']['configlets']:
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
         if not found:
-            new_configlet.append({'name': str(ansible_configlet),
-                                  'config': str(module.params['configlets'][ansible_configlet])})
+            intend['create'].append(
+                {'data':{'name': str(ansible_configlet)},
+                 'config': str(module.params['configlets'][ansible_configlet])}
+            )
+    return intend
 
-    # Only execute this section if ansible check_mode is false
-    if not module.check_mode:
-        # delete any configlets as required
-        if len(delete_configlet) > 0:
-            for configlet in delete_configlet:
-                try:
-                    delete_resp = module.client.api.delete_configlet(configlet['name'], configlet['key'])
-                except Exception as error:
-                    errorMessage = re.split(':', str(error))[-1]
-                    message = "Configlet %s cannot be deleted - %s" % (configlet['name'], errorMessage)
-                    deleted.append({configlet['name']: message})
-                else:
-                    if "error" in str(delete_resp).lower():
-                        message = "Configlet %s cannot be deleted - %s" % (configlet['name'], delete_resp['errorMessage'])
-                        deleted.append({configlet['name']: message})
-                    else:
-                        changed = True
-                        deleted.append({configlet['name']: "success"})
+def action_update(update_configlets, module):
+    """
+    Manage configlet Update process
 
-        # Update any configlets as required
-        if len(update_configlet) > 0:
-            for configlet in update_configlet:
-                try:
-                    update_resp = module.client.api.update_configlet(config=configlet['config'],
-                                                                     key=configlet['data']['key'],
-                                                                     name=configlet['data']['name'],
-                                                                     wait_task_ids=True)
-                except Exception as error:
-                    errorMessage = re.split(':', str(error))[-1]
-                    message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
-                    updated.append({configlet['name']: message})
-                else:
-                    if "errorMessage" in str(update_resp):
-                        message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
-                        updated.append({configlet['data']['name']: message})
-                    else:
-                        module.client.api.add_note_to_configlet(configlet['data']['key'], "## Managed by Ansible ##")
-                        changed = True
-                        updated.append({configlet['data']['name']: "success"})
-                        diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
+    Example:
+    --------
+    >>> action_update(...)
+    {
+        'changed': True,
+        'failed': False,
+        'update': {
+            'CONFIGLET_01': success
+        },
+        'diff': ""
+    }
 
-        # Add any new configlets as required
-        if len(new_configlet) > 0:
-            for configlet in new_configlet:
-                try:
-                    new_resp = module.client.api.add_configlet(configlet['name'], configlet['config'])
-                except Exception as error:
-                    errorMessage = re.split(':', str(error))[-1]
-                    message = "Configlet %s cannot be created - %s" % (configlet['name'], errorMessage)
-                    new.append({configlet['name']: message})
-                else:
-                    if "errorMessage" in str(new_resp):
-                        message = "Configlet %s cannot be created - %s" % (configlet['name'], new_resp['errorMessage'])
-                        new.append({configlet['name']: message})
-                    else:
-                        module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
-                        changed = True
-                        new.append({configlet['name']: "success"})
+    Parameters
+    ----------
+    update_configlets : list
+        List of configlet to update on CV.
+    module : AnsibleModule
+        Ansible module.
 
-        # Get any Pending Tasks in CVP
-        if changed:
-            # Allow CVP to generate Tasks
-            sleep(10)
-            # Build required data for tasks in CVP - work order Id, current task status, name
-            # description
-            tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
-                          'currentTaskName': 'currentTaskName', 'description': 'description',
-                          'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
-                          'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
-            tasks = module.client.api.get_tasks_by_status('Pending')
-            # Reduce task data to required fields
-            for task in tasks:
-                taskFacts = {}
-                for field in task.keys():
-                    if field in tasksField:
-                        taskFacts[tasksField[field]] = task[field]
-                taskList.append(taskFacts)
-        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
-    else:
-        for configlet in new_configlet:
-            new.append({configlet['name']: "checked"})
-            changed = True
-        for configlet in update_configlet:
-            updated.append({configlet['data']['name']: "checked"})
-            changed = True
-            diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
-        for configlet in delete_configlet:
-            deleted.append({configlet['name']: "checked"})
-            changed = True
-        data = {'new': new, 'updated': updated, 'deleted': deleted, 'tasks': taskList}
-    return [changed, data, diff]
+    Returns
+    -------
+    dict:
+        A dict with all action results.
+    """
+    response_data = list()
+    diff = ''
+    flag_failed = False
+    flag_changed = False
+
+    for configlet in update_configlets:
+        try:
+            update_resp = module.client.api.update_configlet(config=configlet['config'],
+                                                             key=configlet['data']['key'],
+                                                             name=configlet['data']['name'],
+                                                             wait_task_ids=True)
+        except Exception as error:
+            errorMessage = re.split(':', str(error))[-1]
+            message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
+            response_data.append({configlet['name']: message})
+            # Mark module execution with error
+            flag_failed = True
+        else:
+            if "errorMessage" in str(update_resp):
+                # Mark module execution with error
+                flag_failed = True
+                message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                response_data.append({configlet['data']['name']: message})
+            else:
+                # Inform module a changed has been done
+                flag_changed = True
+                # Add note to configlet to mark as managed by Ansible
+                module.client.api.add_note_to_configlet(
+                    configlet['data']['key'], "## Managed by Ansible ##")
+                # Save result for further traces.
+                response_data.append({configlet['data']['name']: "success"})
+                # Save configlet diff
+                diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
+    return {'changed': flag_changed, 'failed': flag_failed, 'update': response_data, 'diff': diff}
+
+
+def action_delete(delete_configlets, module):
+    """
+    Manage configlet Deletion process
+
+    Example:
+    --------
+    >>> action_delete(...)
+    {
+        'changed': True,
+        'failed': False,
+        'delete': {
+            'CONFIGLET_01': success
+        }
+    }
+
+    Parameters
+    ----------
+    delete_configlets : list
+        List of configlet to delete from CV.
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict:
+        A dict with all action results.
+    """
+    response_data = list()
+    diff = None
+    flag_failed = False
+    flag_changed = False
+
+    for configlet in delete_configlets:
+        try:
+            delete_resp = module.client.api.delete_configlet(
+                name=configlet['data']['name'],
+                key=configlet['data']['key'])
+        except Exception as error:
+            # Mark module execution with error
+            flag_failed = True
+            errorMessage = re.split(':', str(error))[-1]
+            message = "Configlet %s cannot be deleted - %s" % (
+                configlet['data']['name'], errorMessage)
+            response_data.append({configlet['data']['name']: message})
+        else:
+            if "error" in str(delete_resp).lower():
+                # Mark module execution with error
+                flag_failed = True
+                message = "Configlet %s cannot be deleted - %s" % (
+                    configlet['data']['name'], delete_resp['errorMessage'])
+                response_data.append({configlet['data']['name']: message})
+            else:
+                # Inform module a changed has been done
+                flag_changed = True
+                response_data.append({configlet['data']['name']: "success"})
+    return {'changed': flag_changed, 'failed': flag_failed, 'delete': response_data}
+
+
+def action_create(create_configlets, module):
+    """
+    Manage configlet Update process
+
+    Example:
+    --------
+    >>> action_update(...)
+    {
+        'changed': True,
+        'failed': False,
+        'create': {
+            'CONFIGLET_01': success
+        }
+    }
+
+    Parameters
+    ----------
+    create_configlets : list
+        List of configlet to create on CV.
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict:
+        A dict with all action results.
+    """
+    response_data = list()
+    diff = None
+    flag_failed = False
+    flag_changed = False
+
+    for configlet in create_configlets:
+        try:
+            new_resp = module.client.api.add_configlet(
+                name=configlet['data']['name'],
+                config=configlet['config'])
+        except Exception as error:
+            errorMessage = re.split(':', str(error))[-1]
+            message = "Configlet %s cannot be created - %s" % (configlet['data']['name'], errorMessage)
+            response_data.append({configlet['data']['name']: message})
+        else:
+            if "errorMessage" in str(new_resp):
+                message = "Configlet %s cannot be created - %s" % (
+                    configlet['data']['name'], new_resp['errorMessage'])
+                response_data.append({configlet['data']['name']: message})
+            else:
+                module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
+                changed = True
+                response_data.append({configlet['data']['name']: "success"})
+    return {'changed': flag_changed, 'failed': flag_failed, 'create': response_data}
+
+def action_manager(module):
+    """
+    Function to manage all tasks execution.
+
+    Examples:
+    ---------
+    >>> action_manager(module=module)
+    {
+        "changed": false,
+        "data": {
+            "new": [
+                {
+                    "CONFIGLET_01": "success"
+                }
+            ],
+            "updated": [
+                {
+                    "CONFIGLET_02": "success"
+                }
+            ],
+            "deleted": [
+                {
+                    "CONFIGLET_03": "success"
+                }
+            ]
+        },
+        "diff": "",
+        "failed": false
+    }
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict:
+        Dictionary as module result.
+    """
+    intend_list = build_configlets_list(module=module)
+    action_results = {'changed': False, 'failed': False, 'diff': '', 'data':{}}
+    flag_changed = False
+    flag_failed = False
+
+    MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
+
+    # Create new configlets
+    if len(intend_list['create']) > 0:
+        MODULE_LOGGER.info('Start configlets creation process')
+        temp_res = action_create(
+            create_configlets=intend_list['create'],
+            module=module)
+        action_results['data']['new'] = temp_res['create']
+        if temp_res['changed']:
+            action_results['changed'] = temp_res['changed']
+        if temp_res['failed']:
+            action_results['failed'] = True
+
+    # Update existing configlets
+    if len(intend_list['update']) > 0:
+        MODULE_LOGGER.info('Start configlets update process')
+        temp_res = action_update(
+            update_configlets=intend_list['update'],
+            module=module)
+        action_results['data']['updated'] = temp_res['update']
+        if temp_res['diff']:
+            action_results['diff'] = temp_res['diff']
+        if temp_res['changed']:
+            action_results['changed'] = temp_res['changed']
+        if temp_res['failed']:
+            action_results['failed'] = True
+
+    # Delete configlets.
+    if len(intend_list['delete']) > 0:
+        MODULE_LOGGER.info('Start configlets deletion process')
+        temp_res = action_delete(
+            delete_configlets=intend_list['delete'],
+            module=module)
+        action_results['data']['deleted'] = temp_res['delete']
+        if temp_res['changed']:
+            action_results['changed'] = temp_res['changed']
+        if temp_res['failed']:
+            action_results['failed'] = True
+
+    return action_results
 
 
 def main():
@@ -343,9 +566,9 @@ def main():
     module.client = connect(module)
 
     # Pass module params to configlet_action to act on configlet
-    result['changed'], result['data'], diff = configlet_action(module)
-    if len(diff) > 0:
-        result['diff'] = {'prepared': diff}
+    result = action_manager(module)
+    # if len(diff) > 0:
+    #     result['diff'] = {'prepared': diff}
     module.exit_json(**result)
 
 
