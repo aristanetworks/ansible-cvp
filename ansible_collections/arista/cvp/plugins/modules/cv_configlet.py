@@ -173,6 +173,23 @@ def connect(module):
     return client
 
 
+def get_tasks(taskIds, module):
+    taskList = list()
+    tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',
+                  'currentTaskName': 'currentTaskName', 'description': 'description',
+                  'workOrderUserDefinedStatus': 'workOrderUserDefinedStatus', 'note': 'note',
+                  'taskStatus': 'taskStatus', 'workOrderDetails': 'workOrderDetails'}
+    tasks = module.client.api.get_tasks_by_status('Pending')
+    # Reduce task data to required fields
+    for task in tasks:
+        taskFacts = {}
+        for field in task.keys():
+            if field in tasksField:
+                taskFacts[tasksField[field]] = task[field]
+        taskList.append(taskFacts)
+    return taskList
+
+
 def build_configlets_list(module):
     """
     Generate list of configlets per action type.
@@ -280,6 +297,7 @@ def build_configlets_list(module):
             )
     return intend
 
+
 def action_update(update_configlets, module):
     """
     Manage configlet Update process
@@ -293,7 +311,10 @@ def action_update(update_configlets, module):
         'update': {
             'CONFIGLET_01': success
         },
-        'diff': ""
+        'diff': "",
+        'taskIds': [
+            ...
+        ]
     }
 
     Parameters
@@ -312,6 +333,7 @@ def action_update(update_configlets, module):
     diff = ''
     flag_failed = False
     flag_changed = False
+    taskIds = list()
 
     for configlet in update_configlets:
         try:
@@ -320,17 +342,28 @@ def action_update(update_configlets, module):
                                                              name=configlet['data']['name'],
                                                              wait_task_ids=True)
         except Exception as error:
-            errorMessage = re.split(':', str(error))[-1]
-            message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
-            response_data.append({configlet['name']: message})
             # Mark module execution with error
             flag_failed = True
+            # Build error message to report in ansible output
+            errorMessage = re.split(':', str(error))[-1]
+            message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
+            # Add logging to ansible response.
+            response_data.append({configlet['name']: message})
+            # Generate logging error message
+            MODULE_LOGGER.error('Error updating configlet %s: %s', str(
+                configlet['data']['name']), str(error))
         else:
+            MODULE_LOGGER.debug('CV response is %s', str(update_resp))
             if "errorMessage" in str(update_resp):
                 # Mark module execution with error
                 flag_failed = True
+                # Build error message to report in ansible output
                 message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
+                # Generate logging error message
+                MODULE_LOGGER.error('Error updating configlet %s: %s', str(
+                    configlet['data']['name']), str(error))
             else:
                 # Inform module a changed has been done
                 flag_changed = True
@@ -341,7 +374,16 @@ def action_update(update_configlets, module):
                 response_data.append({configlet['data']['name']: "success"})
                 # Save configlet diff
                 diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
-    return {'changed': flag_changed, 'failed': flag_failed, 'update': response_data, 'diff': diff}
+                # Collect generated tasks
+                if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
+                    taskIds.append(update_resp['taskIds'])
+                MODULE_LOGGER.info('Configlet %s updated on cloudvision', str(
+                    configlet['data']['name']))
+    return {'changed': flag_changed,
+            'failed': flag_failed,
+            'update': response_data,
+            'diff': diff,
+            'taskIds': taskIds}
 
 
 def action_delete(delete_configlets, module):
@@ -356,7 +398,8 @@ def action_delete(delete_configlets, module):
         'failed': False,
         'delete': {
             'CONFIGLET_01': success
-        }
+        },
+        'taskIds': []
     }
 
     Parameters
@@ -384,22 +427,37 @@ def action_delete(delete_configlets, module):
         except Exception as error:
             # Mark module execution with error
             flag_failed = True
+            # Build error message to report in ansible output
             errorMessage = re.split(':', str(error))[-1]
             message = "Configlet %s cannot be deleted - %s" % (
                 configlet['data']['name'], errorMessage)
+            # Add logging to ansible response.
             response_data.append({configlet['data']['name']: message})
+            # Generate logging error message
+            MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
+                configlet['data']['name']), str(error))
         else:
             if "error" in str(delete_resp).lower():
                 # Mark module execution with error
                 flag_failed = True
+                # Build error message to report in ansible output
                 message = "Configlet %s cannot be deleted - %s" % (
                     configlet['data']['name'], delete_resp['errorMessage'])
+                # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
+                # Generate logging error message
+                MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
+                    configlet['data']['name']), str(error))
             else:
                 # Inform module a changed has been done
                 flag_changed = True
                 response_data.append({configlet['data']['name']: "success"})
-    return {'changed': flag_changed, 'failed': flag_failed, 'delete': response_data}
+                MODULE_LOGGER.info('Configlet %s deleted from cloudvision', str(
+                    configlet['data']['name']))
+    return {'changed': flag_changed,
+            'failed': flag_failed,
+            'delete': response_data,
+            'taskIds': []}
 
 
 def action_create(create_configlets, module):
@@ -414,7 +472,8 @@ def action_create(create_configlets, module):
         'failed': False,
         'create': {
             'CONFIGLET_01': success
-        }
+        },
+        'taskIds': []
     }
 
     Parameters
@@ -440,19 +499,86 @@ def action_create(create_configlets, module):
                 name=configlet['data']['name'],
                 config=configlet['config'])
         except Exception as error:
+            # Mark module execution with error
+            flag_failed = True
+            # Build error message to report in ansible output
             errorMessage = re.split(':', str(error))[-1]
             message = "Configlet %s cannot be created - %s" % (configlet['data']['name'], errorMessage)
+            # Add logging to ansible response.
             response_data.append({configlet['data']['name']: message})
+            # Generate logging error message
+            MODULE_LOGGER.error('Error creating configlet %s: %s', str(configlet['data']['name']), str(error))
         else:
             if "errorMessage" in str(new_resp):
+                # Mark module execution with error
+                flag_failed = True
+                # Build error message to report in ansible output
                 message = "Configlet %s cannot be created - %s" % (
                     configlet['data']['name'], new_resp['errorMessage'])
+                # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
+                # Generate logging error message
+                MODULE_LOGGER.error(
+                    'Error creating configlet %s: %s', str(configlet['data']['name']), str(new_resp))
             else:
-                module.client.api.add_note_to_configlet(new_resp, "## Managed by Ansible ##")
+                module.client.api.add_note_to_configlet(
+                    new_resp, "## Managed by Ansible ##")
                 changed = True
                 response_data.append({configlet['data']['name']: "success"})
-    return {'changed': flag_changed, 'failed': flag_failed, 'create': response_data}
+                MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['data']['name']))
+    return {'changed': flag_changed,
+            'failed': flag_failed,
+            'create': response_data,
+            'taskIds': []}
+
+
+def update_response(cv_response, ansible_response, module, type='create'):
+    """
+    Extract information to build ansible response.
+
+    Parameters
+    ----------
+    cv_response : dict
+        Response from Cloudvision got from action_* functions.
+    ansible_response : dict
+        Structure to print out ansible information.
+    module : AnsibleModule
+        Ansible module.
+    type : str, optional
+        Type of action to manage. Must be either create / update / delete, by default 'create'
+
+    Returns
+    -------
+    dict
+        Updated structure to print out ansible information.
+    """
+    # Forge list of configlets managed
+    if type == 'create':
+        ansible_response['data']['new'] = cv_response[type]
+    elif type == 'update':
+        ansible_response['data']['updated'] = cv_response[type]
+    elif type == 'delete':
+        ansible_response['data']['deleted'] = cv_response[type]
+
+    # Forge additional outputs
+    # Get optional list of tasks
+    if 'taskIds' in cv_response and len(cv_response['taskIds']) > 0:
+        ansible_response['tasks'] = ansible_response['tasks'] + \
+            get_tasks(taskIds=cv_response['taskIds'], module=module)
+
+    # Extract DIFF results
+    if 'diff' in cv_response and cv_response['diff']:
+        ansible_response['diff'] = ansible_response['diff'] + cv_response['diff']
+    # Update changed flag if required
+    if cv_response['changed']:
+        ansible_response['changed'] = cv_response['changed']
+    # Update failed status if required
+    if cv_response['failed']:
+        ansible_response['failed'] = True
+
+    # Provide complete response
+    return ansible_response
+
 
 def action_manager(module):
     """
@@ -494,9 +620,23 @@ def action_manager(module):
     dict:
         Dictionary as module result.
     """
+    # Collect lists to execute actions.
     intend_list = build_configlets_list(module=module)
-    action_results = {'changed': False, 'failed': False, 'diff': '', 'data':{}}
+    # Create initial output structure.
+    action_results = {
+                        'changed': False,
+                        'failed': False,
+                        'data': {
+                            'new': list(),
+                            'updated': list(),
+                            'deleted': list()
+                        },
+                        'tasks': list(),
+                        'diff': '',
+                     }
+    # Default flag for changed set to False
     flag_changed = False
+    # Default flag for failed set to False
     flag_failed = False
 
     MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
@@ -507,11 +647,11 @@ def action_manager(module):
         temp_res = action_create(
             create_configlets=intend_list['create'],
             module=module)
-        action_results['data']['new'] = temp_res['create']
-        if temp_res['changed']:
-            action_results['changed'] = temp_res['changed']
-        if temp_res['failed']:
-            action_results['failed'] = True
+        action_results = update_response(
+            cv_response=temp_res,
+            ansible_response=action_results,
+            type='create',
+            module=module)
 
     # Update existing configlets
     if len(intend_list['update']) > 0:
@@ -519,13 +659,11 @@ def action_manager(module):
         temp_res = action_update(
             update_configlets=intend_list['update'],
             module=module)
-        action_results['data']['updated'] = temp_res['update']
-        if temp_res['diff']:
-            action_results['diff'] = temp_res['diff']
-        if temp_res['changed']:
-            action_results['changed'] = temp_res['changed']
-        if temp_res['failed']:
-            action_results['failed'] = True
+        action_results = update_response(
+            cv_response=temp_res,
+            ansible_response=action_results,
+            type='update',
+            module=module)
 
     # Delete configlets.
     if len(intend_list['delete']) > 0:
@@ -533,17 +671,18 @@ def action_manager(module):
         temp_res = action_delete(
             delete_configlets=intend_list['delete'],
             module=module)
-        action_results['data']['deleted'] = temp_res['delete']
-        if temp_res['changed']:
-            action_results['changed'] = temp_res['changed']
-        if temp_res['failed']:
-            action_results['failed'] = True
+        action_results = update_response(
+            cv_response=temp_res,
+            ansible_response=action_results,
+            type='delete',
+            module=module)
 
     return action_results
 
 
 def main():
-    """ main entry point for module execution
+    """
+    main entry point for module execution.
     """
     argument_spec = dict(
         configlets=dict(type='dict', required=True),
@@ -561,14 +700,12 @@ def main():
         module.fail_json(msg='difflib required for this module')
 
     result = dict(changed=False, data={})
-    messages = dict(issues=False)
+    # messages = dict(issues=False)
     # Connect to CVP instance
     module.client = connect(module)
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
-    # if len(diff) > 0:
-    #     result['diff'] = {'prepared': diff}
     module.exit_json(**result)
 
 
