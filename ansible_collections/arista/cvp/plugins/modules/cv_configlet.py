@@ -292,7 +292,7 @@ def build_configlets_list(module):
                 found = True
         if not found:
             intend['create'].append(
-                {'data':{'name': str(ansible_configlet)},
+                {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
             )
     return intend
@@ -543,7 +543,7 @@ def update_response(cv_response, ansible_response, module, type='create'):
     ansible_response : dict
         Structure to print out ansible information.
     module : AnsibleModule
-        Ansible module.
+        Ansible module.`
     type : str, optional
         Type of action to manage. Must be either create / update / delete, by default 'create'
 
@@ -623,17 +623,7 @@ def action_manager(module):
     # Collect lists to execute actions.
     intend_list = build_configlets_list(module=module)
     # Create initial output structure.
-    action_results = {
-                        'changed': False,
-                        'failed': False,
-                        'data': {
-                            'new': list(),
-                            'updated': list(),
-                            'deleted': list()
-                        },
-                        'tasks': list(),
-                        'diff': '',
-                     }
+    action_results = {'changed': False, 'failed': False, 'data': {'new': list(), 'updated': list(), 'deleted': list()}, 'tasks': list(), 'diff': ''}
     # Default flag for changed set to False
     flag_changed = False
     # Default flag for failed set to False
