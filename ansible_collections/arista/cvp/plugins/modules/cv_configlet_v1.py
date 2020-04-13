@@ -57,7 +57,7 @@ except ImportError:
 
 DOCUMENTATION = r'''
 ---
-module: cv_configlet
+module: cv_configlet_v1
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
