@@ -56,6 +56,10 @@ build-docker: ## Build docker image based on latest supported Python version
 run-docker: ## Connect to docker container
 	docker run -it --rm $(DOCKER_NAME):$(DOCKER_TAG)
 
+.PHONY: clean-docker
+clean-docker: ## Remove docker image from local repository
+	docker rmi $(DOCKER_NAME):$(DOCKER_TAG)
+
 #########################################
 # Misc Actions 							#
 #########################################
