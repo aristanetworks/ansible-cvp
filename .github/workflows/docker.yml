@@ -13,9 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Execute testing playbook
+      - name: Build docker image for testing.
         run: |
-          cd development
           make build-docker
           echo '-----------------------'
           echo 'Image information: '
