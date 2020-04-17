@@ -21,4 +21,4 @@ jobs:
           docker images | grep cvp
           echo '-----------------------'
           echo 'Cleanup image'
-          make clean-docker
+          make DOCKER_TAG=github clean-docker
