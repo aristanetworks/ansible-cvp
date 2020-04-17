@@ -15,10 +15,7 @@ jobs:
       - uses: actions/checkout@master
       - name: Build docker image for testing.
         run: |
-          echo '-----------------------'
-          echo "Current branch/version is: "$(sh .github/version.sh)
-          echo '-----------------------'
-          make build-docker
+          make DOCKER_TAG=github build-docker
           echo '-----------------------'
           echo 'Image information: '
           docker images | grep cvp
