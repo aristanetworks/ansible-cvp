@@ -40,10 +40,10 @@
 #
 
 # Get BRANCH information from git DB
-BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
+BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD) || 'devel'
 
-if [[ $BRANCH == *"/"* ]]; then
-    if [[ $BRANCH == "master" ]] ; then
+if [[ ${BRANCH} == *"/"* ]]; then
+    if [[ ${BRANCH} == "master" ]] ; then
         echo "latest"
     else
         echo ${BRANCH} | awk -F '/' '{print $2}'

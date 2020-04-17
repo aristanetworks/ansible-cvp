@@ -15,6 +15,9 @@ jobs:
       - uses: actions/checkout@master
       - name: Build docker image for testing.
         run: |
+          echo '-----------------------'
+          echo 'Current branch/version is: $(.github/version.sh)'
+          echo '-----------------------'
           make build-docker
           echo '-----------------------'
           echo 'Image information: '
