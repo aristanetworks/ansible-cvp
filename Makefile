@@ -1,5 +1,5 @@
 CURRENT_DIR = $(shell pwd)
-DOCKER_NAME ?= arista-cvp
+DOCKER_NAME ?= aransible/cvp
 DOCKER_TAG ?= $(shell sh .github/version.sh)
 # ansible-test path
 ANSIBLE_TEST ?= $(shell which ansible-test)
@@ -48,17 +48,13 @@ sanity-import: ## Run ansible-test sanity for code import
 #########################################
 # Docker actions					 	#
 #########################################
-.PHONY: build-docker3
-build-docker3: ## Build docker image for python 3.0
-	docker build -f Dockerfile -t $(DOCKER_NAME):$(DOCKER_TAG) .
-
 .PHONY: build-docker
 build-docker: ## Build docker image based on latest supported Python version
 	docker build -f Dockerfile -t $(DOCKER_NAME):$(DOCKER_TAG) .
 
 .PHONY: run-docker
 run-docker: ## Connect to docker container
-	docker run -it --rm $(DOCKER_NAME):$(DOCKER_TAG) sh
+	docker run -it --rm $(DOCKER_NAME):$(DOCKER_TAG)
 
 #########################################
 # Misc Actions 							#
