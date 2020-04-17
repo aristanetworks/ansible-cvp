@@ -1,0 +1,25 @@
+name: Docker Build
+on:
+  push:
+    paths:
+      - 'Dockerfile'
+  pull_request:
+    branches:
+      - 'master'
+      - 'releases/*'
+jobs:
+  'docker_image':
+    name: Build Local Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Execute testing playbook
+        run: |
+          cd development
+          make build-docker
+          echo '-----------------------'
+          echo 'Image information: '
+          docker images | grep cvp
+          echo '-----------------------'
+          echo 'Cleanup image'
+          make clean-docker
