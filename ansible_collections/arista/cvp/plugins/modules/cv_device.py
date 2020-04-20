@@ -1040,7 +1040,7 @@ def devices_reset(module):
         # include all devices.
         MODULE_LOGGER.info(
             'check hostname %s against filter %s', str(cvp_device["hostname"]),
-            str(module.parameters['device_filter']))
+            str(module.params['device_filter']))
         if is_in_filter(
             hostname_filter=module.params["device_filter"],
             hostname=cvp_device["hostname"],
