@@ -563,7 +563,7 @@ def update_response(cv_response, ansible_response, module, type='create'):
     # Forge additional outputs
     # Get optional list of tasks
     if 'taskIds' in cv_response and len(cv_response['taskIds']) > 0:
-        ansible_response['tasks'] = ansible_response['tasks'] + \
+        ansible_response['data']['tasks'] = ansible_response['data']['tasks'] + \
             get_tasks(taskIds=cv_response['taskIds'], module=module)
 
     # Extract DIFF results
@@ -604,6 +604,11 @@ def action_manager(module):
                 {
                     "CONFIGLET_03": "success"
                 }
+            ],
+            "tasks": [
+                {
+                    ...
+                }
             ]
         },
         "diff": "",
@@ -623,13 +628,15 @@ def action_manager(module):
     # Collect lists to execute actions.
     intend_list = build_configlets_list(module=module)
     # Create initial output structure.
-    action_results = {'changed': False, 'failed': False, 'data': {'new': list(), 'updated': list(), 'deleted': list()}, 'tasks': list(), 'diff': ''}
+    action_results = {'changed': False, 'failed': False, 'data': {'new': list(),
+                      'updated': list(), 'deleted': list(), 'tasks': list()},
+                      'diff': ''}
     # Default flag for changed set to False
     flag_changed = False
     # Default flag for failed set to False
     flag_failed = False
 
-    MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
+    # MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
 
     # Create new configlets
     if len(intend_list['create']) > 0:
@@ -696,6 +703,9 @@ def main():
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
+
+    MODULE_LOGGER.info('result of cv_configlet is: %s', str(result))
+
     module.exit_json(**result)
 
 
