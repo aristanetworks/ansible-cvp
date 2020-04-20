@@ -284,7 +284,7 @@ def configlet_get_fact_key(configlet_name, cvp_facts):
     return None
 
 
-def tasks_get_fitlered(taskid_list, module):
+def tasks_get_filtered(taskid_list, module):
     """
     Get tasks information from a list of tasks.
 
@@ -1158,7 +1158,7 @@ def devices_action(module):
             results["data"]["tasksIds"] += result_update["moved_tasksIds"]
 
         # Get CV info for generated tasks
-        tasks_generated = tasks_get_fitlered(
+        tasks_generated = tasks_get_filtered(
             taskid_list=results["data"]["tasksIds"], module=module
         )
         results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
@@ -1168,10 +1168,10 @@ def devices_action(module):
         result_reset = devices_reset(module)
         results["changed"] = True
         results["data"].update(result_reset)
-        tasks_generated = tasks_get_fitlered(
-            taskid_list=result_update["tasksIds"], module=module
+        tasks_generated = tasks_get_filtered(
+            taskid_list=result_reset["reset_taskIds"], module=module
         )
-        results["data"]["tasks"].append(tasks_generated)
+        results["data"]["tasks"] += tasks_generated
 
     # Check if we have to update changed flag
     if len(results["data"]["tasks"]) > 0 or int(results["data"]["moved_devices"]) > 0:
