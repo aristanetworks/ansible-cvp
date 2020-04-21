@@ -6,7 +6,6 @@ theme:
 site_author: Arista Ansible Team
 copyright: Apache
 nav:
-    - Home: 'README.md'
     - Roles documentation:
         - DHCP Configuration: roles/dhcp_configuration/README.md
     - Modules documentation:
