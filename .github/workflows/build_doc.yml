@@ -1,0 +1,21 @@
+name: Code Linting
+on:
+  push:
+jobs:
+  'Update Public documentation':
+    name: 'Update Public documentation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: 'Build mkdocs content'
+        run: |
+            cd ansible_collections/arista/cvp/docs
+            pip install -r requirements.txt
+            make build_modules
+            cd ../../../../
+            mkdocs build -f mkdocs.yml
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./site

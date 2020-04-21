@@ -1,0 +1,44 @@
+site_name: Arista Cloudvision ansible collection
+docs_dir: ansible_collections/arista/cvp
+# theme: readthedocs
+theme:
+  name: lumen
+site_author: Arista Ansible Team
+copyright: Apache
+nav:
+    - Home: 'README.md'
+    - Roles documentation:
+        - DHCP Configuration: roles/dhcp_configuration/README.md
+    - Modules documentation:
+        - Module cv_facts: docs/module_docs/cv_facts.rst.md
+        - Module cv_configlet: docs/module_docs/cv_configlet.rst.md
+        - Module cv_container: docs/module_docs/cv_container.rst.md
+        - Module cv_device: docs/module_docs/cv_device.rst.md
+        - Module cv_tasks: docs/module_docs/cv_tasks.rst.md
+    - About:
+        - Contribution Guide: contributing.md
+
+markdown_extensions:
+    - smarty
+    - pymdownx.arithmatex
+    - pymdownx.betterem:
+        smart_enable: all
+    - pymdownx.caret
+    - pymdownx.critic
+    - pymdownx.details
+    - pymdownx.emoji:
+        emoji_generator: !!python/name:pymdownx.emoji.to_svg
+    - pymdownx.inlinehilite
+    - pymdownx.magiclink
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.superfences
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.tilde
+    - fontawesome_markdown
+    - toc:
+        permalink: True
+        separator: "-"
+        permalink: "#"
+        baselevel: 2
