@@ -2,7 +2,7 @@ name: Code Linting
 on:
   push:
 jobs:
-  'Update Public documentation':
+  'doc':
     name: 'Update Public documentation'
     runs-on: ubuntu-latest
     steps:
