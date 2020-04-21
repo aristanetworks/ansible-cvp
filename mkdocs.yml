@@ -1,5 +1,5 @@
 site_name: Arista Cloudvision ansible collection
-docs_dir: ansible_collections/arista/cvp
+docs_dir: ansible_collections/arista/cvp/
 # theme: readthedocs
 theme:
   name: lumen
