@@ -13,6 +13,7 @@ jobs:
           python-version: '3.x'
       - name: 'Build mkdocs content'
         run: |
+            pip install -r requirements.txt
             cd ansible_collections/arista/cvp/docs
             pip install -r requirements.txt
             make build_modules
