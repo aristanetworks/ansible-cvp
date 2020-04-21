@@ -40,4 +40,4 @@ markdown_extensions:
         permalink: True
         separator: "-"
         permalink: "#"
-        baselevel: 2
+        baselevel: 1
