@@ -11,15 +11,12 @@ jobs:
         uses: actions/setup-python@v1.2.0
         with:
           python-version: '3.x'
-      - name: 'Build mkdocs content'
+      - name: 'Build mkdocs content to site folder'
         run: |
             pip install -r requirements.txt
-            cd ansible_collections/arista/cvp/docs
-            pip install -r requirements.txt
-            make build_modules
-            cd ../../../../
-            mkdocs build -f mkdocs.yml
-      - name: Deploy
+            pip install -r ansible_collections/arista/cvp/docs/requirements.txt
+            make webdoc
+      - name: 'Deploy last version to gh-pages'
         uses: peaceiris/actions-gh-pages@v3
         with:
             github_token: ${{ secrets.GITHUB_TOKEN }}
