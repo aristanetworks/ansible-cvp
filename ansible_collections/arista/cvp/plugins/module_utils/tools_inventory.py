@@ -47,7 +47,11 @@ def find_hostname_by_mac(inventory, mac_address):
     for device in inventory:
         if 'systemMacAddress' in device:
             if device['systemMacAddress'] == mac_address:
-                return device['name']
+                MODULE_LOGGER.debug('device data: %s', str(device))
+                if 'name' in device:
+                    return device['name']
+                elif 'hostname' in device:
+                    return device['hostname']
     return None
 
 
