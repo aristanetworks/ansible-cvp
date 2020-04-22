@@ -285,7 +285,7 @@ class CvpClient(object):
         self._create_session(all_nodes=True)
         # Verify that we can connect to at least one node
         if not self.session:
-            self.log.error('error connecting to cvp: %s', str(self.error_msg.replace('\n','')))
+            self.log.error('error connecting to cvp: %s', str(self.error_msg.replace('\n', '')))
             raise CvpLoginError(self.error_msg)
         else:
             # Instantiate the CvpApi class
