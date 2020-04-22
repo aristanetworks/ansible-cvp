@@ -2,7 +2,7 @@
 
 Execute or Cancel CVP Tasks.
 
-Module added in version .. versionadded:: 2.9
+Module added in version 2.9
 
 <div class="contents" data-local="" data-depth="2">
 
@@ -10,7 +10,13 @@ Module added in version .. versionadded:: 2.9
 
 ## Synopsis
 
-CloudVison Portal Task module
+C l o u d V i s o n
+
+P o r t a l
+
+T a s k
+
+m o d u l e
 
 ## Module-specific Options
 

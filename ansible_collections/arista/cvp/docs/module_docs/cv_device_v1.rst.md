@@ -2,7 +2,7 @@
 
 Provision, Reset, or Update CloudVision Portal Devices.
 
-Module added in version .. versionadded:: 2.9
+Module added in version 2.9
 
 <div class="contents" data-local="" data-depth="2">
 
