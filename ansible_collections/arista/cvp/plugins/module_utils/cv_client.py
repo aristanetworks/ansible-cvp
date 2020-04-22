@@ -285,7 +285,7 @@ class CvpClient(object):
         self._create_session(all_nodes=True)
         # Verify that we can connect to at least one node
         if not self.session:
-            self.log.error(' error connecting cvp: %s', str(self.error_msg))
+            self.log.error('error connecting to cvp: %s', str(self.error_msg.replace('\n','')))
             raise CvpLoginError(self.error_msg)
         else:
             # Instantiate the CvpApi class
@@ -307,15 +307,8 @@ class CvpClient(object):
             self.url_prefix = ('https://%s:%d/web' % (host, self.port or 443))
             error = self._reset_session()
             if error and not self.cert:
-                self.log.warning('Failed to connect over https. Potentially'
-                                 ' due to an old version of CVP. Attempting'
-                                 ' fallback to http. Error: %s', error)
-                # Attempt http fallback if no cert file is provided. The
-                # intention here is that a user providing a cert file
-                # forces https.
-                self.url_prefix = ('http://%s:%d/web'
-                                   % (host, self.port or 80))
-                error = self._reset_session()
+                self.log.error('error connecting to cvp (%s:%s)',
+                               host, str(self.port))
             if error is None:
                 break
             self.error_msg += '%s: %s\n' % (host, error)
