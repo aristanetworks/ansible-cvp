@@ -107,3 +107,6 @@ venv.bak/
 *.tar.gz
 */collections/*
 *.old
+
+# Exclude output of mkdocs
+site/*
