@@ -33,6 +33,7 @@ import re
 import traceback
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger
+from ansible.module_utils._text import to_native
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError

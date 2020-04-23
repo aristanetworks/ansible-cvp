@@ -15,23 +15,26 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 import os
 import re
 import sys
 import datetime
 import cgi
+import yaml
+import logging
 from distutils.version import LooseVersion
 from jinja2 import Environment, FileSystemLoader
-import yaml
-from six import print_
-
-from collections import MutableMapping, MutableSet, MutableSequence
-
+from ansible.module_utils.six import print_
+from ansible.module_utils.common._collections_compat import MutableMapping, MutableSet, MutableSequence
 from ansible.module_utils.six import iteritems, string_types
 from ansible.parsing.plugin_docs import read_docstring
 from ansible.parsing.yaml.loader import AnsibleLoader
 from ansible.plugins.loader import fragment_loader
 from ansible.module_utils._text import to_bytes
+from ansible.errors import AnsibleError, AnsibleParserError
 
 try:
     from html import escape as html_escape
@@ -75,7 +78,6 @@ def too_old(added):
         readded = added_tokens[0] + "." + added_tokens[1]
         added_float = float(readded)
     except ValueError as e:
-        warnings.warn("Could not parse %s: %s" % (added, str(e)))
         return False
     return added_float < TO_OLD_TO_BE_NOTABLE
 
@@ -295,7 +297,7 @@ def process_module(fname, template, outputname, aliases=None):
             # Error out if there's no description
             if 'description' not in doc['options'][k]:
                 raise AnsibleError(
-                    "Missing required description for option %s in %s " % (k, module))
+                    "Missing required description for option %s in %s " % (k, module_name))
 
             # Error out if required isn't a boolean (people have been putting
             # information on when something is required in here.  Those need
@@ -303,7 +305,7 @@ def process_module(fname, template, outputname, aliases=None):
             required_value = doc['options'][k].get('required', False)
             if not isinstance(required_value, bool):
                 raise AnsibleError("Invalid required value '%s' for option '%s' in '%s' (must be truthy)" % (
-                    required_value, k, module))
+                    required_value, k, module_name))
 
             # Strip old version_added information for options
             if 'version_added' in doc['options'][k] and too_old(doc['options'][k]['version_added']):
@@ -323,7 +325,7 @@ def process_module(fname, template, outputname, aliases=None):
             # Error out if there's no description
             if 'description' not in doc['connection_options'][k]:
                 raise AnsibleError(
-                    "Missing required description for connection_option %s in %s " % (k, module))
+                    "Missing required description for connection_option %s in %s " % (k, module_name))
 
             # Error out if required isn't a boolean (people have been putting
             # information on when something is required in here.  Those need
@@ -332,7 +334,7 @@ def process_module(fname, template, outputname, aliases=None):
                 'required', False)
             if not isinstance(required_value, bool):
                 raise AnsibleError("Invalid required value '%s' for connection_option '%s' in '%s' (must be truthy)" %
-                                   (required_value, k, module))
+                                   (required_value, k, module_name))
 
             # Strip old version_added information for options
             if ('version_added' in doc['connection_options'][k] and
@@ -353,7 +355,7 @@ def process_module(fname, template, outputname, aliases=None):
             # Error out if there's no description
             if 'description' not in doc['logging_options'][k]:
                 raise AnsibleError(
-                    "Missing required description for logging_option %s in %s " % (k, module))
+                    "Missing required description for logging_option %s in %s " % (k, module_name))
 
             # Error out if required isn't a boolean (people have been putting
             # information on when something is required in here.  Those need
@@ -361,7 +363,7 @@ def process_module(fname, template, outputname, aliases=None):
             required_value = doc['logging_options'][k].get('required', False)
             if not isinstance(required_value, bool):
                 raise AnsibleError("Invalid required value '%s' for logging_option '%s' in '%s' (must be truthy)" %
-                                   (required_value, k, module))
+                                   (required_value, k, module_name))
 
             # Strip old version_added information for options
             if ('version_added' in doc['logging_options'][k] and
