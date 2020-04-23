@@ -12,7 +12,7 @@
 
   /* Primary color shades */
   --md-primary-fg-color:               #5487B7;
-  --md-primary-fg-color--light:        #5487B7;
+  --md-primary-fg-color--light:        #FFFFFF;
   --md-primary-fg-color--dark:         #5487B7;
   --md-primary-bg-color:               #FFFFFF;
   --md-primary-bg-color--light:        #FFFFFF;
@@ -73,5 +73,12 @@
     line-height: 2.4rem;
     color: var(--md-default-fg-color--light);
   }
+  .md-typeset table:not([class]) th {
+    min-width: 5rem;
+    padding: .6rem .8rem;
+    color: var(--md-default-fg-color--lighter);
+    vertical-align: top;
+    background-color: var(--md-accent-bg-color);
+}
 }
 
