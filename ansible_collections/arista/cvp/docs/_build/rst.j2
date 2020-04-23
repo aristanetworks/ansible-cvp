@@ -417,11 +417,10 @@ In addition to the :ref:`module-specific-options-label`, the following logging-r
 {% if examples or plainexamples -%}
 .. _@{ title }@-examples-label:
 
-Examples
---------
+Examples:
+---------
 
 ::
-
 {% for example in examples %}
 {% if example['description'] %}
 @{ example['description'] }@
@@ -432,8 +431,6 @@ Examples
 @{ plainexamples | indent(4, True) }@
 {% endif %}
 {% endif %}
-
-
 {% if returndocs -%}
 
 

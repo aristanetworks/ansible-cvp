@@ -65,9 +65,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
-
-:
+## Examples:
 
     - name: Create container topology on CVP
       hosts: cvp

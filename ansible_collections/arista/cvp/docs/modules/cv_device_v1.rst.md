@@ -81,9 +81,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
-
-:
+## Examples:
 
     ---
     - name: Test cv_device

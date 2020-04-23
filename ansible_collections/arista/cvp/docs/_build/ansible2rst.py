@@ -198,7 +198,7 @@ def add_fragments(doc, filename):
         else:
             fragment_name, fragment_var = fragment_slug, 'DOCUMENTATION'
 
-        fragment_loader.add_directory('../module_utils/')
+        fragment_loader.add_directory('../../plugins/modules/')
         fragment_class = fragment_loader.get(fragment_name)
         assert fragment_class is not None
 
