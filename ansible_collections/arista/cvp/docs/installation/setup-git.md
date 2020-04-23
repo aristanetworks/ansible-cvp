@@ -30,14 +30,14 @@ $ git clone https://github.com/aristanetworks/ansible-cvp.git
 cd ansible-cvp
 ```
 
-### 2. Install python virtual-environment
+### Install python virtual-environment
 
 ```shell
 # Install virtualenv if not part of your system
 $ python -m pip install virtualenv
 ```
 
-### 3. Create virtual environment
+### Create virtual environment
 
 ```shell
 # Create a virtual env named .venv
@@ -47,14 +47,14 @@ $ virtualenv --no-site-packages -p $(which python2.7) .venv
 $ source .venv/bin/activate
 ```
 
-### 4. Install collection requirements
+### Install collection requirements
 
 ```shell
 # Install repsoitory requirements
 $ pip install -r requirements.txt
 ```
 
-### 5. (Optional) Update your ansible.cfg
+### (Optional) Update your ansible.cfg
 
 Only if you want to use your own playbooks outside of __`examples/`__folder of the repository.
 
