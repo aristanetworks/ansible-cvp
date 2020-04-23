@@ -5,3 +5,4 @@ mkdocs-material-extensions==1.0b2
 mkdocs-windmill==1.0.4
 fontawesome-markdown
 pymdown-extensions
+mkdocs-material

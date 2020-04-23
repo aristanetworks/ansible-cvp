@@ -1,5 +1,5 @@
 CURRENT_DIR = $(shell pwd)
-WEBDOC_BUILD = ansible_collections/arista/cvp/docs
+WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
 DOCKER_NAME ?= arista-cvp
 DOCKER_TAG ?= $(shell sh .github/version.sh)
 # ansible-test path
@@ -68,7 +68,7 @@ run-docker: ## Connect to docker container
 webdoc: ## Build documentation to publish static content
 	( cd $(WEBDOC_BUILD) ; \
 	python ansible2rst.py ; \
-	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o module_docs/{}.md \;)
+	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
 	cd $(CURRENT_DIR)
 	mkdocs build -f mkdocs.yml
 
