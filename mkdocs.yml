@@ -1,7 +1,8 @@
-site_name: Arista Cloudvision ansible collection
+site_name: Arista CVP collection
 site_author: Arista Ansible Team
 site_description: Arista Cloudvision collection's documentation
 docs_dir: ansible_collections/arista/cvp/
+site_favicon: docs/_media/favicon.ico
 theme:
   name: material
   features:
