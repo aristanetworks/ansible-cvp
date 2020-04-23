@@ -61,7 +61,7 @@ _UNDERSCORE = re.compile(r"_")
 DEPRECATED = b" (D)"
 
 MODULE_NAME_STARTS_WITH = "cv_"
-MODULEDIR = "../plugins/modules/"
+MODULEDIR = "../../plugins/modules/"
 OUTPUTDIR = "./"
 
 #####################################################################################

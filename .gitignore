@@ -110,3 +110,4 @@ venv.bak/
 
 # Exclude output of mkdocs
 site/*
+ansible_collections/arista/cvp/docs/_build/*.rst

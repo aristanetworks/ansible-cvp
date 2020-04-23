@@ -51,7 +51,7 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 
 __List of available roles:__
 
-- [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 
 This collection supports CVP version >= `2018.2.5`
 
