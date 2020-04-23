@@ -21,7 +21,8 @@ Below is a list of platforms where DHCPd configuration has been tested:
 
 This role should work on any platform running [ISC-DHCP server](https://www.isc.org/dhcp/).
 
-> If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
+!!! note
+    If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
 
 ## Role Variables
 
