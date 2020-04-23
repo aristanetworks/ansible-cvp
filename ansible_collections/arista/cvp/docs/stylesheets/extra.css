@@ -2,13 +2,13 @@
   /* Color schema based on Arista Color Schema */
   /* Default color shades */
   --md-default-fg-color:               #000000;
-  --md-default-fg-color--light:        #5487B7;
-  --md-default-fg-color--lighter:      #5487B7;
-  --md-default-fg-color--lightest:     #5487B7;
+  --md-default-fg-color--light:        #a1a0a0;
+  --md-default-fg-color--lighter:      #FFFFFF;
+  --md-default-fg-color--lightest:     #FFFFFF;
   --md-default-bg-color:               #FFFFFF;
-  --md-default-bg-color--light:        #5487B7;
-  --md-default-bg-color--lighter:      #5487B7;
-  --md-default-bg-color--lightest:     #5487B7;
+  --md-default-bg-color--light:        #FFFFFF;
+  --md-default-bg-color--lighter:      #FFFFFF;
+  --md-default-bg-color--lightest:     #FFFFFF;
 
   /* Primary color shades */
   --md-primary-fg-color:               #5487B7;
@@ -19,7 +19,6 @@
 
   /* Accent color shades */
   --md-accent-fg-color:                #5487B7;
-  /* --md-accent-fg-color--transparent:   #FFFFFF; */
   --md-accent-bg-color:                #5487B7;
   --md-accent-bg-color--light:         #5487B7;
 
@@ -59,6 +58,20 @@
     }
   .md-footer {
     height: 2%;
+  }
+  .md-footer-nav__direction {
+    position: absolute;
+    right: 0;
+    left: 0;
+    margin-top: -1rem;
+    padding: 0 1rem;
+    color: var(--md-default-fg-color--light);
+    font-size: .64rem;
+  }
+  .md-footer-nav__title {
+    font-size: .9rem;
+    line-height: 2.4rem;
+    color: var(--md-default-fg-color--light);
   }
 }
 
