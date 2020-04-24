@@ -1,6 +1,15 @@
 # Collecting Facts
 
-## Descrpition
+- [Collecting Facts](#collecting-facts)
+  - [Description](#description)
+    - [Facts limitation](#facts-limitation)
+    - [Facts subset](#facts-subset)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Inputs example](#inputs-example)
+    - [Result example](#result-example)
+
+## Description
 
 __Module name:__ `arista.cvp.cv_facts`
 
@@ -13,28 +22,29 @@ This module collects facts from CloudVision platform and return a dictionary for
 
 Module comes with 2 different options to allow user to select what information to retrieve from CVP:
 
-__Facts limitation:__
+### Facts limitation
 
 - __`facts`__: A list of facts to retrieve from CVP. it can be one or more entries from the list:
-    - `devices`
-    - `containers`
-    - `configlets`
-    - `tasks`. 
+  - `devices`
+  - `containers`
+  - `configlets`
+  - `tasks`.
+
 > If not specified, module will extract all this elements from CloudVision
 
-__Facts subset__
+### Facts subset
 
 - __`gather_subset`__: Allow user to extract an optional element from CloudVision.
-    - `config`: Add device configuration in device facts. If not set, configuration is skipped. (applicable if `devices` is part of __facts__)
-    - `tasks_pending`: Collect only facts from pending tasks on CloudVision. (applicable if `tasks` is part of __facts__)
-    - `tasks_failed`: Collect only failed tasks information. (applicable if `tasks` is part of __facts__)
-    - `tasks_all`: Collect all tasks information from CVP. (applicable if `tasks` is part of __facts__)
+  - `config`: Add device configuration in device facts. If not set, configuration is skipped. (applicable if `devices` is part of __facts__)
+  - `tasks_pending`: Collect only facts from pending tasks on CloudVision. (applicable if `tasks` is part of __facts__)
+  - `tasks_failed`: Collect only failed tasks information. (applicable if `tasks` is part of __facts__)
+  - `tasks_all`: Collect all tasks information from CVP. (applicable if `tasks` is part of __facts__)
 
 Module supports inactive devices and 3rd part devices: When `gather_subset: config` is defined, only devices with flag `"streamingStatus": "active"` have their configuration collected into the facts.
 
 ## Usage
 
-__Authentication__
+### Authentication
 
 This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
@@ -52,7 +62,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-__Inputs__
+### Inputs example
 
 Below is a basic playbook to collect all facts:
 
@@ -89,14 +99,14 @@ Extracting device configuration in facts:
         facts:
           devices
         gather_subset:
-          condiguration
+          configuration
 
     - name: "Print out facts from CVP"
       debug:
         msg: "{{ansible_facts}}"
 ```
 
-__Result__
+### Result example
 
 Below is an example of output with default parameters
 
@@ -104,9 +114,9 @@ Below is an example of output with default parameters
 {
     "ansible_facts": {
         "cvp_info": {
-            "appVersion": "Foster_Build_03", 
+            "appVersion": "Foster_Build_03",
             "version": "2018.2.5"
-        }, 
+        },
         "configlets": [
             {
                 "name": "ANSIBLE_TESTING_CONTAINER",
@@ -290,5 +300,3 @@ Below is an example of output with default parameters
     }
 }
 ```
-
-

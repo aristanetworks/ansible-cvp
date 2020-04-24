@@ -1,6 +1,16 @@
 # Manage device content
 
-## Descrpition
+- [Manage device content](#manage-device-content)
+  - [Description](#description)
+  - [Options](#options)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Inputs example](#inputs-example)
+    - [Result example](#result-example)
+  - [Use cases](#use-cases)
+    - [Reset devices to undefined container](#reset-devices-to-undefined-container)
+
+## Description
 
 __Module name:__ `arista.cvp.cv_device`
 
@@ -14,12 +24,16 @@ Module comes with a set of options:
 - `cvp_facts`: Current facts collecting on CVP by a previous task
 - `devices_filter`: Filter to apply intended mode on a set of configlet. If not used, then module only uses ADD mode. device_filter list devices that can be modified or deleted based on configlets entries.
 - `state`: . Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
-    - `absent`: Reset devices.
-    - `present`: Configure devices.
+  - `absent`: Reset devices.
+  - `present`: Configure devices.
+- `configlet_fitler`: Allow user to select behaviour to apply on configlets attached to a device:
+  - `override`: (default) Configure list provided by user and remove any other configlets attached to device.
+  - `merge`: add configlets listed by user to the device and do not touch existing configlets.
+  - `delete`: Remove list of configlets from device and let other unchanged.
 
 ## Usage
 
-__Authentication__
+### Authentication
 
 This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
@@ -37,7 +51,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-__Inputs__
+### Inputs example
 
 Below is a basic playbook to collect facts:
 
@@ -67,38 +81,45 @@ Below is a basic playbook to collect facts:
       register: cvp_device
 ```
 
-__Result__
+### Result example
 
 Below is an example of expected output
 
 ```json
 {
-    "changed": true, 
+    "changed": "True",
     "data": {
-        "new": [], 
-        "reset": [], 
         "tasks": [
             {
-                "actionStatus": "ACTIVE", 
-                "currentAction": "Submit", 
-                "description": "Ansible Configlet Update: on Device veos01", 
-                "displayedStutus": "Pending", 
-                "name": "", 
-                "note": "", 
-                "status": "ACTIVE", 
-                "taskNo": "128"
+                "workOrderId": "108",
+                "name": "",
+                "workOrderState": "ACTIVE"
             }
+        ],
+        "added_tasksIds": [
+            "118"
+        ],
+        "provisionned": [
+            {
+                "veos-01": "provisionning-tasks-['118']"
+            }
+        ],
+        "provisionned_devices": 1,
+        "updated_devices": 1,
+        "updated_tasksIds": [
+            "108"
         ],
         "updated": [
             {
-                "veos01": "Configlets-[u'128']"
+                "DC1-SPINE1": "Configlets-['108']"
             }
+        ],
+        "tasksIds": [
+            "108"
         ]
-    }, 
-    "failed": false
+    }
 }
 ```
-
 
 ## Use cases
 

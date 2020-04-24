@@ -18,13 +18,13 @@
   become: true
   template:
     src: 'dhcpd.conf.j2'
-    dest: '{{dhcp_config}}'
+    dest: '{{ dhcp_config }}'
     backup: yes
   notify: "restart dhcpd"
 
 - name: Check & activate DHCP service
   become: true
   service:
-    name: '{{dhcp_service}}'
+    name: '{{ dhcp_service }}'
     enabled: yes
     state: started

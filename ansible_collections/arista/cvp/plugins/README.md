@@ -2,7 +2,7 @@
 
 `arista.cvp` collection provides a set of plugins to configure Arista EOS devices with a CloudVision Platform server.
 
-__List of available modules__
+## List of available modules
 
 - __arista.cvp.cv_facts__ - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - __arista.cvp.cv_configlet__:  Manage configlet configured on CVP.

@@ -4,7 +4,7 @@
 # FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2020 Arista Networks AS-EMEA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ __metaclass__ = type
 ''' Class containing calls to CVP RESTful API.
 '''
 import os
+import logging
 # This import is for proper file IO handling support for both Python 2 and 3
 # pylint: disable=redefined-builtin
 from io import open
-import logging
-
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 
@@ -40,7 +39,7 @@ except (AttributeError, ImportError):
 
 
 class CvpApi(object):
-    ''' CvpApi class contains calls to CVP 2019.1.x RESTful API.  The RESTful API
+    ''' CvpApi class contains calls to CVP 2020.1.x RESTful API.  The RESTful API
         parameters are passed in as parameters to the method.  The results of
         the RESTful API call are converted from json to a dict and returned.
         Where needed minimal processing is performed on the results.
@@ -53,7 +52,7 @@ class CvpApi(object):
         CvpRequestError: A CvpRequestError is raised if the request is not
             properly constructed.
         CvpSessionLogOutError: A CvpSessionLogOutError is raised if
-            reponse from server indicates session was logged out.
+            response from server indicates session was logged out.
         HTTPError: A HTTPError is raised if there was an invalid HTTP response.
         ReadTimeout: A ReadTimeout is raised if there was a request
             timeout when reading from the connection.
@@ -67,6 +66,7 @@ class CvpApi(object):
     '''
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-lines
+    # pylint: disable=invalid-name
 
     def __init__(self, clnt, request_timeout=30):
         ''' Initialize the class.
@@ -103,7 +103,7 @@ class CvpApi(object):
                     are running a specific version of EOS.
         '''
         self.log.debug('get_inventory: called')
-        self.log.debug('2019 Inventory API Call')
+        self.log.debug('2020 Inventory API Call')
         data = self.clnt.get('/inventory/devices?provisioned=%s' % provisioned,
                              timeout=self.request_timeout)
         for dev in data:
@@ -133,6 +133,7 @@ class CvpApi(object):
                 dev['containerName'] = ''
         return data
 
+    # pylint: disable=invalid-name
     def get_net_element_info_by_device_id(self, device_id):
         ''' Return a dict of info about a device in CVP.
 
@@ -147,7 +148,7 @@ class CvpApi(object):
         try:
             element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
                                          % qplus(device_id), timeout=self.request_timeout)
-        except CvpApiError as e:  # pylint: disable=invalid-name
+        except CvpApiError as e:
             # Catch an invalid task_id error and return None
             if 'errorMessage' in str(e):
                 self.log.debug('Device with id %s could not be found' % device_id)
@@ -309,7 +310,7 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except Exception as e:  # pylint: disable=invalid-name
+        except Exception as e:
             self.log.debug('Device %s : %s' % (device['fqdn'], e))
             raise Exception("update_configlets_on_device:%s" % e)
         configlets = []
@@ -322,7 +323,7 @@ class CvpApi(object):
             tasks = {}
         return tasks
 
-    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):  # pylint: disable=invalid-name
+    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):
         ''' Remove the image bundle from the specified container.
 
             Args:
@@ -379,7 +380,7 @@ class CvpApi(object):
                    'format=topology&queryParam=&nodeId=root')
             try:
                 self.clnt.post(url, data=data, timeout=self.request_timeout)
-            except Exception as e:  # pylint: disable=invalid-name
+            except Exception as e:
                 # pylint: disable=unreachable
                 raise Exception("update_imageBundle_on_device:%s" % e)
                 self.log.debug('Device %s : %s' % (device['fqdn'], e))
@@ -434,11 +435,11 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except CvpApiError as e:  # pylint: disable=invalid-name
+        except CvpApiError as e:
             if any(txt in str(e) for txt in ['Data already exists', 'undefined container']):
                 self.log.debug('Device %s already in container Undefined'
                                % device['fqdn'])
-        except Exception as e:  # pylint: disable=invalid-name
+        except Exception as e:
             self.log.debug('Reset Device %s : %s' % (device['fqdn'], e))
             raise Exception("reset_device:%s" % e)
         if create_task:
@@ -446,7 +447,7 @@ class CvpApi(object):
             tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
             return tasks
 
-    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):  # pylint: disable=invalid-name
+    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):
         '''Move a device from the undefined container to a target container.
             Optionally apply device-specific configlets and an imageBundle.
 
@@ -479,7 +480,7 @@ class CvpApi(object):
         try:
             self.move_device_to_container('%s:provision_device' % app_name, device, container,
                                           create_task=False)
-        except Exception as e:  # pylint: disable=invalid-name
+        except Exception as e:
             self.log.debug('Provision Device - move %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-move_to_container:%s" % e)
         # Don't save configlet action if there is an image bundle to add
@@ -492,7 +493,7 @@ class CvpApi(object):
         try:
             created_tasks = self.update_configlets_on_device(app_name, device, configlets, [],
                                                              configlet_task)
-        except Exception as e:  # pylint: disable=invalid-name
+        except Exception as e:
             self.log.debug('Provision Device - configlets %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-update_configlets:%s" % e)
         # If configlet action created tasks then don't action imageBundles
@@ -501,7 +502,7 @@ class CvpApi(object):
             try:
                 created_tasks = self.update_imageBundle_on_device(app_name, device, imageBundle, {},
                                                                   create_task)
-            except Exception as e:  # pylint: disable=invalid-name
+            except Exception as e:
                 self.log.debug('Provision Device - imageBundle %s : %s' % (device['fqdn'], e))
                 raise Exception("provsion_device-update_imageBundle:%s" % e)
         return created_tasks
@@ -981,7 +982,7 @@ class CvpApi(object):
         '''
         self.log.debug('Get info for container %s' % name)
         self.log.debug(
-            '* cv_api2019 - get_container_by_name - container name is: %s', str(name))
+            '* cv_api2020 - get_container_by_name - container name is: %s', str(name))
         containers = self.clnt.get('/provisioning/searchTopology.do?queryParam=%s'
                                    '&startIndex=0&endIndex=0' % qplus(name))
         if containers['total'] > 0 and containers['containerList']:
@@ -1011,9 +1012,9 @@ class CvpApi(object):
         '''
         self.log.debug('get_devices_in_container: called')
         devices = []
-        logging.debug('* cv_api2019 - container name is: %s', str(name))
+        logging.debug('* cv_api2020 - container name is: %s', str(name))
         container = self.get_container_by_name(name)
-        logging.debug('* cv_api2019 - container is: %s', str(container))
+        logging.debug('* cv_api2020 - container is: %s', str(container))
         if container:
             all_devices = self.get_inventory(0, 0)
             for device in all_devices:

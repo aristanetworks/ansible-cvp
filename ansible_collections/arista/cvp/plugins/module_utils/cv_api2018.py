@@ -19,6 +19,13 @@
 # limitations under the License.
 #
 
+# pylint: disable=redefined-builtin
+# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-lines
+# pylint: disable=invalid-name
+# pylint: disable=C0103
+
+
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
@@ -26,7 +33,6 @@ __metaclass__ = type
 '''
 import os
 # This import is for proper file IO handling support for both Python 2 and 3
-# pylint: disable=redefined-builtin
 from io import open
 
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError
@@ -63,8 +69,6 @@ class CvpApi(object):
             failed and no session could be established to a CVP node.  Destroy
             the class and re-instantiate.
     '''
-    # pylint: disable=too-many-public-methods
-    # pylint: disable=too-many-lines
 
     def __init__(self, clnt, request_timeout=30):
         ''' Initialize the class.
@@ -145,7 +149,7 @@ class CvpApi(object):
         try:
             element_info = self.clnt.get('/provisioning/getNetElementInfoById.do?netElementId=%s'
                                          % qplus(device_id), timeout=self.request_timeout)
-        except CvpApiError as e:
+        except CvpApiError as e:  # pylint: disable=invalid-name
             # Catch an invalid task_id error and return None
             if 'errorMessage' in str(e):
                 self.log.debug('Device with id %s could not be found' % device_id)
@@ -306,7 +310,7 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Device %s : %s' % (device['fqdn'], e))
             raise Exception("update_configlets_on_device:%s" % e)
         configlets = []
@@ -319,7 +323,7 @@ class CvpApi(object):
             tasks = {}
         return tasks
 
-    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):
+    def update_imageBundle_on_device(self, app_name, device, add_imageBundle, del_imageBundle, create_task=True):  # pylint: disable=invalid-name
         ''' Remove the image bundle from the specified container.
 
             Args:
@@ -376,7 +380,7 @@ class CvpApi(object):
                    'format=topology&queryParam=&nodeId=root')
             try:
                 self.clnt.post(url, data=data, timeout=self.request_timeout)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=invalid-name
                 # pylint: disable=unreachable
                 raise Exception("update_imageBundle_on_device:%s" % e)
                 self.log.debug('Device %s : %s' % (device['fqdn'], e))
@@ -431,11 +435,11 @@ class CvpApi(object):
                'format=topology&queryParam=&nodeId=root')
         try:
             self.clnt.post(url, data=data, timeout=self.request_timeout)
-        except CvpApiError as e:
+        except CvpApiError as e:  # pylint: disable=invalid-name
             if any(txt in str(e) for txt in ['Data already exists', 'undefined container']):
                 self.log.debug('Device %s already in container Undefined'
                                % device['fqdn'])
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Reset Device %s : %s' % (device['fqdn'], e))
             raise Exception("reset_device:%s" % e)
         if create_task:
@@ -443,7 +447,7 @@ class CvpApi(object):
             tasks = self.clnt.post(url, data=[], timeout=self.request_timeout)
             return tasks
 
-    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):
+    def provision_device(self, app_name, device, container, configlets, imageBundle, create_task=True):  # pylint: disable=invalid-name
         '''Move a device from the undefined container to a target container.
             Optionally apply device-specific configlets and an imageBundle.
 
@@ -476,7 +480,7 @@ class CvpApi(object):
         try:
             self.move_device_to_container('%s:provision_device' % app_name, device, container,
                                           create_task=False)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Provision Device - move %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-move_to_container:%s" % e)
         # Don't save configlet action if there is an image bundle to add
@@ -489,7 +493,7 @@ class CvpApi(object):
         try:
             created_tasks = self.update_configlets_on_device(app_name, device, configlets, [],
                                                              configlet_task)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=invalid-name
             self.log.debug('Provision Device - configlets %s : %s' % (device['fqdn'], e))
             raise Exception("provsion_device-update_configlets:%s" % e)
         # If configlet action created tasks then don't action imageBundles
@@ -498,7 +502,7 @@ class CvpApi(object):
             try:
                 created_tasks = self.update_imageBundle_on_device(app_name, device, imageBundle, {},
                                                                   create_task)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=invalid-name
                 self.log.debug('Provision Device - imageBundle %s : %s' % (device['fqdn'], e))
                 raise Exception("provsion_device-update_imageBundle:%s" % e)
         return created_tasks
@@ -579,6 +583,84 @@ class CvpApi(object):
         else:
             return data
 
+    # pylint: disable=too-many-locals
+    # pylint: disable=invalid-name
+    def remove_configlets_from_container(self, app_name, container,
+                                         del_configlets, create_task=True):
+        ''' Remove the configlets from the container.
+            Args:
+                app_name (str): The application name to use in info field.
+                container (dict): The container dict
+                del_configlets (list): List of configlet name and key pairs
+                create_task (bool): Determines whether or not to execute a save
+                    and create the tasks (if any)
+            Returns:
+                response (dict): A dict that contains a status and a list of
+                    task ids created (if any).
+                    Ex: {u'data': {u'status': u'success', u'taskIds': [u'35']}}
+        '''
+        self.log.debug(
+            'remove_configlets_from_container: container: %s names: %s' %
+            (container, del_configlets))
+
+        # Get all the configlets assigned to the device.
+        configlets = self.get_configlets_by_container_id(container['key'])
+
+        # Get a list of the names and keys of the configlets.  Do not add
+        # configlets that are on the delete list.
+        keep_names = []
+        keep_keys = []
+        for configlet in configlets['configletList']:
+            key = configlet['key']
+            if next((ent for ent in del_configlets if ent['key'] == key),
+                    None) is None:
+                keep_names.append(configlet['name'])
+                keep_keys.append(key)
+
+        # Remove the names and keys of the configlets to keep and build a
+        # list of the configlets to remove.
+        del_names = []
+        del_keys = []
+        for entry in del_configlets:
+            del_names.append(entry['name'])
+            del_keys.append(entry['key'])
+
+        info = '%s Configlet Remove: from Container %s' % (app_name,
+                                                           container['name'])
+        info_preview = '<b>Configlet Remove:</b> from Container' + container[
+            'name']
+        data = {'data': [{'info': info,
+                          'infoPreview': info_preview,
+                          'note': '',
+                          'action': 'associate',
+                          'nodeType': 'configlet',
+                          'nodeId': '',
+                          'configletList': keep_keys,
+                          'configletNamesList': keep_names,
+                          'ignoreConfigletNamesList': del_names,
+                          'ignoreConfigletList': del_keys,
+                          'configletBuilderList': [],
+                          'configletBuilderNamesList': [],
+                          'ignoreConfigletBuilderList': [],
+                          'ignoreConfigletBuilderNamesList': [],
+                          'toId': container['key'],
+                          'toIdType': 'container',
+                          'fromId': '',
+                          'nodeName': '',
+                          'fromName': '',
+                          'toName': container['name'],
+                          'nodeIpAddress': '',
+                          'nodeTargetIpAddress': '',
+                          'childTasks': [],
+                          'parentTask': ''}]}
+        self.log.debug(
+            'remove_configlets_from_container: saveTopology data:\n%s'
+            % data['data'])
+        self._add_temp_action(data)
+        if create_task:
+            return self._save_topology_v2([])
+        return data
+
     # ~Configlet Related API Calls
 
     def get_configlet_by_name(self, name):
@@ -613,6 +695,13 @@ class CvpApi(object):
                     configlet['name'])
                 configlet['config'] = full_cfglt_data['config']
         return configlets
+
+    def get_configlets_and_mappers(self):
+        '''
+        Return a list of all defined configlets and associated mappers
+        '''
+        self.log.debug('getConfigletsAndAssociatedMappers')
+        return self.clnt.get('/configlet/getConfigletsAndAssociatedMappers.do')
 
     def get_devices_by_configlet(self, configlet_name, start=0, end=0):
         ''' Returns a list of devices to which the named configlet is applied.

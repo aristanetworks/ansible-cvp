@@ -1,6 +1,14 @@
 # Manage pending tasks on CVP
 
-## Descrpition
+- [Manage pending tasks on CVP](#manage-pending-tasks-on-cvp)
+  - [Description](#description)
+  - [Options](#options)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Inputs example](#inputs-example)
+    - [Result example](#result-example)
+
+## Description
 
 __Module name:__ `arista.cvp.cv_task`
 
@@ -16,7 +24,7 @@ Module comes with a set of options:
 
 ## Usage
 
-__Authentication__
+### Authentication
 
 This module uses `HTTPAPI` connection plugin for authentication. These elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
@@ -34,7 +42,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-__Inputs__
+### Inputs example
 
 Below is a basic playbook to collect facts:
 
@@ -52,21 +60,19 @@ tasks:
         wait: 60
 ```
 
-__Result__
+### Result example
 
 Below is an example of expected output
 
 ```json
 {
     "msg": {
-        "changed": false, 
-        "data": {}, 
-        "failed": false, 
+        "changed": false,
+        "data": {},
+        "failed": false,
         "warnings": [
             "No actionable tasks found on CVP"
         ]
     }
 }
 ```
-
-
