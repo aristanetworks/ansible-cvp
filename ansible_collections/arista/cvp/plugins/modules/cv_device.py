@@ -29,17 +29,13 @@ ANSIBLE_METADATA = {
     "supported_by": "community",
 }
 
-import re
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.connection import Connection, ConnectionError
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import (
-    CvpLoginError,
-    CvpApiError,
+    CvpLoginError
 )
-from time import sleep
+from ansible.module_utils.connection import Connection
 
 DOCUMENTATION = r"""
 ---
@@ -728,7 +724,7 @@ def devices_new(module):
                 )
                 result_update.append({device_update["name"]: message})
             else:
-                changed = True
+                changed = True  # noqa # pylint: disable=unused-variable
                 if "taskIds" in str(device_action):
                     device_provisioned_result += 1
                     result_tasks_generatedtaskId += device_action["data"]["taskIds"]
@@ -786,7 +782,7 @@ def devices_move(module):
     result_move = list()
     result_tasks_generated = list()
     device_action = dict()
-    changed = False
+    changed = False  # noqa # pylint: disable=unused-variable
     MODULE_LOGGER.debug(" * devices_move - Entering devices_move")
 
     for device_update in devices_update:
@@ -809,10 +805,11 @@ def devices_move(module):
                 )
             except Exception as error:
                 errorMessage = str(error)
-                message = "Device %s cannot be moved - %s" % (
+                message = "Device %s cannot be moved - %s" % (  # noqa # pylint: disable=unused-variable
                     device_update["name"],
                     errorMessage,
-                )
+                )   # noqa # pylint: disable=unused-variable
+                # TODO: Add log message to trace exception.
 
             changed = True
             devices_moved += 1
@@ -971,7 +968,7 @@ def devices_update(module, mode="override"):
                 )
                 result_update.append({device_update["name"]: message})
             else:
-                changed = True
+                changed = True  # noqa # pylint: disable=unused-variable
                 if "taskIds" in str(device_action):
                     devices_updated += 1
                     for taskId in device_action["data"]["taskIds"]:
@@ -1028,12 +1025,10 @@ def devices_reset(module):
         Dict result with tasks and information.
     """
     # If any configlet changed updated 'changed' flag
-    changed = False
+    changed = False  # noqa # pylint: disable=unused-variable
     # Compare configlets against cvp_facts-configlets
-    reset_device = []  # devices to factory reset
     reset = []
     newTasks = []  # Task Ids that have been identified during device actions
-    taskList = []  # Tasks that have a pending status after function runs
 
     for cvp_device in module.params["cvp_facts"]["devices"]:
         # Include only devices that match filter elements, "all" will
@@ -1125,8 +1120,6 @@ def devices_action(module):
         Json structure to stdout to ansible.
     """
     # change_mode = module.params['configlet_mode']
-    cvp_facts = module.params["cvp_facts"]
-    topology_devices = module.params["devices"]
     topology_state = module.params["state"]
     configlet_mode = module.params['configlet_mode']
 
