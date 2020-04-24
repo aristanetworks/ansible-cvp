@@ -75,6 +75,11 @@ options:
     description: List of configlets to managed on CVP server.
     required: true
     type: dict
+  configlets_notes:
+    description: Add a note to the configlets.
+    required: false
+    default: 'Managed by Ansible'
+    type: str
   cvp_facts:
     description: Facts extracted from CVP servers using cv_facts module
     required: true
@@ -121,6 +126,7 @@ EXAMPLES = r'''
       cv_configlet:
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
+        configlets_notes: "Configlet managed by Ansible"
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
       register: cvp_configlet
 '''
@@ -334,6 +340,7 @@ def action_update(update_configlets, module):
     flag_failed = False
     flag_changed = False
     taskIds = list()
+    configlets_notes = str(module.params['configlets_notes'])
 
     for configlet in update_configlets:
         try:
@@ -369,7 +376,7 @@ def action_update(update_configlets, module):
                 flag_changed = True
                 # Add note to configlet to mark as managed by Ansible
                 module.client.api.add_note_to_configlet(
-                    configlet['data']['key'], "## Managed by Ansible ##")
+                    configlet['data']['key'], configlets_notes)
                 # Save result for further traces.
                 response_data.append({configlet['data']['name']: "success"})
                 # Save configlet diff
@@ -492,6 +499,7 @@ def action_create(create_configlets, module):
     diff = None
     flag_failed = False
     flag_changed = False
+    configlets_notes = str(module.params['configlets_notes'])
 
     for configlet in create_configlets:
         try:
@@ -522,7 +530,7 @@ def action_create(create_configlets, module):
                     'Error creating configlet %s: %s', str(configlet['data']['name']), str(new_resp))
             else:
                 module.client.api.add_note_to_configlet(
-                    new_resp, "## Managed by Ansible ##")
+                    new_resp, configlets_notes)
                 changed = True
                 response_data.append({configlet['data']['name']: "success"})
                 MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['data']['name']))
@@ -683,6 +691,7 @@ def main():
     """
     argument_spec = dict(
         configlets=dict(type='dict', required=True),
+        configlets_notes=dict(type='str', default='Managed by Ansible', required=False),
         cvp_facts=dict(type='dict', required=True),
         configlet_filter=dict(type='list', default='none'),
         state=dict(type='str',
