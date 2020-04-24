@@ -1,6 +1,5 @@
-# Configuration applied to collection by ansible-test
-# https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/_data/sanity/pylint/config/collection.cfg
 [MESSAGES CONTROL]
+
 disable=
     abstract-method,
     access-member-before-definition,
@@ -104,8 +103,6 @@ disable=
     unsupported-delete-operation,
     unsupported-membership-test,
     unused-argument,
-    unused-import,
-    unused-variable,
     used-before-assignment,
     useless-object-inheritance,
     useless-return,
@@ -114,6 +111,7 @@ disable=
     wrong-import-position,
 
 [BASIC]
+
 bad-names=foo,
           bar,
           baz,
@@ -129,5 +127,6 @@ good-names=i,
            Run,
 
 [TYPECHECK]
+
 ignored-modules=
     _MovedItems,
