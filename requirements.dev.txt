@@ -5,3 +5,5 @@ yamllint==1.18.0
 six
 virtualenv
 mitogen
+ansible-lint==4.2.0
+pre-commit==2.3.0
