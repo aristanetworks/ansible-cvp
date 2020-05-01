@@ -5,7 +5,7 @@ repos:
     rev: v2.4.0
     hooks:
       - id: trailing-whitespace
-    #   - id: end-of-file-fixer
+      - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
       - id: check-merge-conflict
@@ -31,3 +31,12 @@ repos:
       - id: ansible-lint
         name: Check for ansible-lint errors
         files: \.(yaml|yml)$
+  # - repo: https://github.com/markdownlint/markdownlint.git
+  #   rev: v0.9.0
+  #   hooks:
+  #     - id: markdownlint
+  #       name: Markdownlint
+  #       description: Run markdownlint on your Markdown files
+  #       entry: mdl
+  #       language: ruby
+  #       files: \.(md|mdown|markdown)$
