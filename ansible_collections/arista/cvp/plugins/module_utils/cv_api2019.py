@@ -24,14 +24,12 @@ __metaclass__ = type
 
 ''' Class containing calls to CVP RESTful API.
 '''
-import os
 # This import is for proper file IO handling support for both Python 2 and 3
 # pylint: disable=redefined-builtin
-from io import open
 import logging
 
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient  # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError  # noqa # pylint: disable=unused-import
 
 try:
     from urllib import quote_plus as qplus

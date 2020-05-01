@@ -30,6 +30,7 @@ ANSIBLE_METADATA = {
 
 import time
 import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError

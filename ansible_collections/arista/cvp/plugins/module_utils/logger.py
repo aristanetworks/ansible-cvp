@@ -23,7 +23,6 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import logging
-from logging.handlers import RotatingFileHandler
 import os
 
 # Get Logging level from Environment variable / Default INFO

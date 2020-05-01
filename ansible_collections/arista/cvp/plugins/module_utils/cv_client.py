@@ -89,7 +89,7 @@ import logging
 import inspect
 import traceback
 from logging.handlers import SysLogHandler
-import ansible_collections.arista.cvp.plugins.module_utils.logger
+import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from itertools import cycle
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpApiError, CvpLoginError, CvpRequestError, CvpSessionLogOutError
 REQUESTS_IMP_ERR = None
@@ -211,19 +211,19 @@ class CvpClient(object):
                     self.apiVersion = '2018'
                     self.apiName = 'cv_api2018'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2018 import CvpApi
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2018 import CvpApi   # noqa # pylint: disable=import-outside-toplevel
                 elif int(self.splitVersion[0]) == 2019:
                     self.log.info('Setting API version to 2019')
                     self.apiVersion = '2019'
                     self.apiName = 'cv_api2019'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi  # noqa # pylint: disable=import-outside-toplevel
                 elif int(self.splitVersion[0]) == 2020:
                     self.log.info('Setting API version to 2020')
                     self.apiVersion = '2020'
                     self.apiName = 'cv_api2020'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2020 import CvpApi
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2020 import CvpApi  # noqa # pylint: disable=import-outside-toplevel
                 else:
                     self.log.error('Unable to set API version')
             else:
@@ -302,7 +302,7 @@ class CvpClient(object):
             num_nodes -= 1
 
         self.error_msg = '\n'
-        for x in range(0, num_nodes):
+        for x in range(0, num_nodes):   # noqa # pylint: disable=unused-variable
             host = next(self.node_pool)
             self.url_prefix = ('https://%s:%d/web' % (host, self.port or 443))
             error = self._reset_session()
@@ -356,7 +356,7 @@ class CvpClient(object):
         if isinstance(obj, dict):
             if key in obj:
                 return obj[key]
-            for k, v in obj.items():
+            for k, v in obj.items():    # noqa # pylint: disable=unused-variable
                 if isinstance(v, dict) or isinstance(v, list):
                     item = self._finditem(v, key)
                     if item is not None:
