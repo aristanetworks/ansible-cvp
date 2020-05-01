@@ -1,4 +1,4 @@
-FROM python:3-alpine3.6 
+FROM python:3-alpine3.6
 
 LABEL maintainer="Arista Ansible Team <ansible@arista.com>"
 LABEL com.example.version="1.0.2"

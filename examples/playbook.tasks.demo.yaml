@@ -32,7 +32,7 @@
       cv_task:
         tasks: "{{ cvp_configlets.data.tasks }}"
       register: cvp_tasks
-       
+
     - name: 'RUN 1: Verify tasks have been changed'
       assert:
         that:

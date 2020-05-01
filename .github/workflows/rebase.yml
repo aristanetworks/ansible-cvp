@@ -1,5 +1,5 @@
 name: 'Automatic PR rebase'
-on: 
+on:
   issue_comment:
     types: [created]
 jobs:

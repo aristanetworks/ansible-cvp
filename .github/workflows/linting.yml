@@ -1,5 +1,5 @@
 name: Code Linting
-on: 
+on:
   push:
     branches-ignore:
       - master
