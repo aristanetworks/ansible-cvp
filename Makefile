@@ -37,12 +37,14 @@ sanity-info: ## Show information about ansible-test
 .PHONY: sanity-lint
 sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --skip-test import
+	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --skip-test import ; \
+	rm -rf tests/output/
 
 .PHONY: sanity-import
 sanity-import: ## Run ansible-test sanity for code import
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --test import
+	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --test import ; \
+	rm -rf tests/output/
 
 
 #########################################
@@ -67,6 +69,10 @@ run-docker: ## Connect to docker container
 .PHONY: linting
 linting: ## Run pre-commit script for python code linting using pylint
 	sh .github/pre-commit
+
+.PHONY: pre-commit
+pre-commit: ## Execute pre-commit validation
+	pre-commit run --all-files
 
 .PHONY: github-configure-ci
 github-configure-ci: ## Configure CI environment to run GA (Ubuntu:latest LTS)
