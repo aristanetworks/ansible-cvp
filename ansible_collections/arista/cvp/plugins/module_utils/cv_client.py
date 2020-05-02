@@ -83,6 +83,8 @@ Example:
     >>>
 '''
 
+# pylint: disable=wrong-import-position
+
 import re
 import json
 import logging
@@ -211,19 +213,19 @@ class CvpClient(object):
                     self.apiVersion = '2018'
                     self.apiName = 'cv_api2018'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2018 import CvpApi   # noqa # pylint: disable=import-outside-toplevel
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2018 import CvpApi   # noqa # pylint: disable=wrong-import-position
                 elif int(self.splitVersion[0]) == 2019:
                     self.log.info('Setting API version to 2019')
                     self.apiVersion = '2019'
                     self.apiName = 'cv_api2019'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi  # noqa # pylint: disable=import-outside-toplevel
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2019 import CvpApi  # noqa # pylint: disable=wrong-import-position
                 elif int(self.splitVersion[0]) == 2020:
                     self.log.info('Setting API version to 2020')
                     self.apiVersion = '2020'
                     self.apiName = 'cv_api2020'
                     if init:
-                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2020 import CvpApi  # noqa # pylint: disable=import-outside-toplevel
+                        from ansible_collections.arista.cvp.plugins.module_utils.cv_api2020 import CvpApi  # noqa # pylint: disable=wrong-import-position
                 else:
                     self.log.error('Unable to set API version')
             else:

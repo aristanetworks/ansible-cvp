@@ -24,6 +24,7 @@ __metaclass__ = type
 
 import logging
 import os
+from logging.handlers import RotatingFileHandler  # noqa # pylint: disable=unused-import
 
 # Get Logging level from Environment variable / Default INFO
 
