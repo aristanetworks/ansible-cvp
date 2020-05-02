@@ -126,6 +126,7 @@ disable=
     useless-super-delegation,
     wrong-import-order,
     wrong-import-position,
+    import-outside-toplevel,
 
 [BASIC]
 
