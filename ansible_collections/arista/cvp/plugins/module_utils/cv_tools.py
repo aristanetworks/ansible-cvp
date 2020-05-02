@@ -22,7 +22,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-import re
 import logging
 
 LOGGER = logging.getLogger('arista.cvp.cv_tools')
@@ -41,9 +40,9 @@ def isIterable(testing_object=None):
 
     """
     try:
-        some_object_iterator = iter(testing_object)
+        some_object_iterator = iter(testing_object)  # noqa # pylint: disable=unused-variable
         return True
-    except TypeError as te:
+    except TypeError as te:  # noqa # pylint: disable=unused-variable
         return False
 
 

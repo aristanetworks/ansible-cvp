@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.tools_inventory')
 

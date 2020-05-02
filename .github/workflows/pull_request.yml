@@ -1,5 +1,5 @@
 name: ansible-test on PR
-on: 
+on:
   pull_request:
     branches:
       - 'releases/*'
@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - name: Setup Python 3 on runner
+        uses: actions/setup-python@v1.2.0
+        with:
+          python-version: '3.x'
       - name: 'Install requirements'
         run: make github-configure-ci
       - name: 'Install Python requirements'

@@ -1,7 +1,23 @@
-# Configuration applied to collection by ansible-test
-# https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/_data/sanity/pylint/config/collection.cfg
+[MASTER]
+suggestion-mode=yes
+
+[FORMAT]
+# String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
+# tab).
+indent-string='    '
+
+# Maximum number of characters on a single line.
+max-line-length=100
+
+# Maximum number of lines in a module.
+max-module-lines=1000
+
+[SIMILARITIES]
+min-similarity-lines: 10
+
 [MESSAGES CONTROL]
 disable=
+    duplicate-code
     abstract-method,
     access-member-before-definition,
     ansible-deprecated-version,
@@ -104,16 +120,16 @@ disable=
     unsupported-delete-operation,
     unsupported-membership-test,
     unused-argument,
-    unused-import,
-    unused-variable,
     used-before-assignment,
     useless-object-inheritance,
     useless-return,
     useless-super-delegation,
     wrong-import-order,
     wrong-import-position,
+    import-outside-toplevel,
 
 [BASIC]
+
 bad-names=foo,
           bar,
           baz,
@@ -129,5 +145,6 @@ good-names=i,
            Run,
 
 [TYPECHECK]
+
 ignored-modules=
     _MovedItems,
