@@ -920,7 +920,9 @@ def configure_configlet_to_container(module, intended, facts):
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
-                if match_filter is False and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']:
+                if (match_filter is False
+                    and container_factinfo(container_name=container, facts=facts) is not None
+                    and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
                     MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s), skipped', str(
                         configlet_filter), str(container_info_cvp['configlets']))
                     continue
