@@ -3,13 +3,11 @@
 # Configure default connection parameter.
 ansible_connection: paramiko
 
-ansible_python_interpreter: $(which python)
-
 # Method to become root
 ansible_become_method: sudo
 
 # Default password to become root
-ansible_become_password: '{{ansible_password}}'
+# ansible_become_password: '{{ansible_password}}'
 
 # List of packages to install to enable DHCP package
 dhcp_packages:
@@ -26,3 +24,6 @@ dhcp_config: '{{ dhcp_config_dir }}/dhcpd.conf'
 
 # DHCP service name
 dhcp_service: dhcpd
+
+# Apparmor Fix for DHCP
+dhcp_apparmor_fix: true
