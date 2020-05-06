@@ -8,6 +8,7 @@
 
 - [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
   - [About](#about)
+  - [List of CVP versions supported](#list-of-cvp-versions-supported)
   - [Modules overview](#modules-overview)
     - [Important notes.](#important-notes)
   - [Installation](#installation)
@@ -34,6 +35,16 @@
 
 More documentation is available in [project's wiki pages](https://github.com/aristanetworks/ansible-cvp/wiki)
 
+## List of CVP versions supported
+
+__arista.cvp__ collection supports list of Cloudvision version as listed below:
+
+- __2018__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __2019__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __2020__: starting version [`1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
+
+When a CVP version is supported starting a specific version, any upcoming version will support that version until a specific announcement was made.
+
 ## Modules overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
@@ -50,8 +61,6 @@ __List of available roles:__
 
 - [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 
-This collection supports CVP version `2018.2.5` and `2019.1.x`
-
 ### Important notes.
 
 This repository is built based on [new collections system](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#developing-collections) introduced by ansible starting version __2.9__.
@@ -64,11 +73,10 @@ This repository is built based on [new collections system](https://docs.ansible.
 
 This collection requires the following to be installed on the Ansible control machine:
 
-
-- python `2.7` (legacy) and `3.7`
+- python `3.7`
 - ansible >= `2.9.0`
 - requests >= `2.22.0`
-- treelib version `1.5.5` or later
+- treelib version `1.5.5`
 
 ### Installation from ansible-galaxy
 
@@ -86,6 +94,7 @@ Installing 'arista.cvp:1.0.1' to '~/.ansible/collections/ansible_collections/ari
 You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
 
 __Clone repository__
+
 ```shell
 $ git clone https://github.com/aristanetworks/ansible-cvp.git
 $ cd ansible-cvp
@@ -127,11 +136,9 @@ $ make run-docker
 
 Image will be created using current branch as tag. If it is run in master branch, then latest git tag will be used as docker tag.
 
-
 > Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
 
 All files part of [`examples`](examples/) are copied into the container.
-
 
 ## Getting Started
 
@@ -194,7 +201,6 @@ ansible_httpapi_port=443
 ```
 
 As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
-
 
 ## Resources
 
