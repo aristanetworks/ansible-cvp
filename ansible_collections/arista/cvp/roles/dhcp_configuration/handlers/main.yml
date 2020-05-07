@@ -6,3 +6,8 @@
     name: '{{ dhcp_service }}'
     state: restarted
   listen: "restart dhcpd"
+
+- name: restart apparmor
+  service:
+    name: apparmor
+    state: restarted

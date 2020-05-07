@@ -3,10 +3,7 @@
 
 # List of packages to install to enable DHCP package
 dhcp_packages:
-  - isc-dhcp-server
+  - dhcp-server
 
 # DHCP service name
-dhcp_service: isc-dhcp-server
-
-# AppArmor Policy for isc-dhcp
-dhcp_apparmor_policy: /etc/apparmor.d/usr.sbin.dhcpd
+dhcp_service: dhcpd

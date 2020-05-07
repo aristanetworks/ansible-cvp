@@ -1,0 +1,6 @@
+---
+- name: 'set a default listening interface'
+  lineinfile:
+    dest: /etc/default/isc-dhcp-server
+    line: 'INTERFACESv4="{{ ansible_default_ipv4.interface }}"'
+    regexp: '^INTERFACESv4='
