@@ -33,16 +33,16 @@ import sys
 import json
 import traceback
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger
 import ansible_collections.arista.cvp.plugins.module_utils.cv_tools as cv_tools
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.connection import Connection, ConnectionError
+from ansible.module_utils.connection import Connection
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
 from ansible.module_utils.six import string_types
 TREELIB_IMP_ERR = None
 try:
-    from treelib import Node, Tree
+    from treelib import Tree
     HAS_TREELIB = True
 except ImportError:
     HAS_TREELIB = False
@@ -384,9 +384,9 @@ def isIterable(testing_object=None):
 
     """
     try:
-        some_object_iterator = iter(testing_object)
+        some_object_iterator = iter(testing_object)  # noqa # pylint: disable=unused-variable
         return True
-    except TypeError as te:
+    except TypeError:
         return False
 
 
@@ -920,7 +920,9 @@ def configure_configlet_to_container(module, intended, facts):
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
-                if match_filter is False and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']:
+                if (match_filter is False
+                    and container_factinfo(container_name=container, facts=facts) is not None
+                    and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
                     MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s), skipped', str(
                         configlet_filter), str(container_info_cvp['configlets']))
                     continue
@@ -1027,7 +1029,7 @@ def delete_topology(module, intended, facts):
     MODULE_LOGGER.info('build tree topology from facts topology')
     container_cvp_tree = tree_build_from_list(
         containers=facts['containers'], root=topology_root)
-    container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())
+    container_cvp_ordered_list = tree_to_list(json_data=container_cvp_tree, myList=list())  # noqa # pylint: disable=unused-variable
 
     # Build a tree of containers expected to be deleted from CVP
     MODULE_LOGGER.info('build tree topology from intended topology')

@@ -32,20 +32,11 @@ ANSIBLE_METADATA = {
 import re
 import traceback
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
-from ansible.module_utils.connection import Connection, ConnectionError
-from time import sleep
-# Required by compare function
-# FUZZYWUZZY_IMP_ERR = None
-# try:
-#     from fuzzywuzzy import fuzz  # Library that uses Levenshtein Distance to calculate the differences between strings.
-#     HAS_FUZZYWUZZY = True
-# except ImportError:
-#     HAS_TREELIB = False
-#     FUZZYWUZZY_IMP_ERR = traceback.format_exc()
+from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+from ansible.module_utils.connection import Connection
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
@@ -370,7 +361,7 @@ def action_update(update_configlets, module):
                 response_data.append({configlet['data']['name']: message})
                 # Generate logging error message
                 MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                    configlet['data']['name']), str(error))
+                    configlet['data']['name']), str(update_resp['errorMessage']))
             else:
                 # Inform module a changed has been done
                 flag_changed = True
@@ -422,7 +413,6 @@ def action_delete(delete_configlets, module):
         A dict with all action results.
     """
     response_data = list()
-    diff = None
     flag_failed = False
     flag_changed = False
 
@@ -454,7 +444,7 @@ def action_delete(delete_configlets, module):
                 response_data.append({configlet['data']['name']: message})
                 # Generate logging error message
                 MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
-                    configlet['data']['name']), str(error))
+                    configlet['data']['name']), delete_resp['errorMessage'])
             else:
                 # Inform module a changed has been done
                 flag_changed = True
@@ -496,7 +486,6 @@ def action_create(create_configlets, module):
         A dict with all action results.
     """
     response_data = list()
-    diff = None
     flag_failed = False
     flag_changed = False
     configlets_notes = str(module.params['configlets_notes'])
@@ -531,7 +520,7 @@ def action_create(create_configlets, module):
             else:
                 module.client.api.add_note_to_configlet(
                     new_resp, configlets_notes)
-                changed = True
+                changed = True  # noqa # pylint: disable=unused-variable
                 response_data.append({configlet['data']['name']: "success"})
                 MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['data']['name']))
     return {'changed': flag_changed,
@@ -640,9 +629,9 @@ def action_manager(module):
                       'updated': list(), 'deleted': list(), 'tasks': list()},
                       'diff': ''}
     # Default flag for changed set to False
-    flag_changed = False
+    flag_changed = False  # noqa # pylint: disable=unused-variable
     # Default flag for failed set to False
-    flag_failed = False
+    flag_failed = False  # noqa # pylint: disable=unused-variable
 
     # MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
 

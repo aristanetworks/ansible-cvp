@@ -17,7 +17,7 @@
     - name: "Gather CVP facts {{inventory_hostname}}"
       cv_facts:
       register: cv_facts
-    
+
     - name: "Print out facts from CVP"
       debug:
         msg: "{{cv_facts}}"
@@ -40,7 +40,7 @@
           - "{{ cv_facts.ansible_facts['containers'] | length }} >1"
         fail_msg: "Facts from CVP do not return any container. (>=2 are expected)"
         success_msg: "Facts from CVP return more than 1 container as expected"
-    
+
     - name: "Check if undefined container exists"
       assert:
         that:
@@ -58,7 +58,7 @@
         fail_msg: "Facts from CVP do not return any configlets. (>=1 are expected)"
         success_msg: "Facts from CVP return more than 1 configlets as expected"
 
-      # Disable as long as there is no trigger to select correct configlet based on CVP version. 
+      # Disable as long as there is no trigger to select correct configlet based on CVP version.
     # - name: "Check if SYS_TelemetryBuilderV2 configlet exists"
     #   assert:
     #     that:

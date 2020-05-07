@@ -75,7 +75,7 @@
 
     # Display information for device before a container's move
     - name: "Configure devices on {{inventory_hostname}}"
-      tags: 
+      tags:
         - provision
       cv_device:
         devices: "{{devices_inventory}}"
@@ -84,7 +84,7 @@
       register: cvp_device
 
     - name: Display cv_device
-      tags: 
+      tags:
         - provision
       debug:
         msg: "{{cvp_device}}"
@@ -95,7 +95,7 @@
 
     # Display information for device before a container's move
     - name: "Rollback configlet on devices on {{inventory_hostname}}"
-      tags: 
+      tags:
         - cleanup
       cv_device:
         devices: "{{devices_inventory_rollback}}"
@@ -104,7 +104,7 @@
       register: cvp_device
 
     - name: Display cv_device
-      tags: 
+      tags:
         - cleanup
       debug:
         msg: "{{cvp_device}}"

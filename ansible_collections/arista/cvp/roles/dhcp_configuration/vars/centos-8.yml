@@ -3,7 +3,7 @@
 
 # List of packages to install to enable DHCP package
 dhcp_packages:
-  - dhcp
+  - dhcp-server
 
 # DHCP service name
 dhcp_service: dhcpd
