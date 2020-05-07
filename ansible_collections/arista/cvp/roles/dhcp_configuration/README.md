@@ -113,11 +113,13 @@ all:
       hosts:
         dhcp_server:
           ansible_host: 1.1.1.1
-          ansible_user: root
-          ansible_password: password
+          ansible_user: user1
+          ansible_password: password1
+          ansible_become_password: password1
+          ansible_python_interpreter: $(which python3)
 ```
 
-If you are not using `root` user, please also add `ansible_become_password`. By default, `ansible_become_password` is set to be equal to `ansible_password`
+If you are not using __root__ user, configure `ansible_become_password` since role always use `become: true`.
 
 SSH connection is managed by [`paramiko`](http://www.paramiko.org/).
 
