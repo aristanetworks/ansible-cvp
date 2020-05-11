@@ -1,38 +1,116 @@
-Role Name
-=========
+# configlet_sync role
 
-A brief description of the role goes here.
+Ansible role to synchronize configlets between 2 instances of [Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.
 
-Requirements
-------------
+This role synchronize a designated set of CVP Configlets across multiple CVP instances. This ability to synchronize Configlets provides an efficient way of ensuring organizational policies and security requirements can be quickly deployed across an entire Arista estate in a consistent automated manner. The aim will be to deploy and synchronize a set of configlets that could be updated from any instance of CVP or via an Ansible PlayBook. This provides the most flexible method of managing the configlets without imposing any requirements to exclusively use either CVP or Ansible for updating them.
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+![](files/ansible-cvp-sync.png)
 
-Role Variables
---------------
+This role is implementation of example describe on [EOS Central blog](https://eos.arista.com/synchronising-cloudvision-portal-configlets-with-ansible/) by @Hugh-Adams.
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+## Requirements
 
-Dependencies
-------------
+No specific requirements to use this role.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+## Tested Platforms
 
-Example Playbook
-----------------
+Any version of Cloudvision supported by current `arista.cvp` collection.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Role Variables
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+### Mandatory variables
 
-License
--------
+```yaml
+---
+action: < * action to run with the role: init|sync|refresh>
+```
 
-BSD
+- __`init`__: Create initial local folder to save role outputs.
+- __`sync`__: connects to each of the CVP instances, locates the configlets with “shared_” in their name and updates the shared Configlet data (config, last time changed, associated containers, associated devices) for each CVP instance.
+- __`refresh`__: connects to each of the CVP instances and updates the shared configlets on each one using the information provided by `sync` action.
 
-Author Information
-------------------
+#### Optional variables
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+#### Role variables
+
+```yaml
+configlet_filter:       < PREFIX of configlet to look for synchronization, Default is shared >
+```
+
+#### Local folders outputs
+
+```yaml
+---
+cvpsync_data:           < Local folder where configlets_sync save data. Default is generated_vars/ >
+
+common_configlets_dir:  < Folder for common configlets. Default is {{cvpsync_data}}/common_configlets/ >
+cvp_servers_dir:        < Folder for common configlets. Default is {{cvpsync_data}}/common_configlets/ >
+```
+
+- __`common_configlets_dir`__: contains details of the configlets that are to be synchronized across the CVP instances.
+- __`cvp_servers_dir`__:  contains details of which configlets are to be deployed to the CVP servers. This directory can be used by other PlayBooks to deploy configlets and provision devices.
+
+## Dependencies
+
+No dependency required for this role.
+
+## Example Playbook
+
+Below is a basic playbook running `arista.cvp.dhcp_configuration` role
+
+```yaml
+---
+- name: Shared Configlets across CVP clusters
+  hosts: cvp_sync
+  serial: true
+  gather_facts: no
+  collections:
+    - arista.cvp
+  tasks:
+    - name: 'Init Configlets Sync structure'
+      import_role:
+        name: configlets_sync
+      vars:
+        action: init
+    - name: 'Sync Shared Configlets'
+      import_role:
+        name: configlets_sync
+      vars:
+        action: sync
+    - name: 'Refresh Shared Configlets'
+      import_role:
+        name: configlets_sync
+      vars:
+        action: refresh
+```
+
+Inventory is configured like below:
+
+```yaml
+---
+all:
+  children:
+    cvp_sync:
+      vars:
+        ansible_httpapi_host: '{{ ansible_host }}'
+        ansible_connection: httpapi
+        ansible_httpapi_use_ssl: true
+        ansible_httpapi_validate_certs: false
+        ansible_network_os: eos
+        ansible_httpapi_port: 443
+        # Configuration to get Virtual Env information
+        ansible_python_interpreter: $(which python)
+      hosts:
+        cv_server1:
+          ansible_host: 1.1.1.1.1
+          ansible_user: ansible
+          ansible_password: ansible
+        cv_server2:
+          ansible_host: 8.8.8.8
+          ansible_user: arista
+          ansible_password: arista
+```
+
+## License
+
+Project is published under [Apache 2.0 License](../../../../../LICENSE)

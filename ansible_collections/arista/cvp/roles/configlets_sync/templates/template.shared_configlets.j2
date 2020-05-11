@@ -1,6 +1,6 @@
 ---
 {% for configlet in ansible_facts['configlets'] %}
-{%      if 'shared_' in configlet['name'] %}
+{%      if configlet_filter in configlet['name'] %}
    '{{configlet["name"]}}':
       config: "{{ configlet['config'] | replace('\n', '\\n')}}"
       last_changed: {{configlet['dateTimeInLongFormat']}}

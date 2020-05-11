@@ -34,6 +34,6 @@
   arista.cvp.cv_configlet:
     cvp_facts: "{{CVP_FACTS.ansible_facts}}"
     configlets: "{{CVP_CONFIGLET}}"
-    configlet_filter: ["shared"]
+    configlet_filter: ['{{configlet_filter}}']
   when:
     - CVP_CONFIGLET is defined

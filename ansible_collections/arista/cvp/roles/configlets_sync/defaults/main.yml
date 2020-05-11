@@ -7,3 +7,7 @@ cvpsync_data: 'generated_vars/'
 common_configlets_dir: '{{cvpsync_data}}/common_configlets/'
 cvp_servers_dir: '{{cvpsync_data}}/cvp_servers/'
 devices_dir: '{{cvpsync_data}}/devices/'
+
+
+# Configlet filter to look for
+configlet_filter: 'shared'
