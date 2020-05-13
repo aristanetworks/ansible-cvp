@@ -11,3 +11,6 @@ devices_dir: '{{cvpsync_data}}/devices/'
 
 # Configlet filter to look for
 configlet_filter: 'shared'
+
+# Ansible runner for delegation
+ansible_runner: localhost
