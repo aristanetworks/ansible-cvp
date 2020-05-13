@@ -22,12 +22,13 @@ Any version of Cloudvision supported by current `arista.cvp` collection.
 
 ```yaml
 ---
-action: < * action to run with the role: init|sync|refresh>
+action: < * action to run with the role: init|sync|pull|push>
 ```
 
 - __`init`__: Create initial local folder to save role outputs.
-- __`sync`__: connects to each of the CVP instances, locates the configlets with “shared_” in their name and updates the shared Configlet data (config, last time changed, associated containers, associated devices) for each CVP instance.
-- __`refresh`__: connects to each of the CVP instances and updates the shared configlets on each one using the information provided by `sync` action.
+- __`pull`__: Connects to each of the CVP instances, locates the configlets with `{{configlet_filter}}` in their name and updates local shared configlet data (config, last time changed, associated containers, associated devices) for each CVP instance.
+- __`pull`__: Connects to each of the CVP instances and updates the shared configlets on each one using the information provided by `pull` action.
+- __`sync`__: Execute both __`pull`__ and __`push`__ actions.
 
 #### Optional variables
 
@@ -56,7 +57,9 @@ No dependency required for this role.
 
 ## Example Playbook
 
-Below is a basic playbook running `arista.cvp.dhcp_configuration` role
+### Playbook
+
+Below is a basic playbook running `arista.cvp.dhcp_configuration` role to only get shared configlets with `generic` string in the name.
 
 ```yaml
 ---
@@ -76,30 +79,38 @@ Below is a basic playbook running `arista.cvp.dhcp_configuration` role
       import_role:
         name: configlets_sync
       vars:
-        action: sync
-    - name: 'Refresh Shared Configlets'
+        action: pull
+        configlet_filter: 'generic'
+```
+
+Example playbook to to synchronize shared configlets with `generic` string in the name:
+
+```yaml
+---
+- name: Shared Configlets across CVP clusters
+  hosts: cvp_sync
+  serial: true
+  gather_facts: no
+  collections:
+    - arista.cvp
+  tasks:
+    - name: 'Init Configlets Sync structure'
       import_role:
         name: configlets_sync
       vars:
-        action: refresh
+        configlet_filter: 'generic'
+        action: sync
 ```
 
-Inventory is configured like below:
+### Inventory
+
+`{{inventory_name}}` for Cloudvision instances can be changed to match your own environement. Only group name `cvp_sync` must be the same in inventory and playbook.
 
 ```yaml
 ---
 all:
   children:
     cvp_sync:
-      vars:
-        ansible_httpapi_host: '{{ ansible_host }}'
-        ansible_connection: httpapi
-        ansible_httpapi_use_ssl: true
-        ansible_httpapi_validate_certs: false
-        ansible_network_os: eos
-        ansible_httpapi_port: 443
-        # Configuration to get Virtual Env information
-        ansible_python_interpreter: $(which python)
       hosts:
         cv_server1:
           ansible_host: 1.1.1.1.1
@@ -109,6 +120,15 @@ all:
           ansible_host: 8.8.8.8
           ansible_user: arista
           ansible_password: arista
+      vars:
+        ansible_httpapi_host: '{{ ansible_host }}'
+        ansible_connection: httpapi
+        ansible_httpapi_use_ssl: true
+        ansible_httpapi_validate_certs: false
+        ansible_network_os: eos
+        ansible_httpapi_port: 443
+        # Optional - Configuration to get Virtual Env information
+        ansible_python_interpreter: $(which python)
 ```
 
 ## License
