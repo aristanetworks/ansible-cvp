@@ -1,0 +1,49 @@
+---
+# tasks file for configlets-sync
+- name: "collect facts from {{inventory_hostname}}"
+  arista.cvp.cv_facts:
+  register: CVP_FACTS
+
+- name: "Extract shared Configlets"
+  template:
+    src: "template.shared_configlets.j2"
+    dest: "{{common_configlets_dir}}/{{inventory_hostname}}.yml"
+  delegate_to: '{{ansible_runner}}'
+  run_once: False
+
+- name: "check for shared_master"
+  stat:
+    path: '{{common_configlets_dir}}/master.yml'
+  register: status_shared_master
+  delegate_to: '{{ansible_runner}}'
+
+- name: "create {{common_configlets_dir}}/master.yml if not exist"
+  file:
+     path: '{{common_configlets_dir}}/master.yml'
+     state: touch
+     mode: u=rw,g=r,o=r
+  when: status_shared_master.stat.exists == false
+  delegate_to: '{{ansible_runner}}'
+
+- name: "add YAML designators to {{common_configlets_dir}}/master.yml"
+  copy: content="---" dest="{{common_configlets_dir}}/master.yml"
+  when: status_shared_master.stat.exists == false
+  delegate_to: '{{ansible_runner}}'
+
+- name: "load Common CVP Servers Configlet Data"
+  include_vars:
+     file: '{{common_configlets_dir}}/master.yml'
+     name: 'shared_master'
+  delegate_to: '{{ansible_runner}}'
+
+- name: "load CVP Instance Shared Configlet Data"
+  include_vars:
+     file: "{{common_configlets_dir}}/{{inventory_hostname}}.yml"
+     name: 'shared_server'
+  delegate_to: '{{ansible_runner}}'
+
+- name: "compare shared Configlets"
+  template:
+    src: "template.compare_configlets.j2"
+    dest: "{{common_configlets_dir}}/master.yml"
+  delegate_to: '{{ansible_runner}}'
