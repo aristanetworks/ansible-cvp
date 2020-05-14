@@ -2,7 +2,7 @@ name: ansible-test on PR
 on:
   pull_request:
     branches:
-      - 'releases/*'
+      - 'devel'
 jobs:
   'ansible-test':
     name: Run ansible-test validation
