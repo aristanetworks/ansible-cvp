@@ -1,8 +1,6 @@
 name: Code Linting
 on:
   push:
-    branches-ignore:
-      - master
     tags-ignore:
       - '*'
     paths:
