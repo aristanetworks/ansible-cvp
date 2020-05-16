@@ -39,9 +39,9 @@ More documentation is available in [project's wiki pages](https://github.com/ari
 
 __arista.cvp__ collection supports list of Cloudvision version as listed below:
 
-- __2018__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __2019__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __2020__: starting version [`1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
+- __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __CVP 2020.x.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
 
 When a CVP version is supported starting a specific version, any upcoming version will support that version until a specific announcement was made.
 
