@@ -1088,10 +1088,10 @@ class CvpApi(object):
         self.log.debug('Attempting to move device %s to container %s'
                        % (device['fqdn'], container['name']))
         # Allow for deviceId key name variations
-        if 'systemMacAddress' not in device.keys() and 'key' in device.keys():
-            device['systemMacAddress'] = device['key']
-        if 'systemMacAddress' not in device.keys():
-            raise KeyError("update_imageBundle: key or systemMacAddress not found in device object %s" % device['name'])
+        if 'key' not in device.keys() and 'systemMacAddress' in device.keys():
+            device['key'] = device['systemMacAddress']
+        if 'key' not in device.keys():
+            raise KeyError("move_device_to_container: key or systemMacAddress not found in device object %s" % device['name'])
         # Allow for parentContainerId key name variations
         if 'parentContainerId' not in device.keys() and 'parentContainerKey' in device.keys():
             device['parentContainerId'] = device['parentContainerKey']

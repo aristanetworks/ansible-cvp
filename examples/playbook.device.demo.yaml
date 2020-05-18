@@ -18,6 +18,7 @@
           - SYS_TelemetryBuilderV2_172.23.0.2_1
           - veos01-basic-configuration
           - SYS_TelemetryBuilderV2
+        parentContainerName: MLAG01
       veos02:
         name: veos02
         configlets:
@@ -25,12 +26,14 @@
           - SYS_TelemetryBuilderV2_172.23.0.3_1
           - SYS_TelemetryBuilderV2
           - veos02-basic-configuration
+        parentContainerName: MLAG01
       veos03:
         name: veos03
         configlets:
           - SYS_TelemetryBuilderV2_172.23.0.4_1
           - SYS_TelemetryBuilderV2
           - veos03-basic-configuration
+        parentContainerName: Leaves
     # Device inventory for rollback activity: unbind configlet
     devices_inventory_rollback:
       veos01:

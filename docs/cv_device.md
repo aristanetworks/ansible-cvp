@@ -26,7 +26,7 @@ Module comes with a set of options:
 - `state`: . Provide an option to delete devices from topology and reset devices to undefined container. Default value is `present` and it is an optional field.
   - `absent`: Reset devices.
   - `present`: Configure devices.
-- `configlet_fitler`: Allow user to select behaviour to apply on configlets attached to a device:
+- `configlet_mode`: Allow user to select behaviour to apply on configlets attached to a device:
   - `override`: (default) Configure list provided by user and remove any other configlets attached to device.
   - `merge`: add configlets listed by user to the device and do not touch existing configlets.
   - `delete`: Remove list of configlets from device and let other unchanged.
