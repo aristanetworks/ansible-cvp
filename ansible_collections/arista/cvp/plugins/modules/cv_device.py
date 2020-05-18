@@ -898,12 +898,7 @@ def devices_update(module, mode="override"):
         )
         # Start configlet update in override mode
         if mode == 'override':
-            # Get list of configlet to update: in ansible inputs and not in facts
-            MODULE_LOGGER.info("Configlets CVP has for device")
-            MODULE_LOGGER.info(device_update["cv_configlets"])
-            MODULE_LOGGER.info("\n")
-            MODULE_LOGGER.info("Configlets playbook has for device")
-            MODULE_LOGGER.info(device_update["configlets"])     
+            # Get list of configlet to update: in ansible inputs and not in facts 
             if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
                 configlets_delete = get_unique_from_list(
                     source_list=device_update["cv_configlets"],
