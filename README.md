@@ -19,9 +19,9 @@
     - [Docker for testing](#docker-for-testing)
   - [Getting Started](#getting-started)
   - [Resources](#resources)
-  - [License](#license)
   - [Ask a question](#ask-a-question)
-  - [Contributing](#contributing)
+  - [Branching Model](#branching-model)
+  - [License](#license)
 
 <!-- /code_chunk_output -->
 
@@ -209,18 +209,17 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
 - Content for [demo using Arista Validated Design and `arista.cvp` collection.](https://github.com/titom73/ansible-avd-cloudvision-demo)
 
-## License
-
-Project is published under [Apache License](LICENSE).
-
 ## Ask a question
 
 Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
 
-## Contributing
+## Branching Model
 
-Contributing pull requests are gladly welcomed for this repository. If you are planning a big change, please start a discussion first to make sure we’ll be able to merge it.
+- The __`devel`__ branch corresponds to the release actively under development.
+- The __`releases/x.x.x`__ branches correspond to stable releases.
+- Fork repository and create a branch based on __`devel`__ to set up a dev environment if you want to open a PR.
+- See the ansible-cvp release for information about active branches.
 
-You can also open an [issue](https://github.com/aristanetworks/ansible-cvp/issues) to report any problem or to submit enhancement.
+## License
 
-A more complete [guide for contribution](contributing.md) is available in the repository
+Project is published under [Apache 2.0 License](LICENSE)
