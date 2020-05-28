@@ -556,6 +556,8 @@ def build_new_devices_list(module):
             cvp_device = device_get_from_facts(
                 module=module, device_name=ansible_device_hostname
             )
+            if cvp_device is None:
+                module.fail_json(msg="Device not available on Cloudvision ("+ansible_device_hostname+")")
             if len(cvp_device) >= 0:
                 if is_in_container(device=cvp_device, container="undefined_container"):
                     device_info = {
