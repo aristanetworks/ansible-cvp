@@ -60,6 +60,7 @@ __List of available modules:__
 __List of available roles:__
 
 - [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](ansible_collections/arista/cvp/roles/configlets_sync/README.md) - Synchronize configlets between multiple Cloudvision servers.
 
 ### Important notes.
 

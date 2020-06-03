@@ -1,0 +1,39 @@
+---
+- name: "collect CVP Facts"
+  tags:
+    - sync
+  arista.cvp.cv_facts:
+  register: CVP_FACTS
+
+- name: "Refresh Shared Configlet Data"
+  tags:
+    - sync
+  include_vars:
+     file: '{{common_configlets_dir}}/master.yml'
+     name: 'shared_configlets'
+  delegate_to: '{{ansible_runner}}'
+
+- name: 'Refresh Shared configlet files for CVP'
+  tags:
+    - sync
+  template:
+    src: "template.cvp.shared_configlets.j2"
+    dest: '{{cvp_servers_dir}}/{{inventory_hostname}}_shared.yml'
+  delegate_to: '{{ansible_runner}}'
+  run_once: False
+
+- name: "Load refreshed CVP shared Configlet information"
+  tags:
+    - sync
+  include_vars: '{{cvp_servers_dir}}/{{inventory_hostname}}_shared.yml'
+  delegate_to: '{{ansible_runner}}'
+
+- name: 'Update Shared configlets on CVP Servers.'
+  tags:
+    - sync
+  arista.cvp.cv_configlet:
+    cvp_facts: "{{CVP_FACTS.ansible_facts}}"
+    configlets: "{{CVP_CONFIGLET}}"
+    configlet_filter: ['{{configlet_filter}}']
+  when:
+    - CVP_CONFIGLET is defined

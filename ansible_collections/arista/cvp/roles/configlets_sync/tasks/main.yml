@@ -1,0 +1,4 @@
+---
+# Manual action selection
+- name: 'load tasks for {{action}}'
+  include_tasks: "{{action}}.yml"

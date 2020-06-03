@@ -1,0 +1,9 @@
+# Run everything if user set action=sync
+- name: 'Run init phase'
+  include_tasks: "init.yml"
+
+- name: 'Run pull phase'
+  include_tasks: "pull.yml"
+
+- name: 'Run push phase'
+  include_tasks: "push.yml"

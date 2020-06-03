@@ -8,11 +8,13 @@
 
 __Arista CloudVision:__
 
-- CloudVision 2018.2.5 or later
+- __2018__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __2019__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __2020__: starting version [`1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
 
 __Python:__
 
-- Python 3.6.8 or later
+- Python 3.x
 
 __Additional Python Libraries required:__
 
@@ -21,7 +23,7 @@ __Additional Python Libraries required:__
 
 __Supported Ansible Versions:__
 
-    ansible 2.9 or later
+ansible 2.9 or later
 
 ## Installation
 
@@ -51,9 +53,8 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 
 __List of available roles:__
 
-- [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
-
-This collection supports CVP version >= `2018.2.5`
+- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](roles/configlets_sync/README.md) - Synchronize configlets between multiple Cloudvision servers.
 
 ## Example
 

@@ -1,0 +1,35 @@
+---
+# - name: 'creating folder {{generated_configlets_dir}}'
+#   file:
+#     path: '{{generated_configlets_dir}}'
+#     state: directory
+#     mode: 0755
+#   delegate_to: localhost
+#   run_once: True
+
+- name: 'creating folder {{common_configlets_dir}}'
+  file:
+    path: '{{common_configlets_dir}}'
+    recurse: yes
+    state: directory
+    mode: 0755
+  delegate_to: localhost
+  run_once: True
+
+- name: 'creating folder {{cvp_servers_dir}}'
+  file:
+    path: '{{cvp_servers_dir}}'
+    recurse: yes
+    state: directory
+    mode: 0755
+  delegate_to: localhost
+  run_once: True
+
+- name: 'creating folder {{devices_dir}}'
+  file:
+    path: '{{devices_dir}}'
+    recurse: yes
+    state: directory
+    mode: 0755
+  delegate_to: localhost
+  run_once: True
