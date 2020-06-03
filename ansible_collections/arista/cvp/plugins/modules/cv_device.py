@@ -813,22 +813,23 @@ def devices_move(module):
                     errorMessage,
                 )   # noqa # pylint: disable=unused-variable
                 # TODO: Add log message to trace exception.
-
-            changed = True
-            devices_moved += 1
-            if "taskIds" in str(device_action):
-                for taskId in device_action["data"]["taskIds"]:
-                    result_tasks_generated.append(taskId)
-                result_move.append(
-                    {
-                        device_update["name"]: "device-move-%s"
-                        % device_action["data"]["taskIds"]
-                    }
-                )
+                result_move.append({device_update["name"]: message})
             else:
-                result_move.append(
-                    {device_update["name"]: "device-move-no-specifc-tasks"}
-                )
+                changed = True
+                devices_moved += 1
+                if "taskIds" in str(device_action):
+                    for taskId in device_action["data"]["taskIds"]:
+                        result_tasks_generated.append(taskId)
+                    result_move.append(
+                        {
+                            device_update["name"]: "device-move-%s"
+                            % device_action["data"]["taskIds"]
+                        }
+                    )
+                else:
+                    result_move.append(
+                        {device_update["name"]: "device-move-no-specifc-tasks"}
+                    )
 
     # Build response structure
     data = {
@@ -899,7 +900,7 @@ def devices_update(module, mode="override"):
         )
         # Start configlet update in override mode
         if mode == 'override':
-            # Get list of configlet to update: in ansible inputs and not in facts
+            # Get list of configlet to update: in ansible inputs and not in facts 
             if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
                 configlets_delete = get_unique_from_list(
                     source_list=device_update["cv_configlets"],
@@ -1141,17 +1142,17 @@ def devices_action(module):
         if len(result_add["added_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_add["added_tasksIds"]
 
+        # move devices that needs to be moved to another container.
+        result_move = devices_move(module=module)
+        results["data"].update(result_move)
+        if len(result_move["moved_tasksIds"]) > 0:
+            results["data"]["tasksIds"] += result_move["moved_tasksIds"]
+
         # update devices that need to be updated
         result_update = devices_update(module=module, mode=configlet_mode)
         results["data"].update(result_update)
         if len(result_update["updated_tasksIds"]) > 0:
             results["data"]["tasksIds"] += result_update["updated_tasksIds"]
-
-        # move devices that needs to be moved to another container.
-        result_move = devices_move(module=module)
-        results["data"].update(result_move)
-        if len(result_move["moved_tasksIds"]) > 0:
-            results["data"]["tasksIds"] += result_update["moved_tasksIds"]
 
         # Get CV info for generated tasks
         tasks_generated = tasks_get_filtered(
