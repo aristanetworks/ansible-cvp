@@ -6,8 +6,11 @@ ansible_connection: paramiko
 # Method to become root
 ansible_become_method: sudo
 
-# Default password to become root
-# ansible_become_password: '{{ansible_password}}'
+# Default execution mode
+mode: online
+
+# Default folder if mode=offline
+output_dir: '{{ inventory_dir }}'
 
 # List of packages to install to enable DHCP package
 dhcp_packages:
