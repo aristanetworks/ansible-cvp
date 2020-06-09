@@ -10,8 +10,6 @@
   - [Using the issue tracker](#using-the-issue-tracker)
   - [Branches](#branches)
     - [Current active branches](#current-active-branches)
-    - [Branch namespaces](#branch-namespaces)
-    - [Branches for Bug Fixes only](#branches-for-bug-fixes-only)
   - [Pull requests](#pull-requests)
 
 <!-- /code_chunk_output -->
@@ -108,18 +106,8 @@ requests__](#pull-requests), but please respect the following restrictions:
 
 ### Current active branches
 
-- Current development branch: __`releases/v1.1.x`__
-- Stable branch: `master`
-
-### Branch namespaces
-
-- Branch namespace for issues: `issues/<IssueID>-<issue-name-shorten>`
-- Branch namespace for new features: `features/<IssueID>-<issue-name-shorten>`
-- Branch namespace for releases & development: `releases/<release_id>`
-
-### Branches for Bug Fixes only
-
-- Branch `releases/v1.0.x`: Bug Fixes only (cherry-picking or specific PR)
+- Current development branch: __`devel`__
+- Stable branch: `releases/v1.1.x`
 
 ## Pull requests
 
