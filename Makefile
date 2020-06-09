@@ -1,6 +1,9 @@
 CURRENT_DIR = $(shell pwd)
-DOCKER_NAME ?= arista-cvp
-DOCKER_TAG ?= $(shell sh .github/version.sh)
+CONTAINER_NAME = avdteam/base
+DOCKER_TAG = centos-7
+CONTAINER = $(CONTAINER_NAME):$(DOCKER_TAG)
+HOME_DIR = $(shell pwd)
+HOME_DIR_DOCKER = '/home/docker'
 # ansible-test path
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
@@ -50,17 +53,23 @@ sanity-import: ## Run ansible-test sanity for code import
 #########################################
 # Docker actions					 	#
 #########################################
-.PHONY: build-docker3
-build-docker3: ## Build docker image for python 3.0
-	docker build -f Dockerfile -t $(DOCKER_NAME):$(DOCKER_TAG) .
-
-.PHONY: build-docker
-build-docker: ## Build docker image based on latest supported Python version
-	docker build -f Dockerfile -t $(DOCKER_NAME):$(DOCKER_TAG) .
-
 .PHONY: run-docker
 run-docker: ## Connect to docker container
-	docker run -it --rm $(DOCKER_NAME):$(DOCKER_TAG) sh
+	docker run --rm -it \
+		-v $(HOME)/.ssh:$(HOME_DIR_DOCKER)/.ssh \
+		-v $(HOME)/.gitconfig:$(HOME_DIR_DOCKER)/.gitconfig \
+		-v $(HOME_DIR)/:/projects \
+		-v /etc/hosts:/etc/hosts $(CONTAINER)
+
+.PHONY: build-docker
+build-docker: ## [DEPRECATED] visit https://github.com/arista-netdevops-community/docker-avd-base to build image
+	#docker build --no-cache -t $(CONTAINER) .
+	echo ''; echo 'Deprecated command -- visit https://github.com/arista-netdevops-community/docker-avd-base to build image'; echo ''
+
+.PHONY: build-docker3
+build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-community/docker-avd-base to build image
+	#docker build --no-cache -t $(CONTAINER) .
+	echo ''; echo 'Deprecated command -- visit https://github.com/arista-netdevops-community/docker-avd-base to build image'; echo ''
 
 #########################################
 # Misc Actions 							#
