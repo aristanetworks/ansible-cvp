@@ -126,20 +126,9 @@ collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/
 
 ### Docker for testing
 
-The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
+In an effort to support both [arista.avd](https://github.com/aristanetworks/ansible-avd) and arista.cvp collections, you can find a generic docker image in [this repository](https://github.com/arista-netdevops-community/docker-avd-base).
 
-- Build Docker image
-
-```shell
-$ make build-docker
-$ make run-docker
-```
-
-Image will be created using current branch as tag. If it is run in master branch, then latest git tag will be used as docker tag.
-
-> Docker images can be reduced by using `--squash` option available with experimental features enabled on your docker host.
-
-All files part of [`examples`](examples/) are copied into the container.
+besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-toi)
 
 ## Getting Started
 
@@ -208,6 +197,7 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 - Ansible for [Arista Validated Design](https://github.com/aristanetworks/ansible-avd)
 - Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
+- [Lab for Getting started](https://github.com/arista-netdevops-community/ansible-cvp-toi)
 - Content for [demo using Arista Validated Design and `arista.cvp` collection.](https://github.com/titom73/ansible-avd-cloudvision-demo)
 
 ## Ask a question
