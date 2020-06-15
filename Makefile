@@ -31,7 +31,7 @@ collection-install: ## Install arista.cvp collection to default location (~/.ans
 #########################################
 
 .PHONY: sanity
-sanity: sanity-info-env sanity-lint sanity-import ## Run ansible-test sanity validation.
+sanity: sanity-info sanity-lint sanity-import ## Run ansible-test sanity validation.
 
 .PHONY: sanity-info
 sanity-info: ## Show information about ansible-test
@@ -80,7 +80,11 @@ linting: ## Run pre-commit script for python code linting using pylint
 	sh .github/pre-commit
 
 .PHONY: pre-commit
-pre-commit: ## Execute pre-commit validation
+pre-commit: ## Execute pre-commit validation for staged files
+	pre-commit run
+
+.PHONY: pre-commit-all
+pre-commit-all: ## Execute pre-commit validation for all files
 	pre-commit run --all-files
 
 .PHONY: github-configure-ci
@@ -95,8 +99,8 @@ github-configure-ci: ## Configure CI environment to run GA (Ubuntu:latest LTS)
 	sudo pip install --upgrade wheel
 	sudo pip install -r requirements.txt
 
-.PHONY: setup-repository
-setup-repository: ## Install python requirements
+.PHONY: install-requirements
+install-requirements: ## Install python requirements
 	pip install --upgrade wheel
 	pip install -r requirements.txt
 	pip install -r requirements.dev.txt
