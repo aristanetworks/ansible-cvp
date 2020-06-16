@@ -8,6 +8,8 @@ HOME_DIR_DOCKER = '/home/docker'
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
 ANSIBLE_TEST_MODE ?= docker
+# Root path for MKDOCS content
+WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
 
 .PHONY: help
 help: ## Display help message (*: main entry points / []: part of an entry point)
@@ -70,6 +72,20 @@ build-docker: ## [DEPRECATED] visit https://github.com/arista-netdevops-communit
 build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-community/docker-avd-base to build image
 	#docker build --no-cache -t $(CONTAINER) .
 	echo ''; echo 'Deprecated command -- visit https://github.com/arista-netdevops-community/docker-avd-base to build image'; echo ''
+
+
+#########################################
+# Documentation actions					#
+#########################################
+.PHONY: webdoc
+webdoc: ## Build documentation to publish static content
+	( cd $(WEBDOC_BUILD) ; \
+	python ansible2rst.py ; \
+	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
+	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
+	cd $(CURRENT_DIR)
+	mkdocs build -f mkdocs.yml
+
 
 #########################################
 # Misc Actions 							#
