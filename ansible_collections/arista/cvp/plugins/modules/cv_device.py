@@ -894,13 +894,26 @@ def devices_update(module, mode="override"):
 
     for device_update in devices_update:
         MODULE_LOGGER.info(" * devices_update - updating device: %s", str(device_update["name"]))
+        MODULE_LOGGER.info(" * devices_update - updating device with: %s", str(device_update))
         # Get device facts from cv facts
         device_facts = device_get_from_facts(
             module=module, device_name=device_update["name"]
         )
+        MODULE_LOGGER.debug(" * device_update - device facts: %s", str(device_facts))
+
+        MODULE_LOGGER.debug(" * device_update - var status for %s: add: %s / del: %s",
+            str(device_update["name"]),
+            str(configlets_add),
+            str(configlets_delete)
+        )
+        # # Structure to list configlets to delete
+        configlets_delete = list()
+        # # Structure to list configlets to configure on device.
+        configlets_add = list()
+
         # Start configlet update in override mode
         if mode == 'override':
-            # Get list of configlet to update: in ansible inputs and not in facts 
+            # Get list of configlet to update: in ansible inputs and not in facts
             if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
                 configlets_delete = get_unique_from_list(
                     source_list=device_update["cv_configlets"],

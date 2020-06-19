@@ -218,6 +218,7 @@ class CvpApi(object):
                              'netElementId=%s&queryParam=&startIndex=%d&'
                              'endIndex=%d' % (mac, start, end),
                              timeout=self.request_timeout)
+        self.log.debug('get_configlets_by_device: getting: %s' % str(data['configletList']))
         return data['configletList']
 
     # pylint: disable=too-many-locals
