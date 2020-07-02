@@ -85,7 +85,7 @@ ansible_python_interpreter=$(which python)
 `cv_facts` module collects all relevant information from a CloudVision instance. It is the baseline for all other modules to manage their elements.
 
 ```shell
-$ ansible-playbook playbook.facts.yaml
+$ ansible-playbook playbook.facts.demo.yaml
 ```
 
 ## Manage Configlets with `cv_configlet`
