@@ -49,7 +49,7 @@ Below are list of all activities to do to configure collections
 
 ```shell
 # Install python requirements.
-$ pip install ../requirements.txt
+$ pip install -r ../requirements.txt
 
 # Build collection
 $ ansible-galaxy collection build --force ../arista/cvp
