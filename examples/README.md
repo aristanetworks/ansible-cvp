@@ -52,7 +52,7 @@ Below are list of all activities to do to configure collections
 $ pip install -r ../requirements.txt
 
 # Build collection
-$ ansible-galaxy collection build --force ../arista/cvp
+$ ansible-galaxy collection build --force ../ansible_collections/arista/cvp
 
 # Install collection
 $ ls | grep arista-cvp
