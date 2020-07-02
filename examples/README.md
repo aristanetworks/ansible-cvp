@@ -37,10 +37,11 @@ Use Make to install python [`requirements`](../requirements.txt), build collecti
 
 ```shell
 # Install requirements
-$ make setup
+$ make install-requirements
 
 # Build & install collection
-$ make install
+$ make collection-build
+$ make collection-install
 ```
 
 ### Step by step approach
