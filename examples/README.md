@@ -37,10 +37,11 @@ Use Make to install python [`requirements`](../requirements.txt), build collecti
 
 ```shell
 # Install requirements
-$ make setup
+$ make install-requirements
 
 # Build & install collection
-$ make install
+$ make collection-build
+$ make collection-install
 ```
 
 ### Step by step approach
@@ -49,10 +50,10 @@ Below are list of all activities to do to configure collections
 
 ```shell
 # Install python requirements.
-$ pip install ../requirements.txt
+$ pip install -r ../requirements.txt
 
 # Build collection
-$ ansible-galaxy collection build --force ../arista/cvp
+$ ansible-galaxy collection build --force ../ansible_collections/arista/cvp
 
 # Install collection
 $ ls | grep arista-cvp
@@ -84,7 +85,7 @@ ansible_python_interpreter=$(which python)
 `cv_facts` module collects all relevant information from a CloudVision instance. It is the baseline for all other modules to manage their elements.
 
 ```shell
-$ ansible-playbook playbook.facts.yaml
+$ ansible-playbook playbook.facts.demo.yaml
 ```
 
 ## Manage Configlets with `cv_configlet`
