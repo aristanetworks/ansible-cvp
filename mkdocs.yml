@@ -19,6 +19,7 @@ use_directory_urls: true
 nav:
   - Installation:
     - Requirements: docs/installation/requirements.md
+    - Use docker environment: docs/installation/setup-docker.md
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Installation using git: docs/installation/setup-git.md
     - Docker & Development: docs/installation/setup-docker.md
