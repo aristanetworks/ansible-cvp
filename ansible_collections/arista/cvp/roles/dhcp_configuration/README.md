@@ -26,11 +26,18 @@ This role should work on any platform running [ISC-DHCP server](https://www.isc.
 ## Role Variables
 
 ```yaml
+mode:                 < offline/online - Select if role configure a DHCP server or just generate dhcpd.conf file locally. (default online) >
+# Offline only variables
+output_dir:           < path where to save dhcpd.conf file when using offline mode.>
+
+# Online only variables
 dhcp_packages: []     < List of packages to install as part of DHCP service. (default is ['dhcp'])>
 dhcp_packages_state:  < Flag to install or remove DHCP package. (default is present)>
 dhcp_config_dir:      < Folder where dhcp config is saved. (default is /etc/dhcp/)>
 dhcp_config:          < Configuration file for DHCP service. (default is {{ dhcp_config_dir }}/dhcpd.conf)>
 dhcp_service:         < Name of the service running on the system for DHCP. (default is dhcpd)>
+
+# Data for template engine. For both offline and online mode
 ztp:
   default:            < Section with default value for hosts configuration >
     registration:     < * Default URL to get Script to register to CV or initial configuration >
@@ -62,12 +69,60 @@ No dependency required for this role.
 
 ## Example Playbook
 
+### Generate DHCPD configuration to deploy on a DHCP server
+
+```yaml
+---
+- name: Configure DHCP service on CloudVision
+  hosts: dhcp_server
+  gather_facts: false
+  collection:
+    - arista.cvp
+  vars:
+    ztp:
+      default:
+        registration: 'http://10.255.0.1/ztp/bootstrap'
+        gateway: 10.255.0.3
+        nameservers:
+          - '10.255.0.3'
+      general:
+        subnets:
+          - network: 10.255.0.0
+            netmask: 255.255.255.0
+            gateway: 10.255.0.3
+            nameservers:
+              - '10.255.0.3'
+            start: 10.255.0.200
+            end: 10.255.0.250
+            lease_time: 300
+      clients:
+        - name: DC1-SPINE1
+          mac: '0c:1d:c0:1d:62:01'
+          ip4: 10.255.0.11
+        - name: DC1-SPINE2
+          mac: '0c:1d:c0:1d:62:02'
+          ip4: 10.255.0.12
+        - name: DC1-LEAF1A
+          mac: '0c:1d:c0:1d:62:11'
+          ip4: 10.255.0.13
+  tasks:
+  - name: 'Execute DHCP configuration role'
+    import_role:
+      name: arista.cvp.dhcp_configuration
+    vars:
+      mode: offline
+      output_dirs: '{{inventory}}'
+```
+
+### Configure Server to act as ZTP server
+
 Below is a basic playbook running `arista.cvp.dhcp_configuration` role
 
 ```yaml
 ---
 - name: Configure DHCP service on CloudVision
   hosts: dhcp_server
+  gather_facts: true
   collection:
     - arista.cvp
   vars:
