@@ -10,92 +10,105 @@ For example, see the file/folder structure below.
 ├── git_projects
 │   ├── ansible-avd
 │   ├── ansible-cvp
-│   ├── ansible-eos
-│   ├── eve-ng-lab
-│   ├── netdevops-examples
-│   ├── Dockerfile
+│   ├── ansible-avd-cloudvision-demo
+│   ├── <your-own-test-folder>
 │   ├── Makefile
-│   ├── requirements-dev.txt
-│   ├── requirements.txt
-
+...
 ```
 
-## Python Virtual Environment
+## Step by step installation process
 
-### Install Python3 Virtual Environment
-
-```shell
-# install virtualenv via pip3
-$ sudo pip3 install virtualenv
-
-```
-
-```shell
-# Configure Python virtual environment
-$ virtualenv -p python3 .venv
-$ source .venv/bin/activate
-
-# Install Python requirements
-$ pip install -r requirements.txt
-
-```
-
-## Docker Container for Ansible Testing and Development
-
-The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
-The container will mount the current working directory, so you can work with your local files.
-
-The ansible version is passed in with the docker build command using ***ANSIBLE*** variable.  If the ***ANSIBLE*** variable is not used the Dockerfile will by default set the ansible version to 2.9.2
-
-Before you can use a container, you must install Docker CE on your workstation: https://www.docker.com/products/docker-desktop
-
-### Build Docker Container
-
-In addition to the `Dockerfile`, a `Makefile` is provided to help provision the container a single step. A user can pass the ansible version number to make and alter the default ansible-version number.  This allows a user to setup multiple containers running differing versions of ansible.
-
-```shell
-make build                        # Use default version of Ansible
-make build ANSIBLE_VERSION=2.9.5  # Explicitly set Ansible version to 2.9.5
-
-docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-ansible_avd         2.9.6               5291937a2214        33 minutes ago      795MB
-ansible_avd         2.9.5               27f648c4c249        46 hours ago        912MB
-```
-
-### Run Docker Container
-
-```shell
-make run                        # Use default version of Ansible
-make run ANSIBLE_VERSION=2.9.5  # Explicitly set Ansible version to 2.9.5
-
-docker ps
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-e682058d7dae        ansible_avd:2.9.5   "/bin/sh"           6 seconds ago       Up 5 seconds                            ansible_avd_2.9.5
-540a8e778907        ansible_avd:2.9.6   "/bin/sh"           38 seconds ago      Up 37 seconds                           ansible_avd_2.9.6
-```
-
-### Stop Docker Container
-
-Another make target (clean) has been created to stop and remove the container once the user is finished with it.
-
-```shell
-make clean                       # Clean default version of Ansible
-make clean ANSIBLE_VERSION=2.9.5 # Explicitly clean Ansible version to 2.9.5
-
-docker ps
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-```
-
-## Getting started Script
+This process is similar to [ansible-avd collection](https://github.com/aristanetworks/ansible-avd). It means if you use AVD, this step is not required.
 
 ```shell
 mkdir git_projects
 cd git_projects
 git clone https://github.com/aristanetworks/ansible-avd.git
 git clone https://github.com/aristanetworks/ansible-cvp.git
-git clone https://github.com/aristanetworks/netdevops-examples.git
-cp ansible-avd/development/* ./
-make build
+git clone https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo.git
+cp ansible-cvp/development/Makefile ./
 make run
+```
+
+## One liner installation
+
+[One liner script](https://github.com/aristanetworks/ansible-cvp/blob/devel/development/install.sh) to setup a development environment. it does following actions:
+
+- Create local folder for development
+- Instantiate a local git repository (no remote)
+- Clone AVD and CVP collections
+- Deploy Makefile
+
+```shell
+$ sh -c "$(curl -fsSL https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/development/install.sh)"
+```
+
+## Build local environment
+
+### Docker Container for Ansible Testing and Development
+
+The docker container approach for development can be used to ensure that everybody is using the same development environment while still being flexible enough to use the repo you are making changes in. You can inspect the Dockerfile to see what packages have been installed.
+The container will mount the current working directory, so you can work with your local files.
+
+The ansible version is passed in with the docker build command using ***ANSIBLE*** variable.  If the ***ANSIBLE*** variable is not used the Dockerfile will by default set the ansible version to 2.9.2
+
+Before you can use a container, you must install [__Docker CE__](https://www.docker.com/products/docker-desktop) and [__docker-compose__](https://docs.docker.com/compose/) on your workstation.
+
+#### Development containers
+
+- [Ansible shell](https://hub.docker.com/repository/docker/avdteam/base): provide a built-in container with all AVD and CVP requirements already installed.
+- [MKDOCS](https://github.com/titom73/docker-mkdocs) for documentation update: Run MKDOCS in a container and expose port `8000` to test and validate markdown rendering for AVD site.
+
+#### Container commands
+
+In this folder you have a [`Makefile`](./Makefile) providing a list of commands to start a development environment:
+
+- `run`: Start a shell within a container and local folder mounted in `/projects`
+- `dev-start`: Start a stack of containers based on docker-compose: 1 container for ansible playbooks and 1 container for mkdocs
+- `dev-stop`: Stop compose stack and remove containers.
+- `dev-run`: Connect to ansible container to run your test playbooks.
+- `dev-reload`: Run stop and start.
+
+If you want to test a specific ansible version, you can refer to this [dedicated page](https://github.com/arista-netdevops-community/docker-avd-base/blob/master/USAGE.md) to start your own docker image. You can also use following make command: `make ANSIBLE_VERSION=2.9.3 run`
+
+Since docker image is now automatically published on [__docker-hub__](https://hub.docker.com/repository/docker/avdteam/base), a dedicated repository is available on [__Arista Netdevops Community__](https://github.com/arista-netdevops-community/docker-avd-base).
+
+```shell
+# Start development stack
+$ make dev-start
+docker-compose -f ansible-cvp/development/docker-compose.yml up -d
+Creating development_webdoc_1  ... done
+Creating development_ansible_1 ... done
+
+# List containers started with stack
+$ docker-compose -f ansible-avd/development/docker-compose.yml ps
+        Name                       Command               State           Ports
+---------------------------------------------------------------------------------------
+development_ansible_1   /bin/sh -c while true; do  ...   Up
+development_webdoc_1    sh -c pip install -r ansib ...   Up      0.0.0.0:8000->8000/tcp
+
+# Get a shell with ansible
+$ make dev-run
+docker-compose -f ansible-cvp/development/docker-compose.yml exec ansible zsh
+Agent pid 52
+➜  /projects
+
+# Test MKDOCS access
+$ curl -s http://127.0.0.1:8001 | head -n 10
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+
+# Stop development stack
+$ make dev-stop
+docker-compose -f ansible-cvp/development/docker-compose.yml kill &&\
+        docker-compose -f ansible-cvp/development/docker-compose.yml rm -f
+Killing development_ansible_1 ... done
+Killing development_webdoc_1  ... done
+Going to remove development_ansible_1, development_webdoc_1
+Removing development_ansible_1 ... done
+Removing development_webdoc_1  ... done
 ```

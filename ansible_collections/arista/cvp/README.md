@@ -58,95 +58,67 @@ __List of available roles:__
 
 ## Example
 
-### Create containers on CloudVision
+This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
+
+A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-toi).
+
+A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
+
+Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
 
 ```yaml
 ---
-- name: Build Switch configuration
-  hosts: DC1_FABRIC
+- name: Playbook to demonstrate cv_container module.
+  hosts: cvp
   connection: local
   gather_facts: no
+  collections:
+    - arista.cvp
   vars:
-    CVP_CONTAINERS:
-      DC1_LEAF1:
-        parent_container: DC1_L3LEAFS
-      DC1_FABRIC:
-        parent_container: Tenant
-      DC1_L3LEAFS:
-        parent_container: DC1_FABRIC
-      DC1_LEAF2:
-        parent_container: DC1_L3LEAFS
-      DC1_SPINES:
-        parent_container: DC1_FABRIC
+    containers_provision:
+        Fabric:
+          parent_container: Tenant
+        Spines:
+          parent_container: Fabric
+        Leaves:
+          parent_container: Fabric
+          configlets:
+              - alias
+          devices:
+            - veos03
+        MLAG01:
+          parent_container: Leaves
+          devices:
+            - veos01
+            - veos02
   tasks:
-    - name: 'Collecting facts from CVP {{inventory_hostname}}.'
-      arista.cvp.cv_facts:
-      register: CVP_FACTS
-    - name: "Building Container topology on {{inventory_hostname}}"
-      tags: [provision]
-      arista.cvp.cv_container:
-        topology: '{{CVP_CONTAINERS}}'
-        cvp_facts: '{{CVP_FACTS.ansible_facts}}'
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+
+    - name: "Build Container topology on {{inventory_hostname}}"
+      cv_container:
+        topology: '{{containers_provision}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
 ```
 
-### Create Configlets on CloudVision
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
-```yaml
----
-- name: Build Switch configuration
-  hosts: DC1_FABRIC
-  connection: local
-  gather_facts: no
-  vars:
-    CVP_CONFIGLETS:
-      ANSIBLE_TESTING_CONTAINER: "alias a{{ 999 | random }} show version"
-      ANSIBLE_TESTING_VEOS: "alias a{{ 999 | random }} show version"
-  tasks:
-    - name: 'Collecting facts from CVP {{inventory_hostname}}.'
-      arista.cvp.cv_facts:
-      register: CVP_FACTS
-    - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      arista.cvp.cv_configlet:
-        cvp_facts: "{{CVP_FACTS.ansible_facts}}"
-        configlets: "{{CVP_CONFIGLETS}}"
-        configlet_filter: ["_TESTING_"]
+```ini
+[development]
+cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
+
+[development:vars]
+ansible_connection=httpapi
+ansible_httpapi_use_ssl=True
+ansible_httpapi_validate_certs=False
+ansible_user=cvpadmin
+ansible_password=ansible
+ansible_network_os=eos
+ansible_httpapi_port=443
 ```
 
-### Configure devices on CloudVision
-
-```yaml
----
-- name: Build Switch configuration
-  hosts: DC1_FABRIC
-  connection: local
-  gather_facts: no
-  vars:
-    CVP_DEVICES:
-      DC1-SPINE1:
-        name: DC1-SPINE1
-        parent_container: DC1_SPINES
-        configlets:
-            - AVD_DC1-SPINE1
-        imageBundle: []
-      DC1-SPINE2:
-        name: DC1-SPINE2
-        parent_container: DC1_SPINES
-        configlets:
-            - AVD_DC1-SPINE2
-        imageBundle: []
-  tasks:
-    - name: 'Collecting facts from CVP {{inventory_hostname}}.'
-      arista.cvp.cv_facts:
-      register: CVP_FACTS
-    - name: "Configure devices on {{inventory_hostname}}"
-      arista.cvp.cv_device:
-        devices: "{{CVP_DEVICES}}"
-        cvp_facts: '{{CVP_FACTS.ansible_facts}}'
-        device_filter: ['DC1']
-        state: present
-```
-
-More documentation on [github repository](https://github.com/aristanetworks/ansible-cvp)
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ## License
 

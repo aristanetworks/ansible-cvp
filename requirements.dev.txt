@@ -1,8 +1,0 @@
-pylint==2.5.0
-docker==4.1.0
-yamllint==1.18.0
-six
-virtualenv
-mitogen
-ansible-lint==4.2.0
-pre-commit==2.3.0

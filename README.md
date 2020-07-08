@@ -10,14 +10,14 @@
   - [About](#about)
   - [List of CVP versions supported](#list-of-cvp-versions-supported)
   - [Modules overview](#modules-overview)
-    - [Important notes.](#important-notes)
+    - [Important notes](#important-notes)
+  - [Getting Started](#getting-started)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
     - [Installation from ansible-galaxy](#installation-from-ansible-galaxy)
     - [Git installation](#git-installation)
     - [Git installation for testing](#git-installation-for-testing)
     - [Docker for testing](#docker-for-testing)
-  - [Getting Started](#getting-started)
   - [Resources](#resources)
   - [Ask a question](#ask-a-question)
   - [Branching Model](#branching-model)
@@ -33,7 +33,7 @@
   <img src='docs/cv_ansible_logo.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-More documentation is available in [project's wiki pages](https://github.com/aristanetworks/ansible-cvp/wiki)
+More documentation is available in [project's website](https://aristanetworks.github.io/ansible-cvp/)
 
 ## List of CVP versions supported
 
@@ -62,11 +62,73 @@ __List of available roles:__
 - [__arista.cvp.dhcp_configuration__](ansible_collections/arista/cvp/roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 - [__arista.cvp.configlet_sync__](ansible_collections/arista/cvp/roles/configlets_sync/README.md) - Synchronize configlets between multiple Cloudvision servers.
 
-### Important notes.
+### Important notes
 
 This repository is built based on [new collections system](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#developing-collections) introduced by ansible starting version __2.9__.
 
 > It means that it is required to run at least ansible `2.9.0rc4` to be able to use this collection.
+
+## Getting Started
+
+This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
+
+A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-toi).
+
+A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
+
+Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
+
+```yaml
+---
+- name: Playbook to demonstrate cv_container module.
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  collections:
+    - arista.cvp
+  vars:
+    containers_provision:
+        Fabric:
+          parent_container: Tenant
+        Spines:
+          parent_container: Fabric
+        Leaves:
+          parent_container: Fabric
+          configlets:
+              - alias
+          devices:
+            - veos03
+        MLAG01:
+          parent_container: Leaves
+          devices:
+            - veos01
+            - veos02
+  tasks:
+    - name: "Gather CVP facts from {{inventory_hostname}}"
+      cv_facts:
+      register: cvp_facts
+
+    - name: "Build Container topology on {{inventory_hostname}}"
+      cv_container:
+        topology: '{{containers_provision}}'
+        cvp_facts: '{{cvp_facts.ansible_facts}}'
+```
+
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
+
+```ini
+[development]
+cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
+
+[development:vars]
+ansible_connection=httpapi
+ansible_httpapi_use_ssl=True
+ansible_httpapi_validate_certs=False
+ansible_user=cvpadmin
+ansible_password=ansible
+ansible_network_os=eos
+ansible_httpapi_port=443
+```
 
 ## Installation
 
@@ -128,67 +190,7 @@ collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/
 
 In an effort to support both [arista.avd](https://github.com/aristanetworks/ansible-avd) and arista.cvp collections, you can find a generic docker image in [this repository](https://github.com/arista-netdevops-community/docker-avd-base).
 
-besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-toi)
-
-## Getting Started
-
-This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
-
-A [complete end to end demo](https://github.com/titom73/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
-
-Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
-
-```yaml
----
-- name: Playbook to demonstrate cv_container module.
-  hosts: cvp
-  connection: local
-  gather_facts: no
-  collections:
-    - arista.cvp
-  vars:
-    containers_provision:
-        Fabric:
-          parent_container: Tenant
-        Spines:
-          parent_container: Fabric
-        Leaves:
-          parent_container: Fabric
-          configlets:
-              - alias
-          devices:
-            - veos03
-        MLAG01:
-          parent_container: Leaves
-          devices:
-            - veos01
-            - veos02
-  tasks:
-    - name: "Gather CVP facts from {{inventory_hostname}}"
-      cv_facts:
-      register: cvp_facts
-
-    - name: "Build Container topology on {{inventory_hostname}}"
-      cv_container:
-        topology: '{{containers_provision}}'
-        cvp_facts: '{{cvp_facts.ansible_facts}}'
-```
-
-As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
-
-```ini
-[development]
-cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
-
-[development:vars]
-ansible_connection=httpapi
-ansible_httpapi_use_ssl=True
-ansible_httpapi_validate_certs=False
-ansible_user=cvpadmin
-ansible_password=ansible
-ansible_network_os=eos
-ansible_httpapi_port=443
-```
+Besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-toi)
 
 ## Resources
 
