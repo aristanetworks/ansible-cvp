@@ -1,4 +1,4 @@
-# AVD Unit test
+# CVP Unit test
 
 This section provides a list of Ansible Cloudvision scenario executed during Continuous Integration to validate CVP integration.
 
