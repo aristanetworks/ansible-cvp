@@ -22,3 +22,16 @@ __Additional Python Libraries required:__
 ## Supported Ansible Versions
 
 ansible 2.9 or later
+
+
+## Install requirements
+
+To install project's requirements, use `pip` from the root of the repository
+
+```shell
+# Requirement to use arista.cvp collection
+$ pip install -r requirements.txt
+
+# Requirements to develop arista.cvp collection
+$ pip install -r development/requirements-dev.txt
+```

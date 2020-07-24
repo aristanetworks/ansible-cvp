@@ -254,12 +254,14 @@ def build_configlets_list(module):
     # Place to save configlets to delete from CV
     intend['delete'] = list()
 
+    MODULE_LOGGER.info(' * build_configlets_list - configlet filter is: %s', str(module.params['configlet_filter']))
+
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
         # their derived configlets
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
-            if re.search(r"\ball\b", str(module.params['configlet_filter'])) or (
+            if re.search(r"\b(all|none)\b", str(module.params['configlet_filter'])) or (
                any(element in configlet['name'] for element in module.params['configlet_filter'])):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
@@ -292,6 +294,7 @@ def build_configlets_list(module):
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
             )
+    MODULE_LOGGER.info(' * build_configlets_list - configlet list is: %s', str(intend))
     return intend
 
 
