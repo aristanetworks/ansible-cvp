@@ -31,8 +31,12 @@ import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+
+from cvprac.cvp_client import CvpClient
+from cvprac.cvp_client_errors import CvpLoginError
+
 from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
     find_hostname_by_mac,
     find_containerName_by_containerId
