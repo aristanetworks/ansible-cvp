@@ -39,8 +39,13 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
 
 from ansible.module_utils.six import string_types
 TREELIB_IMP_ERR = None
@@ -924,8 +929,8 @@ def configure_configlet_to_container(module, intended, facts):
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
                 if (match_filter is False
-                    and container_factinfo(container_name=container, facts=facts) is not None
-                    and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
+                        and container_factinfo(container_name=container, facts=facts) is not None
+                        and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
                     MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s), skipped', str(
                         configlet_filter), str(container_info_cvp['configlets']))
                     continue
@@ -1119,6 +1124,10 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
+
+    if not HAS_CVPRAC:
+        module.fail_json(msg='cvprac required for this module')
+
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()

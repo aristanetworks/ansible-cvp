@@ -30,12 +30,18 @@ ANSIBLE_METADATA = {
 
 import time
 import logging
+import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
 
 from ansible.module_utils.connection import Connection
 
@@ -215,6 +221,9 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
+
+    if not HAS_CVPRAC:
+        module.fail_json(msg='cvprac required for this module')
 
     result = dict(changed=False)
 

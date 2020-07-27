@@ -30,12 +30,18 @@ ANSIBLE_METADATA = {
 }
 
 import logging
+import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-from cvprac.cvp_client import CvpClient
-from cvprac.cvp_client_errors import CvpLoginError
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
 
 from ansible.module_utils.connection import Connection
 
@@ -558,7 +564,7 @@ def build_new_devices_list(module):
                 module=module, device_name=ansible_device_hostname
             )
             if cvp_device is None:
-                module.fail_json(msg="Device not available on Cloudvision ("+ansible_device_hostname+")")
+                module.fail_json(msg="Device not available on Cloudvision (" + ansible_device_hostname + ")")
             if len(cvp_device) >= 0:
                 if is_in_container(device=cvp_device, container="undefined_container"):
                     device_info = {
@@ -903,10 +909,9 @@ def devices_update(module, mode="override"):
         MODULE_LOGGER.debug(" * device_update - device facts: %s", str(device_facts))
 
         MODULE_LOGGER.debug(" * device_update - var status for %s: add: %s / del: %s",
-            str(device_update["name"]),
-            str(configlets_add),
-            str(configlets_delete)
-        )
+                            str(device_update["name"]),
+                            str(configlets_add),
+                            str(configlets_delete))
         # # Structure to list configlets to delete
         configlets_delete = list()
         # # Structure to list configlets to configure on device.
@@ -1210,6 +1215,10 @@ def main():
                             choices=['merge', 'override', 'delete']))
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
+
+    if not HAS_CVPRAC:
+        module.fail_json(msg='cvprac required for this module')
+
     # Connect to CVP instance
     module.client = connect(module)
 
