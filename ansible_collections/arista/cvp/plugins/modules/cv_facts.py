@@ -196,7 +196,7 @@ def facts_devices(module, facts):
 
         # Add ImageBundle Info
         device['imageBundle'] = ""
-        deviceInfo = module.client.api.get_net_element_info_by_device_id(device['key'])
+        deviceInfo = module.client.api.get_device_by_mac(device['key'])
         if "imageBundleMapper" in deviceInfo:
             # There should only be one ImageBudle but its id is not decernable
             # If the Image is applied directly to the device its type will be 'netelement'
@@ -356,7 +356,7 @@ def facts_containers(module, facts):
         MODULE_LOGGER.debug('  -> Working on %s', container['name'])
         container['devices'] = []
         # Get list of devices attached to container.
-        applied_devices = module.client.api.get_devices_by_container_id(container['key'])
+        applied_devices = module.client.api.get_devices_in_container(container['key'])
         for device in applied_devices:
             container['devices'].append(device['fqdn'])
 
@@ -505,6 +505,7 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
+    # TODO: Test CVPRAC version as well
     if not HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
