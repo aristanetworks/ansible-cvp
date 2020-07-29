@@ -85,3 +85,41 @@ def match_filter(input, filter, default_always='all'):
         return True
     LOGGER.debug(" * is_in_filter - NOT matched")
     return False
+
+def cv_update_configlets_on_device(module, device_facts, add_configlets, del_configlets):
+    response = dict()
+    device_deletion = dict()
+    device_addition = dict()
+    # Initial Logging
+    LOGGER.debug(' * cv_update_configlets_on_device - add_configlets: %s', str(add_configlets))
+    LOGGER.debug(' * cv_update_configlets_on_device - del_configlets: %s', str(del_configlets))
+    # Work on delete configlet scenario
+    LOGGER.info(" * cv_update_configlets_on_device - start device deletion process")
+    if len(del_configlets) > 0:
+        LOGGER.debug(' * cv_update_configlets_on_device - DELETE configlets: %s', str(del_configlets))
+        try:
+            device_deletion = module.client.api.remove_configlets_from_device(
+                    app_name="Ansible",
+                    dev=device_facts,
+                    del_configlets=del_configlets,
+                    create_task=True
+                )
+            LOGGER.info(" * cv_update_configlets_on_device - device_deletion result: %s", str(device_deletion))
+            response.update(device_deletion)
+        except Exception as error:
+            errorMessage = str(error)
+            LOGGER.debug('OK, something wrong happens, raise an exception: %s', str(message))
+    # Work on Add configlet scenario
+    LOGGER.debug(" * cv_update_configlets_on_device - start device addition process")
+    if len(del_configlets) > 0:
+        LOGGER.debug(' * cv_update_configlets_on_device - ADD configlets: %s', str(add_configlets))
+        device_addition = module.client.api.apply_configlets_to_device(
+                    app_name="Ansible",
+                    dev=device_facts,
+                    add_configlets=add_configlets,
+                    create_task=True
+                )
+        LOGGER.debug(" * cv_update_configlets_on_device - device_addition result: %s", str(device_addition))
+        response.update(device_addition)
+    LOGGER.debug(" * cv_update_configlets_on_device - final result: %s", str(response))
+    return response

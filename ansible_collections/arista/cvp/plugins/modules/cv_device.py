@@ -33,6 +33,7 @@ import logging
 import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_update_configlets_on_device
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
 try:
@@ -710,12 +711,13 @@ def devices_new(module):
 
         # Execute configlet update on device
         try:
-            device_action = module.client.api.provision_device(
+            MODULE_LOGGER.info('provision device using cvprac.api.deploy_device')
+            device_action = module.client.api.deploy_device(
                 app_name="Ansible",
                 device=device_facts,
-                container=container_facts,
+                container=container_facts['name'],
                 configlets=configlets_add,
-                imageBundle=imageBundle_attached,
+                # imageBundle=imageBundle_attached,
                 create_task=action_save_topology,
             )
         except Exception as error:
@@ -724,6 +726,7 @@ def devices_new(module):
                 device_update["name"],
                 errorMessage,
             )
+            MODULE_LOGGER.debug('OK, something wrong happens, raise an exception: %s', str(message))
             result_update.append({device_update["name"]: message})
         else:
             # Capture and report error message sent by CV during update
@@ -968,14 +971,24 @@ def devices_update(module, mode="override"):
             module.fail_json("Error - device does not exists on CV side.")
 
         # Execute configlet update on device
+        MODULE_LOGGER.debug(' * device_update - device_update configlets: %s', str(device_update["configlets"]))
+        MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s', str(device_update["cv_configlets"]))
         if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
             try:
-                device_action = module.client.api.update_configlets_on_device(
-                    app_name="Ansible",
-                    device=device_facts,
+                # device_action = module.client.api.update_configlets_on_device(
+                #     app_name="Ansible",
+                #     device=device_facts,
+                #     add_configlets=configlets_add,
+                #     del_configlets=configlets_delete,
+                # )
+                MODULE_LOGGER.debug("", str(configlets_add))
+                device_action = cv_update_configlets_on_device(
+                    module=module,
+                    device_facts=device_facts,
                     add_configlets=configlets_add,
-                    del_configlets=configlets_delete,
+                    del_configlets=configlets_delete
                 )
+
             except Exception as error:
                 errorMessage = str(error)
                 message = "Device %s Configlets cannot be updated - %s" % (
