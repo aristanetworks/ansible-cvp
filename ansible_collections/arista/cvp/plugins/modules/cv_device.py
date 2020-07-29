@@ -974,7 +974,9 @@ def devices_update(module, mode="override"):
         MODULE_LOGGER.debug(' * device_update - device_update configlets: %s', str(device_update["configlets"]))
         MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s', str(device_update["cv_configlets"]))
         if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+            MODULE_LOGGER.debug(' * device_update - call cv_update_configlets_on_device')
             try:
+                MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
                 # device_action = module.client.api.update_configlets_on_device(
                 #     app_name="Ansible",
                 #     device=device_facts,
@@ -988,7 +990,7 @@ def devices_update(module, mode="override"):
                     add_configlets=configlets_add,
                     del_configlets=configlets_delete
                 )
-
+                MODULE_LOGGER.debug(' * device_update - get response from cv_update_configlets_on_device: %s', str(device_action))
             except Exception as error:
                 errorMessage = str(error)
                 message = "Device %s Configlets cannot be updated - %s" % (
@@ -1006,6 +1008,7 @@ def devices_update(module, mode="override"):
                     result_update.append({device_update["name"]: message})
                 else:
                     changed = True  # noqa # pylint: disable=unused-variable
+                    MODULE_LOGGER.debug(' * device_update - looking for taskIds in %s', str(device_action))
                     if "taskIds" in str(device_action):
                         devices_updated += 1
                         for taskId in device_action["data"]["taskIds"]:
