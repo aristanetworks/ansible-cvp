@@ -868,6 +868,8 @@ def configure_configlet_to_container(module, intended, facts):
     # Define wether we want to save topology or not
     # Force to True as per issue115
     save_topology = True
+    # Structure to save CVP result for configlet changes
+    configlet_action = dict()
     # Configlet filter
     configlet_filter = module.params['configlet_filter']
     # Read complete intended topology to locate devices
@@ -904,6 +906,7 @@ def configure_configlet_to_container(module, intended, facts):
                                                                                new_configlets=configlet_list_attach,
                                                                                container=container_info_cvp,
                                                                                create_task=save_topology)
+            MODULE_LOGGER.debug('Get following response from cvprac for addition: %s', str(configlet_action))
             # Release list of configlet to configure (#165)
             configlet_list_attach = list()
             if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
@@ -922,7 +925,7 @@ def configure_configlet_to_container(module, intended, facts):
             container_info_cvp), str(container_name))
         if container_info_cvp is not None and 'configlets' in container_info_cvp:
             for configlet in container_info_cvp['configlets']:
-                # If configlet matchs filter, we just remove attachement.
+                # If configlet matchs filter, we just remove attachment.
                 match_filter = cv_tools.match_filter(
                     input=configlet, filter=configlet_filter, default_always='none')
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
@@ -963,6 +966,7 @@ def configure_configlet_to_container(module, intended, facts):
                                                                                       del_configlets=configlet_list_detach,
                                                                                       container=container_info_cvp,
                                                                                       create_task=save_topology)
+                MODULE_LOGGER.debug('Get following response from cvprac for deletion: %s', str(configlet_action))
                 # Release list of configlet to configure (#165)
                 configlet_list_detach = list()
                 if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
@@ -979,6 +983,7 @@ def configure_configlet_to_container(module, intended, facts):
     result['changed'] = True
     result['attached_configlet'] = attached
     result['detached_configlet'] = detached
+    MODULE_LOGGER.debug('configure_configlet_to_container returns %s', str(result))
     return result
 
 
