@@ -196,7 +196,8 @@ def facts_devices(module, facts):
 
         # Add ImageBundle Info
         device['imageBundle'] = ""
-        deviceInfo = module.client.api.get_device_by_mac(device['key'])
+        deviceInfo = module.client.api.get_device_image_info(
+            device['key'])  # get_device_image_info() from cvprac
         if "imageBundleMapper" in deviceInfo:
             # There should only be one ImageBudle but its id is not decernable
             # If the Image is applied directly to the device its type will be 'netelement'
