@@ -18,6 +18,7 @@ __Python:__
 
 __Additional Python Libraries required:__
 
+- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.4`
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
 
@@ -30,6 +31,7 @@ ansible 2.9 or later
 ```shell
 pip install requests>=2.22.0
 pip install treelib>=1.5.5
+pip install cvprac==1.0.4
 ```
 
 Ansible galaxy hosts all stable version of this collection. Installation from ansible-galaxy is the most convenient approach for consuming `arista.cvp` content
@@ -38,7 +40,7 @@ Ansible galaxy hosts all stable version of this collection. Installation from an
 $ ansible-galaxy collection install arista.cvp
 Process install dependency map
 Starting collection install process
-Installing 'arista.cvp:1.0.3' to '~/.ansible/collections/ansible_collections/arista/cvp'
+Installing 'arista.cvp:1.1.0' to '~/.ansible/collections/ansible_collections/arista/cvp'
 ```
 
 ## Modules overview
