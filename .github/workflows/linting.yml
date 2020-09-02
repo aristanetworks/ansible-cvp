@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@master
       - name: test pre-commit
         run: |
-          pip --no-cache-dir install development/requirements-dev.txt
+          pip --no-cache-dir install -r development/requirements-dev.txt
           pre-commit help
       - name: 'Pre Commit run'
         run: |
