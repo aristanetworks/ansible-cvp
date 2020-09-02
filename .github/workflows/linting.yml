@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@master
       - name: test pre-commit
         run: |
+          mkdir -p /github/home/.cache/pip
           pip list | grep pre-commit
           ls -al /root/.local/bin/ | grep pre
           pre-commit help
