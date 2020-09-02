@@ -1,6 +1,8 @@
 name: Mkdocs
 on:
   push:
+    branches:
+      - 'devel'
 jobs:
   'doc':
     name: 'Update Public documentation'
