@@ -1,14 +1,18 @@
 name: Commit check
 on:
   push:
-
+  pull_request:
 jobs:
   'pre-commit':
     name: Run pre-commit validation hooks
     runs-on: ubuntu-latest
-    container: avdteam/base:centos-8
+    container: avdteam/base:3.6
     steps:
       - uses: actions/checkout@master
+      - name: test pre-commit
+        run: |
+          pip --no-cache-dir install -r development/requirements-dev.txt
+          pre-commit help
       - name: 'Pre Commit run'
         run: |
           make pre-commit

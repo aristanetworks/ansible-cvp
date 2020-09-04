@@ -1,0 +1,30 @@
+name: Ansible Molecule
+on:
+  push:
+  pull_request:
+    paths:
+      - 'ansible_collections/arista/cvp/roles/**'
+      - 'ansible_collections/arista/cvp/molecules/**'
+      - 'requirements.txt'
+jobs:
+  molecule:
+    runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+    strategy:
+      fail-fast: true
+      matrix:
+        avd_scenario:
+          - dhcp_configuration
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run molecule action
+        uses: inetsix/molecule-collection-actions@master
+        with:
+          molecule_parentdir: 'ansible_collections/arista/cvp'
+          molecule_command: 'test'
+          molecule_args: '-s ${{ matrix.avd_scenario }}'
+          pip_file: 'requirements.txt'

@@ -3,7 +3,7 @@ on:
   pull_request:
     branches:
       - 'devel'
-      - 'releases/*'
+      - 'releases/**'
 jobs:
   'ansible-test':
     name: Run ansible-test validation
