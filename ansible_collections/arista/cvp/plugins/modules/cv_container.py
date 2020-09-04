@@ -37,8 +37,16 @@ import ansible_collections.arista.cvp.plugins.module_utils.cv_tools as cv_tools
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError, CvpApiError
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError, CvpApiError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
+
 from ansible.module_utils.six import string_types
 TREELIB_IMP_ERR = None
 try:
@@ -860,6 +868,8 @@ def configure_configlet_to_container(module, intended, facts):
     # Define wether we want to save topology or not
     # Force to True as per issue115
     save_topology = True
+    # Structure to save CVP result for configlet changes
+    configlet_action = dict()
     # Configlet filter
     configlet_filter = module.params['configlet_filter']
     # Read complete intended topology to locate devices
@@ -896,6 +906,7 @@ def configure_configlet_to_container(module, intended, facts):
                                                                                new_configlets=configlet_list_attach,
                                                                                container=container_info_cvp,
                                                                                create_task=save_topology)
+            MODULE_LOGGER.debug('Get following response from cvprac for addition: %s', str(configlet_action))
             # Release list of configlet to configure (#165)
             configlet_list_attach = list()
             if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
@@ -914,15 +925,15 @@ def configure_configlet_to_container(module, intended, facts):
             container_info_cvp), str(container_name))
         if container_info_cvp is not None and 'configlets' in container_info_cvp:
             for configlet in container_info_cvp['configlets']:
-                # If configlet matchs filter, we just remove attachement.
+                # If configlet matchs filter, we just remove attachment.
                 match_filter = cv_tools.match_filter(
                     input=configlet, filter=configlet_filter, default_always='none')
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
                 # If configlet is not in intended and does not match filter, ignore it
                 # If filter is set to ['none'], we consider to NOT touch attachment in any situation.
                 if (match_filter is False
-                    and container_factinfo(container_name=container, facts=facts) is not None
-                    and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
+                        and container_factinfo(container_name=container, facts=facts) is not None
+                        and configlet not in container_factinfo(container_name=container, facts=facts)['configlets']):
                     MODULE_LOGGER.warning('configlet does not match filter (%s) and is not in intended topology (%s), skipped', str(
                         configlet_filter), str(container_info_cvp['configlets']))
                     continue
@@ -955,6 +966,7 @@ def configure_configlet_to_container(module, intended, facts):
                                                                                       del_configlets=configlet_list_detach,
                                                                                       container=container_info_cvp,
                                                                                       create_task=save_topology)
+                MODULE_LOGGER.debug('Get following response from cvprac for deletion: %s', str(configlet_action))
                 # Release list of configlet to configure (#165)
                 configlet_list_detach = list()
                 if 'data' in configlet_action and configlet_action['data']['status'] == 'success':
@@ -971,6 +983,7 @@ def configure_configlet_to_container(module, intended, facts):
     result['changed'] = True
     result['attached_configlet'] = attached
     result['detached_configlet'] = detached
+    MODULE_LOGGER.debug('configure_configlet_to_container returns %s', str(result))
     return result
 
 
@@ -1116,6 +1129,10 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
+
+    if not HAS_CVPRAC:
+        module.fail_json(msg='cvprac required for this module')
+
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()

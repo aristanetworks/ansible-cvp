@@ -2,6 +2,8 @@
 
 # Ansible Modules for Arista CloudVision Platform
 
+> All the CV communication are now managed by [__cvprac library__](https://github.com/aristanetworks/cvprac). So a new [requirements](#dependencies) __MUST__ be installed first before any code execution.
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -136,8 +138,9 @@ ansible_httpapi_port=443
 
 This collection requires the following to be installed on the Ansible control machine:
 
-- python `3.7`
+- python `3.6` and higher
 - ansible >= `2.9.0`
+- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.4`
 - requests >= `2.22.0`
 - treelib version `1.5.5`
 

@@ -28,11 +28,20 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 import logging
+import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
+# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
+
 from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
     find_hostname_by_mac,
     find_containerName_by_containerId
@@ -187,7 +196,8 @@ def facts_devices(module, facts):
 
         # Add ImageBundle Info
         device['imageBundle'] = ""
-        deviceInfo = module.client.api.get_net_element_info_by_device_id(device['key'])
+        deviceInfo = module.client.api.get_device_image_info(
+            device['key'])  # get_device_image_info() from cvprac
         if "imageBundleMapper" in deviceInfo:
             # There should only be one ImageBudle but its id is not decernable
             # If the Image is applied directly to the device its type will be 'netelement'
@@ -347,7 +357,7 @@ def facts_containers(module, facts):
         MODULE_LOGGER.debug('  -> Working on %s', container['name'])
         container['devices'] = []
         # Get list of devices attached to container.
-        applied_devices = module.client.api.get_devices_by_container_id(container['key'])
+        applied_devices = module.client.api.get_devices_in_container(container['key'])
         for device in applied_devices:
             container['devices'].append(device['fqdn'])
 
@@ -495,6 +505,10 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
+
+    # TODO: Test CVPRAC version as well
+    if not HAS_CVPRAC:
+        module.fail_json(msg='cvprac required for this module')
 
     # Forge standard Ansible output
     result = dict(changed=False, ansible_facts={})

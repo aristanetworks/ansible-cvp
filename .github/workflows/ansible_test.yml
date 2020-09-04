@@ -4,8 +4,6 @@ on:
     branches:
       - 'devel'
       - 'releases/**'
-    paths:
-      - 'ansible_collections/arista/cvp/**'
 jobs:
   'ansible-test':
     name: Run ansible-test validation
