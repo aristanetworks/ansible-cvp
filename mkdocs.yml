@@ -7,23 +7,21 @@ theme:
   name: material
   features:
     - instant
-  font:
-    text: Ubuntu
-    code: Ubuntu Mono
 extra_css:
-  - docs/stylesheets/extra.css
+  - docs/stylesheets/extra.material.css
 copyright: Copyright &copy; 2019 - 2020 Arista Networks
-repo_name: Github
+repo_name: CVP on Github
 repo_url: https://github.com/aristanetworks/ansible-cvp
 use_directory_urls: true
 nav:
+  - Home: README.md
+  - Getting Started: docs/getting-started.md
   - Installation:
     - Requirements: docs/installation/requirements.md
-    - Use docker environment: docs/installation/setup-docker.md
-    - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
+    - Configure your local environment: docs/installation/setup-environement.md
     - Installation using git: docs/installation/setup-git.md
+    - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Docker & Development: docs/installation/setup-docker.md
-  - Getting Started: docs/getting-started.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
@@ -33,10 +31,12 @@ nav:
     - Module cv_container: docs/modules/cv_container.rst.md
     - Module cv_device: docs/modules/cv_device.rst.md
     - Module cv_tasks: docs/modules/cv_task.rst.md
+  - External resources:
+    - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
+    - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html
   - About:
-    - Contribution Guide: docs/contributing.md
     - Ansible Galaxy page: https://galaxy.ansible.com/arista/cvp
-    - Arista Validated Design: https://github.com/aristanetworks/ansible-avd
+    - Arista Validated Design Collection: https://github.com/aristanetworks/ansible-avd
     - Arista Automation Examples: https://github.com/aristanetworks/netdevops-examples
 
 markdown_extensions:

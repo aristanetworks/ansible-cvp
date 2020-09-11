@@ -22,7 +22,7 @@ Any version of Cloudvision supported by current `arista.cvp` collection.
 
 ```yaml
 ---
-action: < * action to run with the role: init|sync|pull|push>
+action: < * action to run with the role: init|sync|pull|push >
 ```
 
 - __`init`__: Create initial local folder to save role outputs.

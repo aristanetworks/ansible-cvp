@@ -1,37 +1,57 @@
 # Requirements
 
-## Arista CloudVision
+## Arista EOS version
 
-__arista.cvp__ collection supports list of Cloudvision version as listed below:
-
-- __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __CVP 2020.x.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
-
-When a CVP version is supported starting a specific version, any upcoming version will support that version until a specific announcement was made.
+- EOS __4.21.8M__ or later
+- Roles validated with eAPI transport -> `ansible_connection: httpapi`
 
 ## Python
 
-- Python 3.x
-
-__Additional Python Libraries required:__
-
-- requests >= `2.22.0`
-- treelib version `1.5.5` or later
+- Python __3.6.8__ or later
 
 ## Supported Ansible Versions
 
-ansible 2.9 or later
+- ansible 2.9.2 or later
 
+## Additional Python Libraries required
 
-## Install requirements
+- [Jinja2](https://pypi.org/project/Jinja2/)  `2.10.3`
+- [netaddr](https://pypi.org/project/netaddr/) `0.7.19`
+- [requests](https://pypi.org/project/requests/) `2.22.0`
+- [treelib](https://pypi.org/project/treelib/) `1.5.5`
+- [cvprac](https://github.com/aristanetworks/cvprac) `1.0.4`
 
-To install project's requirements, use `pip` from the root of the repository
+### Python requirements installation
+
+In a shell, run following command:
 
 ```shell
-# Requirement to use arista.cvp collection
-$ pip install -r requirements.txt
-
-# Requirements to develop arista.cvp collection
-$ pip install -r development/requirements-dev.txt
+$ pip3 install -r development/requirements.txt
 ```
+
+[`requirements.txt`](https://github.com/aristanetworks/ansible-avd/blob/devel/development/requirements.txt) has the following content:
+
+```text
+ansible==2.9.6
+netaddr==0.7.19
+Jinja2==2.10.3
+requests==2.22.0
+treelib==1.5.5
+cvprac==1.0.4
+```
+
+> Depending of your operating system settings, `pip3` might be replaced by `pip`.
+
+## Ansible runner requirements
+
+A optional docker container is available with all the requirements already installed. To use this container, Docker must be installed on your ansible runner.
+
+To install Docker on your system, you can refer to the following page: [Docker installation step by step](https://docs.docker.com/engine/installation/)
+
+Or if you prefer you can run this oneLiner installation script:
+
+```shell
+$ curl -fsSL get.docker.com | sh
+```
+
+In addition, docker-compose should be considered to run a stack of containers: https://docs.docker.com/compose/install/
