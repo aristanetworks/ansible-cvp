@@ -1,26 +1,12 @@
 # Installation using GIT
 
-## Setup using Git to install collection
+Using GIT as source of collection in ansible provides an easy way to implement all the changes once they are part of the development branch without waiting for a new tagged version shipped to ansible-galaxy.
 
-You can git clone this repository and use examples folder for testing. This folder contains a set of pre-configured playbook and ansible configuration:
+## Use Git as source of collection
 
-### Clone repository
+In this setup, git repository will be used by ansible as collection. It is useful when working on feature development as we can change git branch and test code lively.
 
-```shell
-$ git clone https://github.com/aristanetworks/ansible-cvp.git
-$ cd ansible-cvp
-```
-
-### Build and install collection
-
-```shell
-$ ansible-galaxy collection build --force ansible_collections/arista/cvp
-$ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
-```
-
-## Setup using Git for local testing.
-
-### Clone repository
+### Get repository locally
 
 ```shell
 # Clone repository
@@ -30,40 +16,42 @@ $ git clone https://github.com/aristanetworks/ansible-cvp.git
 cd ansible-cvp
 ```
 
-### Install python virtual-environment
+### Update your ansible.cfg
 
-```shell
-# Install virtualenv if not part of your system
-$ python -m pip install virtualenv
-```
+In your project, update your `ansible.cfg` file to point __collection_paths__ to your local version of ansible-cvp
 
-### Create virtual environment
-
-```shell
-# Create a virtual env named .venv
-$ virtualenv --no-site-packages -p $(which python2.7) .venv
-
-# Activate virtualenv
-$ source .venv/bin/activate
-```
-
-### Install collection requirements
-
-```shell
-# Install repsoitory requirements
-$ pip install -r requirements.txt
-```
-
-### (Optional) Update your ansible.cfg
-
-Only if you want to use your own playbooks outside of __`examples/`__folder of the repository.
+- Get full path to your newly cloned AVD repository.
 
 ```shell
 # Get your current location
 $ pwd
-/path/to/ansible/cvp/collection_repository
+/path/to/ansible/avd/collection_repository
+```
 
-# Update your ansible.cfg
+- Configure your project to use AVD repository as source of collections:
+
+```shell
+# Update your ansible.cfg in your playbook project
 $ vim ansible.cfg
 collections_paths = /path/to/ansible/cvp/collection_repository
+```
+
+## Build & install collection from git
+
+In this approach, an ansible collection package is built from current git version and installed locally.
+
+### Clone repository
+
+```shell
+$ git clone https://github.com/aristanetworks/ansible-cvp.git
+$ cd ansible-avd
+```
+
+### Build and install collection
+
+This section should be used only to test collection packaging and to create an offline package to ship on your internal resources if required.
+
+```shell
+$ ansible-galaxy collection build --force ansible_collections/arista/avd
+$ ansible-galaxy collection install arista-cvp-<VERSION>.tar.gz
 ```

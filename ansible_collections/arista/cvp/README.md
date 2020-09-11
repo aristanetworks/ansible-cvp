@@ -6,6 +6,10 @@
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks.
 
+<p align="center">
+  <img src='medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
+</p>
+
 ## Requirements
 
 __Arista CloudVision:__
@@ -24,9 +28,7 @@ __Additional Python Libraries required:__
 - requests >= `2.22.0`
 - treelib version `1.5.5` or later
 
-__Supported Ansible Versions:__
-
-ansible 2.9 or later
+__Supported Ansible Versions:__ ansible 2.9 or later
 
 ## Installation
 
@@ -45,20 +47,24 @@ Starting collection install process
 Installing 'arista.cvp:1.1.0' to '~/.ansible/collections/ansible_collections/arista/cvp'
 ```
 
+Complete installation process is available on [repository website](https://cvp.avd.sh/installation/)
+
 ## Modules overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-- __arista.cvp.cv_facts__ - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- __arista.cvp.cv_configlet__ -  Manage configlet configured on CVP.
-- __arista.cvp.cv_container__ -  Manage container topology and attach configlet and devices to containers.
-- __arista.cvp.cv_device__ - Manage devices configured on CVP
-- __arista.cvp.cv_task__ - Run tasks created on CVP.
+__List of available modules:__
+
+- [__arista.cvp.cv_facts__](http://cvp.avd.sh/docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- [__arista.cvp.cv_configlet__](http://cvp.avd.sh/docs/modules/cv_configlet.md) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container__](http://cvp.avd.sh/docs/modules/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device__](http://cvp.avd.sh/docs/modules/cv_device.md) - Manage devices configured on CVP
+- [__arista.cvp.cv_task__](http://cvp.avd.sh/docs/modules/cv_task.md) - Run tasks created on CVP.
 
 __List of available roles:__
 
-- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/README.md) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
-- [__arista.cvp.configlet_sync__](roles/configlets_sync/README.md) - Synchronize configlets between multiple Cloudvision servers.
+- [__arista.cvp.dhcp_configuration__](http://cvp.avd.sh/roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](http://cvp.avd.sh/roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
 
 ## Example
 
@@ -66,7 +72,7 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 
 A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-toi).
 
-A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example. You can also find some playbook examples under [__`examples`__](examples/) folder with information about how to built a test environment.
+A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
 
 Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
 
