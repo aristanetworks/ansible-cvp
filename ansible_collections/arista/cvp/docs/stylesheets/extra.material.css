@@ -23,7 +23,7 @@
   --md-accent-bg-color--light:         #27569B;
 
   /* Code block color shades */
-  --md-code-bg-color:                  #FFFFFF;
+  --md-code-bg-color:                  #E6E6E6;
   --md-code-border-color:              #5487b74f;
   --block-code-bg-color:               #e4e4e4;
   /* --md-code-fg-color:                  ...; */
@@ -77,13 +77,13 @@
     padding: 0 .2941176471em;
     font-size: 80%;
     word-break: break-word;
-    background-color: #E6E6E6;
+    background-color: var(--md-code-bg-color);
     border-radius: .1rem;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
   }
   .highlight code {
-    background-color: #E6E6E6;
+    background-color: var(--md-code-bg-color);
     border: 2px solid var(--md-code-border-color);
   }
 }
