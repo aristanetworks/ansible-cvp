@@ -7,6 +7,11 @@ theme:
   name: material
   features:
     - instant
+  highlightjs: true
+  hljs_languages:
+        - yaml
+        - python
+        - shell
 extra_css:
   - docs/stylesheets/extra.material.css
 copyright: Copyright &copy; 2019 - 2020 Arista Networks
@@ -36,8 +41,8 @@ nav:
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html
   - About:
     - Ansible Galaxy page: https://galaxy.ansible.com/arista/cvp
-    - Arista Validated Design Collection: https://github.com/aristanetworks/ansible-avd
-    - Arista Automation Examples: https://github.com/aristanetworks/netdevops-examples
+    - Arista Validated Design Collection: https://www.avd.sh
+    - Arista Automation Examples: https://aristanetworks.github.io/netdevops-examples/
 
 markdown_extensions:
   - smarty
