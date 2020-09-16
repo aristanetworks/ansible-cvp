@@ -61,7 +61,7 @@ Before you can use a container, you must install [__Docker CE__](https://www.doc
 
 #### Container commands
 
-In this folder you have a [`Makefile`](./Makefile) providing a list of commands to start a development environment:
+In this folder you have a `Makefile` providing a list of commands to start a development environment:
 
 - `run`: Start a shell within a container and local folder mounted in `/projects`
 - `dev-start`: Start a stack of containers based on docker-compose: 1 container for ansible playbooks and 1 container for mkdocs
