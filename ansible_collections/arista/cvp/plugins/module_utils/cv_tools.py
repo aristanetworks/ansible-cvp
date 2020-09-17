@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
 #
-# FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
 # Copyright 2019 Arista Networks AS-EMEA
@@ -23,8 +22,74 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 import logging
+import traceback
+from ansible.module_utils.connection import Connection
+try:
+    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client_errors import CvpLoginError
+    HAS_CVPRAC = True
+except ImportError:
+    HAS_CVPRAC = False
+    CVPRAC_IMP_ERR = traceback.format_exc()
+
 
 LOGGER = logging.getLogger('arista.cvp.cv_tools')
+
+
+def cv_connect(module):
+    """
+    cv_connect CV Connection method.
+
+    Generic Cloudvision connection method to connect to either on-prem or cvaas instances.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module information
+
+    Returns
+    -------
+    CvpClient
+        Instanciated CvpClient with connection information.
+    """
+    client = CvpClient()
+    connection = Connection(module._socket_path)
+    host = connection.get_option("host")
+    port = connection.get_option("port")
+    user = connection.get_option("remote_user")
+    user_authentication = connection.get_option("password")
+    LOGGER.info('Connecting to CVP')
+    if user == 'cvaas':
+        LOGGER.debug('Connecting to a cvaas instance')
+        try:
+            client.connect(nodes=[host],
+                           is_cvaas=True,
+                           cvaas_token=user_authentication,
+                           username='',
+                           password='',
+                           protocol="https",
+                           port=port
+                           )
+        except CvpLoginError as e:
+            module.fail_json(msg=str(e))
+            LOGGER.error('Cannot connect to CVP: %s', str(e))
+    else:
+        LOGGER.debug('Connecting to a on-prem instance')
+        try:
+            client.connect(nodes=[host],
+                           username=user,
+                           password=user_authentication,
+                           protocol="https",
+                           is_cvaas=False,
+                           port=port,
+                           )
+        except CvpLoginError as e:
+            module.fail_json(msg=str(e))
+            LOGGER.error('Cannot connect to CVP: %s', str(e))
+
+    LOGGER.debug('*** Connected to CVP')
+
+    return client
 
 
 def isIterable(testing_object=None):
@@ -86,6 +151,7 @@ def match_filter(input, filter, default_always='all'):
     LOGGER.debug(" * is_in_filter - NOT matched")
     return False
 
+
 def cv_update_configlets_on_device(module, device_facts, add_configlets, del_configlets):
     response = dict()
     device_deletion = None
@@ -98,11 +164,11 @@ def cv_update_configlets_on_device(module, device_facts, add_configlets, del_con
     if len(del_configlets) > 0:
         try:
             device_deletion = module.client.api.remove_configlets_from_device(
-                    app_name="Ansible",
-                    dev=device_facts,
-                    del_configlets=del_configlets,
-                    create_task=True
-                )
+                app_name="Ansible",
+                dev=device_facts,
+                del_configlets=del_configlets,
+                create_task=True
+            )
             response = device_deletion
         except Exception as error:
             errorMessage = str(error)
@@ -114,12 +180,12 @@ def cv_update_configlets_on_device(module, device_facts, add_configlets, del_con
         LOGGER.debug(' * cv_update_configlets_on_device - ADD configlets: %s', str(add_configlets))
         try:
             device_addition = module.client.api.apply_configlets_to_device(
-                        app_name="Ansible",
-                        dev=device_facts,
-                        new_configlets=add_configlets,
-                        create_task=True
-                    )
-            response.update(device_addition)
+                app_name="Ansible",
+                dev=device_facts,
+                new_configlets=add_configlets,
+                create_task=True
+            )
+            response.uate(device_addition)
         except Exception as error:
             errorMessage = str(error)
             LOGGER.error('OK, something wrong happens, raise an exception: %s', str(errorMessage))
