@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
 #
-# FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
 # Copyright 2019 Arista Networks AS-EMEA
