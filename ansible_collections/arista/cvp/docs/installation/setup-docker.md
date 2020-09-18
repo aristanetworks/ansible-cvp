@@ -32,7 +32,7 @@ make run
 
 ## One liner installation
 
-[One liner script](https://github.com/aristanetworks/ansible-cvp/blob/devel/development/install.sh) to setup a development environment. it does following actions:
+[One liner script](https://github.com/arista-netdevops-community/avd-install/blob/master/install.sh) to setup a development environment. it does following actions:
 
 - Create local folder for development
 - Instantiate a local git repository (no remote)
@@ -40,7 +40,7 @@ make run
 - Deploy Makefile
 
 ```shell
-$ sh -c "$(curl -fsSL https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/development/install.sh)"
+$ sh -c "$(curl -fsSL https://get.avd.sh)"
 ```
 
 ## Build local environment

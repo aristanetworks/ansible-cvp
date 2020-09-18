@@ -26,7 +26,7 @@ nav:
     - Configure your local environment: docs/installation/setup-environement.md
     - Installation using git: docs/installation/setup-git.md
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
-    - Docker & Development: docs/installation/setup-docker.md
+    - Development tips & tricks: docs/installation/development.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
