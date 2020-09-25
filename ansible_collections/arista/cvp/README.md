@@ -14,9 +14,10 @@
 
 __Arista CloudVision:__
 
-- __2018__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __2019__: starting version [`1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __2020__: starting version [`1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
+- __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
+- __CVP 2020.1.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
+- __CVP 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
 
 __Python:__
 
