@@ -10,6 +10,8 @@ ANSIBLE_TEST ?= $(shell which ansible-test)
 ANSIBLE_TEST_MODE ?= docker
 # Root path for MKDOCS content
 WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
+COMPOSE_FILE ?= development/docker-compose.yml
+MUFFET_TIMEOUT ?= 60
 
 .PHONY: help
 help: ## Display help message (*: main entry points / []: part of an entry point)
@@ -86,6 +88,9 @@ webdoc: ## Build documentation to publish static content
 	cd $(CURRENT_DIR)
 	mkdocs build -f mkdocs.yml
 
+.PHONY: check-cvp-404
+check-cvp-404: ## Check local 404 links for AVD documentation
+	docker run --rm --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8000 -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=$(MUFFET_TIMEOUT)
 
 #########################################
 # Misc Actions 							#

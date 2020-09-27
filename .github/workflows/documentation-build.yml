@@ -1,14 +1,15 @@
-name: Mkdocs
+name: mkdoc_deploy
 on:
   push:
     branches:
       - 'devel'
     paths:
       - 'mkdocs.yml'
+      - 'ansible_collections/arista/cvp/README.md'
       - 'ansible_collections/arista/cvp/docs/**'
       - 'ansible_collections/arista/cvp/roles/**/README.md'
 jobs:
-  'doc':
+  publish:
     name: 'Update Public documentation'
     runs-on: ubuntu-latest
     steps:
