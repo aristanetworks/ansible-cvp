@@ -5,6 +5,7 @@ on:
       - 'devel'
     paths:
       - 'mkdocs.yml'
+      - 'ansible_collections/arista/cvp/README.md'
       - 'ansible_collections/arista/cvp/docs/**'
       - 'ansible_collections/arista/cvp/roles/**/README.md'
 jobs:
