@@ -29,6 +29,7 @@ nav:
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
     - Configure Cloudvision Authentication: docs/how-to/cvp-authentication.md
+    - Development tips & tricks: docs/installation/development.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
