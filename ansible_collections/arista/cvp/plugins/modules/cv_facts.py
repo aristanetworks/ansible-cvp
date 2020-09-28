@@ -504,7 +504,7 @@ def main():
                    default='all'))
 
     module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=False)
+                           supports_check_mode=True)
 
     if not HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
