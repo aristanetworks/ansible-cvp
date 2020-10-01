@@ -21,6 +21,9 @@ use_directory_urls: true
 nav:
   - Home: README.md
   - Getting Started: docs/getting-started.md
+  - Release Notes:
+    - Versions 1.x: docs/release-notes/v1.x.md
+    - Versions 2.x: docs/release-notes/v2.x.md
   - Installation:
     - Requirements: docs/installation/requirements.md
     - Configure your local environment: docs/installation/setup-environement.md
@@ -29,12 +32,11 @@ nav:
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
     - Configure Cloudvision Authentication: docs/how-to/cvp-authentication.md
-    - Development tips & tricks: docs/installation/development.md
-  - How-to:
     - Get Facts: docs/how-to/cv_facts.md
     - Manage configlets: docs/how-to/cv_configlet.md
     - Manage containers: docs/how-to/cv_container.md
     - Manage devices: docs/how-to/cv_device.md
+    - Development tips & tricks: docs/installation/development.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
