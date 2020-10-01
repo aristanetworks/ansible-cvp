@@ -27,6 +27,11 @@ nav:
     - Installation using git: docs/installation/setup-git.md
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Development tips & tricks: docs/installation/development.md
+  - How-to:
+    - Get Facts: docs/how-to/cv_facts.md
+    - Manage configlets: docs/how-to/cv_configlet.md
+    - Manage containers: docs/how-to/cv_container.md
+    - Manage devices: docs/how-to/cv_device.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
