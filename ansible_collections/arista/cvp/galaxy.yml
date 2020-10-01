@@ -45,10 +45,10 @@ dependencies: {}
 repository: https://github.com/aristanetworks/ansible-cvp
 
 # The URL to any online docs
-documentation: https://github.com/aristanetworks/ansible-cvp
+documentation: https://cvp.avd.sh/
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/aristanetworks/ansible-cvp
+homepage: https://cvp.avd.sh/
 
 # The URL to the collection issue tracker
 issues: https://github.com/aristanetworks/ansible-cvp/issues
