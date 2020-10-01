@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
 # Copyright 2019 Arista Networks AS-EMEA
@@ -28,24 +27,17 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 import logging
-import traceback
+import traceback  # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.connection import Connection
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
 # from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-try:
-    from cvprac.cvp_client import CvpClient
-    from cvprac.cvp_client_errors import CvpLoginError
-    HAS_CVPRAC = True
-except ImportError:
-    HAS_CVPRAC = False
-    CVPRAC_IMP_ERR = traceback.format_exc()
 
 from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
     find_hostname_by_mac,
     find_containerName_by_containerId
 )
+from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 
 DOCUMENTATION = r'''
 ---
@@ -125,33 +117,6 @@ EXAMPLES = r'''
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
 MODULE_LOGGER.info('Start cv_facts module execution')
-
-
-def connect(module):
-    ''' Connects to CVP device using user provided credentials from playbook.
-    :param module: Ansible module with parameters and client connection.
-    :return: CvpClient object with connection instantiated.
-    '''
-    client = CvpClient()
-    connection = Connection(module._socket_path)
-    host = connection.get_option("host")
-    port = connection.get_option("port")
-    user = connection.get_option("remote_user")
-    pswd = connection.get_option("password")
-    MODULE_LOGGER.info('Connecting to CVP')
-    try:
-        client.connect([host],
-                       user,
-                       pswd,
-                       protocol="https",
-                       port=port,
-                       )
-    except CvpLoginError as e:
-        module.fail_json(msg=str(e))
-
-    MODULE_LOGGER.debug('*** Connected to CVP')
-
-    return client
 
 
 def facts_devices(module, facts):
@@ -514,7 +479,7 @@ def main():
     result = dict(changed=False, ansible_facts={})
 
     # Connect to CVP Instance
-    module.client = connect(module)
+    module.client = cv_connect(module)
 
     # Get Facts from CVP
     result['ansible_facts'] = facts_builder(module)

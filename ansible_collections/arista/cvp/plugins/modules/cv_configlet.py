@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
 # Copyright 2019 Arista Networks AS-EMEA
@@ -33,18 +32,8 @@ import re
 import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-try:
-    from cvprac.cvp_client import CvpClient
-    from cvprac.cvp_client_errors import CvpLoginError
-    HAS_CVPRAC = True
-except ImportError:
-    HAS_CVPRAC = False
-    CVPRAC_IMP_ERR = traceback.format_exc()
-
-from ansible.module_utils.connection import Connection
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
@@ -153,29 +142,6 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
     textComp = difflib.SequenceMatcher(None, fromText, toText)
     diffRatio = textComp.ratio()
     return [diffRatio, diff]
-
-
-def connect(module):
-    ''' Connects to CVP device using user provided credentials from playbook.
-    :param module: Ansible module with parameters and client connection.
-    :return: CvpClient object with connection instantiated.
-    '''
-    client = CvpClient()
-    connection = Connection(module._socket_path)
-    host = connection.get_option("host")
-    port = connection.get_option("port")
-    user = connection.get_option("remote_user")
-    pswd = connection.get_option("password")
-    try:
-        client.connect([host],
-                       user,
-                       pswd,
-                       protocol="https",
-                       port=port,
-                       )
-    except CvpLoginError as e:
-        module.fail_json(msg=str(e))
-    return client
 
 
 def get_tasks(taskIds, module):
@@ -706,12 +672,13 @@ def main():
         module.fail_json(msg='difflib required for this module')
 
     if not HAS_CVPRAC:
-        module.fail_json(msg='cvprac required for this module')
+        module.fail_json(
+            msg='cvprac required for this module. Please install using pip install cvprac')
 
     result = dict(changed=False, data={})
     # messages = dict(issues=False)
     # Connect to CVP instance
-    module.client = connect(module)
+    module.client = cv_connect(module)
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)

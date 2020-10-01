@@ -26,6 +26,9 @@ nav:
     - Configure your local environment: docs/installation/setup-environement.md
     - Installation using git: docs/installation/setup-git.md
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
+    - Docker & Development: docs/installation/setup-docker.md
+  - How-To:
+    - Configure Cloudvision Authentication: docs/how-to/cvp-authentication.md
     - Development tips & tricks: docs/installation/development.md
   - How-to:
     - Get Facts: docs/how-to/cv_facts.md
