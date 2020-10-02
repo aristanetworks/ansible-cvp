@@ -53,6 +53,7 @@ nav:
     - Arista Automation Examples: https://aristanetworks.github.io/netdevops-examples/
 
 markdown_extensions:
+  - mdx_truly_sane_lists
   - smarty
   - pymdownx.arithmatex
   - pymdownx.betterem:
