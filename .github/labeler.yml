@@ -1,40 +1,40 @@
-  "module: cv_configlet":
-    - ansible_collections/arista/cvp/plugins/modules/cv_configlet.py
+"module: cv_configlet":
+  - ansible_collections/arista/cvp/plugins/modules/cv_configlet.py
 
-  "module: cv_container":
-    - ansible_collections/arista/cvp/plugins/modules/cv_container.py
+"module: cv_container":
+  - ansible_collections/arista/cvp/plugins/modules/cv_container.py
 
-  "module: cv_device":
-    - ansible_collections/arista/cvp/plugins/modules/cv_device.py
+"module: cv_device":
+  - ansible_collections/arista/cvp/plugins/modules/cv_device.py
 
-  "module: cv_facts":
-    - ansible_collections/arista/cvp/plugins/modules/cv_facts.py
+"module: cv_facts":
+  - ansible_collections/arista/cvp/plugins/modules/cv_facts.py
 
-  "module: cv_task":
-    - ansible_collections/arista/cvp/plugins/modules/cv_task.py
+"module: cv_task":
+  - ansible_collections/arista/cvp/plugins/modules/cv_task.py
 
-  "module_utils: cv_client":
-    - ansible_collections/arista/cvp/plugins/module_utils/*
+"module_utils: cv_client":
+  - ansible_collections/arista/cvp/plugins/module_utils/*
 
-  "role: ztp_configuration":
-    - ansible_collections/arista/cvp/roles/dhcp_configuration/*
+"role: ztp_configuration":
+  - ansible_collections/arista/cvp/roles/dhcp_configuration/*
 
-  "role: configlets_sync":
-    - ansible_collections/arista/cvp/roles/configlets_sync/*
+"role: configlets_sync":
+  - ansible_collections/arista/cvp/roles/configlets_sync/*
 
-  "type: documentation":
-    - README.md
-    - contributing.md
-    - ansible_collections/arista/cvp/README.md
-    - ansible_collections/arista/cvp/docs/*
+"type: documentation":
+  - README.md
+  - contributing.md
+  - ansible_collections/arista/cvp/README.md
+  - ansible_collections/arista/cvp/docs/*
 
-  "type: code quality":
-    - ./.github/labeler.yml
-    - ./.github/*
-    - ./.github/**/*
-    - development/docker-compose.yml
-    - development/Makefile
+"type: code quality":
+  - .github/labeler.yml
+  - .github/*
+  - .github/**/*
+  - development/docker-compose.yml
+  - development/Makefile
 
-  "type: dependencies":
-    - development/requirements-dev.txt
-    - development/requirements.txt
+"type: dependencies":
+  - development/requirements-dev.txt
+  - development/requirements.txt
