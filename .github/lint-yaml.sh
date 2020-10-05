@@ -22,3 +22,4 @@ echo "--------------------------------------------------------------------------
 echo "  - Group Variables"
 find group_vars/ -name "*.yml" -maxdepth 1 -exec yamllint -d "{extends: relaxed, rules: {line-length: {max: 140}}}" {} \;
 echo "------------------------------------------------------------------------------------------------------------"
+echo "Validation finished"
