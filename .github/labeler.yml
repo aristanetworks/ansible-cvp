@@ -1,6 +1,3 @@
----
-  # Labeler file for action provided by https://github.com/actions/labeler
-
   "module: cv_configlet":
     - ansible_collections/arista/cvp/plugins/modules/cv_configlet.py
 
