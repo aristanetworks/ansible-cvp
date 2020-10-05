@@ -27,4 +27,5 @@
 - [ ] My change requires a change to the documentation.
 - [ ] I have updated the documentation accordingly.
 - [ ] I have read the [**CONTRIBUTING**](https://github.com/aristanetworks/ansible-cvp/blob/master/contributing.md#branches) document.
+- [ ] Add fake question
 - [ ] All new and existing tests passed (`make linting` and `make sanity-lint`).
