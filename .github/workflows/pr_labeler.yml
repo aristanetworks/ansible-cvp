@@ -5,8 +5,10 @@ on:
 
 jobs:
   triage:
+    name: "PR Triage"
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: actions/labeler@v2
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
