@@ -29,9 +29,9 @@
   - ansible_collections/arista/cvp/docs/*
 
 "type: code quality":
-  - ./.github/labeler.yml
-  - ./.github/*
-  - ./.github/**/*
+  - .github/labeler.yml
+  - .github/*
+  - .github/**/*
   - development/docker-compose.yml
   - development/Makefile
 
