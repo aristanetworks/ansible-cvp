@@ -52,5 +52,6 @@
     - development/Makefile
 
   'type: dependencies':
+    - development/*
     - development/requirements-dev.txt
     - development/requirements.txt
