@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# FIXME: required to pass ansible-test
 # GNU General Public License v3.0+
 #
 # Copyright 2019 Arista Networks AS-EMEA
@@ -30,21 +29,11 @@ ANSIBLE_METADATA = {
 }
 
 import logging
-import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_update_configlets_on_device
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-try:
-    from cvprac.cvp_client import CvpClient
-    from cvprac.cvp_client_errors import CvpLoginError
-    HAS_CVPRAC = True
-except ImportError:
-    HAS_CVPRAC = False
-    CVPRAC_IMP_ERR = traceback.format_exc()
+from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 
-from ansible.module_utils.connection import Connection
 
 DOCUMENTATION = r"""
 ---
@@ -146,35 +135,6 @@ EXAMPLES = r"""
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
 MODULE_LOGGER.info('Start cv_device module execution')
-
-
-def connect(module):
-    """
-    Connects to CVP device using user provided credentials from playbook.
-
-    Parameters
-    ----------
-    module : AnsibleModule
-        Ansible module.
-
-    Returns
-    -------
-    CvpClient
-        CvpClient object with connection instantiated.
-    """
-    client = CvpClient()
-    connection = Connection(module._socket_path)
-    host = connection.get_option("host")
-    port = connection.get_option("port")
-    user = connection.get_option("remote_user")
-    pswd = connection.get_option("password")
-    try:
-        client.connect(
-            [host], user, pswd, protocol="https", port=port,
-        )
-    except CvpLoginError as e:
-        module.fail_json(msg=str(e))
-    return client
 
 
 # ------------------------------------------------------------- #
@@ -1240,10 +1200,11 @@ def main():
                            supports_check_mode=True)
 
     if not HAS_CVPRAC:
-        module.fail_json(msg='cvprac required for this module')
+        module.fail_json(
+            msg='cvprac required for this module. Please install using pip install cvprac')
 
     # Connect to CVP instance
-    module.client = connect(module)
+    module.client = cv_connect(module)
 
     result = devices_action(module=module)
     module.exit_json(**result)
