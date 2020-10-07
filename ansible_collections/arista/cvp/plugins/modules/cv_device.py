@@ -581,6 +581,14 @@ def configlet_prepare_cvp_update(configlet_name_list, facts):
     return configlets_structure
 
 
+def configlet_check_unknown_from_cvp(configlet_name_list, facts):
+    unknown_configlets = list()
+    for configlet_name in configlet_name_list:
+        if configlet_get_fact_key(configlet_name=configlet_name, cvp_facts=facts) is None:
+            unknown_configlets.append(configlet_name)
+    return unknown_configlets
+
+
 # ------------------------------------------------------------- #
 # Device Actions #
 # ------------------------------------------------------------- #
@@ -863,6 +871,22 @@ def devices_update(module, mode="override"):
     MODULE_LOGGER.debug(" * devices_update - entering update function")
 
     for device_update in devices_update:
+        # First check all configlets are already on CV side.
+        unknown_configlet = configlet_check_unknown_from_cvp(
+            configlet_name_list=device_update["configlets"],
+            facts=module.params["cvp_facts"]
+        )
+        if len(unknown_configlet) > 0:
+            MODULE_LOGGER.error(
+                'Configlet list for %s has some configlets not configured on Cloudvision %s',
+                str(device_update["name"]),
+                str(unknown_configlet))
+            module.fail_json(
+                msg="{} device has unknown configlets from CV: {}".format(device_update["name"],
+                unknown_configlet)
+            )
+
+    for device_update in devices_update:
         MODULE_LOGGER.info(" * devices_update - updating device: %s", str(device_update["name"]))
         MODULE_LOGGER.info(" * devices_update - updating device with: %s", str(device_update))
         # Get device facts from cv facts
@@ -1072,7 +1096,7 @@ def devices_action(module):
     """
     Manage all actions related to devices.
 
-    Action ordonancer and output bui
+    Action scheduler and output builder
 
     Structure output:
     >>> devices_action(module)
