@@ -15,18 +15,22 @@
 
 "module_utils: cv_client":
   - ansible_collections/arista/cvp/plugins/module_utils/*
+  - ansible_collections/arista/cvp/plugins/module_utils/**/*
 
 "role: ztp_configuration":
   - ansible_collections/arista/cvp/roles/dhcp_configuration/*
+  - ansible_collections/arista/cvp/roles/dhcp_configuration/**/*
 
 "role: configlets_sync":
   - ansible_collections/arista/cvp/roles/configlets_sync/*
+  - ansible_collections/arista/cvp/roles/configlets_sync/**/*
 
 "type: documentation":
   - README.md
   - contributing.md
   - ansible_collections/arista/cvp/README.md
   - ansible_collections/arista/cvp/docs/*
+  - ansible_collections/arista/cvp/docs/**/*
 
 "type: code quality":
   - .github/labeler.yml
@@ -38,3 +42,4 @@
 "type: dependencies":
   - development/requirements-dev.txt
   - development/requirements.txt
+  - ansible_collections/arista/cvp/docs/requirements.txt
