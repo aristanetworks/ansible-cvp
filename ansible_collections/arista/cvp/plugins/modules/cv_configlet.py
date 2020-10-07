@@ -612,8 +612,8 @@ def action_manager(module):
 
     # MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
 
-    # Create new configlets
-    if len(intend_list['create']) > 0:
+    # Create new configlets and only if state is not absent
+    if len(intend_list['create']) > 0 and module.params['state'] != "absent":
         MODULE_LOGGER.info('Start configlets creation process')
         temp_res = action_create(
             create_configlets=intend_list['create'],
@@ -624,8 +624,8 @@ def action_manager(module):
             type='create',
             module=module)
 
-    # Update existing configlets
-    if len(intend_list['update']) > 0:
+    # Update existing configlets and only if state is not absent
+    if len(intend_list['update']) > 0 and module.params['state'] != "absent":
         MODULE_LOGGER.info('Start configlets update process')
         temp_res = action_update(
             update_configlets=intend_list['update'],
