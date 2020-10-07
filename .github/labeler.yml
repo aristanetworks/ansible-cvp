@@ -27,6 +27,7 @@
   - contributing.md
   - ansible_collections/arista/cvp/README.md
   - ansible_collections/arista/cvp/docs/*
+  - ansible_collections/arista/cvp/docs/**/*
 
 "type: code quality":
   - .github/labeler.yml
