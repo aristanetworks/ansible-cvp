@@ -17,22 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    "metadata_version": "1.0",
-    "status": ["preview"],
-    "supported_by": "community",
-}
-
-import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 
 DOCUMENTATION = r"""
 ---
@@ -131,6 +118,13 @@ EXAMPLES = r"""
         device_filter: ['veos']
       register: cvp_device
 """
+
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
+
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
 MODULE_LOGGER.info('Start cv_device module execution')

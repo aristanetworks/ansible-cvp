@@ -19,28 +19,8 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-
-# Required by Ansible and CVP
-import re
-import traceback
-import logging
-from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-DIFFLIB_IMP_ERR = None
-try:
-    import difflib
-    HAS_DIFFLIB = True
-except ImportError:
-    HAS_DIFFLIB = False
-    DIFFLIB_IMP_ERR = traceback.format_exc()
 
 
 DOCUMENTATION = r'''
@@ -118,6 +98,21 @@ EXAMPLES = r'''
         configlet_filter: ["New", "Test","base-chk","base-firewall"]
       register: cvp_configlet
 '''
+
+# Required by Ansible and CVP
+import re
+import traceback
+import logging
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+DIFFLIB_IMP_ERR = None
+try:
+    import difflib
+    HAS_DIFFLIB = True
+except ImportError:
+    HAS_DIFFLIB = False
+    DIFFLIB_IMP_ERR = traceback.format_exc()
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')

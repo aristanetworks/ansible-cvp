@@ -23,25 +23,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-
-import sys
-import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
-from ansible.module_utils.basic import AnsibleModule
-
-
-# List of Ansible default containers
-builtin_containers = tools_tree.BUILTIN_CONTAINERS
-
-
 DOCUMENTATION = r'''
 ---
 module: cv_container
@@ -107,6 +88,16 @@ EXAMPLES = r'''
         cvp_facts: '{{cvp_facts.ansible_facts}}'
 '''
 
+import sys
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
+import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
+from ansible.module_utils.basic import AnsibleModule
+
+# List of Ansible default containers
+builtin_containers = tools_tree.BUILTIN_CONTAINERS
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container')
 MODULE_LOGGER.info('Start cv_container module execution')
@@ -820,15 +811,15 @@ def main():
         # -> Start process to create new containers
         if (tools.isIterable(module.params['topology']) and module.params['topology'] is not None):
             creation_process = create_new_containers(module=module,
-                                                        intended=module.params['topology'],
-                                                        facts=module.params['cvp_facts'])
+                                                     intended=module.params['topology'],
+                                                     facts=module.params['cvp_facts'])
             if creation_process[0]:
                 result['data']['changed'] = True
                 result['data']['creation_result'] = creation_process[1]
             # -> Start process to move devices to targetted containers
             move_process = move_devices_to_container(module=module,
-                                                        intended=module.params['topology'],
-                                                        facts=module.params['cvp_facts'])
+                                                     intended=module.params['topology'],
+                                                     facts=module.params['cvp_facts'])
             if move_process is not None:
                 result['data']['changed'] = True
                 # If a list of task exists, we expose it

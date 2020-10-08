@@ -55,8 +55,8 @@ CVP_DEVICES:
 - name: "Configure devices on {{inventory_hostname}}"
   arista.cvp.cv_device:
     devices: "{{CVP_DEVICES}}"
-    cvp_facts: '{{CVP_FACTS.ansible_facts}}’
-    device_filter: ['TEAM’]
+    cvp_facts: '{{CVP_FACTS.ansible_facts}}'
+    device_filter: ['TEAM']
     state: present
   register: CVP_DEVICES_RESULTS
 ```

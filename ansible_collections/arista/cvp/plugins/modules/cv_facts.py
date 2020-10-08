@@ -19,19 +19,8 @@
 #
 
 from __future__ import absolute_import, division, print_function
-__metaclass__ = type
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-import logging
-import traceback  # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+__metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
@@ -63,7 +52,7 @@ options:
     description:
       - List of facts to retrieve from CVP.
       - By default, cv_facts returns facts for devices/configlets/containers/tasks
-      - Using this parameter allows user to limit scope to a subet of information.
+      - Using this parameter allows user to limit scope to a subset of information.
     required: false
     default: ['all']
     type: list
@@ -108,6 +97,14 @@ EXAMPLES = r'''
       cv_facts:
       register: FACTS
 '''
+
+import logging
+import traceback  # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
 MODULE_LOGGER.info('Start cv_facts module execution')
@@ -278,7 +275,7 @@ def facts_configlets(module, facts):
                     # If mapper is for container
                     if mapper['type'] == 'container':
                         container_name = tools_inventory.find_containerName_by_containerId(containers_list=containers,
-                                                                           container_id=mapper['objectId'])
+                                                                                           container_id=mapper['objectId'])
                         if container_name is not None:
                             MODULE_LOGGER.debug(
                                 'found mapping to container %s', str(container_name))
