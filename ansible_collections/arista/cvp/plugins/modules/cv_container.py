@@ -20,6 +20,7 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -32,10 +33,10 @@ import sys
 import json
 import traceback
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.cv_tools as cv_tools
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as cv_tools
+from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 from ansible.module_utils.six import string_types
 try:
     from cvprac.cvp_client import CvpApiError

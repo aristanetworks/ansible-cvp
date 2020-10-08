@@ -33,7 +33,7 @@ import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
+from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
