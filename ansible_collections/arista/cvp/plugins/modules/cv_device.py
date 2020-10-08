@@ -542,7 +542,7 @@ def build_new_devices_list(module):
 
 def configlet_prepare_cvp_update(configlet_name_list, facts):
     """
-    Build configlets strcuture to configure CV.
+    Build configlets structure to configure CV.
 
     CV requires to get a specific list of dict to add/delete configlets
     attached to device. This function create this specific structure.

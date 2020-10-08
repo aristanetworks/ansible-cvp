@@ -34,8 +34,8 @@ import json
 import traceback
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as cv_tools
 from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.six import string_types
 try:
@@ -797,7 +797,7 @@ def configure_configlet_to_container(module, intended, facts):
     not remove it
     - if configlet is not part of intended and filter is matched: we
     detach configlet.
-    - configlet_filter = ['none'], configet is ignored and not detached
+    - configlet_filter = ['none'], configlet is ignored and not detached
 
     Parameters
     ----------
@@ -849,7 +849,7 @@ def configure_configlet_to_container(module, intended, facts):
                 MODULE_LOGGER.debug('running configlet %s', str(configlet))
                 # We apply filter to know if we have to attach configlet.
                 # If filter is set to ['none'], we consider add in any situation.
-                if cv_tools.match_filter(input=configlet, filter=configlet_filter) or('none' in configlet_filter):
+                if tools.match_filter(input=configlet, filter=configlet_filter) or ('none' in configlet_filter):
                     MODULE_LOGGER.debug('collecting information for configlet %s', str(configlet))
                     # Get CVP information for device.
                     configlet_cvpinfo = configlet_factinfo(configlet_name=configlet, facts=facts)
@@ -890,7 +890,7 @@ def configure_configlet_to_container(module, intended, facts):
         if container_info_cvp is not None and 'configlets' in container_info_cvp:
             for configlet in container_info_cvp['configlets']:
                 # If configlet matchs filter, we just remove attachment.
-                match_filter = cv_tools.match_filter(
+                match_filter = tools.match_filter(
                     input=configlet, filter=configlet_filter, default_always='none')
                 MODULE_LOGGER.info('Filter test has returned: %s - Filter is %s - input is %s', str(match_filter), str(configlet_filter), str(configlet))
                 # If configlet is not in intended and does not match filter, ignore it
