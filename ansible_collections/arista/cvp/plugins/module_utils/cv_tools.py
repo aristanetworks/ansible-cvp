@@ -53,14 +53,17 @@ def cv_connect(module):
         Instanciated CvpClient with connection information.
     """
     client = CvpClient()
+    LOGGER.info('Connecting to CVP')
     connection = Connection(module._socket_path)
     host = connection.get_option("host")
     port = connection.get_option("port")
     user = connection.get_option("remote_user")
     user_authentication = connection.get_option("password")
-    LOGGER.info('Connecting to CVP')
+    cert_validation = connection.get_option("validate_certs")
+    if cert_validation:
+        LOGGER.debug("  Module will check CV certificate")
     if user == 'cvaas':
-        LOGGER.debug('Connecting to a cvaas instance')
+        LOGGER.debug('  Connecting to a cvaas instance')
         try:
             client.connect(nodes=[host],
                            is_cvaas=True,
@@ -68,13 +71,14 @@ def cv_connect(module):
                            username='',
                            password='',
                            protocol="https",
-                           port=port
+                           port=port,
+                           cert=cert_validation
                            )
         except CvpLoginError as e:
             module.fail_json(msg=str(e))
             LOGGER.error('Cannot connect to CVP: %s', str(e))
     else:
-        LOGGER.debug('Connecting to a on-prem instance')
+        LOGGER.debug('  Connecting to a on-prem instance')
         try:
             client.connect(nodes=[host],
                            username=user,
@@ -82,12 +86,13 @@ def cv_connect(module):
                            protocol="https",
                            is_cvaas=False,
                            port=port,
+                           cert=cert_validation
                            )
         except CvpLoginError as e:
             module.fail_json(msg=str(e))
             LOGGER.error('Cannot connect to CVP: %s', str(e))
 
-    LOGGER.debug('*** Connected to CVP')
+    LOGGER.info('Connected to CVP')
 
     return client
 
