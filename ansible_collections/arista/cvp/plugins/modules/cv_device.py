@@ -31,9 +31,8 @@ ANSIBLE_METADATA = {
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_update_configlets_on_device
-from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
-
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 
 DOCUMENTATION = r"""
 ---
@@ -304,37 +303,6 @@ def get_unique_from_list(source_list, compare_list):
 # ------------------------------------------------------------- #
 
 
-def is_in_filter(hostname_filter=None, hostname="eos"):
-    """
-    Check if device is part of the filter or not.
-
-    Parameters
-    ----------
-    hostname_filter : list, optional
-        Device filter, by default ['all']
-    hostname : str
-        Device hostname to compare against filter.
-
-    Returns
-    -------
-    boolean
-        True if device hostname is part of filter. False if not.
-    """
-    MODULE_LOGGER.debug(" * is_in_filter - filter is %s", str(hostname_filter))
-    MODULE_LOGGER.debug(" * is_in_filter - hostname is %s", str(hostname))
-
-    # W102 Workaround to avoid list as default value.
-    if hostname_filter is None:
-        hostname_filter = ["all"]
-
-    if "all" in hostname_filter:
-        return True
-    elif any(element in hostname for element in hostname_filter):
-        return True
-    MODULE_LOGGER.debug(" * is_in_filter - NOT matched")
-    return False
-
-
 def is_in_container(device, container="undefined_container"):
     """
     Check if device is attached to given container.
@@ -376,32 +344,6 @@ def is_device_target(hostname, device_list):
     if hostname in device_list.keys():
         return True
     return False
-
-
-def is_list_diff(list1, list2):
-    """
-    Check if 2 list have some differences.
-
-    Parameters
-    ----------
-    list1 : list
-        First list to compare.
-    list2 : list
-        Second list to compare.
-
-    Returns
-    -------
-    boolean
-        True if lists have diffs. False if not.
-    """
-    has_diff = False
-    for entry1 in list1:
-        if entry1 not in list2:
-            has_diff = True
-    for entry2 in list2:
-        if entry2 not in list1:
-            has_diff = True
-    return has_diff
 
 
 # ------------------------------------------------------------- #
@@ -453,7 +395,7 @@ def build_existing_devices_list(module):
     MODULE_LOGGER.debug(" * build_existing_devices_list - device filter is: %s", str(devices_filter))
     for cvp_device in facts_device:
         MODULE_LOGGER.debug(" * build_existing_devices_list - start %s", str(cvp_device["hostname"]))
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=devices_filter, hostname=cvp_device["hostname"]
         ):
             # Check if device is in module input
@@ -518,7 +460,7 @@ def build_new_devices_list(module):
     # facts_devices = facts_devices(module)
     # Loop in Input devices to see if it is part of CV Facts
     for ansible_device_hostname, ansible_device in devices_ansible.items():
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=devices_filter, hostname=ansible_device_hostname
         ):
             cvp_device = device_get_from_facts(
@@ -883,7 +825,7 @@ def devices_update(module, mode="override"):
         # Start configlet update in override mode
         if mode == 'override':
             # Get list of configlet to update: in ansible inputs and not in facts
-            if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+            if tools.is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
                 configlets_delete = get_unique_from_list(
                     source_list=device_update["cv_configlets"],
                     compare_list=device_update["configlets"],
@@ -933,7 +875,7 @@ def devices_update(module, mode="override"):
         # Execute configlet update on device
         MODULE_LOGGER.debug(' * device_update - device_update configlets: %s', str(device_update["configlets"]))
         MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s', str(device_update["cv_configlets"]))
-        if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+        if tools.is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
             MODULE_LOGGER.debug(' * device_update - call cv_update_configlets_on_device')
             try:
                 MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
@@ -944,7 +886,7 @@ def devices_update(module, mode="override"):
                 #     del_configlets=configlets_delete,
                 # )
                 MODULE_LOGGER.debug("%s", str(configlets_add))
-                device_action = cv_update_configlets_on_device(
+                device_action = tools_cv.cv_update_configlets_on_device(
                     module=module,
                     device_facts=device_facts,
                     add_configlets=configlets_add,
@@ -1036,7 +978,7 @@ def devices_reset(module):
         MODULE_LOGGER.info(
             'check hostname %s against filter %s', str(cvp_device["hostname"]),
             str(module.params['device_filter']))
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=module.params["device_filter"],
             hostname=cvp_device["hostname"],
         ):
@@ -1192,12 +1134,12 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
     # Connect to CVP instance
-    module.client = cv_connect(module)
+    module.client = tools_cv.cv_connect(module)
 
     result = devices_action(module=module)
     module.exit_json(**result)

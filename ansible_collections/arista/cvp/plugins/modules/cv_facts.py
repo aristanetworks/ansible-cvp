@@ -30,11 +30,8 @@ import logging
 import traceback  # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
-    find_hostname_by_mac,
-    find_containerName_by_containerId
-)
-from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
+import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 
 DOCUMENTATION = r'''
 ---
@@ -273,13 +270,14 @@ def facts_configlets(module, facts):
                 if mapper['configletId'] == configlet['key']:
                     # If mapper is for device
                     if mapper['type'] == 'netelement':
-                        device_hostname = find_hostname_by_mac(inventory=inventory, mac_address=mapper['objectId'])
+                        device_hostname = tools_inventory.find_hostname_by_mac(
+                            inventory=inventory, mac_address=mapper['objectId'])
                         if device_hostname is not None:
                             MODULE_LOGGER.debug('found mapping to device %s', str(device_hostname))
                             configlet['devices'].append(device_hostname)
                     # If mapper is for container
                     if mapper['type'] == 'container':
-                        container_name = find_containerName_by_containerId(containers_list=containers,
+                        container_name = tools_inventory.find_containerName_by_containerId(containers_list=containers,
                                                                            container_id=mapper['objectId'])
                         if container_name is not None:
                             MODULE_LOGGER.debug(
@@ -469,14 +467,14 @@ def main():
                            supports_check_mode=True)
 
     # TODO: Test CVPRAC version as well
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
     # Forge standard Ansible output
     result = dict(changed=False, ansible_facts={})
 
     # Connect to CVP Instance
-    module.client = cv_connect(module)
+    module.client = tools_cv.cv_connect(module)
 
     # Get Facts from CVP
     result['ansible_facts'] = facts_builder(module)

@@ -31,7 +31,7 @@ import time
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 
 DOCUMENTATION = r'''
 ---
@@ -186,13 +186,13 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
     result = dict(changed=False)
 
     # Connect to CVP instance
-    module.client = cv_connect(module)
+    module.client = tools_cv.cv_connect(module)
 
     result['changed'], result['data'], warnings = task_action(module)
 

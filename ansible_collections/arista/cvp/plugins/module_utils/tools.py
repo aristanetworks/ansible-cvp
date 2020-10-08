@@ -86,3 +86,60 @@ def match_filter(input, filter, default_always='all'):
         return True
     LOGGER.debug(" * is_in_filter - NOT matched")
     return False
+
+
+def is_list_diff(list1, list2):
+    """
+    Check if 2 list have some differences.
+
+    Parameters
+    ----------
+    list1 : list
+        First list to compare.
+    list2 : list
+        Second list to compare.
+
+    Returns
+    -------
+    boolean
+        True if lists have diffs. False if not.
+    """
+    has_diff = False
+    for entry1 in list1:
+        if entry1 not in list2:
+            has_diff = True
+    for entry2 in list2:
+        if entry2 not in list1:
+            has_diff = True
+    return has_diff
+
+
+def is_in_filter(hostname_filter=None, hostname="eos"):
+    """
+    Check if device is part of the filter or not.
+
+    Parameters
+    ----------
+    hostname_filter : list, optional
+        Device filter, by default ['all']
+    hostname : str
+        Device hostname to compare against filter.
+
+    Returns
+    -------
+    boolean
+        True if device hostname is part of filter. False if not.
+    """
+    LOGGER.debug(" * is_in_filter - filter is %s", str(hostname_filter))
+    LOGGER.debug(" * is_in_filter - hostname is %s", str(hostname))
+
+    # W102 Workaround to avoid list as default value.
+    if hostname_filter is None:
+        hostname_filter = ["all"]
+
+    if "all" in hostname_filter:
+        return True
+    elif any(element in hostname for element in hostname_filter):
+        return True
+    LOGGER.debug(" * is_in_filter - NOT matched")
+    return False

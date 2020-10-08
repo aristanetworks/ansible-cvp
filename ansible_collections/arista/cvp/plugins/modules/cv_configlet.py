@@ -33,7 +33,7 @@ import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect, HAS_CVPRAC
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
@@ -671,14 +671,14 @@ def main():
     if not HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
     result = dict(changed=False, data={})
     # messages = dict(issues=False)
     # Connect to CVP instance
-    module.client = cv_connect(module)
+    module.client = tools_cv.cv_connect(module)
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
