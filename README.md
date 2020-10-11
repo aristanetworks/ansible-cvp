@@ -144,7 +144,8 @@ This collection requires the following to be installed on the Ansible control ma
 - ansible >= `2.9.0`
 - [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.4`
 - requests >= `2.22.0`
-- treelib version `1.5.5`
+- treelib `1.5.5`
+- jsonschema `3.2.0`
 
 ### Installation from ansible-galaxy
 
