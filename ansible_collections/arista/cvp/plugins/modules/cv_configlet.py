@@ -321,23 +321,26 @@ def action_update(update_configlets, module):
             flag_failed = True
             # Build error message to report in ansible output
             errorMessage = re.split(':', str(error))[-1]
-            message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
+            errorKey = 'Undefined Configlet'
+            if 'name' in configlet['data'].keys():
+                errorKey = configlet['data']['name']
+            message = "Configlet %s cannot be updated due to cv_client exception - %s" % (errorKey, errorMessage)
             # Add logging to ansible response.
-            response_data.append({configlet['name']: message})
+            response_data.append({errorKey:errorMessage})
             # Generate logging error message
-            MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                configlet['data']['name']), str(error))
+            MODULE_LOGGER.error('Exception raised when updating configlet %s: %s', str(
+                errorKey), str(errorMessage))
         else:
             MODULE_LOGGER.debug('CV response is %s', str(update_resp))
             if "errorMessage" in str(update_resp):
                 # Mark module execution with error
                 flag_failed = True
                 # Build error message to report in ansible output
-                message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                message = "Configlet %s cannot be updated due to a CV error- %s" % (configlet['data']['name'], update_resp['errorMessage'])
                 # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
                 # Generate logging error message
-                MODULE_LOGGER.error('Error updating configlet %s: %s', str(
+                MODULE_LOGGER.error('Error on CV updating configlet %s: %s', str(
                     configlet['data']['name']), str(update_resp['errorMessage']))
             else:
                 # Inform module a changed has been done
