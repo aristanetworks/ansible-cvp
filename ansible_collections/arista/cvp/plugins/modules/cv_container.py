@@ -36,6 +36,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.cv_tools as cv_tools
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
+from ansible_collections.arista.cvp.plugins.module_utils.schema import SCHEMA_CV_CONTAINER, HAS_JSONSCHEMA, validate_cv_inputs
 from ansible.module_utils.six import string_types
 try:
     from cvprac.cvp_client import CvpApiError
@@ -1099,6 +1100,16 @@ def main():
 
     if not HAS_TREELIB:
         module.fail_json(msg='treelib required for this module')
+
+    if not HAS_JSONSCHEMA:
+        module.fail_json(
+            msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not validate_cv_inputs(user_json=module.params['topology'], schema=SCHEMA_CV_CONTAINER):
+        MODULE_LOGGER.error("Invalid configlet input : %s",
+                            str(module.params['configlets']))
+        module.fail_json(
+            msg='Container input data are not compliant with module.')
 
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()

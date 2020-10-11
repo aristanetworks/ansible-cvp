@@ -34,6 +34,7 @@ import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
+from ansible_collections.arista.cvp.plugins.module_utils.schema import SCHEMA_CV_CONFIGLET, HAS_JSONSCHEMA, validate_cv_inputs
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
@@ -674,6 +675,15 @@ def main():
     if not HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
+
+    if not HAS_JSONSCHEMA:
+        module.fail_json(
+            msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not validate_cv_inputs(user_json=module.params['configlets'], schema=SCHEMA_CV_CONFIGLET):
+        MODULE_LOGGER.error("Invalid configlet input : %s", str(module.params['configlets']))
+        module.fail_json(
+            msg='Configlet input data are not compliant with module.')
 
     result = dict(changed=False, data={})
     # messages = dict(issues=False)
