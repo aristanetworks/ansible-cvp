@@ -471,7 +471,6 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
-    # TODO: Test CVPRAC version as well
     if not HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
