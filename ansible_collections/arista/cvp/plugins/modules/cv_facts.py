@@ -470,11 +470,12 @@ def main():
     # Forge standard Ansible output
     result = dict(changed=False, ansible_facts={})
 
-    # Connect to CVP Instance
-    module.client = tools_cv.cv_connect(module)
+    if not module.check_mode:
+        # Connect to CVP Instance
+        module.client = tools_cv.cv_connect(module)
 
-    # Get Facts from CVP
-    result['ansible_facts'] = facts_builder(module)
+        # Get Facts from CVP
+        result['ansible_facts'] = facts_builder(module)
 
     # Standard Ansible outputs
     module.exit_json(**result)

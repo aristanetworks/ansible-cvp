@@ -186,13 +186,14 @@ def main():
 
     result = dict(changed=False)
 
-    # Connect to CVP instance
-    module.client = tools_cv.cv_connect(module)
+    if not module.check_mode:
+        # Connect to CVP instance
+        module.client = tools_cv.cv_connect(module)
 
-    result['changed'], result['data'], warnings = task_action(module)
+        result['changed'], result['data'], warnings = task_action(module)
 
-    if warnings:
-        [module.warn(w) for w in warnings]
+        if warnings:
+            [module.warn(w) for w in warnings]
 
     module.exit_json(**result)
 

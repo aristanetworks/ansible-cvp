@@ -1164,7 +1164,8 @@ def main():
             msg='cvprac required for this module. Please install using pip install cvprac')
 
     # Connect to CVP instance
-    module.client = tools_cv.cv_connect(module)
+    if not module.check_mode:
+        module.client = tools_cv.cv_connect(module)
 
     result = devices_action(module=module)
     module.exit_json(**result)

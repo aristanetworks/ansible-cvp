@@ -831,9 +831,12 @@ def main():
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
-    module.client = tools_cv.cv_connect(module)
     deletion_process = None
     creation_process = None
+
+    if not module.check_mode:
+        module.client = tools_cv.cv_connect(module)
+
     # Create list of builtin containers
     create_builtin_containers(facts=module.params['cvp_facts'])
     if module.params['mode'] in ['merge', 'override']:
