@@ -1117,20 +1117,22 @@ def devices_action(module):
             results["data"]["tasksIds"] += result_update["updated_tasksIds"]
 
         # Get CV info for generated tasks
-        tasks_generated = tasks_get_filtered(
-            taskid_list=results["data"]["tasksIds"], module=module
-        )
-        results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
+        if not module.check_mode:
+            tasks_generated = tasks_get_filtered(
+                taskid_list=results["data"]["tasksIds"], module=module
+            )
+            results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
 
     # Call reset function to restart ZTP process on devices.
     elif topology_state == "absent":
         result_reset = devices_reset(module)
         results["changed"] = True
         results["data"].update(result_reset)
-        tasks_generated = tasks_get_filtered(
-            taskid_list=result_reset["reset_taskIds"], module=module
-        )
-        results["data"]["tasks"] += tasks_generated
+        if not module.check_mode:
+            tasks_generated = tasks_get_filtered(
+                taskid_list=result_reset["reset_taskIds"], module=module
+            )
+            results["data"]["tasks"] += tasks_generated
 
     # Check if we have to update changed flag
     if len(results["data"]["tasks"]) > 0 or int(results["data"]["moved_devices"]) > 0:
