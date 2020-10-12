@@ -106,6 +106,7 @@ import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 DIFFLIB_IMP_ERR = None
 try:
     import difflib
@@ -258,7 +259,7 @@ def build_configlets_list(module):
         for cvp_configlet in module.params['cvp_facts']['configlets']:
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
-        if not found:
+        if not found and tools.match_filter(input=ansible_configlet, filter=module.params['configlet_filter']):
             intend['create'].append(
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
@@ -699,7 +700,8 @@ def main():
     result = dict(changed=False, data={})
     # messages = dict(issues=False)
     # Connect to CVP instance
-    module.client = tools_cv.cv_connect(module)
+    if not module.check_mode:
+        module.client = tools_cv.cv_connect(module)
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
