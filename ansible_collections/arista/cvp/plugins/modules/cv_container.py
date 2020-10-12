@@ -133,39 +133,59 @@ def process_container(module, container, parent, action):
     action : string
         Action to run on container. Must be one of: 'show/add/delete'
     """
+    MODULE_LOGGER.debug('run process_container with %s / %s', str(container), str(action))
     containers = module.client.api.get_containers()
     # Ensure the parent exists
     parent = next((item for item in containers['data'] if
                    item['name'] == parent), None)
-    if not parent:
+    if not parent and module.check_mode is False:
         module.fail_json(msg=str('Parent container (' + str(parent) + ') does not exist for container ' + str(container)))
+    elif not parent and module.check_mode:
+        return [True, {'taskIDs': 'unset-id-to-create-container'},
+                {'container': container}]
 
     cont = next((item for item in containers['data'] if
                  item['name'] == container), None)
-    if cont:
-        if action == "show":
-            return [False, {'container': cont}]
+    # If module runs in dry_run, emulate CV response
+    if module.check_mode is True:
+        if cont and action == "delete":
+            MODULE_LOGGER.debug(
+                '[check mode] - run action %s on %s', str(action), str(container))
+            return [True, {'taskIDs': 'unset-id-to-delete-container'},
+                    {'container': cont}]
         elif action == "add":
-            return [False, {'container': cont}]
-        elif action == "delete":
-            resp = module.client.api.delete_container(cont['name'],
-                                                      cont['key'],
-                                                      parent['name'],
-                                                      parent['key'])
-            if resp['data']['status'] == "success":
-                return [True, {'taskIDs': resp['data']['taskIds']},
-                        {'container': cont}]
-    else:
-        if action == "show":
-            return [False, {'container': "Not Found"}]
-        elif action == "add":
-            resp = module.client.api.add_container(container, parent['name'],
-                                                   parent['key'])
-            if resp['data']['status'] == "success":
-                return [True, {'taskIDs': resp['data']['taskIds']},
-                        {'container': cont}]
-        if action == "delete":
-            return [False, {'container': "Not Found"}]
+            MODULE_LOGGER.debug(
+                'check mode] - run action %s on %s', str(action), str(cont))
+            return [True, {'taskIDs': 'unset-id-to-create-container'},
+                    {'container': cont}]
+        else:
+            return [False]
+    # For default processing
+    if module.check_mode is False:
+        if cont:
+            if action == "show":
+                return [False, {'container': cont}]
+            elif action == "add":
+                return [False, {'container': cont}]
+            elif action == "delete":
+                resp = module.client.api.delete_container(cont['name'],
+                                                        cont['key'],
+                                                        parent['name'],
+                                                        parent['key'])
+                if resp['data']['status'] == "success":
+                    return [True, {'taskIDs': resp['data']['taskIds']},
+                            {'container': cont}]
+        else:
+            if action == "show":
+                return [False, {'container': "Not Found"}]
+            elif action == "add":
+                resp = module.client.api.add_container(container, parent['name'],
+                                                    parent['key'])
+                if resp['data']['status'] == "success":
+                    return [True, {'taskIDs': resp['data']['taskIds']},
+                            {'container': cont}]
+            if action == "delete":
+                return [False, {'container': "Not Found"}]
 
 
 def create_new_containers(module, intended, facts):
@@ -199,10 +219,14 @@ def create_new_containers(module, intended, facts):
         # If container has not been found, we create it
         if not found:
             # module.fail_json(msg='** Create container'+container_name+' attached to '+intended[container_name]['parent_container'])
+            MODULE_LOGGER.debug('sent process_container request with %s / %s', str(
+                container_name), str(intended[container_name]['parent_container']))
             response = process_container(module=module,
                                          container=container_name,
                                          parent=intended[container_name]['parent_container'],
                                          action='add')
+            MODULE_LOGGER.debug('sent process_container request with %s / %s and response is : %s', str(
+                container_name), str(intended[container_name]['parent_container']), str(response))
             # If a container has been created, increment creation counter
             if response[0]:
                 count_container_creation += 1
@@ -790,7 +814,12 @@ def main():
     )
 
     module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=False)
+                           supports_check_mode=True)
+
+    MODULE_LOGGER.info('starting module cv_container')
+    if module.check_mode:
+        MODULE_LOGGER.warning('! check_mode is enable')
+        # module.exit_json(changed=True)
 
     if not tools_cv.HAS_CVPRAC:
         module.fail_json(

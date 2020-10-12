@@ -895,54 +895,60 @@ def devices_update(module, mode="override"):
         MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s', str(device_update["cv_configlets"]))
         if tools.is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
             MODULE_LOGGER.debug(' * device_update - call cv_update_configlets_on_device')
-            try:
-                MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
-                # device_action = module.client.api.update_configlets_on_device(
-                #     app_name="Ansible",
-                #     device=device_facts,
-                #     add_configlets=configlets_add,
-                #     del_configlets=configlets_delete,
-                # )
-                MODULE_LOGGER.debug("%s", str(configlets_add))
-                device_action = tools_cv.cv_update_configlets_on_device(
-                    module=module,
-                    device_facts=device_facts,
-                    add_configlets=configlets_add,
-                    del_configlets=configlets_delete
+            if module.check_mode:
+                devices_updated += 1
+                result_update.append(
+                    {device_update["name"]: "update-with-configlets"}
                 )
-                MODULE_LOGGER.debug(' * device_update - get response from cv_update_configlets_on_device: %s', str(device_action))
-            except Exception as error:
-                errorMessage = str(error)
-                message = "Device %s Configlets cannot be updated - %s" % (
-                    device_update["name"],
-                    errorMessage,
-                )
-                result_update.append({device_update["name"]: message})
             else:
-                # Capture and report error message sent by CV during update
-                if "errorMessage" in str(device_action):
-                    message = "Device %s Configlets cannot be Updated - %s" % (
+                try:
+                    MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
+                    # device_action = module.client.api.update_configlets_on_device(
+                    #     app_name="Ansible",
+                    #     device=device_facts,
+                    #     add_configlets=configlets_add,
+                    #     del_configlets=configlets_delete,
+                    # )
+                    MODULE_LOGGER.debug("%s", str(configlets_add))
+                    device_action = tools_cv.cv_update_configlets_on_device(
+                        module=module,
+                        device_facts=device_facts,
+                        add_configlets=configlets_add,
+                        del_configlets=configlets_delete
+                    )
+                    MODULE_LOGGER.debug(' * device_update - get response from cv_update_configlets_on_device: %s', str(device_action))
+                except Exception as error:
+                    errorMessage = str(error)
+                    message = "Device %s Configlets cannot be updated - %s" % (
                         device_update["name"],
-                        device_action["errorMessage"],
+                        errorMessage,
                     )
                     result_update.append({device_update["name"]: message})
                 else:
-                    changed = True  # noqa # pylint: disable=unused-variable
-                    MODULE_LOGGER.debug(' * device_update - looking for taskIds in %s', str(device_action))
-                    if "taskIds" in str(device_action):
-                        devices_updated += 1
-                        for taskId in device_action["data"]["taskIds"]:
-                            result_tasks_generated.append(taskId)
-                        result_update.append(
-                            {
-                                device_update["name"]: "Configlets-%s"
-                                % device_action["data"]["taskIds"]
-                            }
+                    # Capture and report error message sent by CV during update
+                    if "errorMessage" in str(device_action):
+                        message = "Device %s Configlets cannot be Updated - %s" % (
+                            device_update["name"],
+                            device_action["errorMessage"],
                         )
+                        result_update.append({device_update["name"]: message})
                     else:
-                        result_update.append(
-                            {device_update["name"]: "Configlets-No_Specific_Tasks"}
-                        )
+                        changed = True  # noqa # pylint: disable=unused-variable
+                        MODULE_LOGGER.debug(' * device_update - looking for taskIds in %s', str(device_action))
+                        if "taskIds" in str(device_action):
+                            devices_updated += 1
+                            for taskId in device_action["data"]["taskIds"]:
+                                result_tasks_generated.append(taskId)
+                            result_update.append(
+                                {
+                                    device_update["name"]: "Configlets-%s"
+                                    % device_action["data"]["taskIds"]
+                                }
+                            )
+                        else:
+                            result_update.append(
+                                {device_update["name"]: "Configlets-No_Specific_Tasks"}
+                            )
 
     # Build response structure
     data = {
@@ -1150,7 +1156,8 @@ def main():
                             default='override',
                             choices=['merge', 'override', 'delete']))
 
-    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = AnsibleModule(argument_spec=argument_spec,
+                           supports_check_mode=True)
 
     if not tools_cv.HAS_CVPRAC:
         module.fail_json(
