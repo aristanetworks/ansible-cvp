@@ -101,43 +101,14 @@ EXAMPLES = r'''
 
 # Required by Ansible and CVP
 import re
-import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-DIFFLIB_IMP_ERR = None
-try:
-    import difflib
-    HAS_DIFFLIB = True
-except ImportError:
-    HAS_DIFFLIB = False
-    DIFFLIB_IMP_ERR = traceback.format_exc()
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
-
-
-def compare(fromText, toText, fromName='', toName='', lines=10):
-    """ Compare text string in 'fromText' with 'toText' and produce
-        diffRatio - a score as a float in the range [0, 1] 2.0*M / T
-          T is the total number of elements in both sequences,
-          M is the number of matches.
-          Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
-        unified diff list
-          Code	Meaning
-          '- '	line unique to sequence 1
-          '+ '	line unique to sequence 2
-          '  '	line common to both sequences
-          '? '	line not present in either input sequence
-    """
-    fromlines = fromText.splitlines(1)
-    tolines = toText.splitlines(1)
-    diff = list(difflib.unified_diff(fromlines, tolines, fromName, toName, n=lines))
-    textComp = difflib.SequenceMatcher(None, fromText, toText)
-    diffRatio = textComp.ratio()
-    return [diffRatio, diff]
 
 
 def get_tasks(taskIds, module):
@@ -231,14 +202,14 @@ def build_configlets_list(module):
         # their derived configlets
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
-            if re.search(r"\b(all|none)\b", str(module.params['configlet_filter'])) or (
-               any(element in configlet['name'] for element in module.params['configlet_filter'])):
+            if tools.match_filter(input=configlet['name'],
+                                  filter=module.params['configlet_filter']):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
                     # Scenario where configlet module is set to create.
                     if module.params['state'] == 'present':
                         ansible_configlet = module.params['configlets'][configlet['name']]
-                        configlet_compare = compare(
+                        configlet_compare = tools.compare(
                             configlet['config'], ansible_configlet, 'CVP', 'Ansible')
                         # compare function returns a floating point number
                         if configlet_compare[0] == 1.0:
@@ -690,7 +661,7 @@ def main():
         MODULE_LOGGER.warning('! check_mode is enable')
         # module.exit_json(changed=True)
 
-    if not HAS_DIFFLIB:
+    if not tools.HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
 
     if not tools_cv.HAS_CVPRAC:

@@ -22,10 +22,35 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 import logging
-
+try:
+    import difflib
+    HAS_DIFFLIB = True
+except ImportError:
+    HAS_DIFFLIB = False
 
 LOGGER = logging.getLogger('arista.cvp.tools')
 
+
+def compare(fromText, toText, fromName='', toName='', lines=10):
+    """ Compare text string in 'fromText' with 'toText' and produce
+        diffRatio - a score as a float in the range [0, 1] 2.0*M / T
+          T is the total number of elements in both sequences,
+          M is the number of matches.
+          Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
+        unified diff list
+          Code	Meaning
+          '- '	line unique to sequence 1
+          '+ '	line unique to sequence 2
+          '  '	line common to both sequences
+          '? '	line not present in either input sequence
+    """
+    fromlines = fromText.splitlines(1)
+    tolines = toText.splitlines(1)
+    diff = list(difflib.unified_diff(
+        fromlines, tolines, fromName, toName, n=lines))
+    textComp = difflib.SequenceMatcher(None, fromText, toText)
+    diffRatio = textComp.ratio()
+    return [diffRatio, diff]
 
 def isIterable(testing_object=None):
     """
