@@ -1,0 +1,61 @@
+---
+- name: cv_configlet unit testing
+  hosts: cv_server
+  # connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_DEVICES:
+      DC1-SPINE1:
+        name: 'DC1-SPINE1'
+        parentContainerName: DC1_L3LEAFS
+        configlets:
+          - 'AVD_DC1-SPINE1'
+          - '01TRAINING-01'
+        imageBundle: []  # Not yet supported
+      DC1-SPINE2:
+        name: 'DC1-SPINE2'
+        parentContainerName: DC1_SPINES
+        configlets:
+          - 'AVD_DC1-SPINE2'
+          - '01TRAINING-01'
+          - 'AVD_DC1-SPINE1'
+        imageBundle: []  # Not yet supported
+      DC1-LEAF2A:
+        name: 'DC1-LEAF2A'
+        parentContainerName: DC1_SPINES
+        configlets:
+          - 'AVD_DC1-SPINE2'
+          - '01TRAINING-01'
+          - 'AVD_DC1-SPINE1'
+        imageBundle: []  # Not yet supported
+  tasks:
+    - name: "Include offline facts"
+      include_vars: "{{ root_dir }}/inventory/cv_facts.json"
+
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device:
+        devices: "{{ CVP_DEVICES }}"
+        cvp_facts: '{{ ansible_facts }}'
+        device_filter: ['DC1-SPINE1', 'DC1-SPINE2']
+        state: present
+      register: CVP_DEVICES_RESULTS
+
+    - name: "Print logs"
+      debug:
+        msg: "{{ CVP_DEVICES_RESULTS }}"
+
+    - name: "Check move process"
+      assert:
+        that:
+          - "CVP_DEVICES_RESULTS.data.moved[0]['DC1-SPINE1'] is defined"
+        fail_msg: "Incorrect move process"
+        success_msg: "Move process is running as expected"
+
+    - name: "Check update process"
+      assert:
+        that:
+          - "CVP_DEVICES_RESULTS.data.updated[0]['DC1-SPINE2'] is defined"
+        fail_msg: "Incorrect update process"
+        success_msg: "Update process is running as expected"

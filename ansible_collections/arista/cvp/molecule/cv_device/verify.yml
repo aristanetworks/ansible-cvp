@@ -1,0 +1,17 @@
+---
+- name: cv_configlet unit testing
+  hosts: cv_server
+  # connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_CONFIGLETS:
+      01TRAINING-alias: "alias a101 show version"
+      01TRAINING-02: "alias a102 show version"
+  tasks:
+    - name: "Include offline facts"
+      include_vars: "{{ root_dir }}/cv_configlet_result.json"
+    - name: "Print logs"
+      debug:
+        msg: "{{ CVP_CONFIGLET_RESULT }}"
