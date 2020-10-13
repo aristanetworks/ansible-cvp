@@ -6,6 +6,7 @@ on:
       - 'ansible_collections/arista/cvp/roles/**/*'
       - 'ansible_collections/arista/cvp/molecules/**/*'
       - 'requirements.txt'
+      - '.github/workflows/molecule.yml'
 jobs:
   molecule:
     runs-on: ubuntu-latest
