@@ -7,7 +7,12 @@
   include_vars: "debian.yml"
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
-- name: Install packages
+- name: update packages list
+  apt:
+    update_cache: yes
+  when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
+
+- name: install packages
   become: true
   package:
     name: "{{ dhcp_packages }}"
@@ -16,7 +21,7 @@
 - include_tasks: fix-debian.yml
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
-- name: 'Generate DHCPd configuration file'
+- name: 'generate DHCPd configuration file'
   become: true
   template:
     src: 'dhcpd.conf.j2'
@@ -24,7 +29,7 @@
     backup: yes
   notify: "restart dhcpd"
 
-- name: Check & activate DHCP service
+- name: check & activate DHCP service
   become: true
   service:
     name: '{{ dhcp_service }}'
