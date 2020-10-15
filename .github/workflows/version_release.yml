@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     container: avdteam/base:centos-8
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
 
       - name: 'Ansible Galaxy build'
         run: |
