@@ -30,8 +30,8 @@ except ImportError:
 
 LOGGER = logging.getLogger('arista.cvp.tools')
 # replacement strings
-WINDOWS_LINE_ENDING = b'\r\n'
-UNIX_LINE_ENDING = b'\n'
+WINDOWS_LINE_ENDING = '\r\n'
+UNIX_LINE_ENDING = '\n'
 
 
 def str_cleanup_line_ending(content):
@@ -69,7 +69,7 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
           '? '	line not present in either input sequence
     """
     fromlines = str_cleanup_line_ending(content=fromText).splitlines(1)
-    tolines = str_cleanup_line_ending(contenat=toText).splitlines(1)
+    tolines = str_cleanup_line_ending(content=toText).splitlines(1)
     diff = list(difflib.unified_diff(
         fromlines, tolines, fromName, toName, n=lines))
     textComp = difflib.SequenceMatcher(None, fromText, toText)
