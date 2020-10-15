@@ -69,7 +69,7 @@ In this folder you have a `Makefile` providing a list of commands to start a dev
 - `dev-run`: Connect to ansible container to run your test playbooks.
 - `dev-reload`: Run stop and start.
 
-If you want to test a specific ansible version, you can refer to this [dedicated page](https://github.com/arista-netdevops-community/docker-avd-base/blob/master/USAGE.md) to start your own docker image. You can also use following make command: `make ANSIBLE_VERSION=2.9.3 run`
+If you want to test a specific ansible version, you can refer to this [dedicated page](https://github.com/arista-netdevops-community/docker-avd-base/blob/master/docs/run-options.md) to start your own docker image. You can also use following make command: `make ANSIBLE_VERSION=2.9.3 run`
 
 Since docker image is now automatically published on [__docker-hub__](https://hub.docker.com/repository/docker/avdteam/base), a dedicated repository is available on [__Arista Netdevops Community__](https://github.com/arista-netdevops-community/docker-avd-base).
 
