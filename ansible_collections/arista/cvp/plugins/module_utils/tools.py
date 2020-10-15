@@ -29,6 +29,30 @@ except ImportError:
     HAS_DIFFLIB = False
 
 LOGGER = logging.getLogger('arista.cvp.tools')
+# replacement strings
+WINDOWS_LINE_ENDING = '\r\n'
+UNIX_LINE_ENDING = '\n'
+
+
+def str_cleanup_line_ending(content):
+    """
+    str_cleanup_line_ending Cleanup line ending to use UNIX style and not Windows style
+
+    Replace line ending from WINDOWS to UNIX
+
+    Parameters
+    ----------
+    content : string
+        String to cleanup
+
+    Returns
+    -------
+    string
+        Cleaned up string.
+    """
+    if isinstance(content, str):
+        return content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+    return None
 
 
 def compare(fromText, toText, fromName='', toName='', lines=10):
@@ -44,8 +68,8 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
           '  '	line common to both sequences
           '? '	line not present in either input sequence
     """
-    fromlines = fromText.splitlines(1)
-    tolines = toText.splitlines(1)
+    fromlines = str_cleanup_line_ending(content=fromText).splitlines(1)
+    tolines = str_cleanup_line_ending(content=toText).splitlines(1)
     diff = list(difflib.unified_diff(
         fromlines, tolines, fromName, toName, n=lines))
     textComp = difflib.SequenceMatcher(None, fromText, toText)
