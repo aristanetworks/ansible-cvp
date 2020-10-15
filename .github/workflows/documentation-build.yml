@@ -13,7 +13,7 @@ jobs:
     name: 'Update Public documentation'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: 'Setup Python 3 on runner'
         uses: actions/setup-python@v1.2.0
         with:
