@@ -133,36 +133,40 @@ def facts_devices(module, facts):
     # Get Inventory Data for All Devices
     inventory = module.client.api.get_inventory()
     for device in inventory:
-        MODULE_LOGGER.debug('  -> Working on %s', device['hostname'])
-        device['name'] = device['hostname']
-        # Add designed config for device
-        if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
-            device['config'] = module.client.api.get_device_configuration(device['key'])
+        MODULE_LOGGER.info('  -> Working on %s', device['hostname'])
+        if 'systemMacAddress' in device and len(device['systemMacAddress']) > 0:
+            device['name'] = device['hostname']
+            # Add designed config for device
+            if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
+                device['config'] = module.client.api.get_device_configuration(device['key'])
 
-        # Add parent container name
-        container = module.client.api.get_container_by_id(device['parentContainerKey'])
-        device['parentContainerName'] = container['name']
+            # Add parent container name
+            container = module.client.api.get_container_by_id(device['parentContainerKey'])
+            device['parentContainerName'] = container['name']
 
-        # Add Device Specific Configlets
-        configlets = module.client.api.get_configlets_by_device_id(device['key'])
-        device['deviceSpecificConfiglets'] = []
-        for configlet in configlets:
-            if int(configlet['containerCount']) == 0:
-                device['deviceSpecificConfiglets'].append(configlet['name'])
+            # Add Device Specific Configlets
+            configlets = module.client.api.get_configlets_by_device_id(device['key'])
+            device['deviceSpecificConfiglets'] = []
+            for configlet in configlets:
+                if int(configlet['containerCount']) == 0:
+                    device['deviceSpecificConfiglets'].append(configlet['name'])
 
-        # Add ImageBundle Info
-        device['imageBundle'] = ""
-        deviceInfo = module.client.api.get_device_image_info(
-            device['key'])  # get_device_image_info() from cvprac
-        if "imageBundleMapper" in deviceInfo:
-            # There should only be one ImageBudle but its id is not decernable
-            # If the Image is applied directly to the device its type will be 'netelement'
-            if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
-                if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
-                    device['imageBundle'] = deviceInfo['bundleName']
+            # Add ImageBundle Info
+            device['imageBundle'] = ""
+            deviceInfo = module.client.api.get_device_image_info(
+                device['key'])  # get_device_image_info() from cvprac
+            if "imageBundleMapper" in deviceInfo:
+                # There should only be one ImageBudle but its id is not decernable
+                # If the Image is applied directly to the device its type will be 'netelement'
+                if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
+                    if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
+                        device['imageBundle'] = deviceInfo['bundleName']
 
-        # Add device to facts list
-        facts['devices'].append(device)
+            # Add device to facts list
+            facts['devices'].append(device)
+            MODULE_LOGGER.info('    -> Device added to facts')
+        else:
+            MODULE_LOGGER.error('    ! Device is on Cloudvision but System Mac Address is missing ... skipped')
 
     return facts
 
