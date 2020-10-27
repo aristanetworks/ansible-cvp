@@ -65,7 +65,7 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: true
 ```
 
-### Validate SSL cert signed by unknown CA
+### Validate SSL cert signed by custom CA
 
 > This mechanism works also with self-signed certificate
 
@@ -79,7 +79,34 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: true
 ```
 
-And then, import your CA or server CRT file into database of your CA for Python
+Since `HTTPAPI` plugin is based on Python `Requests` library, you need to use `Requests` method to [support custom `CA_BUNDLE`](https://requests.readthedocs.io/en/master/user/advanced/#ssl-cert-verification)
+
+```shell
+$ export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+```
+
+> Please note `export` is only working in your active shell unless you configure your `.bashrc` or `.zshrc` with this configuration.
+
+For information, `Requests` embeds its bundles in the following paths, for reference:
+
+```shell
+/usr/local/lib/python2.7/site-packages/requests/cacert.pem
+/usr/lib/python3/dist-packages/requests/cacert.pem
+```
+
+### Validate SSL using Cloudvision self-signed certificate
+
+Update httpapi as shown below:
+
+```yaml
+# HTTPAPI plugin configuration
+ansible_httpapi_port: '{{ansible_port}}'
+ansible_httpapi_host: '{{ ansible_host }}'
+ansible_httpapi_use_ssl: true
+ansible_httpapi_validate_certs: true
+```
+
+And then, import your CA or server CRT file into database of your CA for Python using [certifi](https://github.com/certifi/python-certifi) which is [recommended libs from Requests](https://requests.readthedocs.io/en/master/community/recommended/#certifi-ca-bundle)
 
 ```shell
 # Get CVP SSL Cert (If not already provided by your CV admin)
