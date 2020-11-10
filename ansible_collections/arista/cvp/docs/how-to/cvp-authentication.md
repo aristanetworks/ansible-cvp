@@ -138,3 +138,29 @@ fatal: [cv_server]: FAILED! => changed=false
         (Caused by SSLError(SSLError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] \
         certificate verify failed (_ssl.c:852)'),))
 ```
+
+## Configure connection timeout
+
+When used in large environment, API calls can take more than 30 seconds to run. It can be configured in ansible by leveraging either `ansible.cfg` file or variables.
+
+### Ansible configuration file
+
+Edit `ansible.cfg` file and add the following
+
+```ini
+[persistent_conenction]
+connection_timeout = 120
+command_timeout = 120
+```
+
+> If also configured in variables, it will be overwrite.
+
+### Inventory variables
+
+Add in either inventory file, group_vars or host_vars following lines:
+
+```yaml
+---
+ansible_connect_timeout: 30
+ansible_command_timeout: 90
+```
