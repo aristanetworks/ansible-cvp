@@ -57,40 +57,39 @@ def cv_connect(module):
     connection = Connection(module._socket_path)
     host = connection.get_option("host")
     port = connection.get_option("port")
-    user = connection.get_option("remote_user")
-    user_authentication = connection.get_option("password")
     cert_validation = connection.get_option("validate_certs")
+    is_cvaas = True if connection.get_option("remote_user") == 'cvaas' else False
+    cvaas_token = connection.get_option("password") if connection.get_option("remote_user") == 'cvaas' else None
+    user = connection.get_option("remote_user") if connection.get_option("remote_user") != 'cvaas' else ''
+    user_authentication = connection.get_option("password") if connection.get_option("remote_user") != 'cvass' else ''
+    ansible_command_timeout = connection.get_option(
+        "persistent_command_timeout")
+    ansible_connect_timeout = connection.get_option(
+        "persistent_connect_timeout")
+
     if cert_validation:
         LOGGER.debug("  Module will check CV certificate")
     if user == 'cvaas':
         LOGGER.debug('  Connecting to a cvaas instance')
-        try:
-            client.connect(nodes=[host],
-                           is_cvaas=True,
-                           cvaas_token=user_authentication,
-                           username='',
-                           password='',
-                           protocol="https",
-                           port=port,
-                           cert=cert_validation
-                           )
-        except CvpLoginError as e:
-            module.fail_json(msg=str(e))
-            LOGGER.error('Cannot connect to CVP: %s', str(e))
-    else:
-        LOGGER.debug('  Connecting to a on-prem instance')
-        try:
-            client.connect(nodes=[host],
-                           username=user,
-                           password=user_authentication,
-                           protocol="https",
-                           is_cvaas=False,
-                           port=port,
-                           cert=cert_validation
-                           )
-        except CvpLoginError as e:
-            module.fail_json(msg=str(e))
-            LOGGER.error('Cannot connect to CVP: %s', str(e))
+    LOGGER.debug('  Connecting to a CV instance: %s with timers %s %s',
+                 str(host),
+                 str(ansible_connect_timeout),
+                 str(ansible_command_timeout))
+    try:
+        client.connect(nodes=[host],
+                       username=user,
+                       cvaas_token=cvaas_token,
+                       password=user_authentication,
+                       protocol="https",
+                       is_cvaas=is_cvaas,
+                       port=port,
+                       cert=cert_validation,
+                       request_timeout=ansible_command_timeout,
+                       connect_timeout=ansible_connect_timeout
+                       )
+    except CvpLoginError as e:
+        module.fail_json(msg=str(e))
+        LOGGER.error('Cannot connect to CVP: %s', str(e))
 
     LOGGER.info('Connected to CVP')
 
