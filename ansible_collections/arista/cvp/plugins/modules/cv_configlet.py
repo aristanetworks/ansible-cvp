@@ -235,7 +235,6 @@ def build_configlets_list(module):
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
             )
-    MODULE_LOGGER.info(' * build_configlets_list - configlet list is: %s', str(intend))
     return intend
 
 
@@ -676,8 +675,6 @@ def main():
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
-
-    MODULE_LOGGER.info('result of cv_configlet is: %s', str(result))
 
     module.exit_json(**result)
 
