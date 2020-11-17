@@ -4,29 +4,35 @@ on:
   pull_request:
     paths:
       - 'ansible_collections/arista/cvp/roles/**/*'
+      - 'ansible_collections/arista/cvp/plugins/**/*'
       - 'ansible_collections/arista/cvp/molecules/**/*'
       - 'requirements.txt'
       - '.github/workflows/molecule.yml'
 jobs:
   molecule:
     runs-on: ubuntu-latest
-    env:
-      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
-      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
     strategy:
       fail-fast: true
       matrix:
         python_version: [ 3.6 ]
         avd_scenario:
-          - dhcp_configuration
+          - dhcp_management_mac
+          - dhcp_system_mac
           - cv_configlet
           - cv_device
     steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+
       - uses: actions/checkout@v2
+
       - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python_version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
