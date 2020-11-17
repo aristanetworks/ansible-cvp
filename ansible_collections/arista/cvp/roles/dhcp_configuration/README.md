@@ -60,7 +60,6 @@ ztp:
       registration:   < Registration URL to use for the host. If not set, default value will be applied >
       gateway:        < Gateway to use for the host. If not set, default value will be applied >
       nameservers:    < List of NS to use for the host. If not set, default value will be applied >
-      use_system_mac: < true | false Configure DHCP for system-mac-address provided in show version (default false) >
 ```
 
 Variables with `*` are mandatory, others are optional and might be skipped if not needed in your setup.
