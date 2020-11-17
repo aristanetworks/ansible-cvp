@@ -162,8 +162,7 @@ SCHEMA_CV_CONTAINER = {
                     "required": False
                 },
             }
-        },
-        "additionalProperties": False
+        }
     }
 }
 
@@ -186,7 +185,6 @@ def validate_cv_inputs(user_json, schema):
     boolean
         True if valid, False if not.
     """
-    # json_input = json.loads(user_json)
     try:
         jsonschema.validate(instance=user_json, schema=schema)
     except jsonschema.ValidationError as error_message:
