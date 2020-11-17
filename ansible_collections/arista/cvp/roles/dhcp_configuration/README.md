@@ -43,6 +43,7 @@ ztp:
     registration:     < * Default URL to get Script to register to CV or initial configuration >
     gateway:          < Gateway to use by default if not set per device >
     nameservers:      < List of default NS to use on a per host basis >
+    use_system_mac:   < true | false Configure DHCP for system-mac-address provided in show version (default false) >
   general:            < Section to define subnets parameters >
     subnets:
       - network:      < * Subnet where DHCP will listen for request >
@@ -59,6 +60,7 @@ ztp:
       registration:   < Registration URL to use for the host. If not set, default value will be applied >
       gateway:        < Gateway to use for the host. If not set, default value will be applied >
       nameservers:    < List of NS to use for the host. If not set, default value will be applied >
+      use_system_mac: < true | false Configure DHCP for system-mac-address provided in show version (default false) >
 ```
 
 Variables with `*` are mandatory, others are optional and might be skipped if not needed in your setup.
