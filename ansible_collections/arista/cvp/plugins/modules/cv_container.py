@@ -85,7 +85,10 @@ EXAMPLES = r'''
       register: cvp_facts
     - name: "Build Container topology on {{inventory_hostname}}"
       cv_container:
-        cvp_facts: '{{cvp_facts.ansible_facts}}'
+        cvp_facts: "{{cvp_facts.ansible_facts}}"
+        topology: "{{containers}}"
+        mode: merge
+      register: CVP_CONTAINERS_RESULT
 '''
 
 import sys
