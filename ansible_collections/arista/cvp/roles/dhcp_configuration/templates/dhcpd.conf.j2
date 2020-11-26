@@ -1,3 +1,4 @@
+
 # {{ ansible_managed }} - {{ inventory_hostname }}
 # Subnet of ZTP interface
 {% for subnet in ztp.general.subnets %}
@@ -22,7 +23,13 @@ subnet {{ subnet.network }} netmask {{ subnet.netmask }} {
 {% for client in ztp.clients %}
 host {{ client.name }} {
     option host-name "{{ client.name }}";
+{%     if ztp.default.use_system_mac is defined and ztp.default.use_system_mac == false %}
     hardware ethernet {{ client.mac | string }};
+{%     elif ztp.default.use_system_mac is defined and ztp.default.use_system_mac == true %}
+    option dhcp-client-identifier {{ client.mac | string }};
+{%     else %}
+    hardware ethernet {{ client.mac | string }};
+{%     endif %}
     fixed-address {{client.ip4}};
     option bootfile-name "{{ ztp.default.registration }}";
 {%     if client.gateway is defined %}
