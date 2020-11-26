@@ -189,7 +189,7 @@ def cv_update_configlets_on_device(module, device_facts, add_configlets, del_con
                 new_configlets=add_configlets,
                 create_task=True
             )
-            response.uate(device_addition)
+            response.update(device_addition)
         except Exception as error:
             errorMessage = str(error)
             LOGGER.error('OK, something wrong happens, raise an exception: %s', str(errorMessage))
