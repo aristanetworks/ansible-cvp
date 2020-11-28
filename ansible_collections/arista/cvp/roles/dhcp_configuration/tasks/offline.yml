@@ -1,6 +1,5 @@
 ---
 - name: 'Generate DHCPd configuration file'
-  become: true
   template:
     src: 'dhcpd.conf.j2'
     dest: '{{ output_dir }}/dhcpd.conf'

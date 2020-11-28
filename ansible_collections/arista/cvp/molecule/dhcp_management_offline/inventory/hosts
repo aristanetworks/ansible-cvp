@@ -1,0 +1,7 @@
+all:
+  children:
+    AVD_LAB:
+      children:
+        TOOLS:
+          hosts:
+            dhcp_server01:

@@ -1,0 +1,14 @@
+---
+- name: Converge
+  hosts: TOOLS
+  gather_facts: false
+  connection: local
+  tasks:
+
+    - name: generate intented variables
+      delegate_to: localhost
+      import_role:
+         name: arista.cvp.dhcp_configuration
+      vars:
+        mode: offline
+        output_dir: '{{playbook_dir}}/intended/configs/'

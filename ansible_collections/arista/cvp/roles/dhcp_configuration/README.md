@@ -112,7 +112,7 @@ No dependency required for this role.
       name: arista.cvp.dhcp_configuration
     vars:
       mode: offline
-      output_dirs: '{{inventory}}'
+      output_dir: '{{inventory}}'
 ```
 
 ### Configure Server to act as ZTP server

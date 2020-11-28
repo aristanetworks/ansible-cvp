@@ -17,6 +17,7 @@ jobs:
         python_version: [ 3.6 ]
         avd_scenario:
           - dhcp_management_mac
+          - dhcp_management_offline
           - dhcp_system_mac
           - cv_configlet
           - cv_device
