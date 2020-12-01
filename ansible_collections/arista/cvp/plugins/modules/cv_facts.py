@@ -19,25 +19,8 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-import logging
-import traceback  # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client import CvpClient
-# from ansible_collections.arista.cvp.plugins.module_utils.cv_client_errors import CvpLoginError
-
-from ansible_collections.arista.cvp.plugins.module_utils.tools_inventory import (
-    find_hostname_by_mac,
-    find_containerName_by_containerId
-)
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 
 DOCUMENTATION = r'''
 ---
@@ -69,7 +52,7 @@ options:
     description:
       - List of facts to retrieve from CVP.
       - By default, cv_facts returns facts for devices/configlets/containers/tasks
-      - Using this parameter allows user to limit scope to a subet of information.
+      - Using this parameter allows user to limit scope to a subset of information.
     required: false
     default: ['all']
     type: list
@@ -115,6 +98,14 @@ EXAMPLES = r'''
       register: FACTS
 '''
 
+import logging
+import traceback  # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+
+
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
 MODULE_LOGGER.info('Start cv_facts module execution')
 
@@ -142,36 +133,40 @@ def facts_devices(module, facts):
     # Get Inventory Data for All Devices
     inventory = module.client.api.get_inventory()
     for device in inventory:
-        MODULE_LOGGER.debug('  -> Working on %s', device['hostname'])
-        device['name'] = device['hostname']
-        # Add designed config for device
-        if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
-            device['config'] = module.client.api.get_device_configuration(device['key'])
+        MODULE_LOGGER.info('  -> Working on %s', device['hostname'])
+        if 'systemMacAddress' in device and len(device['systemMacAddress']) > 0:
+            device['name'] = device['hostname']
+            # Add designed config for device
+            if 'config' in module.params['gather_subset'] and device['streamingStatus'] == "active":
+                device['config'] = module.client.api.get_device_configuration(device['key'])
 
-        # Add parent container name
-        container = module.client.api.get_container_by_id(device['parentContainerKey'])
-        device['parentContainerName'] = container['name']
+            # Add parent container name
+            container = module.client.api.get_container_by_id(device['parentContainerKey'])
+            device['parentContainerName'] = container['name']
 
-        # Add Device Specific Configlets
-        configlets = module.client.api.get_configlets_by_device_id(device['key'])
-        device['deviceSpecificConfiglets'] = []
-        for configlet in configlets:
-            if int(configlet['containerCount']) == 0:
-                device['deviceSpecificConfiglets'].append(configlet['name'])
+            # Add Device Specific Configlets
+            configlets = module.client.api.get_configlets_by_device_id(device['key'])
+            device['deviceSpecificConfiglets'] = []
+            for configlet in configlets:
+                if int(configlet['containerCount']) == 0:
+                    device['deviceSpecificConfiglets'].append(configlet['name'])
 
-        # Add ImageBundle Info
-        device['imageBundle'] = ""
-        deviceInfo = module.client.api.get_device_image_info(
-            device['key'])  # get_device_image_info() from cvprac
-        if "imageBundleMapper" in deviceInfo:
-            # There should only be one ImageBudle but its id is not decernable
-            # If the Image is applied directly to the device its type will be 'netelement'
-            if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
-                if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
-                    device['imageBundle'] = deviceInfo['bundleName']
+            # Add ImageBundle Info
+            device['imageBundle'] = ""
+            deviceInfo = module.client.api.get_device_image_info(
+                device['key'])  # get_device_image_info() from cvprac
+            if "imageBundleMapper" in deviceInfo:
+                # There should only be one ImageBudle but its id is not decernable
+                # If the Image is applied directly to the device its type will be 'netelement'
+                if len(list(deviceInfo['imageBundleMapper'].values())) > 0:
+                    if list(deviceInfo['imageBundleMapper'].values())[0]['type'] == 'netelement':
+                        device['imageBundle'] = deviceInfo['bundleName']
 
-        # Add device to facts list
-        facts['devices'].append(device)
+            # Add device to facts list
+            facts['devices'].append(device)
+            MODULE_LOGGER.info('    -> Device added to facts')
+        else:
+            MODULE_LOGGER.error('    ! Device is on Cloudvision but System Mac Address is missing ... skipped')
 
     return facts
 
@@ -276,14 +271,15 @@ def facts_configlets(module, facts):
                 if mapper['configletId'] == configlet['key']:
                     # If mapper is for device
                     if mapper['type'] == 'netelement':
-                        device_hostname = find_hostname_by_mac(inventory=inventory, mac_address=mapper['objectId'])
+                        device_hostname = tools_inventory.find_hostname_by_mac(
+                            inventory=inventory, mac_address=mapper['objectId'])
                         if device_hostname is not None:
                             MODULE_LOGGER.debug('found mapping to device %s', str(device_hostname))
                             configlet['devices'].append(device_hostname)
                     # If mapper is for container
                     if mapper['type'] == 'container':
-                        container_name = find_containerName_by_containerId(containers_list=containers,
-                                                                           container_id=mapper['objectId'])
+                        container_name = tools_inventory.find_containerName_by_containerId(containers_list=containers,
+                                                                                           container_id=mapper['objectId'])
                         if container_name is not None:
                             MODULE_LOGGER.debug(
                                 'found mapping to container %s', str(container_name))
@@ -472,17 +468,18 @@ def main():
                            supports_check_mode=True)
 
     # TODO: Test CVPRAC version as well
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
     # Forge standard Ansible output
     result = dict(changed=False, ansible_facts={})
 
-    # Connect to CVP Instance
-    module.client = cv_connect(module)
+    if not module.check_mode:
+        # Connect to CVP Instance
+        module.client = tools_cv.cv_connect(module)
 
-    # Get Facts from CVP
-    result['ansible_facts'] = facts_builder(module)
+        # Get Facts from CVP
+        result['ansible_facts'] = facts_builder(module)
 
     # Standard Ansible outputs
     module.exit_json(**result)

@@ -69,9 +69,11 @@ $ make <your command>
 #### Commands for docker-compose
 
 - `dev-start`: Start docker compose stack to develop with AVD and CVP collection (alias: `start`)
-    - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose AVD documentation with live reload for development purposes.
-    - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose CVP documentation with live reload for development purposes.
-    - Deploy an [AVD runner](https://hub.docker.com/repository/docker/avdteam/base) with a pseudo terminal connected to shell for ansible execution
+
+  - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose AVD documentation with live reload for development purposes.
+  - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose CVP documentation with live reload for development purposes.
+  - Deploy an [AVD runner](https://hub.docker.com/repository/docker/avdteam/base) with a pseudo terminal connected to shell for ansible execution
+
 - `dev-stop`: Stop docker compose stack and remove containers (alias: `stop`)
 - `dev-run`: Run a shell attached to ansible container (alias: `shell`)
 - `dev-reload`: Stop and Start docker-compose stack

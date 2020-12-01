@@ -25,9 +25,12 @@ __Python:__
 
 __Additional Python Libraries required:__
 
+- python `3.6` and higher
+- ansible >= `2.9.0`
 - [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.4`
 - requests >= `2.22.0`
-- treelib version `1.5.5` or later
+- treelib `1.5.5`
+- jsonschema `3.2.0`
 
 __Supported Ansible Versions:__ ansible 2.9 or later
 

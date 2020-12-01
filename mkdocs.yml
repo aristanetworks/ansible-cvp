@@ -37,6 +37,9 @@ nav:
     - Manage containers: docs/how-to/cv_container.md
     - Manage devices: docs/how-to/cv_device.md
     - Development tips & tricks: docs/installation/development.md
+    - Activate logging: docs/how-to/debug.md
+  - Frequently Asked Questions:
+    - Error Messages: docs/faq/errors.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
@@ -55,6 +58,7 @@ nav:
     - Arista Automation Examples: https://aristanetworks.github.io/netdevops-examples/
 
 markdown_extensions:
+  - mdx_truly_sane_lists
   - smarty
   - pymdownx.arithmatex
   - pymdownx.betterem:

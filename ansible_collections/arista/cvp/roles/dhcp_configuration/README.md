@@ -43,6 +43,7 @@ ztp:
     registration:     < * Default URL to get Script to register to CV or initial configuration >
     gateway:          < Gateway to use by default if not set per device >
     nameservers:      < List of default NS to use on a per host basis >
+    use_system_mac:   < true | false Configure DHCP for system-mac-address provided in show version (default false) >
   general:            < Section to define subnets parameters >
     subnets:
       - network:      < * Subnet where DHCP will listen for request >
@@ -111,7 +112,7 @@ No dependency required for this role.
       name: arista.cvp.dhcp_configuration
     vars:
       mode: offline
-      output_dirs: '{{inventory}}'
+      output_dir: '{{inventory}}'
 ```
 
 ### Configure Server to act as ZTP server

@@ -19,19 +19,8 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-
-import time
-import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
 
 DOCUMENTATION = r'''
 ---
@@ -84,6 +73,12 @@ EXAMPLES = '''
     tasks: "{{ tasks }}"
     wait: 60
 '''
+
+import time
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
 MODULE_LOGGER.info('Start cv_tasks module execution')
@@ -186,18 +181,19 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=False)
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(msg='cvprac required for this module')
 
     result = dict(changed=False)
 
-    # Connect to CVP instance
-    module.client = cv_connect(module)
+    if not module.check_mode:
+        # Connect to CVP instance
+        module.client = tools_cv.cv_connect(module)
 
-    result['changed'], result['data'], warnings = task_action(module)
+        result['changed'], result['data'], warnings = task_action(module)
 
-    if warnings:
-        [module.warn(w) for w in warnings]
+        if warnings:
+            [module.warn(w) for w in warnings]
 
     module.exit_json(**result)
 

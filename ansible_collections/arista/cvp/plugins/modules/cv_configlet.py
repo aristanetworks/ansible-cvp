@@ -19,28 +19,8 @@
 #
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-
-# Required by Ansible and CVP
-import re
-import traceback
-import logging
-from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
-DIFFLIB_IMP_ERR = None
-try:
-    import difflib
-    HAS_DIFFLIB = True
-except ImportError:
-    HAS_DIFFLIB = False
-    DIFFLIB_IMP_ERR = traceback.format_exc()
 
 
 DOCUMENTATION = r'''
@@ -119,29 +99,17 @@ EXAMPLES = r'''
       register: cvp_configlet
 '''
 
+# Required by Ansible and CVP
+import re
+import logging
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
-
-
-def compare(fromText, toText, fromName='', toName='', lines=10):
-    """ Compare text string in 'fromText' with 'toText' and produce
-        diffRatio - a score as a float in the range [0, 1] 2.0*M / T
-          T is the total number of elements in both sequences,
-          M is the number of matches.
-          Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
-        unified diff list
-          Code	Meaning
-          '- '	line unique to sequence 1
-          '+ '	line unique to sequence 2
-          '  '	line common to both sequences
-          '? '	line not present in either input sequence
-    """
-    fromlines = fromText.splitlines(1)
-    tolines = toText.splitlines(1)
-    diff = list(difflib.unified_diff(fromlines, tolines, fromName, toName, n=lines))
-    textComp = difflib.SequenceMatcher(None, fromText, toText)
-    diffRatio = textComp.ratio()
-    return [diffRatio, diff]
 
 
 def get_tasks(taskIds, module):
@@ -235,14 +203,14 @@ def build_configlets_list(module):
         # their derived configlets
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
-            if re.search(r"\b(all|none)\b", str(module.params['configlet_filter'])) or (
-               any(element in configlet['name'] for element in module.params['configlet_filter'])):
+            if tools.match_filter(input=configlet['name'],
+                                  filter=module.params['configlet_filter']):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
                     # Scenario where configlet module is set to create.
                     if module.params['state'] == 'present':
                         ansible_configlet = module.params['configlets'][configlet['name']]
-                        configlet_compare = compare(
+                        configlet_compare = tools.compare(
                             configlet['config'], ansible_configlet, 'CVP', 'Ansible')
                         # compare function returns a floating point number
                         if configlet_compare[0] == 1.0:
@@ -263,12 +231,11 @@ def build_configlets_list(module):
         for cvp_configlet in module.params['cvp_facts']['configlets']:
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
-        if not found:
+        if not found and tools.match_filter(input=ansible_configlet, filter=module.params['configlet_filter']):
             intend['create'].append(
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
             )
-    MODULE_LOGGER.info(' * build_configlets_list - configlet list is: %s', str(intend))
     return intend
 
 
@@ -311,49 +278,57 @@ def action_update(update_configlets, module):
     configlets_notes = str(module.params['configlets_notes'])
 
     for configlet in update_configlets:
-        try:
-            update_resp = module.client.api.update_configlet(config=configlet['config'],
-                                                             key=configlet['data']['key'],
-                                                             name=configlet['data']['name'],
-                                                             wait_task_ids=True)
-        except Exception as error:
-            # Mark module execution with error
-            flag_failed = True
-            # Build error message to report in ansible output
-            errorMessage = re.split(':', str(error))[-1]
-            message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
-            # Add logging to ansible response.
-            response_data.append({configlet['name']: message})
-            # Generate logging error message
-            MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                configlet['data']['name']), str(error))
+        if module.check_mode:
+            response_data.append({configlet['data']['name']: 'will be updated'})
+            MODULE_LOGGER.info('[check mode] - Configlet %s updated on cloudvision', str(
+                configlet['data']['name']))
+            flag_changed = True
+            diff += configlet['data']['name'] + \
+                ":\n" + configlet['diff'] + "\n\n"
         else:
-            MODULE_LOGGER.debug('CV response is %s', str(update_resp))
-            if "errorMessage" in str(update_resp):
+            try:
+                update_resp = module.client.api.update_configlet(config=configlet['config'],
+                                                                 key=configlet['data']['key'],
+                                                                 name=configlet['data']['name'],
+                                                                 wait_task_ids=True)
+            except Exception as error:
                 # Mark module execution with error
                 flag_failed = True
                 # Build error message to report in ansible output
-                message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                errorMessage = re.split(':', str(error))[-1]
+                message = "Configlet %s cannot be updated - %s" % (configlet['name'], errorMessage)
                 # Add logging to ansible response.
-                response_data.append({configlet['data']['name']: message})
+                response_data.append({configlet['name']: message})
                 # Generate logging error message
                 MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                    configlet['data']['name']), str(update_resp['errorMessage']))
+                    configlet['data']['name']), str(error))
             else:
-                # Inform module a changed has been done
-                flag_changed = True
-                # Add note to configlet to mark as managed by Ansible
-                module.client.api.add_note_to_configlet(
-                    configlet['data']['key'], configlets_notes)
-                # Save result for further traces.
-                response_data.append({configlet['data']['name']: "success"})
-                # Save configlet diff
-                diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
-                # Collect generated tasks
-                if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
-                    taskIds.append(update_resp['taskIds'])
-                MODULE_LOGGER.info('Configlet %s updated on cloudvision', str(
-                    configlet['data']['name']))
+                MODULE_LOGGER.debug('CV response is %s', str(update_resp))
+                if "errorMessage" in str(update_resp):
+                    # Mark module execution with error
+                    flag_failed = True
+                    # Build error message to report in ansible output
+                    message = "Configlet %s cannot be updated - %s" % (configlet['name'], update_resp['errorMessage'])
+                    # Add logging to ansible response.
+                    response_data.append({configlet['data']['name']: message})
+                    # Generate logging error message
+                    MODULE_LOGGER.error('Error updating configlet %s: %s', str(
+                        configlet['data']['name']), str(update_resp['errorMessage']))
+                else:
+                    # Inform module a changed has been done
+                    flag_changed = True
+                    # Add note to configlet to mark as managed by Ansible
+                    module.client.api.add_note_to_configlet(
+                        configlet['data']['key'], configlets_notes)
+                    # Save result for further traces.
+                    response_data.append({configlet['data']['name']: "success"})
+                    # Save configlet diff
+                    diff += configlet['data']['name'] + ":\n" + configlet['diff'] + "\n\n"
+                    # Collect generated tasks
+                    if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
+                        taskIds.append(update_resp['taskIds'])
+                    MODULE_LOGGER.info('Configlet %s updated on cloudvision', str(
+                        configlet['data']['name']))
     return {'changed': flag_changed,
             'failed': flag_failed,
             'update': response_data,
@@ -394,40 +369,46 @@ def action_delete(delete_configlets, module):
     flag_changed = False
 
     for configlet in delete_configlets:
-        try:
-            delete_resp = module.client.api.delete_configlet(
-                name=configlet['data']['name'],
-                key=configlet['data']['key'])
-        except Exception as error:
-            # Mark module execution with error
-            flag_failed = True
-            # Build error message to report in ansible output
-            errorMessage = re.split(':', str(error))[-1]
-            message = "Configlet %s cannot be deleted - %s" % (
-                configlet['data']['name'], errorMessage)
-            # Add logging to ansible response.
-            response_data.append({configlet['data']['name']: message})
-            # Generate logging error message
-            MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
-                configlet['data']['name']), str(error))
+        if module.check_mode:
+            response_data.append({configlet['data']['name']: 'will be deleted'})
+            MODULE_LOGGER.info('[check mode] - Configlet %s deleted from cloudvision', str(
+                configlet['data']['name']))
+            flag_changed = True
         else:
-            if "error" in str(delete_resp).lower():
+            try:
+                delete_resp = module.client.api.delete_configlet(
+                    name=configlet['data']['name'],
+                    key=configlet['data']['key'])
+            except Exception as error:
                 # Mark module execution with error
                 flag_failed = True
                 # Build error message to report in ansible output
+                errorMessage = re.split(':', str(error))[-1]
                 message = "Configlet %s cannot be deleted - %s" % (
-                    configlet['data']['name'], delete_resp['errorMessage'])
+                    configlet['data']['name'], errorMessage)
                 # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
                 # Generate logging error message
                 MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
-                    configlet['data']['name']), delete_resp['errorMessage'])
+                    configlet['data']['name']), str(error))
             else:
-                # Inform module a changed has been done
-                flag_changed = True
-                response_data.append({configlet['data']['name']: "success"})
-                MODULE_LOGGER.info('Configlet %s deleted from cloudvision', str(
-                    configlet['data']['name']))
+                if "error" in str(delete_resp).lower():
+                    # Mark module execution with error
+                    flag_failed = True
+                    # Build error message to report in ansible output
+                    message = "Configlet %s cannot be deleted - %s" % (
+                        configlet['data']['name'], delete_resp['errorMessage'])
+                    # Add logging to ansible response.
+                    response_data.append({configlet['data']['name']: message})
+                    # Generate logging error message
+                    MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
+                        configlet['data']['name']), delete_resp['errorMessage'])
+                else:
+                    # Inform module a changed has been done
+                    flag_changed = True
+                    response_data.append({configlet['data']['name']: "success"})
+                    MODULE_LOGGER.info('Configlet %s deleted from cloudvision', str(
+                        configlet['data']['name']))
     return {'changed': flag_changed,
             'failed': flag_failed,
             'delete': response_data,
@@ -468,38 +449,45 @@ def action_create(create_configlets, module):
     configlets_notes = str(module.params['configlets_notes'])
 
     for configlet in create_configlets:
-        try:
-            new_resp = module.client.api.add_configlet(
-                name=configlet['data']['name'],
-                config=configlet['config'])
-        except Exception as error:
-            # Mark module execution with error
-            flag_failed = True
-            # Build error message to report in ansible output
-            errorMessage = re.split(':', str(error))[-1]
-            message = "Configlet %s cannot be created - %s" % (configlet['data']['name'], errorMessage)
-            # Add logging to ansible response.
-            response_data.append({configlet['data']['name']: message})
-            # Generate logging error message
-            MODULE_LOGGER.error('Error creating configlet %s: %s', str(configlet['data']['name']), str(error))
+        # Run section to guess changes when module runs with --check flag
+        if module.check_mode:
+            response_data.append({configlet['data']['name']: "will be created"})
+            MODULE_LOGGER.info('[check mode] - Configlet %s created on cloudvision', str(
+                configlet['data']['name']))
+            flag_changed = True
         else:
-            if "errorMessage" in str(new_resp):
+            try:
+                new_resp = module.client.api.add_configlet(
+                    name=configlet['data']['name'],
+                    config=configlet['config'])
+            except Exception as error:
                 # Mark module execution with error
                 flag_failed = True
                 # Build error message to report in ansible output
-                message = "Configlet %s cannot be created - %s" % (
-                    configlet['data']['name'], new_resp['errorMessage'])
+                errorMessage = re.split(':', str(error))[-1]
+                message = "Configlet %s cannot be created - %s" % (configlet['data']['name'], errorMessage)
                 # Add logging to ansible response.
                 response_data.append({configlet['data']['name']: message})
                 # Generate logging error message
-                MODULE_LOGGER.error(
-                    'Error creating configlet %s: %s', str(configlet['data']['name']), str(new_resp))
+                MODULE_LOGGER.error('Error creating configlet %s: %s', str(configlet['data']['name']), str(error))
             else:
-                module.client.api.add_note_to_configlet(
-                    new_resp, configlets_notes)
-                changed = True  # noqa # pylint: disable=unused-variable
-                response_data.append({configlet['data']['name']: "success"})
-                MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['data']['name']))
+                if "errorMessage" in str(new_resp):
+                    # Mark module execution with error
+                    flag_failed = True
+                    # Build error message to report in ansible output
+                    message = "Configlet %s cannot be created - %s" % (
+                        configlet['data']['name'], new_resp['errorMessage'])
+                    # Add logging to ansible response.
+                    response_data.append({configlet['data']['name']: message})
+                    # Generate logging error message
+                    MODULE_LOGGER.error(
+                        'Error creating configlet %s: %s', str(configlet['data']['name']), str(new_resp))
+                else:
+                    module.client.api.add_note_to_configlet(
+                        new_resp, configlets_notes)
+                    flag_changed = True  # noqa # pylint: disable=unused-variable
+                    response_data.append({configlet['data']['name']: "success"})
+                    MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['data']['name']))
     return {'changed': flag_changed,
             'failed': flag_failed,
             'create': response_data,
@@ -612,8 +600,8 @@ def action_manager(module):
 
     # MODULE_LOGGER.debug('Current intended list is: %s', str(intend_list))
 
-    # Create new configlets
-    if len(intend_list['create']) > 0:
+    # Create new configlets and only if state is not absent
+    if len(intend_list['create']) > 0 and module.params['state'] != "absent":
         MODULE_LOGGER.info('Start configlets creation process')
         temp_res = action_create(
             create_configlets=intend_list['create'],
@@ -624,8 +612,8 @@ def action_manager(module):
             type='create',
             module=module)
 
-    # Update existing configlets
-    if len(intend_list['update']) > 0:
+    # Update existing configlets and only if state is not absent
+    if len(intend_list['update']) > 0 and module.params['state'] != "absent":
         MODULE_LOGGER.info('Start configlets update process')
         temp_res = action_update(
             update_configlets=intend_list['update'],
@@ -668,22 +656,35 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
 
-    if not HAS_DIFFLIB:
+    MODULE_LOGGER.info('starting module cv_configlet')
+    if module.check_mode:
+        MODULE_LOGGER.warning('! check_mode is enable')
+        # module.exit_json(changed=True)
+
+    if not tools.HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
+
+    if not schema.HAS_JSONSCHEMA:
+        module.fail_json(
+            msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not schema.validate_cv_inputs(user_json=module.params['configlets'], schema=schema.SCHEMA_CV_CONFIGLET):
+        MODULE_LOGGER.error("Invalid configlet input : %s", str(module.params['configlets']))
+        module.fail_json(
+            msg='Configlet input data are not compliant with module.')
 
     result = dict(changed=False, data={})
     # messages = dict(issues=False)
     # Connect to CVP instance
-    module.client = cv_connect(module)
+    if not module.check_mode:
+        module.client = tools_cv.cv_connect(module)
 
     # Pass module params to configlet_action to act on configlet
     result = action_manager(module)
-
-    MODULE_LOGGER.info('result of cv_configlet is: %s', str(result))
 
     module.exit_json(**result)
 

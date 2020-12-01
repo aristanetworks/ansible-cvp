@@ -17,23 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
-
-ANSIBLE_METADATA = {
-    "metadata_version": "1.0",
-    "status": ["preview"],
-    "supported_by": "community",
-}
-
-import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_update_configlets_on_device
-from ansible_collections.arista.cvp.plugins.module_utils.cv_tools import cv_connect, HAS_CVPRAC
-
 
 DOCUMENTATION = r"""
 ---
@@ -132,6 +118,14 @@ EXAMPLES = r"""
         device_filter: ['veos']
       register: cvp_device
 """
+
+import logging
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
 MODULE_LOGGER.info('Start cv_device module execution')
@@ -304,37 +298,6 @@ def get_unique_from_list(source_list, compare_list):
 # ------------------------------------------------------------- #
 
 
-def is_in_filter(hostname_filter=None, hostname="eos"):
-    """
-    Check if device is part of the filter or not.
-
-    Parameters
-    ----------
-    hostname_filter : list, optional
-        Device filter, by default ['all']
-    hostname : str
-        Device hostname to compare against filter.
-
-    Returns
-    -------
-    boolean
-        True if device hostname is part of filter. False if not.
-    """
-    MODULE_LOGGER.debug(" * is_in_filter - filter is %s", str(hostname_filter))
-    MODULE_LOGGER.debug(" * is_in_filter - hostname is %s", str(hostname))
-
-    # W102 Workaround to avoid list as default value.
-    if hostname_filter is None:
-        hostname_filter = ["all"]
-
-    if "all" in hostname_filter:
-        return True
-    elif any(element in hostname for element in hostname_filter):
-        return True
-    MODULE_LOGGER.debug(" * is_in_filter - NOT matched")
-    return False
-
-
 def is_in_container(device, container="undefined_container"):
     """
     Check if device is attached to given container.
@@ -376,32 +339,6 @@ def is_device_target(hostname, device_list):
     if hostname in device_list.keys():
         return True
     return False
-
-
-def is_list_diff(list1, list2):
-    """
-    Check if 2 list have some differences.
-
-    Parameters
-    ----------
-    list1 : list
-        First list to compare.
-    list2 : list
-        Second list to compare.
-
-    Returns
-    -------
-    boolean
-        True if lists have diffs. False if not.
-    """
-    has_diff = False
-    for entry1 in list1:
-        if entry1 not in list2:
-            has_diff = True
-    for entry2 in list2:
-        if entry2 not in list1:
-            has_diff = True
-    return has_diff
 
 
 # ------------------------------------------------------------- #
@@ -453,7 +390,7 @@ def build_existing_devices_list(module):
     MODULE_LOGGER.debug(" * build_existing_devices_list - device filter is: %s", str(devices_filter))
     for cvp_device in facts_device:
         MODULE_LOGGER.debug(" * build_existing_devices_list - start %s", str(cvp_device["hostname"]))
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=devices_filter, hostname=cvp_device["hostname"]
         ):
             # Check if device is in module input
@@ -518,7 +455,7 @@ def build_new_devices_list(module):
     # facts_devices = facts_devices(module)
     # Loop in Input devices to see if it is part of CV Facts
     for ansible_device_hostname, ansible_device in devices_ansible.items():
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=devices_filter, hostname=ansible_device_hostname
         ):
             cvp_device = device_get_from_facts(
@@ -542,7 +479,7 @@ def build_new_devices_list(module):
 
 def configlet_prepare_cvp_update(configlet_name_list, facts):
     """
-    Build configlets strcuture to configure CV.
+    Build configlets structure to configure CV.
 
     CV requires to get a specific list of dict to add/delete configlets
     attached to device. This function create this specific structure.
@@ -579,6 +516,14 @@ def configlet_prepare_cvp_update(configlet_name_list, facts):
         configlet_data["key"] = configlet_key
         configlets_structure.append(configlet_data)
     return configlets_structure
+
+
+def configlet_check_unknown_from_cvp(configlet_name_list, facts):
+    unknown_configlets = list()
+    for configlet_name in configlet_name_list:
+        if configlet_get_fact_key(configlet_name=configlet_name, cvp_facts=facts) is None:
+            unknown_configlets.append(configlet_name)
+    return unknown_configlets
 
 
 # ------------------------------------------------------------- #
@@ -863,6 +808,22 @@ def devices_update(module, mode="override"):
     MODULE_LOGGER.debug(" * devices_update - entering update function")
 
     for device_update in devices_update:
+        # First check all configlets are already on CV side.
+        unknown_configlet = configlet_check_unknown_from_cvp(
+            configlet_name_list=device_update["configlets"],
+            facts=module.params["cvp_facts"]
+        )
+        if len(unknown_configlet) > 0:
+            MODULE_LOGGER.error(
+                'Configlet list for %s has some configlets not configured on Cloudvision %s',
+                str(device_update["name"]),
+                str(unknown_configlet))
+            module.fail_json(
+                msg="{} device has unknown configlets from CV: {}".format(device_update["name"],
+                unknown_configlet)
+            )
+
+    for device_update in devices_update:
         MODULE_LOGGER.info(" * devices_update - updating device: %s", str(device_update["name"]))
         MODULE_LOGGER.info(" * devices_update - updating device with: %s", str(device_update))
         # Get device facts from cv facts
@@ -883,7 +844,7 @@ def devices_update(module, mode="override"):
         # Start configlet update in override mode
         if mode == 'override':
             # Get list of configlet to update: in ansible inputs and not in facts
-            if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+            if tools.is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
                 configlets_delete = get_unique_from_list(
                     source_list=device_update["cv_configlets"],
                     compare_list=device_update["configlets"],
@@ -933,56 +894,62 @@ def devices_update(module, mode="override"):
         # Execute configlet update on device
         MODULE_LOGGER.debug(' * device_update - device_update configlets: %s', str(device_update["configlets"]))
         MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s', str(device_update["cv_configlets"]))
-        if is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
+        if tools.is_list_diff(device_update["configlets"], device_update["cv_configlets"]):
             MODULE_LOGGER.debug(' * device_update - call cv_update_configlets_on_device')
-            try:
-                MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
-                # device_action = module.client.api.update_configlets_on_device(
-                #     app_name="Ansible",
-                #     device=device_facts,
-                #     add_configlets=configlets_add,
-                #     del_configlets=configlets_delete,
-                # )
-                MODULE_LOGGER.debug("%s", str(configlets_add))
-                device_action = cv_update_configlets_on_device(
-                    module=module,
-                    device_facts=device_facts,
-                    add_configlets=configlets_add,
-                    del_configlets=configlets_delete
+            if module.check_mode:
+                devices_updated += 1
+                result_update.append(
+                    {device_update["name"]: "update-with-configlets"}
                 )
-                MODULE_LOGGER.debug(' * device_update - get response from cv_update_configlets_on_device: %s', str(device_action))
-            except Exception as error:
-                errorMessage = str(error)
-                message = "Device %s Configlets cannot be updated - %s" % (
-                    device_update["name"],
-                    errorMessage,
-                )
-                result_update.append({device_update["name"]: message})
             else:
-                # Capture and report error message sent by CV during update
-                if "errorMessage" in str(device_action):
-                    message = "Device %s Configlets cannot be Updated - %s" % (
+                try:
+                    MODULE_LOGGER.debug(' * device_update - cv_configlets configlets: %s')
+                    # device_action = module.client.api.update_configlets_on_device(
+                    #     app_name="Ansible",
+                    #     device=device_facts,
+                    #     add_configlets=configlets_add,
+                    #     del_configlets=configlets_delete,
+                    # )
+                    MODULE_LOGGER.debug("%s", str(configlets_add))
+                    device_action = tools_cv.cv_update_configlets_on_device(
+                        module=module,
+                        device_facts=device_facts,
+                        add_configlets=configlets_add,
+                        del_configlets=configlets_delete
+                    )
+                    MODULE_LOGGER.debug(' * device_update - get response from cv_update_configlets_on_device: %s', str(device_action))
+                except Exception as error:
+                    errorMessage = str(error)
+                    message = "Device %s Configlets cannot be updated - %s" % (
                         device_update["name"],
-                        device_action["errorMessage"],
+                        errorMessage,
                     )
                     result_update.append({device_update["name"]: message})
                 else:
-                    changed = True  # noqa # pylint: disable=unused-variable
-                    MODULE_LOGGER.debug(' * device_update - looking for taskIds in %s', str(device_action))
-                    if "taskIds" in str(device_action):
-                        devices_updated += 1
-                        for taskId in device_action["data"]["taskIds"]:
-                            result_tasks_generated.append(taskId)
-                        result_update.append(
-                            {
-                                device_update["name"]: "Configlets-%s"
-                                % device_action["data"]["taskIds"]
-                            }
+                    # Capture and report error message sent by CV during update
+                    if "errorMessage" in str(device_action):
+                        message = "Device %s Configlets cannot be Updated - %s" % (
+                            device_update["name"],
+                            device_action["errorMessage"],
                         )
+                        result_update.append({device_update["name"]: message})
                     else:
-                        result_update.append(
-                            {device_update["name"]: "Configlets-No_Specific_Tasks"}
-                        )
+                        changed = True  # noqa # pylint: disable=unused-variable
+                        MODULE_LOGGER.debug(' * device_update - looking for taskIds in %s', str(device_action))
+                        if "taskIds" in str(device_action):
+                            devices_updated += 1
+                            for taskId in device_action["data"]["taskIds"]:
+                                result_tasks_generated.append(taskId)
+                            result_update.append(
+                                {
+                                    device_update["name"]: "Configlets-%s"
+                                    % device_action["data"]["taskIds"]
+                                }
+                            )
+                        else:
+                            result_update.append(
+                                {device_update["name"]: "Configlets-No_Specific_Tasks"}
+                            )
 
     # Build response structure
     data = {
@@ -1036,7 +1003,7 @@ def devices_reset(module):
         MODULE_LOGGER.info(
             'check hostname %s against filter %s', str(cvp_device["hostname"]),
             str(module.params['device_filter']))
-        if is_in_filter(
+        if tools.is_in_filter(
             hostname_filter=module.params["device_filter"],
             hostname=cvp_device["hostname"],
         ):
@@ -1072,7 +1039,7 @@ def devices_action(module):
     """
     Manage all actions related to devices.
 
-    Action ordonancer and output bui
+    Action scheduler and output builder
 
     Structure output:
     >>> devices_action(module)
@@ -1151,20 +1118,22 @@ def devices_action(module):
             results["data"]["tasksIds"] += result_update["updated_tasksIds"]
 
         # Get CV info for generated tasks
-        tasks_generated = tasks_get_filtered(
-            taskid_list=results["data"]["tasksIds"], module=module
-        )
-        results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
+        if not module.check_mode:
+            tasks_generated = tasks_get_filtered(
+                taskid_list=results["data"]["tasksIds"], module=module
+            )
+            results["data"]["tasks"] = results["data"]["tasks"] + tasks_generated
 
     # Call reset function to restart ZTP process on devices.
     elif topology_state == "absent":
         result_reset = devices_reset(module)
         results["changed"] = True
         results["data"].update(result_reset)
-        tasks_generated = tasks_get_filtered(
-            taskid_list=result_reset["reset_taskIds"], module=module
-        )
-        results["data"]["tasks"] += tasks_generated
+        if not module.check_mode:
+            tasks_generated = tasks_get_filtered(
+                taskid_list=result_reset["reset_taskIds"], module=module
+            )
+            results["data"]["tasks"] += tasks_generated
 
     # Check if we have to update changed flag
     if len(results["data"]["tasks"]) > 0 or int(results["data"]["moved_devices"]) > 0:
@@ -1190,14 +1159,23 @@ def main():
                             default='override',
                             choices=['merge', 'override', 'delete']))
 
-    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = AnsibleModule(argument_spec=argument_spec,
+                           supports_check_mode=True)
 
-    if not HAS_CVPRAC:
+    if not tools_cv.HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
+    if not schema.HAS_JSONSCHEMA:
+        module.fail_json(msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not schema.validate_cv_inputs(user_json=module.params['devices'], schema=schema.SCHEMA_CV_DEVICE):
+        module.fail_json(
+            msg='Device input data are not compliant with module.')
+
     # Connect to CVP instance
-    module.client = cv_connect(module)
+    if not module.check_mode:
+        module.client = tools_cv.cv_connect(module)
 
     result = devices_action(module=module)
     module.exit_json(**result)

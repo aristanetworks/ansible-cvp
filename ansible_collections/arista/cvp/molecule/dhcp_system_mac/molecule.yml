@@ -32,7 +32,7 @@ scenario:
     - create
     - prepare
     - converge
-    - idempotence
+    # - idempotence ## Deactivate since apt update breaks idempotency
     # - side_effect
     - verify
     - cleanup

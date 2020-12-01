@@ -1,0 +1,49 @@
+---
+- name: cv_configlet unit testing
+  hosts: cv_server
+  # connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_CONFIGLETS:
+      01TRAINING-01: "alias a110 show version"
+      01TRAINING-02: "alias a102 show version"
+      02DEMO-01: "alias a102 show version"
+  tasks:
+    - name: "Include offline facts"
+      include_vars: "{{ root_dir }}/inventory/cv_facts.json"
+
+    - name: "Configure configlet on {{ inventory_hostname }}"
+      arista.cvp.cv_configlet:
+        cvp_facts: "{{ansible_facts}}"
+        configlets: "{{CVP_CONFIGLETS}}"
+        configlet_filter: ["TRAINING"]
+        state: present
+      register: CVP_CONFIGLET_RESULT
+      check_mode: yes
+
+    - name: "Print logs"
+      debug:
+        msg: "{{ CVP_CONFIGLET_RESULT }}"
+
+    - name: "Check deletion process"
+      assert:
+        that:
+          - "CVP_CONFIGLET_RESULT.data.deleted[0]['01TRAINING-alias'] is defined"
+        fail_msg: "Incorrect deletion process"
+        success_msg: "Deletion process is running as expected"
+
+    - name: "Check creation process"
+      assert:
+        that:
+          - "CVP_CONFIGLET_RESULT.data.new[0]['01TRAINING-02'] is defined"
+        fail_msg: "Incorrect creation process"
+        success_msg: "Creation process is running as expected"
+
+    - name: "Check update process"
+      assert:
+        that:
+          - "CVP_CONFIGLET_RESULT.data.updated[0]['01TRAINING-01'] is defined"
+        fail_msg: "Incorrect update process"
+        success_msg: "Update process is running as expected"
