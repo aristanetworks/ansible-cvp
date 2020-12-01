@@ -97,6 +97,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible.module_utils.basic import AnsibleModule
 
 # List of Ansible default containers
@@ -830,6 +831,16 @@ def main():
 
     if not tools_tree.HAS_TREELIB:
         module.fail_json(msg='treelib required for this module')
+
+    if not schema.HAS_JSONSCHEMA:
+        module.fail_json(
+            msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not schema.validate_cv_inputs(user_json=module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
+        MODULE_LOGGER.error("Invalid configlet input : %s",
+                            str(module.params['configlets']))
+        module.fail_json(
+            msg='Container input data are not compliant with module.')
 
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()

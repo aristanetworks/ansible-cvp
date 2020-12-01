@@ -124,6 +124,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
@@ -1164,6 +1165,13 @@ def main():
     if not tools_cv.HAS_CVPRAC:
         module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
+
+    if not schema.HAS_JSONSCHEMA:
+        module.fail_json(msg="jsonschema is required. Please install using pip install jsonschema")
+
+    if not schema.validate_cv_inputs(user_json=module.params['devices'], schema=schema.SCHEMA_CV_DEVICE):
+        module.fail_json(
+            msg='Device input data are not compliant with module.')
 
     # Connect to CVP instance
     if not module.check_mode:
