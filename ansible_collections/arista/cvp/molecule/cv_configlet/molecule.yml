@@ -9,7 +9,7 @@ driver:
   name: docker
 platforms:
   - name: cv_server
-    image: avdteam/base:3.6
+    image: avdteam/base:3.6-v1.0
     pre_build_image: true
     managed: true
     groups:
