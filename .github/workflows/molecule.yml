@@ -1,6 +1,5 @@
 name: Ansible Molecule
 on:
-  push:
   pull_request:
     paths:
       - 'ansible_collections/arista/cvp/roles/**/*'
@@ -14,7 +13,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.6 ]
         avd_scenario:
           - dhcp_management_mac
           - dhcp_management_offline
@@ -29,30 +27,12 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Set up Python 3
-        uses: actions/setup-python@v2
+      - name: Run molecule action
+        uses: arista-netdevops-community/action-molecule-avd@v1.0
         with:
-          python-version: ${{ matrix.python_version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r development/requirements.txt
-          pip install -r development/requirements-dev.txt
-
-      - name: Execute molecule
-        run: |
-          cd ansible_collections/arista/cvp
-          molecule test --destroy=never  --scenario-name ${{ matrix.avd_scenario }}
-          ls -alR molecule
-
-      - name: Test molecule results
-        run: |
-          pwd
-          cd ansible_collections/arista/cvp/
-          ls -alR
-
-      - uses: actions/upload-artifact@v1
-        with:
-          name: molecule-results-${{ matrix.avd_scenario }}
-          path: ansible_collections/arista/cvp/molecule/${{ matrix.avd_scenario }}
+          molecule_parentdir: 'ansible_collections/arista/cvp'
+          molecule_command: 'test'
+          molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
+          pip_file: development/requirements.txt
+          check_git: true
+          check_git_enforced: false
