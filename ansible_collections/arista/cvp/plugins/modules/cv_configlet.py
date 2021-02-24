@@ -214,7 +214,7 @@ def build_configlets_list(module):
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
             if tools.match_filter(input=configlet['name'],
-                                  filter=module.params['configlet_filter'],filter_mode=module.params['filter_mode']):
+                                  filter=module.params['configlet_filter'], filter_mode=module.params['filter_mode']):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
                     # Scenario where configlet module is set to create.
