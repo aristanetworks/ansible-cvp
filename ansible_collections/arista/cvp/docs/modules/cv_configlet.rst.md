@@ -90,6 +90,20 @@ The following options may be specified for this module:
 </td>
 </tr>
 
+<tr>
+<td>filter_mode<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>loose</td>
+<td><ul><li>loose</li><li>strict</li></ul></td>
+<td>
+    <div>If loose, a match is when a configlet matches a substring of a</div>
+    <div>configlet defined in the filter</div>
+    <div>If strict, a match is when a configlet exactly matches a</div>
+    <div>configlet defined in the filter</div>
+</td>
+</tr>
+
 </table>
 </br>
 
