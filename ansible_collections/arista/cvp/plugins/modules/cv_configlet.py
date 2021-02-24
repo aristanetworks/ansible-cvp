@@ -206,7 +206,8 @@ def build_configlets_list(module):
     # Place to save configlets to delete from CV
     intend['delete'] = list()
 
-    MODULE_LOGGER.info(' * build_configlets_list - configlet filter is: %s', str(module.params['configlet_filter']))
+    MODULE_LOGGER.debug(' * build_configlets_list - configlet filter is: %s', str(module.params['configlet_filter']))
+    MODULE_LOGGER.debug(' * build_configlets_list - filter_mode is set to: %s', str(module.params['filter_mode']))
 
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
@@ -214,7 +215,8 @@ def build_configlets_list(module):
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
             if tools.match_filter(input=configlet['name'],
-                                  filter=module.params['configlet_filter'], filter_mode=module.params['filter_mode']):
+                                  filter=module.params['configlet_filter'],
+                                  filter_mode=module.params['filter_mode']):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
                     # Scenario where configlet module is set to create.
@@ -241,7 +243,9 @@ def build_configlets_list(module):
         for cvp_configlet in module.params['cvp_facts']['configlets']:
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
-        if not found and tools.match_filter(input=ansible_configlet, filter=module.params['configlet_filter']):
+        if not found and tools.match_filter(input=ansible_configlet,
+                                            filter=module.params['configlet_filter'],
+                                            filter_mode=module.params['filter_mode']):
             intend['create'].append(
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}

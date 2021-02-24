@@ -136,10 +136,12 @@ def match_filter(input, filter, default_always='all', filter_mode='loose'):
         return True
 
     if filter_mode == "strict":
+        LOGGER.debug(" * is_in_filter - doing strict validation between %s and %s", str(input), str(filter))
         for element in filter:
             if element == input:
                 return True
     else:
+        LOGGER.debug(" * is_in_filter - doing loose validation between %s and %s", str(input), str(filter))
         if any(element in input for element in filter):
             return True
 
