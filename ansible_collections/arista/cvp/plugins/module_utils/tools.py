@@ -61,7 +61,7 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
           T is the total number of elements in both sequences,
           M is the number of matches.
           Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
-        unified diff list
+          unified diff list
           Code    Meaning
           '- '    line unique to sequence 1
           '+ '    line unique to sequence 2
