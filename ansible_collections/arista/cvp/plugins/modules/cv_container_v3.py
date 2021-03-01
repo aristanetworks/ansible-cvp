@@ -26,10 +26,7 @@ __metaclass__ = type
 
 import logging
 import traceback
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.tools as tools   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible.module_utils.basic import AnsibleModule
 try:
@@ -40,11 +37,9 @@ except ImportError:
     CVPRAC_IMP_ERR = traceback.format_exc()
 
 
-# List of Ansible default containers
-BUILTIN_CONTAINERS = tools_tree.BUILTIN_CONTAINERS
-
 # Ansible module preparation
-ANSIBLE_MODULE = ""
+ansible_module = ""
+CV_CONTAINER_MODE = ['merge', 'override', 'delete']
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
@@ -93,7 +88,7 @@ def is_container_exist(cv_connection: CvpClient(), container: str):
     try:
         if cv_connection.api.get_container_by_name(name=container) is not None:
             return True
-    except:
+    except:  # noqa E722
         MODULE_LOGGER.error("Error getting container %s on CV", str(container))
         return False
     return False
@@ -116,7 +111,7 @@ def container_get_root(cv_connection: CvpClient):
     cv_result = dict()
     try:
         cv_result = cv_connection.api.filter_topology(node_id='root')
-    except:  # noqa E722
+    except:  # noqa E722  # noqa E722
         MODULE_LOGGER.error('Error to get topology from CV for node ROOT/TENANT')
         return None
     else:
@@ -126,8 +121,6 @@ def container_get_root(cv_connection: CvpClient):
 def container_get_id(cv_connection: CvpClient(), container: str):
     """
     container_get_id Get container KEY from Cloudvision from its name
-
-    [extended_summary]
 
     Parameters
     ----------
@@ -145,7 +138,7 @@ def container_get_id(cv_connection: CvpClient(), container: str):
     MODULE_LOGGER.debug("Get ID for container %s", str(container))
     try:
         result = cv_connection.api.get_container_by_name(name=container)
-    except:
+    except:  # noqa E722
         MODULE_LOGGER.error("Error getting container %s on CV", str(container))
 
     if result is not None:
@@ -153,15 +146,39 @@ def container_get_id(cv_connection: CvpClient(), container: str):
     return None
 
 
-def list_container_from_top(container_list, container_root_name: str):
+def list_containers_from_top(container_list, container_root_name: str, parent_field='parent_container'):
+    """
+    list_container_from_top Create an ordered list of containers from top to bottom
+
+    Example
+    -------
+
+    >>> list_containers_from_top(container_list=user_topology, container_root_name=root_container_name)
+     ['DC2', 'Leafs', 'Spines', 'POD01']
+
+    Parameters
+    ----------
+    container_list : dict
+        Dictionary of a topolgoy
+    container_root_name : str
+        Name of the root container
+    parent_field : str
+        Name of the field to look for parent container
+
+    Returns
+    -------
+    list
+        List of container ordered from TOP to BOTTOM
+    """
     result_list = list()
-    MODULE_LOGGER.debug("Build list of container to create")
-    while(len(result_list) < len(container_list)+1):
+    MODULE_LOGGER.debug("Build list of container to create from %s", str(container_list))
+    while(len(result_list) < len(container_list)):
         MODULE_LOGGER.debug("Built list is : %s", str(result_list))
         for container in container_list:
-            if container_list[container]["parent_container"] == container_root_name:
+            if container_list[container][parent_field] == container_root_name:
                 result_list.append(container)
-            if any(element == container_list[container]["parent_container"] for element in result_list):
+            if (any(element == container_list[container][parent_field] for element in result_list)
+                and container not in result_list):
                 result_list.append(container)
     return result_list
 
@@ -201,20 +218,20 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
     """
     resp = dict()
     taskIds = 'UNSET'
-    if is_container_exist(cv_connection=cv_connection, container=parent):
+    if ansible_module.check_mode:
+        MODULE_LOGGER.debug(
+            '[check mode] - Create container %s under %s', str(container), str(parent))
+        return {"success": True, "taskIDs": taskIds, "container": container}
+    elif is_container_exist(cv_connection=cv_connection, container=parent):
         parent_id = container_get_id(cv_connection=cv_connection, container=parent)
-        if ANSIBLE_MODULE.check_mode:
-            MODULE_LOGGER.debug(
-                '[check mode] - Create container %s under %s', str(container), str(parent))
+        try:
+            resp = cv_connection.api.add_container(container_name=container, parent_name=parent, parent_key=parent_id)
+            MODULE_LOGGER.debug('Container %s has been created on CV under %s', str(container), str(parent))
+        except:  # noqa E722
+            MODULE_LOGGER.error("Error creating container %s on CV", str(container))
         else:
-            try:
-                resp = cv_connection.api.add_container(container_name=container, parent_name=parent, parent_key=parent_id)
-                MODULE_LOGGER.debug('Container %s has been created on CV under %s', str(container), str(parent))
-            except:
-                MODULE_LOGGER.error("Error creating container %s on CV", str(container))
-            else:
-                if resp['data']['status'] == "success":
-                    taskIds = resp['data']['taskIds']
+            if resp['data']['status'] == "success":
+                taskIds = resp['data']['taskIds']
         # Return structured data for a container creation
         return {"success": True, "taskIDs": taskIds, "container": container}
     else:
@@ -223,7 +240,7 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
 
 
 # ------------------------------------------------------------ #
-#               CONTAINER MANAGER -- Execute API calls         #
+#               CONTAINER MANAGERS -- Execute API calls         #
 # ------------------------------------------------------------ #
 
 def manager_containers_create(cv_connection: CvpClient(), user_topology):
@@ -235,8 +252,8 @@ def manager_containers_create(cv_connection: CvpClient(), user_topology):
 
     >>> manager_containers_create()
     {
-        "count_new_containers": containers_created_counter,
-        "list_new_containers": ["containers_created"]
+        "containers_created": containers_created_counter,
+        "containers_created_list": ["containers_created"]
     }
 
     Returns
@@ -251,24 +268,30 @@ def manager_containers_create(cv_connection: CvpClient(), user_topology):
     # Get name on root container in CV topology
     root_container_name = container_get_root(cv_connection=cv_connection)
     MODULE_LOGGER.debug("Container root name is set to %s", root_container_name)
+    if ansible_module.check_mode:
+        MODULE_LOGGER.info("Running creation process in check_mode")
+
     # Build a tree of containers expected to be configured on CVP
-    user_containers_topology_ordered_list = list_container_from_top(container_list=user_topology, container_root_name=root_container_name)
+    user_containers_topology_ordered_list = list_containers_from_top(container_list=user_topology, container_root_name=root_container_name)
 
     # --- Container creation process
+    MODULE_LOGGER.info('Start to create containers for %s', str(user_containers_topology_ordered_list))
     for user_container_name in user_containers_topology_ordered_list:
         # Validate parent container exists
-        if is_container_exist(cv_connection=cv_connection,
-                              container=user_topology[user_container_name]['parent_container']):
+        if (is_container_exist(cv_connection=cv_connection,
+                               container=user_topology[user_container_name]['parent_container'])
+            or ansible_module.check_mode):
             # Create missing containers
             if is_container_exist(cv_connection=cv_connection, container=user_container_name) is False:
                 action_result = container_create(cv_connection=cv_connection,
                                                  container=user_container_name,
                                                  parent=user_topology[user_container_name]["parent_container"])
-                MODULE_LOGGER.debug('Containers creation manager received %s when creating container %s', str(action_result), str(user_container_name))
+                MODULE_LOGGER.debug('  - Containers creation manager received %s when creating container %s', str(action_result), str(user_container_name))
                 if action_result["success"] is True:
                     containers_created_counter += 1
                     containers_created.append(user_container_name)
-    return {"count_new_containers": containers_created_counter, "list_new_containers": containers_created}
+    MODULE_LOGGER.debug('End of creation loop with: %s', str(containers_created))
+    return {"containers_created": containers_created_counter, "containers_created_list": containers_created}
 
 
 
@@ -277,43 +300,43 @@ if __name__ == '__main__':
     Main entry point for module execution.
     """
     argument_spec = dict(
-        topology=dict(type='dict', required=True),           # Topology to configure on CV side.
+        topology=dict(type='dict', required=True),            # Topology to configure on CV side.
         cvp_facts=dict(type='dict', required=False),          # Facts from cv_facts module.
-        configlet_filter=dict(type='list', default='none'),  # Filter to protect configlets to be detached
+        configlet_filter=dict(type='list', default='none'),   # Filter to protect configlets to be detached
         mode=dict(type='str',
                   required=False,
                   default='merge',
-                  choices=['merge', 'override', 'delete'])
+                  choices=CV_CONTAINER_MODE)
     )
 
     # Make module global to use it in all functions when required
-    ANSIBLE_MODULE = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=True)
+    ansible_module = AnsibleModule(argument_spec=argument_spec,
+                                   supports_check_mode=True)
 
     # Test all libs are correctly installed
     if HAS_CVPRAC is False:
-        ANSIBLE_MODULE.fail_json(msg='cvprac required for this module. Please install using pip install cvprac')
+        ansible_module.fail_json(msg='cvprac required for this module. Please install using pip install cvprac')
 
     if not schema.HAS_JSONSCHEMA:
-        ANSIBLE_MODULE.fail_json(msg="JSONSCHEMA is required. Please install using pip install jsonschema")
+        ansible_module.fail_json(msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
     # Test user input against schema definition
-    if not schema.validate_cv_inputs(user_json=ANSIBLE_MODULE.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
-        MODULE_LOGGER.error("Invalid configlet input : %s", str(ANSIBLE_MODULE.params['configlets']))
-        ANSIBLE_MODULE.fail_json(msg='Container input data are not compliant with module.')
+    if not schema.validate_cv_inputs(user_json=ansible_module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
+        MODULE_LOGGER.error("Invalid configlet input : %s", str(ansible_module.params['configlets']))
+        ansible_module.fail_json(msg='Container input data are not compliant with module.')
 
     # Create CVPRAC client
-    ANSIBLE_MODULE.client = tools_cv.cv_connect(ANSIBLE_MODULE)
+    ansible_module.client = tools_cv.cv_connect(ansible_module)
 
     # Instantiate ansible results
     result = dict(changed=False, data={})
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
 
-    if ANSIBLE_MODULE.params['mode'] in ['merge', 'override']:
-        creation_data = manager_containers_create(cv_connection=ANSIBLE_MODULE.client, user_topology=ANSIBLE_MODULE.params['topology'])
-        if creation_data['count_new_containers'] > 0:
+    if ansible_module.params['mode'] in ['merge', 'override']:
+        creation_data = manager_containers_create(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
+        if creation_data['containers_created'] > 0:
             result['changed'] = True
             result['data']['creation_result'] = creation_data
 
-    ANSIBLE_MODULE.exit_json(**result)
+    ansible_module.exit_json(**result)
