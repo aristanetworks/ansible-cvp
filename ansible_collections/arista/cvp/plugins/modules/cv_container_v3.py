@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 # pylint: disable=bare-except
+# flake8: noqa: W503
 #
 # GNU General Public License v3.0+
 #
@@ -26,6 +27,8 @@ __metaclass__ = type
 
 import logging
 import traceback
+from typing import Any
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible.module_utils.basic import AnsibleModule
@@ -43,30 +46,6 @@ CV_CONTAINER_MODE = ['merge', 'override', 'delete']
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
-
-
-def facts_get_topology(cv_connection: CvpClient(), root_node: str = 'root'):
-    """
-    facts_get_topology Collect Containers & Devices topology from Cloudvision
-
-    Parameters
-    ----------
-    cv_connection : CvpClient
-        CV connection handler
-    root_node : str, optional
-        Root container of the topology, by default 'root'
-
-    Returns
-    -------
-    dict
-        Cloudvision Containers & Devices topology
-    """
-    topology = dict()
-    try:
-        topology = cv_connection.api.filter_topology(node_id=root_node)
-    except:  # noqa E722
-        MODULE_LOGGER.error('Error to get topology from CV for node %s', str(root_node))
-    return topology
 
 
 def is_container_exist(cv_connection: CvpClient(), container: str):
@@ -91,6 +70,32 @@ def is_container_exist(cv_connection: CvpClient(), container: str):
     except:  # noqa E722
         MODULE_LOGGER.error("Error getting container %s on CV", str(container))
         return False
+    return False
+
+
+def is_container_empty(cv_connection: CvpClient(), container: str):
+    """
+    is_container_empty Test if container has subcontainer or device attached to it
+
+    Test if container has something attached to it or if it is ready to be deleted
+
+    Parameters
+    ----------
+    cv_connection : CvpClient
+        CV connection handler
+    container : str
+        Container name to check
+
+    Returns
+    -------
+    bool
+        True if container is empty, False in any other case
+    """
+    container_id = container_get_id(cv_connection=cv_connection, container=container)
+    container_info = cv_connection.api.filter_topology(node_id=container_id)['topology']
+    MODULE_LOGGER.debug('Get container information from CV for %s (%s): %s', str(container), str(container_id), str(container_info))
+    if container_info['childContainerCount'] == 0 and container_info['childNetElementCount'] == 0:
+        return True
     return False
 
 
@@ -225,7 +230,9 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
     elif is_container_exist(cv_connection=cv_connection, container=parent):
         parent_id = container_get_id(cv_connection=cv_connection, container=parent)
         try:
-            resp = cv_connection.api.add_container(container_name=container, parent_name=parent, parent_key=parent_id)
+            resp = cv_connection.api.add_container(container_name=container,
+                                                   parent_name=parent,
+                                                   parent_key=parent_id)
             MODULE_LOGGER.debug('Container %s has been created on CV under %s', str(container), str(parent))
         except:  # noqa E722
             MODULE_LOGGER.error("Error creating container %s on CV", str(container))
@@ -236,14 +243,47 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
         return {"success": True, "taskIDs": taskIds, "container": container}
     else:
         MODULE_LOGGER.debug('Parent container (%s) is missing for container %s', str(parent), str(container))
-        return {"success": False, "taskIDs": taskIds, "container": container}
+    return {"success": False, "taskIDs": taskIds, "container": container}
+
+
+def container_delete(cv_connection: CvpClient(), container: str, parent: str):
+    resp = dict()
+    taskIds = 'UNSET'
+    if ansible_module.check_mode:
+        # TODO: Add additional constraints to reflect CV logic
+        MODULE_LOGGER.debug('[check mode] - Delete container %s under %s',
+                            str(container), str(parent))
+        return {"success": True, "taskIDs": taskIds, "container": container}
+    elif (is_container_exist(cv_connection=cv_connection, container=parent)
+          and is_container_exist(cv_connection=cv_connection, container=container)):
+        parent_id = container_get_id(cv_connection=cv_connection, container=parent)
+        container_id = container_get_id(cv_connection=cv_connection, container=container)
+        if is_container_empty(cv_connection=cv_connection, container=container):
+            try:
+                resp = cv_connection.api.delete_container(container_name=container,
+                                                          container_key=container_id,
+                                                          parent_name=parent,
+                                                          parent_key=parent_id)
+                MODULE_LOGGER.debug('Container %s has been deleted from CV under %s', str(container), str(parent))
+            except:  # noqa E722
+                MODULE_LOGGER.error("Error deleting container %s on CV", str(container))
+            else:
+                if resp['data']['status'] == "success":
+                    taskIds = resp['data']['taskIds']
+            # Return structured data for a container creation
+            return {"success": True, "taskIDs": taskIds, "container": container}
+        else:
+            MODULE_LOGGER.warning('Container (%s) is not empty, cannot delete it', str(container))
+    else:
+        MODULE_LOGGER.debug('Container (%s) or parent container (%s) is missing', str(container), str(parent))
+    return {"success": False, "taskIDs": taskIds, "container": container}
 
 
 # ------------------------------------------------------------ #
-#               CONTAINER MANAGERS -- Execute API calls         #
+#               CONTAINER MANAGERS -- Execute API calls        #
 # ------------------------------------------------------------ #
 
-def manager_containers_create(cv_connection: CvpClient(), user_topology):
+def manager_containers_create(cv_connection: CvpClient(), user_topology: Any):
     """
     manager_containers_create Create new containers from user's intended topology
 
@@ -294,6 +334,35 @@ def manager_containers_create(cv_connection: CvpClient(), user_topology):
     return {"containers_created": containers_created_counter, "containers_created_list": containers_created}
 
 
+def manager_container_delete(cv_connection: CvpClient(), user_topology: Any):
+    # Counter of container's created
+    containers_deleted_counter: int = 0
+    # List of created containers
+    containers_deleted = list()
+    # Get name on root container in CV topology
+    root_container_name = container_get_root(cv_connection=cv_connection)
+    MODULE_LOGGER.debug("Container root name is set to %s", root_container_name)
+    if ansible_module.check_mode:
+        MODULE_LOGGER.info("Running deletion process in check_mode")
+
+    # Build a tree of containers expected to be removed from CVP
+    user_containers_topology_ordered_list = list_containers_from_top(container_list=user_topology, container_root_name=root_container_name)
+    for user_container_name in reversed(user_containers_topology_ordered_list):
+        if is_container_exist(cv_connection=cv_connection, container=user_container_name):
+            action_result = container_delete(cv_connection=cv_connection,
+                                             container=user_container_name,
+                                             parent=user_topology[user_container_name]["parent_container"])
+            MODULE_LOGGER.debug('  - Containers deletion manager received %s when deleting container %s', str(action_result), str(user_container_name))
+            if action_result["success"] is True:
+                containers_deleted_counter += 1
+                containers_deleted.append(user_container_name)
+    MODULE_LOGGER.debug('End of creation loop with: %s', str(containers_deleted))
+    return {"containers_deleted": containers_deleted_counter, "containers_deleted_list": containers_deleted}
+
+
+# ------------------------------------------------------------ #
+#               MAIN section -- starting point                 #
+# ------------------------------------------------------------ #
 
 if __name__ == '__main__':
     """
@@ -333,10 +402,16 @@ if __name__ == '__main__':
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
 
-    if ansible_module.params['mode'] in ['merge', 'override']:
+    if ansible_module.params['mode'] in ['merge']:
         creation_data = manager_containers_create(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
         if creation_data['containers_created'] > 0:
             result['changed'] = True
             result['data']['creation_result'] = creation_data
+
+    if ansible_module.params['mode'] in ['delete']:
+        deletion_data = manager_container_delete(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
+        if deletion_data['containers_deleted'] > 0:
+            result['changed'] = True
+            result['data']['deletion_result'] = deletion_data
 
     ansible_module.exit_json(**result)
