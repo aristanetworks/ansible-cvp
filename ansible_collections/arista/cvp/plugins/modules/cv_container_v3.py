@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 # pylint: disable=bare-except
+# pylint: disable=dangerous-default-value
 # flake8: noqa: W503
 #
 # GNU General Public License v3.0+
@@ -21,15 +22,15 @@
 #
 
 from __future__ import absolute_import, division, print_function
-
 __metaclass__ = type
 
 
 import logging
 import traceback
-from typing import Any
+from typing import List, Any
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible.module_utils.basic import AnsibleModule
 try:
@@ -42,11 +43,15 @@ except ImportError:
 
 # Ansible module preparation
 ansible_module = ""
-CV_CONTAINER_MODE = ['merge', 'override', 'delete']
+CV_CONTAINER_MODE = ['merge', 'delete']
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
+
+# ------------------------------------------------------------ #
+#               Tooling for containers                         #
+# ------------------------------------------------------------ #
 
 def is_container_exist(cv_connection: CvpClient(), container: str):
     """
@@ -151,7 +156,7 @@ def container_get_id(cv_connection: CvpClient(), container: str):
     return None
 
 
-def list_containers_from_top(container_list, container_root_name: str, parent_field='parent_container'):
+def list_containers_from_top(container_list, container_root_name: str, parent_field: str = 'parent_container'):
     """
     list_container_from_top Create an ordered list of containers from top to bottom
 
@@ -188,10 +193,51 @@ def list_containers_from_top(container_list, container_root_name: str, parent_fi
     return result_list
 
 # ------------------------------------------------------------ #
+#               Tooling for configlets                         #
+# ------------------------------------------------------------ #
+
+
+def is_configlet_exists(cv_connection: CvpClient(), configlet: str):
+    try:
+        if cv_connection.api.get_configlet_by_name(name=configlet) is not None:
+            return True
+    except:  # noqa E722
+        MODULE_LOGGER.error("Error getting configlet %s on CV", str(configlet))
+        return False
+    return False
+
+
+def configlet_get_id(cv_connection: CvpClient(), configlet: str):
+    try:
+        data = cv_connection.api.get_configlet_by_name(name=configlet)
+    except:  # noqa E722
+        MODULE_LOGGER.error("Error getting configlet %s on CV", str(configlet))
+        return None
+    else:
+        if data is not None:
+            return data['key']
+    return None
+
+
+def configlets_get_mapping(cv_connection: CvpClient()):
+    data = dict()
+    try:
+        data = cv_connection.api.get_configlets_and_mappers()['data']
+    except:
+        MODULE_LOGGER.error('Error getting configlets & mappers')
+    else:
+        for mapper_index in range(len(data['configletMappers'])):
+            for configlet in data['configlets']:
+                if configlet['key'] == data['configletMappers'][mapper_index]['configletId']:
+                    data['configletMappers'][mapper_index]['configletName'] = configlet['name']
+        return data
+    return None
+
+# ------------------------------------------------------------ #
 #               API Action -- Require to return JSON result    #
 # ------------------------------------------------------------ #
 
-def container_create(cv_connection: CvpClient, container: str, parent: str):
+def container_create(cv_connection: CvpClient(), container: str, parent: str):
     """
     container_create Action to create a single container on Cloudvision
 
@@ -218,7 +264,7 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
 
     Returns
     -------
-    lsit
+    dict
         Response to be added in ansible
     """
     resp = dict()
@@ -247,6 +293,35 @@ def container_create(cv_connection: CvpClient, container: str, parent: str):
 
 
 def container_delete(cv_connection: CvpClient(), container: str, parent: str):
+    """
+    container_delete Action to delete a single container from Cloudvision
+
+    Delete a container in Cloudvision
+
+    Example
+    -------
+
+    >>> container_delete(cv_connection, container=TEST, parent=Tenant)
+    {
+        sucess: True,
+        taskIDs: [taskIds],
+        container: "container"
+    }
+
+    Parameters
+    ----------
+    cv_connection : CvpClient
+        Cvprac connection
+    container : str
+        Container name
+    parent : str
+        Parent Container name
+
+    Returns
+    -------
+    dict
+        Response to be added in ansible
+    """
     resp = dict()
     taskIds = 'UNSET'
     if ansible_module.check_mode:
@@ -277,6 +352,65 @@ def container_delete(cv_connection: CvpClient(), container: str, parent: str):
     else:
         MODULE_LOGGER.debug('Container (%s) or parent container (%s) is missing', str(container), str(parent))
     return {"success": False, "taskIDs": taskIds, "container": container}
+
+
+def container_attach_configlets(cv_connection: CvpClient(), container: str, configlets: Any, save_topology: bool = True):
+    """
+    container_attach_configlets Action to map configlet(s) to container
+
+    Map one or many configlets to a container and provides generated Task IDs
+
+    Example
+    -------
+
+    >>> container_attach_configlets(cv_connection=cv_connection, container=container, configlets=configlet_list_to_add)
+    {
+        "success": True,
+        "taskIDs": [taskIds],
+        "container": "container",
+        "configlets": ["configlets"]
+    }
+
+    Parameters
+    ----------
+    cv_connection : CvpClient
+        CV connection handler
+    container : str
+        Container name to use to map configlets
+    configlets : list
+        List of configlets dict in {key:, name:} format
+    save_topology : bool, optional
+        Save topology and return TaskIds, by default True
+
+    Returns
+    -------
+    dict
+        Results from Cloudvision.
+    """
+    resp = dict()
+    taskIds = ['UNSET']
+    if ansible_module.check_mode:
+        # TODO: Add additional constraints to reflect CV logic
+        MODULE_LOGGER.debug('[check mode] - Attach configlets %s to %s', str(configlets), str(container))
+        return {"success": True, "taskIDs": taskIds, "container": container, 'configlets': configlets}
+    elif is_container_exist(cv_connection=cv_connection, container=container):
+        container_id = container_get_id(cv_connection=cv_connection, container=container)
+        container_info = {'name': container, 'key': container_id}
+        try:
+            resp = cv_connection.api.apply_configlets_to_container(app_name="ansible_cv_container",
+                                                                   new_configlets=configlets,
+                                                                   container=container_info,
+                                                                   create_task=save_topology)
+        except:
+            MODULE_LOGGER.error("Error attaching configlets %s to container %s on CV", str(configlets), str(container))
+        else:
+            if 'data' in resp and resp['data']['status'] == 'success':
+                taskIds = resp['data']['taskIds']
+                MODULE_LOGGER.info("Configlets %s attached to container %s on CV", str(configlets), str(container))
+        return {"success": True, "taskIDs": taskIds, "container": container, 'configlets': configlets}
+    else:
+        MODULE_LOGGER.debug('Container (%s) is missing', str(container))
+    return {"success": False, "taskIDs": taskIds, "container": container, 'configlets': configlets}
 
 
 # ------------------------------------------------------------ #
@@ -335,6 +469,23 @@ def manager_containers_create(cv_connection: CvpClient(), user_topology: Any):
 
 
 def manager_container_delete(cv_connection: CvpClient(), user_topology: Any):
+    """
+    manager_container_delete Delete containers from user's intended topology
+
+    Example
+    -------
+
+    >>> manager_container_delete()
+    {
+        "containers_deleted": containers_created_counter,
+        "containers_deleted_list": ["containers_created"]
+    }
+
+    Returns
+    -------
+    dict
+        A structured data with number of new containers and list of new containers created
+    """
     # Counter of container's created
     containers_deleted_counter: int = 0
     # List of created containers
@@ -360,6 +511,70 @@ def manager_container_delete(cv_connection: CvpClient(), user_topology: Any):
     return {"containers_deleted": containers_deleted_counter, "containers_deleted_list": containers_deleted}
 
 
+def manager_container_configlets(cv_connection: CvpClient(), user_topology: Any, configlet_filter: List[str] = ['all'], filter_mode: str = 'loose'):  # noqa W0102
+    """
+    manager_container_configlets Manage configlets on containers
+
+    Example
+    -------
+
+    >>> manager_container_configlets(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
+    {
+        "configlet_add":
+            "configlet_attached": 2,
+            "configlet_attached_list": [
+                "configlets"
+            ]
+        }
+    }
+
+    Parameters
+    ----------
+    cv_connection : CvpClient
+        CV connection handler
+    user_topology : dict
+        Container topology to provision on Cloudvision
+    configlet_filter : List[str], optional
+        Configlet filter to test configlets, by default ['all']
+    filter_mode : str, optional
+        Filter mode: loose or strict, by default 'loose'
+
+    Returns
+    -------
+    list
+        List of Cloudvision results
+    """
+    response = dict()
+    for container in user_topology:
+        configlet_list_to_add = list()
+        configlet_list_to_remove = list()
+        container_id = container_get_id(cv_connection=cv_connection, container=container)
+        # Add existing configlets matching filter.
+        configlet_attached_list = cv_connection.api.get_configlets_by_container_id(c_id=container_id)['configletList']
+        for configlet in configlet_attached_list:
+            if tools.match_filter(input=configlet['name'], filter=configlet_filter):
+                configlet_list_to_add.append({"name": configlet['name'], "key": configlet['key']})
+            else:
+                configlet_list_to_remove.append({"name": configlet['name'], "key": configlet['key']})
+
+        # Add new configlets matching filter.
+        if 'configlets' in user_topology[container]:
+            for configlet in user_topology[container]['configlets']:
+                if tools.match_filter(input=configlet, filter=configlet_filter):
+                    configlet_id = configlet_get_id(cv_connection=cv_connection, configlet=configlet)
+                    if configlet_id is not None and configlet not in configlet_list_to_add:
+                        configlet_list_to_add.append({"name": configlet, "key": configlet_id})
+
+            ### Apply changes on Cloudvision
+            if len(configlet_list_to_add) > 0:
+                apply_configlets = container_attach_configlets(cv_connection=cv_connection, container=container, configlets=configlet_list_to_add)
+                MODULE_LOGGER.debug('  - Containers configlet manager received %s when applying configlets %s', str(apply_configlets), str(configlet_list_to_add))
+                if apply_configlets["success"] is True:
+                    response['configlet_add'] = {"configlet_attached": len(apply_configlets["configlets"]), "configlet_attached_list": apply_configlets["configlets"]}
+
+    return response
+
+
 # ------------------------------------------------------------ #
 #               MAIN section -- starting point                 #
 # ------------------------------------------------------------ #
@@ -370,17 +585,23 @@ if __name__ == '__main__':
     """
     argument_spec = dict(
         topology=dict(type='dict', required=True),            # Topology to configure on CV side.
-        cvp_facts=dict(type='dict', required=False),          # Facts from cv_facts module.
+        cvp_facts=dict(type='dict', required=False, ),          # Facts from cv_facts module.
         configlet_filter=dict(type='list', default='none'),   # Filter to protect configlets to be detached
         mode=dict(type='str',
                   required=False,
                   default='merge',
-                  choices=CV_CONTAINER_MODE)
+                  aliases=['state'],
+                  choices=CV_CONTAINER_MODE,
+                  removed_in_version='3.1.0',)
     )
 
     # Make module global to use it in all functions when required
     ansible_module = AnsibleModule(argument_spec=argument_spec,
                                    supports_check_mode=True)
+    # Instantiate ansible results
+    result = dict(changed=False, data={})
+    result['data']['taskIds'] = list()
+    result['data']['tasks'] = list()
 
     # Test all libs are correctly installed
     if HAS_CVPRAC is False:
@@ -397,16 +618,17 @@ if __name__ == '__main__':
     # Create CVPRAC client
     ansible_module.client = tools_cv.cv_connect(ansible_module)
 
-    # Instantiate ansible results
-    result = dict(changed=False, data={})
-    result['data']['taskIds'] = list()
-    result['data']['tasks'] = list()
-
     if ansible_module.params['mode'] in ['merge']:
         creation_data = manager_containers_create(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
         if creation_data['containers_created'] > 0:
             result['changed'] = True
             result['data']['creation_result'] = creation_data
+
+        configlets_data = manager_container_configlets(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
+        if configlets_data['configlet_add']['configlet_attached'] > 0:
+            result['changed'] = True
+            result['data']['configlet_attached'] = configlets_data['configlet_add']['configlet_attached']
+            result['data']['configlet_attached_result'] = configlets_data['configlet_add']['configlet_attached_list']
 
     if ansible_module.params['mode'] in ['delete']:
         deletion_data = manager_container_delete(cv_connection=ansible_module.client, user_topology=ansible_module.params['topology'])
