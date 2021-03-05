@@ -171,8 +171,6 @@ if __name__ == '__main__':
         ansible_module.fail_json(msg="Not yet implemented !")
 
     cv_response = cv_configlet_manager.apply(configlet_list=user_configlets.configlets, present=is_present)
-    result['success'] = cv_response['success']
-    result['changed'] = cv_response['changed']
-    result['data']['changed'] = cv_response
+    result['data'] = cv_response
 
     ansible_module.exit_json(**result)
