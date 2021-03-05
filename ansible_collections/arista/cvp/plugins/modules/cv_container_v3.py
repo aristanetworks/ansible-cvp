@@ -111,10 +111,10 @@ def check_schemas():
     check_schemas Validate schemas for user's input
     """
     if not schema.validate_cv_inputs(user_json=ansible_module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
-        MODULE_LOGGER.error("Invalid configlet input : %s",
-                            str(ansible_module.params['configlets']))
+        MODULE_LOGGER.error("Invalid container topology input : %s",
+                            str(ansible_module.params['topology']))
         ansible_module.fail_json(
-            msg='Container input data are not compliant with module.')
+            msg='Container input data are not compliant with module: \n{}'.format(ansible_module.params['topology']))
 
 
 def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput, present: bool = True):

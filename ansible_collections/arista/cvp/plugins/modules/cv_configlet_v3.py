@@ -119,7 +119,8 @@ def check_schemas():
         MODULE_LOGGER.error("Invalid configlet input : %s",
                             str(ansible_module.params['configlets']))
         ansible_module.fail_json(
-            msg='Configlets input data are not compliant with module.')
+            msg='Container input data are not compliant with module: \n{}'.format(ansible_module.params['configlets']))
+
 
 
 # ------------------------------------------------------------ #
