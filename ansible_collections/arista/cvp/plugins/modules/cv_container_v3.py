@@ -78,6 +78,7 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools, ContainerInput
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvManagerResult
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
@@ -118,11 +119,9 @@ def check_schemas():
 
 def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput, present: bool = True):
     response = dict()
-    containers_created_counter = 0
-    configlet_attached_counter = 0
-    containers_created = list()
-    configlet_attached = list()
-    taskIds = list()
+    container_add_manager = CvManagerResult(builder_name='container_added')
+    container_delete_manager = CvManagerResult(builder_name='container_deleted')
+    configlet_attachment = CvManagerResult(builder_name='configlet_attachmenet')
 
     # Create containers topology in Cloudvision
     if present is True:
@@ -130,21 +129,16 @@ def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput,
             MODULE_LOGGER.info('Start creation process for container %s under %s', str(
                 user_container), str(user_topology.get_parent(container_name=user_container)))
             resp = cv_topology.create_container(container=user_container, parent=user_topology.get_parent(container_name=user_container))
-            if resp['success'] is True:
-                if resp["success"] is True:
-                    containers_created_counter += 1
-                    containers_created.append(user_container)
-                    taskIds += resp['taskIds']
+            # if resp['success'] is True:
+            #     containers_created_counter += 1
+            #     containers_created.append(user_container)
+            #     taskIds += resp['taskIds']
+            container_add_manager.add_change(resp)
 
             if user_topology.has_configlets(container_name=user_container):
                 resp = cv_topology.configlets_attach(
                 container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
-                if resp['success'] is True:
-                    if resp["success"] is True:
-                        configlet_attached_counter = len(
-                            user_topology.get_configlets(container_name=user_container))
-                        configlet_attached = user_topology.get_configlets(container_name=user_container)
-                        taskIds += resp['taskIds']
+                configlet_attachment.add_change(resp)
 
     # Remove containers topology from Cloudvision
     else:
@@ -153,21 +147,16 @@ def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput,
                 user_container), str(user_topology.get_parent(container_name=user_container)))
             resp = cv_topology.delete_container(
                 container=user_container, parent=user_topology.get_parent(container_name=user_container))
-            if resp['success'] is True:
-                if resp["success"] is True:
-                    containers_created_counter += 1
-                    containers_created.append(user_container)
-                    taskIds += resp['taskIds']
+            container_delete_manager.add_change(resp)
 
 
     # Create ansible message
-    response['containers_created'] = {"containers_created": containers_created_counter,
-                                      "containers_created_list": containers_created}
-    response['containers_deleted'] = {"containers_deleted": containers_created_counter,
-                                      "containers_deleted_list": containers_created}
-    response['configlets_attached'] = {"configlet_attached": configlet_attached_counter,
-                                       "configlet_attached_list": configlet_attached}
-    response['taskIds'] = taskIds
+    response[container_add_manager.name] = container_add_manager.changes
+    response[container_delete_manager.name] = container_delete_manager.changes
+    response[configlet_attachment.name] = configlet_attachment.changes
+    # response['configlets_attached'] = {"configlet_attached": configlet_attached_counter,
+    #                                    "configlet_attached_list": configlet_attached}
+    # response['taskIds'] = taskIds
     return response
 
 
@@ -213,18 +202,17 @@ if __name__ == '__main__':
     if ansible_module.params['state'] == 'present':
         cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology)
         MODULE_LOGGER.debug('Received response from Topology builder: %s', str(cv_response))
-        if cv_response['containers_created']['containers_created'] > 0 or cv_response['configlets_attached']['configlets_attached'] > 0:
-            result['data']['changed'] = True
-        result['data']['creation_result'] = cv_response['containers_created']
-        result['data']['configlet_attach_result'] = cv_response['configlets_attached']
-        result['data']['taskIds'] += cv_response['taskIds']
+        result['data'] = cv_response
+        # if cv_response['containers_created']['containers_created'] > 0 or cv_response['configlets_attached']['configlets_attached'] > 0:
+        #     result['data']['changed'] = True
+        # result['data']['creation_result'] = cv_response['containers_created']
+        # result['data']['configlet_attach_result'] = cv_response['configlets_attached']
+        # result['data']['taskIds'] += cv_response['taskIds']
 
     elif ansible_module.params['state'] == 'absent':
         cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology, present=False)
         MODULE_LOGGER.debug(
             'Received response from Topology builder: %s', str(cv_response))
-        if cv_response['containers_deleted']['containers_deleted'] > 0:
-            result['data']['changed'] = True
-        result['data']['containers_deleted'] = cv_response['containers_deleted']
+        result['data'] = cv_response
 
     ansible_module.exit_json(**result)
