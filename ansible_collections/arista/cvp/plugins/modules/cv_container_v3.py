@@ -116,35 +116,58 @@ def check_schemas():
             msg='Container input data are not compliant with module.')
 
 
-def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput):
+def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput, present: bool = True):
     response = dict()
     containers_created_counter = 0
     configlet_attached_counter = 0
     containers_created = list()
     configlet_attached = list()
+    taskIds = list()
 
-    for user_container in user_topology.ordered_list_containers:
-        resp = cv_topology.create_container(container=user_container, parent=user_topology.get_parent(container_name=user_container))
-        if resp['success'] is True:
-            if resp["success"] is True:
-                containers_created_counter += 1
-                containers_created.append(user_container)
-
-
-        if user_topology.has_configlets(container_name=user_container):
-            resp = cv_topology.configlets_attach(
-            container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
+    # Create containers topology in Cloudvision
+    if present is True:
+        for user_container in user_topology.ordered_list_containers:
+            MODULE_LOGGER.info('Start creation process for container %s under %s', str(
+                user_container), str(user_topology.get_parent(container_name=user_container)))
+            resp = cv_topology.create_container(container=user_container, parent=user_topology.get_parent(container_name=user_container))
             if resp['success'] is True:
                 if resp["success"] is True:
-                    configlet_attached_counter = len(
-                        user_topology.get_configlets(container_name=user_container))
-                    configlet_attached = user_topology.get_configlets(container_name=user_container)
+                    containers_created_counter += 1
+                    containers_created.append(user_container)
+                    taskIds += resp['taskIds']
+
+            if user_topology.has_configlets(container_name=user_container):
+                resp = cv_topology.configlets_attach(
+                container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
+                if resp['success'] is True:
+                    if resp["success"] is True:
+                        configlet_attached_counter = len(
+                            user_topology.get_configlets(container_name=user_container))
+                        configlet_attached = user_topology.get_configlets(container_name=user_container)
+                        taskIds += resp['taskIds']
+
+    # Remove containers topology from Cloudvision
+    else:
+        for user_container in reversed(user_topology.ordered_list_containers):
+            MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
+                user_container), str(user_topology.get_parent(container_name=user_container)))
+            resp = cv_topology.delete_container(
+                container=user_container, parent=user_topology.get_parent(container_name=user_container))
+            if resp['success'] is True:
+                if resp["success"] is True:
+                    containers_created_counter += 1
+                    containers_created.append(user_container)
+                    taskIds += resp['taskIds']
+
 
     # Create ansible message
     response['containers_created'] = {"containers_created": containers_created_counter,
-                    "containers_created_list": containers_created}
+                                      "containers_created_list": containers_created}
+    response['containers_deleted'] = {"containers_deleted": containers_created_counter,
+                                      "containers_deleted_list": containers_created}
     response['configlets_attached'] = {"configlet_attached": configlet_attached_counter,
-                    "configlet_attached_list": configlet_attached}
+                                       "configlet_attached_list": configlet_attached}
+    response['taskIds'] = taskIds
     return response
 
 
@@ -171,6 +194,7 @@ if __name__ == '__main__':
     result = dict(changed=False, data={}, failed=False)
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
+    result['data']['changed'] = False
 
     # Test all libs are correctly installed
     check_import()
@@ -185,18 +209,22 @@ if __name__ == '__main__':
     cv_topology = CvContainerTools(cv_connection=cv_client, ansible_module=ansible_module)
     user_topology = ContainerInput(user_topology=ansible_module.params['topology'])
 
-    if ansible_module.check_mode is True:
-        ansible_module.fail_json(msg="Not yet implemented !")
-
     # Create topology
     if ansible_module.params['state'] == 'present':
         cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology)
-        result['data']['changed'] = True
+        MODULE_LOGGER.debug('Received response from Topology builder: %s', str(cv_response))
+        if cv_response['containers_created']['containers_created'] > 0 or cv_response['configlets_attached']['configlets_attached'] > 0:
+            result['data']['changed'] = True
         result['data']['creation_result'] = cv_response['containers_created']
         result['data']['configlet_attach_result'] = cv_response['configlets_attached']
+        result['data']['taskIds'] += cv_response['taskIds']
 
     elif ansible_module.params['state'] == 'absent':
-        result['data']['changed'] = False
-        result['data']['deletion_result'] = 'Not yet supported'
+        cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology, present=False)
+        MODULE_LOGGER.debug(
+            'Received response from Topology builder: %s', str(cv_response))
+        if cv_response['containers_deleted']['containers_deleted'] > 0:
+            result['data']['changed'] = True
+        result['data']['containers_deleted'] = cv_response['containers_deleted']
 
     ansible_module.exit_json(**result)
