@@ -20,6 +20,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
+from typing import Any
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 
@@ -57,6 +58,7 @@ class CvApiResult():
     __FIELD_TASKIDS = 'taskIds'
     __FIELD_COUNT = '_count'
     __FIELD_CHANGE_LIST = '_list'
+    __FIELD_DIFF = 'diff'
 
     def __init__(self, action_name: str):
         self.__success = False
@@ -165,10 +167,26 @@ class CvApiResult():
 
     @property
     def diff(self):
+        """
+        diff Getter for diff result
+
+        Returns
+        -------
+        list
+            List of changes computed by Ansible
+        """
         return self.__diff
 
     @diff.setter
-    def diff(self, diff: str):
+    def diff(self, diff: Any):
+        """
+        diff Setter for diff result
+
+        Parameters
+        ----------
+        diff : Any
+            Diff computed by Ansible
+        """
         self.__diff = diff
 
     @property
@@ -222,6 +240,7 @@ class CvApiResult():
         result[self.__FIELD_SUCCESS] = self.__success
         result[self.__FIELD_CHANGED] = self.__changed
         result[self.__FIELD_TASKIDS] = self.__taskIds
+        result[self.__FIELD_DIFF] = self.__diff
         result[self.__action_name + self.__FIELD_COUNT] = self.__count
         result[self.__action_name +
                self.__FIELD_CHANGE_LIST] = self.__list_changes
@@ -267,6 +286,7 @@ class CvManagerResult():
         self.__changes[self.__FIELD_SUCCESS] = self.__success
         self.__changes[self.__FIELD_CHANGED] = self.__changed
         self.__changes[self.__FIELD_TASKIDS] = self.__taskIds
+        self.__changes[self.__FIELD_DIFFS] = self.__diffs
         self.__changes[self.__name + self.__FIELD_COUNT] = self.__counter
         return self.__changes
 

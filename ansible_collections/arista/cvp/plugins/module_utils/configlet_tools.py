@@ -302,6 +302,7 @@ class CvConfigletTools():
                         if 'diff' in configlet:
                             if configlet['diff'] is not None:
                                 change_response.diff = configlet['diff']
+                                MODULE_LOGGER.debug('Diff is set to: %s', str(change_response.results))
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']
