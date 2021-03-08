@@ -205,15 +205,28 @@ class CvConfigletTools():
         if present and len(to_update) > 0:
             update = self.update(to_update=to_update)
             for entry in update:
+                MODULE_LOGGER.debug(
+                    'List of configlets updted: %s', str(entry.results))
                 updated_configlets.add_change(entry)
         if not present and len(to_delete) > 0:
             delete = self.delete(to_delete=to_delete)
             for entry in delete:
                 deleted_configlets.add_change(entry)
         response = dict()
+        response['changed'] = False
+        response['success'] = False
         response[created_configlets.name] = created_configlets.changes
         response[updated_configlets.name] = updated_configlets.changes
         response[deleted_configlets.name] = deleted_configlets.changes
+        if (created_configlets.changed
+            or updated_configlets.changed
+            or deleted_configlets.changed):
+            response['changed'] = True
+        if (created_configlets.success
+            or updated_configlets.success
+            or deleted_configlets.success):
+            response['success'] = True
+        MODULE_LOGGER.info('Configlet change result is: %s', str(response))
         return response
 
     def update(self, to_update: list, note: str = 'Managed by Ansible AVD'):
@@ -292,7 +305,7 @@ class CvConfigletTools():
                             configlet['name']), str(update_resp['errorMessage']))
                     else:
                         # Inform module a changed has been done
-                        change_response.changed = True
+                        change_response.changed = False
                         change_response.success = True
                         # Add note to configlet to mark as managed by Ansible
                         self._cvp_client.api.add_note_to_configlet(
@@ -300,9 +313,11 @@ class CvConfigletTools():
                         # Save configlet diff
                         change_response.add_entry('configlet updated')
                         if 'diff' in configlet:
-                            if configlet['diff'] is not None:
+                            # Change changed flag if diff is not 1.0
+                            if configlet['diff'] is not None and configlet['diff'][0] < 1.0:
                                 change_response.diff = configlet['diff']
                                 MODULE_LOGGER.debug('Diff is set to: %s', str(change_response.results))
+                                change_response.changed = True
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']

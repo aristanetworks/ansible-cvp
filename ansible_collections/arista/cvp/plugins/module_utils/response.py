@@ -270,7 +270,8 @@ class CvManagerResult():
         MODULE_LOGGER.debug('receive add_change with %s', str(change.results))
         if change.success:
             self.__success = change.success
-            self.__changed = change.changed
+            if self.__changed is not True:
+                self.__changed = change.changed
             self.__taskIds += change.taskIds
             self.__counter += change.count
             self.__changes[self.__name + self.__FIELD_CHANGE_LIST].append(change.name)
@@ -278,6 +279,14 @@ class CvManagerResult():
                 self.__diffs[change.name] = change.diff
         # self.__changes[change.name] = {
         #     change.name: change.count, change.name + self.__FIELD_CHANGE_LIST: change.list_changes}
+
+    @property
+    def changed(self):
+        return self.__changed
+
+    @property
+    def success(self):
+        return self.__success
 
     @property
     def changes(self):
