@@ -227,8 +227,11 @@ class CvContainerTools(object):
                         configlets), str(container))
                 else:
                     if 'data' in resp and resp['data']['status'] == 'success':
+                        # We assume there is a change as API does not provide information
+                        # resp = {'data': {'taskIds': [], 'status': 'success'}}
                         change_response.taskIds = resp['data']['taskIds']
                         change_response.success = True
+                        change_response.changed = True
 
         return change_response
 
@@ -285,7 +288,10 @@ class CvContainerTools(object):
             else:
                 if 'data' in resp and resp['data']['status'] == 'success':
                     change_response.taskIds = resp['data']['taskIds']
+                    # We assume there is a change as API does not provide information
+                    # resp = {'data': {'taskIds': [], 'status': 'success'}}
                     change_response.success = True
+                    change_response.changed = True
 
         return change_response
 

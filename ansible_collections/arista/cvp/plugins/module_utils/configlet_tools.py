@@ -201,16 +201,20 @@ class CvConfigletTools():
         if present and len(to_create) > 0:
             creation = self.create(to_create=to_create)
             for entry in creation:
+                MODULE_LOGGER.debug(
+                    'configlet created: %s', str(entry.results))
                 created_configlets.add_change(entry)
         if present and len(to_update) > 0:
             update = self.update(to_update=to_update)
             for entry in update:
                 MODULE_LOGGER.debug(
-                    'List of configlets updted: %s', str(entry.results))
+                    'configlet updated: %s', str(entry.results))
                 updated_configlets.add_change(entry)
         if not present and len(to_delete) > 0:
             delete = self.delete(to_delete=to_delete)
             for entry in delete:
+                MODULE_LOGGER.debug(
+                    'configlet deleted: %s', str(entry.results))
                 deleted_configlets.add_change(entry)
         response = dict()
         response['changed'] = False
@@ -316,11 +320,12 @@ class CvConfigletTools():
                             # Change changed flag if diff is not 1.0
                             if configlet['diff'] is not None and configlet['diff'][0] < 1.0:
                                 change_response.diff = configlet['diff']
-                                MODULE_LOGGER.debug('Diff is set to: %s', str(change_response.results))
                                 change_response.changed = True
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']
+                        MODULE_LOGGER.info(
+                            'Configlet %s updated on cloudvision', str(configlet['name']))
             response_data.append(change_response)
         return response_data
 

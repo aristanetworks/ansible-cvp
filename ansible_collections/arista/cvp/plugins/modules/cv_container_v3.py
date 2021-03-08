@@ -154,6 +154,11 @@ def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput,
     response[container_add_manager.name] = container_add_manager.changes
     response[container_delete_manager.name] = container_delete_manager.changes
     response[configlet_attachment.name] = configlet_attachment.changes
+    MODULE_LOGGER.debug('Container manager is sending result data: %s', str(response))
+    if container_add_manager.changed or container_delete_manager.changed or configlet_attachment.changed:
+        response['changed'] = True
+    else:
+        response['changed'] = False
     # response['configlets_attached'] = {"configlet_attached": configlet_attached_counter,
     #                                    "configlet_attached_list": configlet_attached}
     # response['taskIds'] = taskIds
@@ -183,8 +188,6 @@ if __name__ == '__main__':
     result = dict(changed=False, data={}, failed=False)
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
-    result['data']['changed'] = False
-
     # Test all libs are correctly installed
     check_import()
 
@@ -203,6 +206,7 @@ if __name__ == '__main__':
         cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology)
         MODULE_LOGGER.debug('Received response from Topology builder: %s', str(cv_response))
         result['data'] = cv_response
+        result['changed'] = cv_response['changed']
         # if cv_response['containers_created']['containers_created'] > 0 or cv_response['configlets_attached']['configlets_attached'] > 0:
         #     result['data']['changed'] = True
         # result['data']['creation_result'] = cv_response['containers_created']
