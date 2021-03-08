@@ -19,6 +19,8 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
+
+import jsonschema
 __metaclass__ = type
 import traceback
 import logging
@@ -26,6 +28,7 @@ from typing import List
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
     from cvprac.cvp_client import CvpClient
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -602,16 +605,28 @@ class CvContainerTools(object):
         return self._configlet_del(container=container_info, configlets=detach_configlets)
 
 
-class ContainerInput():
+class ContainerInput(object):
     """
     ContainerInput Object to manage Container Topology in context of arista.cvp collection.
 
     [extended_summary]
     """
-    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant'):
-        self._topology = user_topology
-        self._parent_field: str = 'parent_container'
-        self._root_name = container_root_name
+    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema: jsonschema = schema.SCHEMA_CV_CONTAINER):
+        self.__topology = user_topology
+        self.__parent_field: str = 'parent_container'
+        self.__root_name = container_root_name
+        self.__schema = schema
+
+    # @property
+    # def is_valid(self):
+    #     """
+    #     check_schemas Validate schemas for user's input
+    #     """
+    #     if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
+    #         MODULE_LOGGER.error(
+    #             "Invalid configlet input : \n%s", str(self.__topology))
+    #         return False
+    #     return True
 
     def _get_container_data(self, container_name: str, key_name: str):
         """
@@ -630,11 +645,11 @@ class ContainerInput():
             Value of the key. None if not found
         """
         MODULE_LOGGER.debug('Receive request to get data for container %s about its %s key', str(container_name), str(key_name))
-        if container_name in self._topology:
-            if key_name in self._topology[container_name]:
+        if container_name in self.__topology:
+            if key_name in self.__topology[container_name]:
                 MODULE_LOGGER.debug('  -> Found data for container %s: %s', str(
-                    container_name), str(self._topology[container_name][key_name]))
-                return self._topology[container_name][key_name]
+                    container_name), str(self.__topology[container_name][key_name]))
+                return self.__topology[container_name][key_name]
         return None
 
     @property
@@ -649,12 +664,12 @@ class ContainerInput():
         """
         result_list = list()
         MODULE_LOGGER.info(
-            "Build list of container to create from %s", str(self._topology))
-        while(len(result_list) < len(self._topology)):
-            for container in self._topology:
-                if self._topology[container][self._parent_field] == self._root_name:
+            "Build list of container to create from %s", str(self.__topology))
+        while(len(result_list) < len(self.__topology)):
+            for container in self.__topology:
+                if self.__topology[container][self.__parent_field] == self.__root_name:
                     result_list.append(container)
-                if (any(element == self._topology[container][self._parent_field] for element in result_list)
+                if (any(element == self.__topology[container][self.__parent_field] for element in result_list)
                         and container not in result_list):
                     result_list.append(container)
         MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
@@ -676,12 +691,12 @@ class ContainerInput():
         str
             Name of the parent container, None if not found
         """
-        return self._get_container_data(container_name=container_name, key_name=parent_key)
+        return self.__get_container_data(container_name=container_name, key_name=parent_key)
 
     def get_configlets(self, container_name: str, configlet_key: str = 'configlets'):
-        return self._get_container_data(container_name=container_name, key_name=configlet_key)
+        return self.__get_container_data(container_name=container_name, key_name=configlet_key)
 
     def has_configlets(self, container_name, configlet_key: str = 'configlets'):
-        if self._get_container_data(container_name=container_name, key_name=configlet_key) is None:
+        if self.__get_container_data(container_name=container_name, key_name=configlet_key) is None:
             return False
         return True

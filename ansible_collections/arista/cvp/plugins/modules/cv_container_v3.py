@@ -192,14 +192,17 @@ if __name__ == '__main__':
     check_import()
 
     # Test user input against schema definition
-    check_schemas()
+    user_topology = ContainerInput(
+        user_topology=ansible_module.params['topology'])
+    if user_topology.is_valid:
+        ansible_module.fail_json(
+            msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['topology']))
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
 
     # Instantiate data
     cv_topology = CvContainerTools(cv_connection=cv_client, ansible_module=ansible_module)
-    user_topology = ContainerInput(user_topology=ansible_module.params['topology'])
 
     # Create topology
     if ansible_module.params['state'] == 'present':
