@@ -156,8 +156,13 @@ if __name__ == '__main__':
     # Test all libs are correctly installed
     check_import()
 
+    user_configlets = ConfigletInput(
+        user_topology=ansible_module.params['configlets'])
+
     # Test user input against schema definition
-    check_schemas()
+    if user_configlets.is_valid is False:
+        ansible_module.fail_json(
+            msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['configlets']))
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
@@ -165,11 +170,9 @@ if __name__ == '__main__':
     # Instantiate data
     cv_configlet_manager = CvConfigletTools(
         cv_connection=cv_client, ansible_module=ansible_module)
-    user_configlets = ConfigletInput(
-        user_topology=ansible_module.params['configlets'])
 
-    if ansible_module.check_mode is True:
-        ansible_module.fail_json(msg="Not yet implemented !")
+    # if ansible_module.check_mode is True:
+    #     ansible_module.fail_json(msg="Not yet implemented !")
 
     cv_response = cv_configlet_manager.apply(configlet_list=user_configlets.configlets, present=is_present)
     result['data'] = cv_response

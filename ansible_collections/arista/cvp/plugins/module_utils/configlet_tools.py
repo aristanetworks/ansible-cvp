@@ -19,6 +19,8 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
+
+import jsonschema
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
 __metaclass__ = type
 
@@ -28,6 +30,7 @@ import re
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
     from cvprac.cvp_client import CvpClient
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -45,21 +48,32 @@ MODULE_LOGGER = logging.getLogger('arista.cvp.configlet_tools_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
 
-class ConfigletInput():
+class ConfigletInput(object):
 
-    def __init__(self, user_topology: dict):
-        self._topology = user_topology
+    def __init__(self, user_topology: dict, schema: jsonschema = schema.SCHEMA_CV_CONFIGLET):
+        self.__topology = user_topology
+        self.__schema = schema
+
+    @property
+    def is_valid(self):
+        """
+        check_schemas Validate schemas for user's input
+        """
+        if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
+            MODULE_LOGGER.error("Invalid configlet input : \n%s", str(self.__topology))
+            return False
+        return True
 
     @property
     def configlets(self):
         configlets_list = list()
-        for configlet_name, configlet_data in self._topology.items():
+        for configlet_name, configlet_data in self.__topology.items():
             configlets_list.append(
                 {'name': configlet_name, 'config': configlet_data})
         return configlets_list
 
 
-class CvConfigletTools():
+class CvConfigletTools(object):
     def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None):
         self._cvp_client = cv_connection
         self._ansible = ansible_module
