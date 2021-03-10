@@ -241,8 +241,8 @@ class CvConfigletTools(object):
             or deleted_configlets.changed):
             response['changed'] = True
         if (created_configlets.success
-            or updated_configlets.success
-            or deleted_configlets.success):
+            and updated_configlets.success
+            and deleted_configlets.success):
             response['success'] = True
         MODULE_LOGGER.info('Configlet change result is: %s', str(response))
         return response

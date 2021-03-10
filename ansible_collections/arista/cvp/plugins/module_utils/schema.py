@@ -170,7 +170,7 @@ SCHEMA_CV_CONTAINER = {
 }
 
 
-def validate_cv_inputs(user_json, schema):
+def validate_cv_inputs(user_json: dict, schema: jsonschema):
     """
     validate_cv_inputs JSON SCHEMA Validation.
 
@@ -178,9 +178,9 @@ def validate_cv_inputs(user_json, schema):
 
     Parameters
     ----------
-    user_json : json
+    user_json : dict
         JSON to validate
-    schema : JSON
+    schema : jsonschema
         JSON Schema to use to validate JSON
 
     Returns
