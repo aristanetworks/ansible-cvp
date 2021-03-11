@@ -27,6 +27,15 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
 
+# CONSTANT TO DEFINE DICT FIELDS
+FIELD_SUCCESS = 'success'
+FIELD_CHANGED = 'changed'
+FIELD_TASKIDS = 'taskIds'
+FIELD_COUNT = '_count'
+FIELD_CHANGE_LIST = '_list'
+FIELD_DIFFS = 'diff'
+FIELD_DIFF = 'diff'
+
 class CvApiResult():
     """
     CvApiResult Object Class to represent Ansible response for an API call execution.
@@ -51,14 +60,6 @@ class CvApiResult():
         ]
     }
     """
-
-    # CONSTANT TO DEFINE DICT FIELDS
-    __FIELD_SUCCESS = 'success'
-    __FIELD_CHANGED = 'changed'
-    __FIELD_TASKIDS = 'taskIds'
-    __FIELD_COUNT = '_count'
-    __FIELD_CHANGE_LIST = '_list'
-    __FIELD_DIFF = 'diff'
 
     def __init__(self, action_name: str):
         self.__success = False
@@ -208,15 +209,39 @@ class CvApiResult():
         self.__list_changes.append(entry)
 
     def add_entries(self, entries: list):
+        """
+        add_entries Add a list of entries to instance
+
+        Parameters
+        ----------
+        entries : list
+            List of string to add to ApiReponse instance
+        """
         self.__count += len(entries)
         self.__list_changes += entries
 
     @property
     def taskIds(self):
+        """
+        taskIds Get list of tasks created for this API response
+
+        Returns
+        -------
+        list
+            List of taskIds from Cloudvision
+        """
         return self.__taskIds
 
     @taskIds.setter
     def taskIds(self, tasks: list):
+        """
+        taskIds Add a list of tasks to the current taskIds list.
+
+        Parameters
+        ----------
+        tasks : list
+            List of TaskIds coming from Cloudvision
+        """
         self.__taskIds += tasks
 
     @property
@@ -237,25 +262,43 @@ class CvApiResult():
             Dictionary with all values
         """
         result = dict()
-        result[self.__FIELD_SUCCESS] = self.__success
-        result[self.__FIELD_CHANGED] = self.__changed
-        result[self.__FIELD_TASKIDS] = self.__taskIds
-        result[self.__FIELD_DIFF] = self.__diff
-        result[self.__action_name + self.__FIELD_COUNT] = self.__count
+        result[FIELD_SUCCESS] = self.__success
+        result[FIELD_CHANGED] = self.__changed
+        result[FIELD_TASKIDS] = self.__taskIds
+        result[FIELD_DIFF] = self.__diff
+        result[self.__action_name + FIELD_COUNT] = self.__count
         result[self.__action_name +
-               self.__FIELD_CHANGE_LIST] = self.__list_changes
+               FIELD_CHANGE_LIST] = self.__list_changes
         return result
 
 
 class CvManagerResult():
+    """
+    CvManagerResult Object class to represent all activities run by a module for a set of activities
 
-    __FIELD_SUCCESS = 'success'
-    __FIELD_CHANGED = 'changed'
-    __FIELD_TASKIDS = 'taskIds'
-    __FIELD_COUNT = '_count'
-    __FIELD_CHANGE_LIST = '_list'
-    __FIELD_DIFFS = 'diff'
+    It is used to concentrate inputs for a subset of actions of a module like move device or attach configlet
 
+    Example
+    -------
+    >>> my_change = CvApiResult(action_name='create_container')
+    >>> my_change.add_event('configlet-x-attached-to-container')
+    >>> my_change.success = True
+    >>>
+    >>> my_manager = CvManagerResult(builder_name = 'TEST_BUILDER')
+    >>> my_manager.add_change(change = my_change)
+    >>> my_manager.changes
+    {
+        "TEST_BUILDER_list": [
+            "create_container"
+        ],
+        "success": "True",
+        "changed": "False",
+        "taskIds": [],
+        "diff": {},
+        "TEST_BUILDER_count": 3
+    }
+
+    """
     def __init__(self, builder_name: str):
         self.__name = builder_name
         self.__success = False
@@ -264,9 +307,20 @@ class CvManagerResult():
         self.__taskIds = list()
         self.__changes = dict()
         self.__diffs = dict()
-        self.__changes[self.__name + self.__FIELD_CHANGE_LIST] = list()
+        self.__changes[self.__name + FIELD_CHANGE_LIST] = list()
 
     def add_change(self, change: CvApiResult):
+        """
+        add_change Add a CvApiResult change to current instance
+
+        Register t a CvApiResult to your current CvManagerResult instance.
+        This addition will automatically extract data and increment number of events
+
+        Parameters
+        ----------
+        change : CvApiResult
+            Change to add to our manager
+        """
         MODULE_LOGGER.debug('receive add_change with %s', str(change.results))
         if change.success:
             self.__success = change.success
@@ -274,31 +328,161 @@ class CvManagerResult():
                 self.__changed = change.changed
             self.__taskIds += change.taskIds
             self.__counter += change.count
-            self.__changes[self.__name + self.__FIELD_CHANGE_LIST].append(change.name)
+            self.__changes[self.__name + FIELD_CHANGE_LIST].append(change.name)
             if change.diff is not None:
                 self.__diffs[change.name] = change.diff
-        # self.__changes[change.name] = {
-        #     change.name: change.count, change.name + self.__FIELD_CHANGE_LIST: change.list_changes}
 
     @property
     def changed(self):
+        """
+        changed Expose flag changed of instance
+
+        Used to report if at least one of the registered actions has changed content during execution
+
+        Returns
+        -------
+        bool
+            True or False
+        """
         return self.__changed
 
     @property
     def success(self):
+        """
+        success Expose flag success of instance
+
+        Used to report if all entries of the registered actions has succeeded during execution
+
+        Returns
+        -------
+        bool
+            True or False
+        """
         return self.__success
 
     @property
     def changes(self):
-        # self.__changes['name'] = self.__name
-        # self.changes[self.__FIELD_DIFFS] = self.__diffs
-        self.__changes[self.__FIELD_SUCCESS] = self.__success
-        self.__changes[self.__FIELD_CHANGED] = self.__changed
-        self.__changes[self.__FIELD_TASKIDS] = self.__taskIds
-        self.__changes[self.__FIELD_DIFFS] = self.__diffs
-        self.__changes[self.__name + self.__FIELD_COUNT] = self.__counter
+        """
+        changes Expose instance data into a dict manner.
+
+        Expose all data into a dict manner that can be consume to build report
+
+        Example
+        -------
+        >>> my_manager = CvManagerResult(builder_name = 'TEST_BUILDER')
+        >>> my_manager.add_change(change = my_change)
+        >>> my_manager.changes
+        {
+            "TEST_BUILDER_list": [
+                "create_container"
+            ],
+            "success": "True",
+            "changed": "False",
+            "taskIds": [],
+            "diff": {},
+            "TEST_BUILDER_count": 3
+        }
+
+        Returns
+        -------
+        dict
+            Manager data
+        """
+        self.__changes[FIELD_SUCCESS] = self.__success
+        self.__changes[FIELD_CHANGED] = self.__changed
+        self.__changes[FIELD_TASKIDS] = self.__taskIds
+        self.__changes[FIELD_DIFFS] = self.__diffs
+        self.__changes[self.__name + FIELD_COUNT] = self.__counter
         return self.__changes
 
     @property
     def name(self):
+        """
+        name Name of the CvApiManager instance
+
+        Returns
+        -------
+        str
+            Name of the manager
+        """
         return self.__name
+
+
+class CvAnsibleResponse():
+    """
+    CvAnsibleResponse Ansible Output Manager for ansible output
+
+    Provide a single method to build a consistent module output
+    format across the collection.
+
+    Example:
+    $ ansible-playbook ....
+    ok: [cv_server] =>
+      msg:
+          changed: true
+          data:
+          changed: true
+          configlets_attached:
+              changed: true
+              configlets_attached_count: 2
+              configlets_attached_list:
+              - CV-ANSIBLE-EOS01_configlet_attached
+              diff: {}
+              success: true
+              taskIds:
+              - '444'
+          devices_deployed:
+              changed: false
+              devices_deployed_count: 0
+              devices_deployed_list: []
+              diff: {}
+              success: false
+              taskIds: []
+          devices_moved:
+              changed: false
+              devices_moved_count: 0
+              devices_moved_list: []
+              diff: {}
+              success: false
+              taskIds: []
+          success: false
+          failed: false
+    """
+    def __init__(self):
+        self.success = False
+        self.changed = False
+        self.data = dict()
+        self.taskIds = list()
+
+    def add_manager(self, api_manager: CvManagerResult):
+        """
+        add_manager Register a CvManagerResult entry in Ansible
+
+        Parameters
+        ----------
+        api_manager : CvManagerResult
+            Api Manager with information to display by Ansible
+        """
+        self.data[api_manager.name] = api_manager.changes
+        self.success = api_manager.success
+        if self.changed is False:
+            self.changed = api_manager.changed
+        for task in api_manager.changes[FIELD_TASKIDS]:
+            self.taskIds.append(task)
+
+    @property
+    def content(self):
+        """
+        content Expose Ansible Output manager content
+
+        Getter to provide ansible output
+
+        Returns
+        -------
+        dict
+            All information for Ansible
+        """
+        self.data[FIELD_SUCCESS] = self.success
+        self.data[FIELD_CHANGED] = self.changed
+        self.data[FIELD_TASKIDS] = self.taskIds
+        return self.data
