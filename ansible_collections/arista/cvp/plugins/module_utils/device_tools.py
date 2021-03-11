@@ -26,7 +26,7 @@ import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils.generic_tools import CvElement
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
@@ -276,9 +276,7 @@ class CvDeviceTools(CvClient):
     # ------------------------------------------ #
 
     def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN):
-        response = dict()
-        response['changed'] = False
-        response['success'] = False
+        response = CvAnsibleResponse()
 
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
@@ -299,20 +297,11 @@ class CvDeviceTools(CvClient):
             for update in action_result:
                 cv_configlets_add.add_change(change=update)
 
-        response[cv_move.name] = cv_move.changes
-        response[cv_deploy.name] = cv_deploy.changes
-        response[cv_configlets_add.name] = cv_configlets_add.changes
+        response.add_manager(cv_move)
+        response.add_manager(cv_deploy)
+        response.add_manager(cv_configlets_add)
 
-        if (cv_move.changed
-            or cv_deploy.changed
-            or cv_configlets_add.changed):
-            response['changed'] = True
-        if (cv_move.success
-            and cv_deploy.success
-            and cv_configlets_add.success):
-            response['success'] = True
-
-        return response
+        return response.content
 
     def move_device(self, user_inventory: DeviceInventory):
         results = list()
