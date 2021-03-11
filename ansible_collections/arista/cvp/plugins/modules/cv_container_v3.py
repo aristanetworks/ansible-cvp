@@ -59,16 +59,10 @@ EXAMPLES = r'''
             parent_container: Fabric
             configlets:
                 - container_configlet
-            images:
-                - 4.22.0F
-            devices:
-                - veos01
   tasks:
-    - name: "Build Container topology on {{inventory_hostname}}"
-      cv_container:
-        topology: "{{containers}}"
-        state: present
-      register: CVP_CONTAINERS_RESULT
+    - name: 'running cv_container'
+      arista.cvp.cv_container_v3:
+        topology: "{{CVP_CONTAINERS}}"
 '''
 
 import logging
@@ -159,9 +153,6 @@ def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput,
         response['changed'] = True
     else:
         response['changed'] = False
-    # response['configlets_attached'] = {"configlet_attached": configlet_attached_counter,
-    #                                    "configlet_attached_list": configlet_attached}
-    # response['taskIds'] = taskIds
     return response
 
 
