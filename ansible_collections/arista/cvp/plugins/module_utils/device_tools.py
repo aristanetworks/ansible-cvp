@@ -59,6 +59,11 @@ FIELD_IMAGE_BUNDLE = 'image_bundle'
 UNDEFINED_CONTAINER = 'undefined_container'
 
 
+class CvClient(object):
+    def __failure(self, msg: str):
+        MODULE_LOGGER.error(msg)
+        if self.__ansible is not None:
+            self.__ansible.fail_json(msg=msg)
 
 
 class DeviceElement(object):
@@ -135,6 +140,7 @@ class DeviceInventory(object):
     def __init__(self, data: list, schema: jsonschema = schema.SCHEMA_CV_DEVICE, search_method: str = FIELD_FQDN):
         self.__inventory = list()
         self.__data = data
+        self.__schema = schema
         self.search_method = search_method
         for entry in data:
             self.__inventory.append(DeviceElement(data=entry))
@@ -168,7 +174,7 @@ class DeviceInventory(object):
         return None
 
 
-class CvDeviceTools(object):
+class CvDeviceTools(CvClient):
 
     def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None, search_by: str = FIELD_FQDN, check_mode: bool = False):
         self.__cv_client = cv_connection
@@ -176,10 +182,6 @@ class CvDeviceTools(object):
         self.__search_by = search_by
         self.__configlets_and_mappers_cache = None
         self.__check_mode = check_mode
-
-    def __failure(self, msg: str):
-        if self.__ansible is not None:
-            self.__ansible.fail_json(msg=msg)
 
     # ------------------------------------------ #
     # Getters & Setters

@@ -55,6 +55,151 @@ SCHEMA_CV_CONFIGLET = {
 
 # JSON Schema to represent CV_DEVICE inputs.
 SCHEMA_CV_DEVICE = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "array",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": [],
+    "examples": [
+        [
+            {
+                "fqdn": "CV-ANSIBLE-EOS01",
+                "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
+                "systemMacAddress": "50:8d:00:e3:78:aa",
+                "parentContainerName": "ANSIBLE2",
+                "configlets": [
+                    "01TRAINING-01",
+                    "CV-EOS-ANSIBLE01"
+                ],
+                "imageBundle": []
+            }
+        ]
+    ],
+    "additionalItems": True,
+    "items": {
+        "$id": "#/items",
+        "anyOf": [
+            {
+                "$id": "#/items/anyOf/0",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "examples": [
+                    {
+                        "fqdn": "CV-ANSIBLE-EOS01",
+                        "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
+                        "systemMacAddress": "50:8d:00:e3:78:aa",
+                        "parentContainerName": "ANSIBLE2",
+                        "configlets": [
+                            "01TRAINING-01",
+                            "CV-EOS-ANSIBLE01"
+                        ],
+                        "imageBundle": []
+                    }
+                ],
+                "required": [
+                    "fqdn",
+                    "serialNumber",
+                    "systemMacAddress",
+                    "parentContainerName",
+                    "configlets",
+                    "imageBundle"
+                ],
+                "properties": {
+                    "fqdn": {
+                        "$id": "#/items/anyOf/0/properties/fqdn",
+                        "type": "string",
+                        "title": "The fqdn schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "CV-ANSIBLE-EOS01"
+                        ]
+                    },
+                    "serialNumber": {
+                        "$id": "#/items/anyOf/0/properties/serialNumber",
+                        "type": "string",
+                        "title": "The serialNumber schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "79AEA53101E7340AEC9AA4819D5E1F5B"
+                        ]
+                    },
+                    "systemMacAddress": {
+                        "$id": "#/items/anyOf/0/properties/systemMacAddress",
+                        "type": "string",
+                        "title": "The systemMacAddress schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "50:8d:00:e3:78:aa"
+                        ]
+                    },
+                    "parentContainerName": {
+                        "$id": "#/items/anyOf/0/properties/parentContainerName",
+                        "type": "string",
+                        "title": "The parentContainerName schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "ANSIBLE2"
+                        ]
+                    },
+                    "configlets": {
+                        "$id": "#/items/anyOf/0/properties/configlets",
+                        "type": "array",
+                        "title": "The configlets schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": [],
+                        "examples": [
+                            [
+                                "01TRAINING-01",
+                                "CV-EOS-ANSIBLE01"
+                            ]
+                        ],
+                        "additionalItems": True,
+                        "items": {
+                            "$id": "#/items/anyOf/0/properties/configlets/items",
+                            "anyOf": [
+                                {
+                                    "$id": "#/items/anyOf/0/properties/configlets/items/anyOf/0",
+                                    "type": "string",
+                                    "title": "The first anyOf schema",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": "",
+                                    "examples": [
+                                        "01TRAINING-01",
+                                        "CV-EOS-ANSIBLE01"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "imageBundle": {
+                        "$id": "#/items/anyOf/0/properties/imageBundle",
+                        "type": "array",
+                        "title": "The imageBundle schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": [],
+                        "examples": [
+                            []
+                        ],
+                        "additionalItems": True,
+                        "items": {
+                            "$id": "#/items/anyOf/0/properties/imageBundle/items"
+                        }
+                    }
+                },
+                "additionalProperties": True
+            }
+        ]
+    }
+}
+
+SCHEMA_CV_DEVICE_OLD = {
     "type": "object",
     "$schema": "http://json-schema.org/draft-03/schema",
     "id": "#",
