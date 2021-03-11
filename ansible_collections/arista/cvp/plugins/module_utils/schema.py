@@ -71,8 +71,7 @@ SCHEMA_CV_DEVICE = {
                 "configlets": [
                     "01TRAINING-01",
                     "CV-EOS-ANSIBLE01"
-                ],
-                "imageBundle": []
+                ]
             }
         ]
     ],
@@ -101,11 +100,7 @@ SCHEMA_CV_DEVICE = {
                 ],
                 "required": [
                     "fqdn",
-                    "serialNumber",
-                    "systemMacAddress",
                     "parentContainerName",
-                    "configlets",
-                    "imageBundle"
                 ],
                 "properties": {
                     "fqdn": {
