@@ -26,7 +26,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: cv_container
+module: cv_device
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
@@ -35,40 +35,38 @@ description:
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
 options:
-  topology:
-    description: Yaml dictionary to describe intended containers
+  devices:
+    description: List of devices with their container and configlets information
     required: true
-    type: dict
-  cvp_facts:
-    description: Facts from CVP collected by cv_facts module
-    required: true
-    type: dict
+    type: list
+  state:
+    description: Set if ansible should build or remove devices on CLoudvision
+    required: false
+    default: 'present'
+    choices: ['present', 'absent']
+    type: str
 '''
 
 EXAMPLES = r'''
-- name: Create container topology on CVP
-  hosts: cvp
+# Minimum usage
+- name: Device Management in Cloudvision
+  hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
+  collections:
+    - arista.avd
+    - arista.cvp
   vars:
-    verbose: False
-    containers:
-        Fabric:
-            parent_container: Tenant
-        Spines:
-            parent_container: Fabric
-            configlets:
-                - container_configlet
-            images:
-                - 4.22.0F
-            devices:
-                - veos01
+    CVP_DEVICES:
+      - fqdn: CV-ANSIBLE-EOS01
+        parentContainerName: 'ANSIBLE'
+        configlets:'
+            - 'CV-EOS-ANSIBLE01'
   tasks:
-    - name: "Build Container topology on {{inventory_hostname}}"
-      cv_container:
-        topology: "{{containers}}"
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: "{{CVP_DEVICES}}"
         state: present
-      register: CVP_CONTAINERS_RESULT
 '''
 
 import logging
