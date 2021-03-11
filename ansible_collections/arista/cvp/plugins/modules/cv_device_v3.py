@@ -145,8 +145,6 @@ if __name__ == '__main__':
     cv_topology = CvDeviceTools(
         cv_connection=cv_client, ansible_module=ansible_module, check_mode=ansible_module.check_mode)
 
-    result['data'] = cv_topology.manager(user_inventory=user_topology)
-    result['changed'] = result['data']['changed']
-
+    result = cv_topology.manager(user_inventory=user_topology)
 
     ansible_module.exit_json(**result)
