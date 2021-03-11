@@ -13,7 +13,6 @@ CVP_DEVICES = [
     {
         "fqdn": "DC1-SPINE1.eve.emea.lab",
         "serialNumber": "ddddddd",
-        "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
         "configlets": [
                 "AVD_DC1-SPINE1",
@@ -23,7 +22,6 @@ CVP_DEVICES = [
     },
     {
         "fqdn": "DC1-SPINE2.eve.emea.lab",
-        "serialNumber": "xxxxxxx",
         "systemMacAddress": "yyyyyyy",
         "parentContainerName": "DC1_SPINES",
         "configlets": [
@@ -40,11 +38,14 @@ def test_create_object():
     for dev in inventory.devices:
         assert dev.fqdn in fqdn_list
 
-
 def test_display_info():
     inventory = DeviceInventory(data=CVP_DEVICES)
     for device in inventory.devices:
         print('device info: {}'.format(device.info))
+
+def test_device_schema():
+    inventory = DeviceInventory(data=CVP_DEVICES)
+    assert inventory.is_valid
 
 def test_devices_iteration():
     inventory = DeviceInventory(data=CVP_DEVICES)
@@ -72,16 +73,22 @@ def test_get_by_fqdn_default():
 def test_get_by_system_mac():
     inventory = DeviceInventory(data=CVP_DEVICES)
     for dev_data in CVP_DEVICES:
-        dev_inventory = inventory.get_device(
-            device_string=dev_data[FIELD_SYSMAC], search_method=FIELD_SYSMAC)
-        assert dev_data[FIELD_SYSMAC] == dev_inventory.system_mac
+        if FIELD_SYSMAC in dev_data:
+            dev_inventory = inventory.get_device(
+                device_string=dev_data[FIELD_SYSMAC], search_method=FIELD_SYSMAC)
+            assert dev_data[FIELD_SYSMAC] == dev_inventory.system_mac
+        else:
+            assert True
 
 def test_get_by_system_mac_default():
     inventory = DeviceInventory(data=CVP_DEVICES, search_method=FIELD_SYSMAC)
     for dev_data in CVP_DEVICES:
-        dev_inventory = inventory.get_device(
-            device_string=dev_data[FIELD_SYSMAC])
-        assert dev_data[FIELD_SYSMAC] == dev_inventory.system_mac
+        if FIELD_SYSMAC in dev_data:
+            dev_inventory = inventory.get_device(
+                device_string=dev_data[FIELD_SYSMAC])
+            assert dev_data[FIELD_SYSMAC] == dev_inventory.system_mac
+        else:
+            assert True
 
 def test_get_by_unsupported_option():
     inventory = DeviceInventory(data=CVP_DEVICES)

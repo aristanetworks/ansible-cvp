@@ -429,7 +429,7 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
 }
 </script>
     <h1>report.html</h1>
-    <p>Report generated on 10-Mar-2021 at 20:09:18 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <p>Report generated on 11-Mar-2021 at 19:15:07 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
@@ -445,8 +445,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <td>Python</td>
         <td>3.6.8</td></tr></table>
     <h2>Summary</h2>
-    <p>10 tests ran in 0.30 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">10 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>48 tests ran in 16.34 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">47 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -457,6 +457,273 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable links" col="links">Links</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_move</td>
+          <td class="col-duration">0.74</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">def test_device_move():<br/>        requests.packages.urllib3.disable_warnings()<br/>        cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)<br/>        user_inventory = DeviceInventory(data=CVP_DEVICES_MOVE)<br/>        resp = cv_devices.move_device(user_inventory=user_inventory)<br/>&gt;       assert resp[0].results[&#x27;success&#x27;]<br/><span class="error">E       assert False</span><br/><br/>test_cvDeviceTools.py:148: AssertionError<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_create_object</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_search_by_getter_setter</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_is_device_exists_by_fqdn</td>
+          <td class="col-duration">0.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_is_not_present</td>
+          <td class="col-duration">0.44</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_in_container</td>
+          <td class="col-duration">0.77</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_not_in_container</td>
+          <td class="col-duration">0.76</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_facts_default</td>
+          <td class="col-duration">0.40</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_get_device_id</td>
+          <td class="col-duration">0.39</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_get_configlets</td>
+          <td class="col-duration">0.75</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_container_id</td>
+          <td class="col-duration">0.40</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_configlet_apply</td>
+          <td class="col-duration">3.37</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_deploy</td>
+          <td class="col-duration">1.58</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>DEPLOYED configlet response is: {&#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;unsupported_in_check_mode&#x27;], &#x27;diff&#x27;: None, &#x27;CV-ANSIBLE-EOS02_deployed_count&#x27;: 1, &#x27;CV-ANSIBLE-EOS02_deployed_list&#x27;: [&#x27;CV-ANSIBLE-EOS02 deployed to ANSIBLE&#x27;]}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cvDeviceTools.py::test_device_manager</td>
+          <td class="col-duration">4.34</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>MANAGER response is: {&#x27;devices_moved&#x27;: {&#x27;devices_moved_list&#x27;: [&#x27;CV-ANSIBLE-EOS01_to_ANSIBLE&#x27;], &#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;unsupported_in_check_mode&#x27;], &#x27;diff&#x27;: {}, &#x27;devices_moved_count&#x27;: 1}, &#x27;devices_deployed&#x27;: {&#x27;devices_deployed_list&#x27;: [], &#x27;success&#x27;: False, &#x27;changed&#x27;: False, &#x27;taskIds&#x27;: [], &#x27;diff&#x27;: {}, &#x27;devices_deployed_count&#x27;: 0}, &#x27;configlets_attached&#x27;: {&#x27;configlets_attached_list&#x27;: [&#x27;CV-ANSIBLE-EOS01_configlet_attached&#x27;], &#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;445&#x27;], &#x27;diff&#x27;: {}, &#x27;configlets_attached_count&#x27;: 2}, &#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;unsupported_in_check_mode&#x27;, &#x27;445&#x27;]}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    arista.cvp.cv_configlet:response.py:324 receive add_change with {&#x27;success&#x27;: False, &#x27;changed&#x27;: False, &#x27;taskIds&#x27;: [], &#x27;diff&#x27;: None, &#x27;CV-ANSIBLE-EOS01_deployed_count&#x27;: 0, &#x27;CV-ANSIBLE-EOS01_deployed_list&#x27;: []}
+DEBUG    arista.cvp.cv_configlet:response.py:324 receive add_change with {&#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;unsupported_in_check_mode&#x27;], &#x27;diff&#x27;: None, &#x27;CV-ANSIBLE-EOS01_to_ANSIBLE_count&#x27;: 1, &#x27;CV-ANSIBLE-EOS01_to_ANSIBLE_list&#x27;: [&#x27;CV-ANSIBLE-EOS01-ANSIBLE&#x27;]}
+DEBUG    arista.cvp.cv_configlet:response.py:324 receive add_change with {&#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [&#x27;445&#x27;], &#x27;diff&#x27;: None, &#x27;CV-ANSIBLE-EOS01_configlet_attached_count&#x27;: 2, &#x27;CV-ANSIBLE-EOS01_configlet_attached_list&#x27;: [&quot;CV-ANSIBLE-EOS01 adds [&#x27;01TRAINING-01&#x27;, &#x27;CV-EOS-ANSIBLE01&#x27;]&quot;, &#x27;CV-ANSIBLE-EOS01 to ANSIBLE&#x27;]}<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceElement.py::test_get_fqdn</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceElement.py::test_get_system_mac</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceElement.py::test_get_serial_number</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceElement.py::test_get_configlets</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceElement.py::test_set_systemMac</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_create_object</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_display_info</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>device info: {&#x27;fqdn&#x27;: &#x27;DC1-SPINE1.eve.emea.lab&#x27;, &#x27;serialNumber&#x27;: &#x27;ddddddd&#x27;, &#x27;parentContainerName&#x27;: &#x27;DC1_SPINES&#x27;, &#x27;configlets&#x27;: [&#x27;AVD_DC1-SPINE1&#x27;, &#x27;01TRAINING-01&#x27;]}
+device info: {&#x27;fqdn&#x27;: &#x27;DC1-SPINE2.eve.emea.lab&#x27;, &#x27;systemMacAddress&#x27;: &#x27;yyyyyyy&#x27;, &#x27;key&#x27;: &#x27;yyyyyyy&#x27;, &#x27;parentContainerName&#x27;: &#x27;DC1_SPINES&#x27;, &#x27;configlets&#x27;: [&#x27;AVD_DC1-SPINE2&#x27;, &#x27;01TRAINING-01&#x27;]}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_device_schema</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_devices_iteration</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_default</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_fqdn</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_fqdn_default</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_system_mac</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_system_mac_default</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_deviceInventory.py::test_get_by_unsupported_option</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
@@ -546,4 +813,86 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="empty log">No log output captured.</div></td></tr></tbody></table></body></html>
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_create[]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_create[a]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_create[action]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_create[action_test]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_create[action test]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_flags</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_manager_add_actions</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> -------------------------------Captured log call-------------------------------- <br/>DEBUG    arista.cvp.cv_configlet:response.py:324 receive add_change with {&#x27;success&#x27;: True, &#x27;changed&#x27;: False, &#x27;taskIds&#x27;: [], &#x27;diff&#x27;: None, &#x27;TEST_count&#x27;: 3, &#x27;TEST_list&#x27;: [&#x27;action1&#x27;, &#x27;action2&#x27;, &#x27;action3&#x27;]}<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_ansible_response_creation</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_response.py::test_ansible_response_add</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;API_BUILDER&#x27;: {&#x27;API_BUILDER_list&#x27;: [&#x27;API_TEST&#x27;], &#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [], &#x27;diff&#x27;: {}, &#x27;API_BUILDER_count&#x27;: 1}, &#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: []}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    arista.cvp.cv_configlet:response.py:324 receive add_change with {&#x27;success&#x27;: True, &#x27;changed&#x27;: True, &#x27;taskIds&#x27;: [], &#x27;diff&#x27;: None, &#x27;API_TEST_count&#x27;: 1, &#x27;API_TEST_list&#x27;: [&#x27;Fake run&#x27;]}<br/></div></td></tr></tbody></table></body></html>
