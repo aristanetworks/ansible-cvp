@@ -48,7 +48,7 @@ The following options may be specified for this module:
     <td>
         <div>List of facts to retrieve from CVP.</div>
         <div>By default, cv_facts returns facts for devices/configlets/containers/tasks</div>
-        <div>Using this parameter allows user to limit scope to a subet of information.</div>
+        <div>Using this parameter allows user to limit scope to a subset of information.</div>
     </td>
     </tr>
 
@@ -77,7 +77,7 @@ Examples:
 ---------
 
 ::
-    
+
     ---
       tasks:
         - name: '#01 - Collect devices facts from {{inventory_hostname}}'
@@ -124,5 +124,3 @@ Status
 ~~~~~~
 
 This module is flagged as **preview** which means that it is not guaranteed to have a backwards compatible interface.
-
-

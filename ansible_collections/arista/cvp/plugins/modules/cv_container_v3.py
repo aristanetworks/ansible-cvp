@@ -26,7 +26,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: cv_container
+module: cv_container_v3
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.

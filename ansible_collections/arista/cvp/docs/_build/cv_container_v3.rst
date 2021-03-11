@@ -1,7 +1,7 @@
-.. _cv_container:
+.. _cv_container_v3:
 
-cv_container
-++++++++++++
+cv_container_v3
++++++++++++++++
 Manage Provisioning topology.
 
 Module added in version 2.9
@@ -41,17 +41,6 @@ The following options may be specified for this module:
     </tr>
 
     <tr>
-    <td>configlet_filter<br/><div style="font-size: small;"></div></td>
-    <td>list</td>
-    <td>no</td>
-    <td>[&#x27;none&#x27;]</td>
-    <td></td>
-    <td>
-        <div>Filter to apply intended set of configlet on containers. If not used, then module only uses ADD mode. configlet_filter list configlets that can be modified or deleted based on configlets entries.</div>
-    </td>
-    </tr>
-
-    <tr>
     <td>cvp_facts<br/><div style="font-size: small;"></div></td>
     <td>dict</td>
     <td>yes</td>
@@ -59,17 +48,6 @@ The following options may be specified for this module:
     <td></td>
     <td>
         <div>Facts from CVP collected by cv_facts module</div>
-    </td>
-    </tr>
-
-    <tr>
-    <td>mode<br/><div style="font-size: small;"></div></td>
-    <td>str</td>
-    <td>no</td>
-    <td>merge</td>
-    <td><ul><li>merge</li><li>override</li><li>delete</li></ul></td>
-    <td>
-        <div>Allow to save topology or not</div>
     </td>
     </tr>
 
@@ -87,7 +65,7 @@ The following options may be specified for this module:
     </table>
     </br>
 
-.. _cv_container-examples-label:
+.. _cv_container_v3-examples-label:
 
 Examples:
 ---------
@@ -107,20 +85,10 @@ Examples:
                 parent_container: Fabric
                 configlets:
                     - container_configlet
-                images:
-                    - 4.22.0F
-                devices:
-                    - veos01
       tasks:
-        - name: "Gather CVP facts {{inventory_hostname}}"
-          cv_facts:
-          register: cvp_facts
-        - name: "Build Container topology on {{inventory_hostname}}"
-          cv_container:
-            cvp_facts: "{{cvp_facts.ansible_facts}}"
-            topology: "{{containers}}"
-            mode: merge
-          register: CVP_CONTAINERS_RESULT
+        - name: 'running cv_container'
+          arista.cvp.cv_container_v3:
+            topology: "{{CVP_CONTAINERS}}"
 
 
 
