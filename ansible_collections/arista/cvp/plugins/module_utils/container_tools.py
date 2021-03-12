@@ -608,6 +608,7 @@ class CvContainerTools(object):
                         if resp['data']['status'] == "success":
                             change_result.taskIds = resp['data']['taskIds']
                             change_result.success = True
+                            change_result.changed = True
                             change_result.count += 1
         else:
             MODULE_LOGGER.debug('Parent container (%s) is missing for container %s', str(
@@ -666,6 +667,8 @@ class CvContainerTools(object):
                     if resp['data']['status'] == "success":
                         change_result.taskIds = resp['data']['taskIds']
                         change_result.success = True
+                        change_result.changed = True
+                        change_result.count += 1
         else:
             MODULE_LOGGER.debug('Container is missing %s', str(container))
         return change_result
