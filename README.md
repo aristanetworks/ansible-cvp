@@ -11,7 +11,9 @@
 - [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
   - [About](#about)
   - [List of CVP versions supported](#list-of-cvp-versions-supported)
-  - [Modules overview](#modules-overview)
+  - [Collection overview](#collection-overview)
+    - [List of available modules](#list-of-available-modules)
+    - [List of available roles](#list-of-available-roles)
     - [Important notes](#important-notes)
   - [Getting Started](#getting-started)
   - [Installation](#installation)
@@ -43,15 +45,15 @@ __arista.cvp__ collection supports list of Cloudvision version as listed below:
 - __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2020.1.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
-- __CVP 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
+- __CVP >= 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
 
-When a CVP version is supported starting a specific version, any upcoming version will support that version until a specific announcement was made.
+Starting version __v2.0.0__ all Cloudvision communications are managed by [__cvprac__](https://github.com/aristanetworks/cvprac) meaning that ansible-cvp collection is going to support any new CV version based on its cvprac support.
 
-## Modules overview
+## Collection overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-__List of available modules:__
+### List of available modules
 
 - [__arista.cvp.cv_facts__](http://cvp.avd.sh/docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](http://cvp.avd.sh/docs/modules/cv_configlet.md) -  Manage configlet configured on CVP.
@@ -59,7 +61,7 @@ __List of available modules:__
 - [__arista.cvp.cv_device__](http://cvp.avd.sh/docs/modules/cv_device.md) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](http://cvp.avd.sh/docs/modules/cv_task.md) - Run tasks created on CVP.
 
-__List of available roles:__
+### List of available roles
 
 - [__arista.cvp.dhcp_configuration__](http://cvp.avd.sh/roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 - [__arista.cvp.configlet_sync__](http://cvp.avd.sh/roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.

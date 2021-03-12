@@ -2,6 +2,20 @@
 
 > All the CV communication are now managed by [__cvprac library__](https://github.com/aristanetworks/cvprac). So a new [requirements](#dependencies) __MUST__ be installed first before any code execution.
 
+**Table of contents**
+
+- [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
+  - [About](#about)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Collection overview](#collection-overview)
+    - [List of available modules](#list-of-available-modules)
+    - [List of available roles](#list-of-available-roles)
+  - [Example](#example)
+  - [License](#license)
+  - [Ask a question](#ask-a-question)
+  - [Contributing](#contributing)
+
 ## About
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks.
@@ -17,7 +31,10 @@ __Arista CloudVision:__
 - __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2020.1.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
-- __CVP 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
+- __CVP >= 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
+
+!!! info
+    Starting version __v2.0.0__ all Cloudvision communications are managed by [__cvprac__](https://github.com/aristanetworks/cvprac) meaning that ansible-cvp collection is going to support any new CV version based on its cvprac support.
 
 __Python:__
 
@@ -53,11 +70,11 @@ Installing 'arista.cvp:1.1.0' to '~/.ansible/collections/ansible_collections/ari
 
 Complete installation process is available on [repository website](docs/installation/requirements/)
 
-## Modules overview
+## Collection overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-__List of available modules:__
+### List of available modules
 
 - [__arista.cvp.cv_facts__](docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
@@ -65,7 +82,7 @@ __List of available modules:__
 - [__arista.cvp.cv_device__](docs/modules/cv_device.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/modules/cv_task.rst/) - Run tasks created on CVP.
 
-__List of available roles:__
+### List of available roles
 
 - [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 - [__arista.cvp.configlet_sync__](roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
@@ -140,7 +157,7 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
-Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
+The best platform for general feedback, assistance, and other discussion is our [GitHub discussions](). To report a bug or request a specific feature, please open a [GitHub issue](https://github.com/aristanetworks/ansible-cvp/issues) using the appropriate template.
 
 ## Contributing
 
