@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import jsonschema
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 __metaclass__ = type
 
 import traceback
@@ -230,20 +230,10 @@ class CvConfigletTools(object):
                 MODULE_LOGGER.debug(
                     'configlet deleted: %s', str(entry.results))
                 deleted_configlets.add_change(entry)
-        response = dict()
-        response['changed'] = False
-        response['success'] = False
-        response[created_configlets.name] = created_configlets.changes
-        response[updated_configlets.name] = updated_configlets.changes
-        response[deleted_configlets.name] = deleted_configlets.changes
-        if (created_configlets.changed
-            or updated_configlets.changed
-            or deleted_configlets.changed):
-            response['changed'] = True
-        if (created_configlets.success
-            and updated_configlets.success
-            and deleted_configlets.success):
-            response['success'] = True
+        response = CvAnsibleResponse()
+        response.add_manager(created_configlets)
+        response.add_manager(updated_configlets)
+        response.add_manager(deleted_configlets)
         MODULE_LOGGER.info('Configlet change result is: %s', str(response))
         return response
 

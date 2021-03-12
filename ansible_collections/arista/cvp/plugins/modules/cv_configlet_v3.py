@@ -22,6 +22,7 @@
 #
 
 from __future__ import absolute_import, division, print_function
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 __metaclass__ = type
 
 DOCUMENTATION = r'''
@@ -110,19 +111,6 @@ def check_import():
         ansible_module.fail_json(
             msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
-
-def check_schemas():
-    """
-    check_schemas Validate schemas for user's input
-    """
-    if not schema.validate_cv_inputs(user_json=ansible_module.params['configlets'], schema=schema.SCHEMA_CV_CONFIGLET):
-        MODULE_LOGGER.error("Invalid configlet input : %s",
-                            str(ansible_module.params['configlets']))
-        ansible_module.fail_json(
-            msg='Container input data are not compliant with module: \n{}'.format(ansible_module.params['configlets']))
-
-
-
 # ------------------------------------------------------------ #
 #               MAIN section -- starting point                 #
 # ------------------------------------------------------------ #
@@ -174,9 +162,7 @@ if __name__ == '__main__':
     # if ansible_module.check_mode is True:
     #     ansible_module.fail_json(msg="Not yet implemented !")
 
-    cv_response = cv_configlet_manager.apply(configlet_list=user_configlets.configlets, present=is_present)
-    result['data'] = cv_response
-    result['changed'] = cv_response['changed']
-    result['success'] = cv_response['success']
+    cv_response: CvAnsibleResponse = cv_configlet_manager.apply(configlet_list=user_configlets.configlets, present=is_present)
+    result = cv_response.content
 
     ansible_module.exit_json(**result)
