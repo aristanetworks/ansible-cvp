@@ -295,15 +295,7 @@ SCHEMA_CV_CONTAINER = {
                         "type": "string"
                     },
                     "required": False
-                },
-                "devices": {
-                    "id": "devices",
-                    "type": "array",
-                    "contains": {
-                        "type": "string"
-                    },
-                    "required": False
-                },
+                }
             }
         }
     }

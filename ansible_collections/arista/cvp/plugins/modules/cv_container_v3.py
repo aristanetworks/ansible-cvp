@@ -33,16 +33,19 @@ short_description: Manage Provisioning topology.
 description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
+  - Module also supports to configure configlets at container level.
   - Returns number of created and/or deleted containers
 options:
   topology:
     description: Yaml dictionary to describe intended containers
     required: true
     type: dict
-  cvp_facts:
-    description: Facts from CVP collected by cv_facts module
-    required: true
-    type: dict
+  state:
+    description: Set if ansible should build or remove devices on CLoudvision
+    required: false
+    default: 'present'
+    choices: ['present', 'absent']
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -65,6 +68,128 @@ EXAMPLES = r'''
         topology: "{{CVP_CONTAINERS}}"
 '''
 
+RETURN = r'''
+taskIds:
+  description: List of tasks returned by Cloudvision
+  returned: On success
+  type: list
+  sample:
+    - '666'
+    - '667'
+configlet_attachmenet:
+  description: Information related to configlet add process
+  returned: On success
+  type: Complex
+  contains:
+    changed:
+      description: Flag to track if process has proceed to change Cloudvision
+      returned: success
+      type: bool
+    configlet_attachmenet_count:
+      description: Counter for number of containers impacted by configlet changes
+      returned: success
+      type: int
+    configlet_attachmenet_list:
+      description: List of containers with configlets
+      returned: success
+      type: list
+      sample:
+        - Spines:ASE_DEVICE-ALIASES
+    success:
+      description: Flag to track if process has succeeded
+      returned: success
+      type: bool
+    taskIds:
+      description: List of tasks returned by Cloudvision
+      returned: success
+      type: list
+      sample:
+        - 666
+        - 667
+container_added:
+  description: Information related to container creation process
+  returned: On success
+  type: Complex
+  sample:
+    container_added:
+      changed: false
+      container_added_count: 0
+      container_added_list: []
+      diff: {}
+      success: false
+      taskIds: []
+  contains:
+    changed:
+      description: Flag to track if process has proceed to change Cloudvision
+      returned: success
+      type: bool
+    container_added_count:
+      description: Counter for number of containers created
+      returned: success
+      type: int
+    container_added_lsit:
+      description: List of containers created
+      returned: success
+      type: list
+      sample:
+        - Spines
+        - Leaves
+        - Fabric
+    success:
+      description: Flag to track if process has succeeded
+      returned: success
+      type: bool
+    taskIds:
+      description: List of tasks returned by Cloudvision
+      returned: success
+      type: list
+      sample:
+        - 330
+        - 340
+        - 350
+container_deleted:
+  description: Information related to container deletion process
+  returned: On success
+  type: Complex
+  sample:
+    container_deleted:
+      changed: false
+      container_deleted_count: 0
+      container_deleted_list: []
+      diff: {}
+      success: false
+      taskIds: []
+  contains:
+    changed:
+      description: Flag to track if process has proceed to change Cloudvision
+      returned: success
+      type: bool
+    container_deleted_count:
+      description: Counter for number of containers deleted
+      returned: success
+      type: int
+    container_deleted_lsit:
+      description: List of containers deleted
+      returned: success
+      type: list
+      sample:
+        - Spines
+        - Leaves
+        - Fabric
+    success:
+      description: Flag to track if process has succeeded
+      returned: success
+      type: bool
+    taskIds:
+      description: List of tasks returned by Cloudvision
+      returned: success
+      type: list
+      sample:
+        - 330
+        - 340
+        - 350
+'''
+
 import logging
 import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
@@ -72,7 +197,7 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools, ContainerInput
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvManagerResult
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
@@ -98,62 +223,6 @@ def check_import():
 
     if not schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(msg="JSONSCHEMA is required. Please install using pip install jsonschema")
-
-
-def check_schemas():
-    """
-    check_schemas Validate schemas for user's input
-    """
-    if not schema.validate_cv_inputs(user_json=ansible_module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
-        MODULE_LOGGER.error("Invalid container topology input : %s",
-                            str(ansible_module.params['topology']))
-        ansible_module.fail_json(
-            msg='Container input data are not compliant with module: \n{}'.format(ansible_module.params['topology']))
-
-
-def build_topology(cv_topology: CvContainerTools, user_topology: ContainerInput, present: bool = True):
-    response = dict()
-    container_add_manager = CvManagerResult(builder_name='container_added')
-    container_delete_manager = CvManagerResult(builder_name='container_deleted')
-    configlet_attachment = CvManagerResult(builder_name='configlet_attachmenet')
-
-    # Create containers topology in Cloudvision
-    if present is True:
-        for user_container in user_topology.ordered_list_containers:
-            MODULE_LOGGER.info('Start creation process for container %s under %s', str(
-                user_container), str(user_topology.get_parent(container_name=user_container)))
-            resp = cv_topology.create_container(container=user_container, parent=user_topology.get_parent(container_name=user_container))
-            # if resp['success'] is True:
-            #     containers_created_counter += 1
-            #     containers_created.append(user_container)
-            #     taskIds += resp['taskIds']
-            container_add_manager.add_change(resp)
-
-            if user_topology.has_configlets(container_name=user_container):
-                resp = cv_topology.configlets_attach(
-                container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
-                configlet_attachment.add_change(resp)
-
-    # Remove containers topology from Cloudvision
-    else:
-        for user_container in reversed(user_topology.ordered_list_containers):
-            MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
-                user_container), str(user_topology.get_parent(container_name=user_container)))
-            resp = cv_topology.delete_container(
-                container=user_container, parent=user_topology.get_parent(container_name=user_container))
-            container_delete_manager.add_change(resp)
-
-
-    # Create ansible message
-    response[container_add_manager.name] = container_add_manager.changes
-    response[container_delete_manager.name] = container_delete_manager.changes
-    response[configlet_attachment.name] = configlet_attachment.changes
-    MODULE_LOGGER.debug('Container manager is sending result data: %s', str(response))
-    if container_add_manager.changed or container_delete_manager.changed or configlet_attachment.changed:
-        response['changed'] = True
-    else:
-        response['changed'] = False
-    return response
 
 
 # ------------------------------------------------------------ #
@@ -182,10 +251,17 @@ if __name__ == '__main__':
     # Test all libs are correctly installed
     check_import()
 
+    # boolean for state flag
+    if ansible_module.params['state'] == 'absent':
+        state_present = False
+    else:
+        state_present = True
+
     # Test user input against schema definition
     user_topology = ContainerInput(
         user_topology=ansible_module.params['topology'])
-    if user_topology.is_valid:
+
+    if user_topology.is_valid is False:
         ansible_module.fail_json(
             msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['topology']))
 
@@ -195,22 +271,9 @@ if __name__ == '__main__':
     # Instantiate data
     cv_topology = CvContainerTools(cv_connection=cv_client, ansible_module=ansible_module)
 
-    # Create topology
-    if ansible_module.params['state'] == 'present':
-        cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology)
-        MODULE_LOGGER.debug('Received response from Topology builder: %s', str(cv_response))
-        result['data'] = cv_response
-        result['changed'] = cv_response['changed']
-        # if cv_response['containers_created']['containers_created'] > 0 or cv_response['configlets_attached']['configlets_attached'] > 0:
-        #     result['data']['changed'] = True
-        # result['data']['creation_result'] = cv_response['containers_created']
-        # result['data']['configlet_attach_result'] = cv_response['configlets_attached']
-        # result['data']['taskIds'] += cv_response['taskIds']
-
-    elif ansible_module.params['state'] == 'absent':
-        cv_response = build_topology(cv_topology=cv_topology, user_topology=user_topology, present=False)
-        MODULE_LOGGER.debug(
-            'Received response from Topology builder: %s', str(cv_response))
-        result['data'] = cv_response
+    cv_response: CvAnsibleResponse = cv_topology.build_topology(user_topology=user_topology, present=state_present)
+    MODULE_LOGGER.debug(
+        'Received response from Topology builder: %s', str(cv_response))
+    result = cv_response.content
 
     ansible_module.exit_json(**result)

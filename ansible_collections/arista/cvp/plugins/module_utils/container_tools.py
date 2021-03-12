@@ -19,6 +19,7 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 
 import jsonschema
 __metaclass__ = type
@@ -27,7 +28,7 @@ import logging
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
     from cvprac.cvp_client import CvpClient
@@ -49,26 +50,156 @@ FIELD_PARENT_ID = 'parentContainerId'
 FIELD_NAME = 'name'
 FIELD_KEY = 'key'
 FIELD_TOPOLOGY = 'topology'
+FIELD_CONFIGLETS = 'configlets'
+
+
+class ContainerInput(object):
+    """
+    ContainerInput Object to manage Container Topology in context of arista.cvp collection.
+
+    [extended_summary]
+    """
+
+    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema: jsonschema = schema.SCHEMA_CV_CONTAINER):
+        self.___topology = user_topology
+        self.___parent_field: str = 'parent_container'
+        self.___root_name = container_root_name
+        self.___schema = schema
+
+    def __get_container_data(self, container_name: str, key_name: str):
+        """
+        _get_container_data Get a specific subset of data for a given container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container
+        key_name : str
+            Name of the key to extract
+
+        Returns
+        -------
+        Any
+            Value of the key. None if not found
+        """
+        MODULE_LOGGER.debug('Receive request to get data for container %s about its %s key', str(
+            container_name), str(key_name))
+        if container_name in self.___topology:
+            if key_name in self.___topology[container_name]:
+                MODULE_LOGGER.debug('  -> Found data for container %s: %s', str(
+                    container_name), str(self.___topology[container_name][key_name]))
+                return self.___topology[container_name][key_name]
+        return None
+
+    @property
+    def is_valid(self):
+        """
+        check_schemas Validate schemas for user's input
+        """
+        MODULE_LOGGER.info('start json schema validation')
+        if not schema.validate_cv_inputs(user_json=self.___topology, schema=self.___schema):
+            MODULE_LOGGER.error(
+                "Invalid configlet input : \n%s\n\n%s", str(self.___data), self.___schema)
+            return False
+        return True
+
+    @property
+    def ordered_list_containers(self):
+        """
+        ordered_list_containers List of container from root to the bottom
+
+        Returns
+        -------
+        list
+            List of containers
+        """
+        result_list = list()
+        MODULE_LOGGER.info(
+            "Build list of container to create from %s", str(self.___topology))
+        while(len(result_list) < len(self.___topology)):
+            for container in self.___topology:
+                if self.___topology[container][self.___parent_field] == self.___root_name:
+                    result_list.append(container)
+                if (any(element == self.___topology[container][self.___parent_field] for element in result_list)
+                        and container not in result_list):
+                    result_list.append(container)
+        MODULE_LOGGER.info(
+            'List of containers to apply on CV: %s', str(result_list))
+        return result_list
+
+    def get_parent(self, container_name: str, parent_key: str = 'parent_container'):
+        """
+        get_parent Expose name of parent container for the given container
+
+        Parameters
+        ----------
+        container_name : str
+            Container Name
+        parent_key : str, optional
+            Key to use for the parent container name, by default 'parent_container'
+
+        Returns
+        -------
+        str
+            Name of the parent container, None if not found
+        """
+        return self.__get_container_data(container_name=container_name, key_name=parent_key)
+
+    def get_configlets(self, container_name: str, configlet_key: str = FIELD_CONFIGLETS):
+        """
+        get_configlets Read and extract list of configlet names for a container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to search configlets
+        configlet_key : str, optional
+            Key where configlets are saved in inventory, by default 'configlets'
+
+        Returns
+        -------
+        list
+            List of configlet names
+        """
+        return self.__get_container_data(container_name=container_name, key_name=configlet_key)
+
+    def has_configlets(self, container_name: str, configlet_key: str = FIELD_CONFIGLETS):
+        """
+        has_configlets Test if container has configlets configured in inventory
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container
+        configlet_key : str, optional
+            Field name where configlets are defined, by default 'configlets'
+
+        Returns
+        -------
+        bool
+            True if configlets attached, False if not
+        """
+        if self.__get_container_data(container_name=container_name, key_name=configlet_key) is None:
+            return False
+        return True
 
 
 class CvContainerTools(object):
     """
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
-
-    [extended_summary]
     """
 
     def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule):
-        self._cvp_client = cv_connection
-        self._ansible = ansible_module
+        self.__cvp_client = cv_connection
+        self.__ansible = ansible_module
 
     #############################################
     ### Private functions
     #############################################
 
-    def _standard_output(self, source: dict):
+    def __standard_output(self, source: dict):
         """
-        _standard_output Filter dict to create a standard output with relevant leys
+        __standard_output Filter dict to create a standard output with relevant leys
 
         Parameters
         ----------
@@ -78,15 +209,15 @@ class CvContainerTools(object):
         Returns
         -------
         dict
-            Standard dict.
+            Standardized dict.
         """
         standard_keys = [FIELD_KEY, FIELD_NAME, FIELD_COUNT_CONTAINERS,
                          FIELD_COUNT_DEVICES, FIELD_PARENT_ID]
         return {k: v for k, v in source.items() if k in standard_keys}
 
-    def _get_attached_configlets(self, container_name: str):
+    def __get_attached_configlets(self, container_name: str):
         """
-        _get_attached_configlets Extract configlet information for all attached configlets to a container
+        __get_attached_configlets Extract configlet information for all attached configlets to a container
 
         Example
         -------
@@ -110,17 +241,17 @@ class CvContainerTools(object):
             List of dict {key:, name:} of attached configlets
         """
         list_configlet = list()
-        info = self._cvp_client.api.get_configlets_by_container_id(
+        info = self.__cvp_client.api.get_configlets_by_container_id(
             c_id=container_name)
         info = {k.lower(): v for k, v in info.items()}
         for attached_configlet in info['configletList']:
             list_configlet.append(
-                self._standard_output(source=attached_configlet))
+                self.__standard_output(source=attached_configlet))
         return list_configlet
 
-    def _get_all_configlets(self):
+    def __get_all_configlets(self):
         """
-        _get_all_configlets Extract information for all configlets
+        __get_all_configlets Extract information for all configlets
 
         Example
         -------
@@ -138,15 +269,15 @@ class CvContainerTools(object):
             List of dict {key:, name:} of attached configlets
         """
         result = list()
-        list_configlets = self._cvp_client.api.get_configlets()
+        list_configlets = self.__cvp_client.api.get_configlets()
         list_configlets = {k.lower(): v for k, v in list_configlets.items()}
         for configlet in list_configlets['data']:
-            result.append(self._standard_output(source=configlet))
+            result.append(self.__standard_output(source=configlet))
         return result
 
-    def _get_configlet_info(self, configlet_name: str):
+    def __get_configlet_info(self, configlet_name: str):
         """
-        _get_configlet_info Get information of a configlet from CV
+        __get_configlet_info Get information of a configlet from CV
 
         Example
 
@@ -166,14 +297,14 @@ class CvContainerTools(object):
         dict
             Configlet information in a filtered maner
         """
-        data = self._cvp_client.api.get_configlet_by_name(name=configlet_name)
+        data = self.__cvp_client.api.get_configlet_by_name(name=configlet_name)
         if data is not None:
-            return self._standard_output(source=data)
+            return self.__standard_output(source=data)
         return None
 
-    def _configlet_add(self, container: dict, configlets: list, save_topology: bool = True):
+    def __configlet_add(self, container: dict, configlets: list, save_topology: bool = True):
         """
-        _configlet_add Add a list of configlets to a container on CV
+        __configlet_add Add a list of configlets to a container on CV
 
         Only execute an API call to attach a list of configlets to a container.
         All configlets must be provided with information and not only name
@@ -212,14 +343,16 @@ class CvContainerTools(object):
             configlet_names = [entry.get('name')
                                for entry in configlets if entry.get('name')]
             change_response.name = container['name']+ ':' + ':'.join(configlet_names)
-            if self._ansible.check_mode:
+            if self.__ansible.check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
+                change_response.add_entry(
+                    container['name'] + ':' + ':'.join(configlet_names))
                 MODULE_LOGGER.warning(
                     '[check_mode] - Fake container creation of %s', str(container['name']))
             else:
                 try:
-                    resp = self._cvp_client.api.apply_configlets_to_container(
+                    resp = self.__cvp_client.api.apply_configlets_to_container(
                         app_name="ansible_cv_container",
                         new_configlets=configlets,
                         container=container,
@@ -238,9 +371,9 @@ class CvContainerTools(object):
 
         return change_response
 
-    def _configlet_del(self, container: dict, configlets: list, save_topology: bool = True):
+    def __configlet_del(self, container: dict, configlets: list, save_topology: bool = True):
         """
-        _configlet_del Remove a list of configlet from container in CV
+        __configlet_del Remove a list of configlet from container in CV
 
         Only execute an API call to reemove a list of configlets from a container.
         All configlets must be provided with information and not only name
@@ -274,12 +407,14 @@ class CvContainerTools(object):
         configlet_names = [entry.get('name')
                            for entry in configlets if entry.get('name')]
         change_response = CvApiResult(action_name=container['name'] + ':' + ':'.join(configlet_names))
-        if self._ansible.check_mode:
+        if self.__ansible.check_mode:
             change_response.success = True
             change_response.taskIds = ['check_mode']
+            change_response.add_entry(
+                container['name'] + ':' + ':'.join(configlet_names))
         else:
             try:
-                resp = self._cvp_client.api.remove_configlets_from_container(
+                resp = self.__cvp_client.api.remove_configlets_from_container(
                     app_name="ansible_cv_container",
                     del_configlets=configlets,
                     container=container,
@@ -330,15 +465,15 @@ class CvContainerTools(object):
         dict
             A standard dictionary with Key, Name, ParentID, Number of children and devices.
         """
-        cv_response = self._cvp_client.api.get_container_by_name(
+        cv_response = self.__cvp_client.api.get_container_by_name(
             name=container_name)
         MODULE_LOGGER.debug('Get container ID (%s) response from cv for container %s', str(cv_response), str(container_name))
         if cv_response is not None and FIELD_KEY in cv_response:
-            container_id = self._cvp_client.api.get_container_by_name(name=container_name)[
+            container_id = self.__cvp_client.api.get_container_by_name(name=container_name)[
                 FIELD_KEY]
-            container_facts = self._cvp_client.api.filter_topology(node_id=container_id)[
+            container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[
                 FIELD_TOPOLOGY]
-            return self._standard_output(source=container_facts)
+            return self.__standard_output(source=container_facts)
         return None
 
     def get_container_id(self, container_name: str):
@@ -359,7 +494,7 @@ class CvContainerTools(object):
         str
             Container ID sent by CV
         """
-        container_info = self._cvp_client.api.get_container_by_name(
+        container_info = self.__cvp_client.api.get_container_by_name(
             name=container_name)
         if FIELD_KEY in container_info:
             return container_info[FIELD_KEY]
@@ -414,7 +549,7 @@ class CvContainerTools(object):
             True if container exists, False if not
         """
         try:
-            cv_data = self._cvp_client.api.get_container_by_name(name=container_name)
+            cv_data = self.__cvp_client.api.get_container_by_name(name=container_name)
         except CvpApiError as error:
             MODULE_LOGGER.error('Error getting information for container %s: %s', str(container_name), str(error))
         if cv_data is not None:
@@ -453,16 +588,17 @@ class CvContainerTools(object):
         resp = dict()
         change_result = CvApiResult(action_name=container)
         if self.is_container_exists(container_name=parent):
-            parent_id = self._cvp_client.api.get_container_by_name(name=parent)[
+            parent_id = self.__cvp_client.api.get_container_by_name(name=parent)[
                 FIELD_KEY]
             MODULE_LOGGER.debug('Parent container (%s) for container %s exists', str(parent), str(container))
             if self.is_container_exists(container_name=container) is False:
-                if self._ansible.check_mode:
+                if self.__ansible.check_mode:
                     change_result.success = True
                     change_result.changed = True
+                    change_result.add_entry(container['name'])
                 else:
                     try:
-                        resp = self._cvp_client.api.add_container(
+                        resp = self.__cvp_client.api.add_container(
                             container_name=container, parent_key=parent_id, parent_name=parent)
                     except CvpApiError:
                         # Add Ansible error management
@@ -514,11 +650,13 @@ class CvContainerTools(object):
             # validation that attached containers would be removed in a       #
             # previous run of this function                                   #
             # ----------------------------------------------------------------#
-            if self._ansible.check_mode:
+            if self.__ansible.check_mode:
                 change_result.success = True
+                change_result.add_entry(container['name'])
+
             else:
                 try:
-                    resp = self._cvp_client.api.delete_container(
+                    resp = self.__cvp_client.api.delete_container(
                         container_name=container, container_key=container_id, parent_key=parent_id, parent_name=parent)
                 except CvpApiError:
                     # Add Ansible error management
@@ -563,10 +701,10 @@ class CvContainerTools(object):
         container_info = self.get_container_info(container_name=container)
         attach_configlets = list()
         for configlet in configlets:
-            data = self._get_configlet_info(configlet_name=configlet)
+            data = self.__get_configlet_info(configlet_name=configlet)
             if data is not None:
                 attach_configlets.append(data)
-        return self._configlet_add(container=container_info, configlets=attach_configlets)
+        return self.__configlet_add(container=container_info, configlets=attach_configlets)
 
     def configlets_detach(self, container: str, configlets: List[str], strict: bool = False):
         """
@@ -599,104 +737,67 @@ class CvContainerTools(object):
         container_info = self.get_container_info(container_name=container)
         detach_configlets = list()
         for configlet in configlets:
-            data = self._get_configlet_info(configlet_name=configlet)
+            data = self.__get_configlet_info(configlet_name=configlet)
             if data is not None:
                 detach_configlets.append(data)
-        return self._configlet_del(container=container_info, configlets=detach_configlets)
+        return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
-
-class ContainerInput(object):
-    """
-    ContainerInput Object to manage Container Topology in context of arista.cvp collection.
-
-    [extended_summary]
-    """
-    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema: jsonschema = schema.SCHEMA_CV_CONTAINER):
-        self.__topology = user_topology
-        self.__parent_field: str = 'parent_container'
-        self.__root_name = container_root_name
-        self.__schema = schema
-
-    # @property
-    # def is_valid(self):
-    #     """
-    #     check_schemas Validate schemas for user's input
-    #     """
-    #     if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
-    #         MODULE_LOGGER.error(
-    #             "Invalid configlet input : \n%s", str(self.__topology))
-    #         return False
-    #     return True
-
-    def _get_container_data(self, container_name: str, key_name: str):
+    def build_topology(self, user_topology: ContainerInput, present: bool = True):
         """
-        _get_container_data Get a specific subset of data for a given container
+        build_topology Class entry point to build container topology on Cloudvision
+
+        Run all actions to provision containers on Cloudvision:
+        - Create or delete containers
+        - Attach or detach configlets to containers
+
+        Creation or deleation is managed with present flag
 
         Parameters
         ----------
-        container_name : str
-            Name of the container
-        key_name : str
-            Name of the key to extract
+        user_topology : ContainerInput
+            User defined containers topology to build
+        present : bool, optional
+            Enable creation or deletion process, by default True
 
         Returns
         -------
-        Any
-            Value of the key. None if not found
+        CvAnsibleResponse
+            Formatted ansible response message
         """
-        MODULE_LOGGER.debug('Receive request to get data for container %s about its %s key', str(container_name), str(key_name))
-        if container_name in self.__topology:
-            if key_name in self.__topology[container_name]:
-                MODULE_LOGGER.debug('  -> Found data for container %s: %s', str(
-                    container_name), str(self.__topology[container_name][key_name]))
-                return self.__topology[container_name][key_name]
-        return None
+        response = CvAnsibleResponse()
+        container_add_manager = CvManagerResult(builder_name='container_added')
+        container_delete_manager = CvManagerResult(
+            builder_name='container_deleted')
+        configlet_attachment = CvManagerResult(
+            builder_name='configlet_attachmenet')
 
-    @property
-    def ordered_list_containers(self):
-        """
-        ordered_list_containers List of container from root to the bottom
+        # Create containers topology in Cloudvision
+        if present is True:
+            for user_container in user_topology.ordered_list_containers:
+                MODULE_LOGGER.info('Start creation process for container %s under %s', str(
+                    user_container), str(user_topology.get_parent(container_name=user_container)))
+                resp = self.create_container(
+                    container=user_container, parent=user_topology.get_parent(container_name=user_container))
+                container_add_manager.add_change(resp)
 
-        Returns
-        -------
-        list
-            List of containers
-        """
-        result_list = list()
-        MODULE_LOGGER.info(
-            "Build list of container to create from %s", str(self.__topology))
-        while(len(result_list) < len(self.__topology)):
-            for container in self.__topology:
-                if self.__topology[container][self.__parent_field] == self.__root_name:
-                    result_list.append(container)
-                if (any(element == self.__topology[container][self.__parent_field] for element in result_list)
-                        and container not in result_list):
-                    result_list.append(container)
-        MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
-        return result_list
+                if user_topology.has_configlets(container_name=user_container):
+                    resp = self.configlets_attach(
+                        container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
+                    configlet_attachment.add_change(resp)
 
-    def get_parent(self, container_name: str, parent_key: str = 'parent_container'):
-        """
-        get_parent Expose name of parent container for the given container
+        # Remove containers topology from Cloudvision
+        else:
+            for user_container in reversed(user_topology.ordered_list_containers):
+                MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
+                    user_container), str(user_topology.get_parent(container_name=user_container)))
+                resp = self.delete_container(
+                    container=user_container, parent=user_topology.get_parent(container_name=user_container))
+                container_delete_manager.add_change(resp)
 
-        Parameters
-        ----------
-        container_name : str
-            Container Name
-        parent_key : str, optional
-            Key to use for the parent container name, by default 'parent_container'
-
-        Returns
-        -------
-        str
-            Name of the parent container, None if not found
-        """
-        return self.__get_container_data(container_name=container_name, key_name=parent_key)
-
-    def get_configlets(self, container_name: str, configlet_key: str = 'configlets'):
-        return self.__get_container_data(container_name=container_name, key_name=configlet_key)
-
-    def has_configlets(self, container_name, configlet_key: str = 'configlets'):
-        if self.__get_container_data(container_name=container_name, key_name=configlet_key) is None:
-            return False
-        return True
+        # Create ansible message
+        response.add_manager(container_add_manager)
+        response.add_manager(container_delete_manager)
+        response.add_manager(configlet_attachment)
+        MODULE_LOGGER.debug(
+            'Container manager is sending result data: %s', str(response))
+        return response
