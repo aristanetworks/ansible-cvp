@@ -85,8 +85,6 @@ webdoc: ## Build documentation to publish static content
 	python ansible2rst.py ; \
 	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
-	cd $(CURRENT_DIR)
-	mkdocs build -f mkdocs.yml
 
 .PHONY: check-cvp-404
 check-cvp-404: ## Check local 404 links for AVD documentation

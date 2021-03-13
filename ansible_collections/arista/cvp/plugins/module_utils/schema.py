@@ -264,16 +264,16 @@ SCHEMA_CV_CONTAINER = {
     "examples": [
         {
             "DC2": {
-                "parent_container": "Tenant"
+                "parentContainerName": "Tenant"
             },
             "Leafs": {
-                "parent_container": "DC2"
+                "parentContainerName": "DC2"
             },
             "Spines": {
-                "parent_container": "DC2"
+                "parentContainerName": "DC2"
             },
             "POD01": {
-                "parent_container": "Leafs"
+                "parentContainerName": "Leafs"
             }
         }
     ],
@@ -283,8 +283,8 @@ SCHEMA_CV_CONTAINER = {
             "type": "object",
             "required": True,
             "properties": {
-                "parent_container": {
-                    "id": "parent_container",
+                "parentContainerName": {
+                    "id": "parentContainerName",
                     "type": "string",
                     "required": True
                 },

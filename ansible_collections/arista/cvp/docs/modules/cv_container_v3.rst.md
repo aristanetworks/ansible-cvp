@@ -12,7 +12,8 @@ Module added in version 2.9
 
 CloudVision Portal Configlet configuration requires a dictionary of
 containers with their parent, to create and delete containers on CVP
-side. Returns number of created and/or deleted containers
+side. Module also supports to configure configlets at container level.
+Returns number of created and/or deleted containers
 
 ## Module-specific Options
 
@@ -30,13 +31,13 @@ The following options may be specified for this module:
 </tr>
 
 <tr>
-<td>cvp_facts<br/><div style="font-size: small;"></div></td>
-<td>dict</td>
-<td>yes</td>
-<td></td>
-<td></td>
+<td>state<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>present</td>
+<td><ul><li>present</li><li>absent</li></ul></td>
 <td>
-    <div>Facts from CVP collected by cv_facts module</div>
+    <div>Set if ansible should build or remove devices on CLoudvision</div>
 </td>
 </tr>
 
@@ -64,9 +65,9 @@ The following options may be specified for this module:
         verbose: False
         containers:
             Fabric:
-                parent_container: Tenant
+                parentContainerName: Tenant
             Spines:
-                parent_container: Fabric
+                parentContainerName: Fabric
                 configlets:
                     - container_configlet
       tasks:
@@ -77,8 +78,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.

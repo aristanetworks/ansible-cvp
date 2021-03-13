@@ -69,7 +69,7 @@
   .md-typeset table:not([class]) th {
     min-width: 5rem;
     padding: .6rem .8rem;
-    color: var(--md-default-fg-color--lighter);
+    /* color: var(--md-default-fg-color--lighter); */
     vertical-align: top;
     background-color: var(--md-accent-bg-color);
   }

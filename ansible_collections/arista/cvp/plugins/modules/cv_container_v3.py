@@ -57,9 +57,9 @@ EXAMPLES = r'''
     verbose: False
     containers:
         Fabric:
-            parent_container: Tenant
+            parentContainerName: Tenant
         Spines:
-            parent_container: Fabric
+            parentContainerName: Fabric
             configlets:
                 - container_configlet
   tasks:
@@ -68,127 +68,127 @@ EXAMPLES = r'''
         topology: "{{CVP_CONTAINERS}}"
 '''
 
-RETURN = r'''
-taskIds:
-  description: List of tasks returned by Cloudvision
-  returned: On success
-  type: list
-  sample:
-    - '666'
-    - '667'
-configlet_attachmenet:
-  description: Information related to configlet add process
-  returned: On success
-  type: Complex
-  contains:
-    changed:
-      description: Flag to track if process has proceed to change Cloudvision
-      returned: success
-      type: bool
-    configlet_attachmenet_count:
-      description: Counter for number of containers impacted by configlet changes
-      returned: success
-      type: int
-    configlet_attachmenet_list:
-      description: List of containers with configlets
-      returned: success
-      type: list
-      sample:
-        - Spines:ASE_DEVICE-ALIASES
-    success:
-      description: Flag to track if process has succeeded
-      returned: success
-      type: bool
-    taskIds:
-      description: List of tasks returned by Cloudvision
-      returned: success
-      type: list
-      sample:
-        - 666
-        - 667
-container_added:
-  description: Information related to container creation process
-  returned: On success
-  type: Complex
-  sample:
-    container_added:
-      changed: false
-      container_added_count: 0
-      container_added_list: []
-      diff: {}
-      success: false
-      taskIds: []
-  contains:
-    changed:
-      description: Flag to track if process has proceed to change Cloudvision
-      returned: success
-      type: bool
-    container_added_count:
-      description: Counter for number of containers created
-      returned: success
-      type: int
-    container_added_lsit:
-      description: List of containers created
-      returned: success
-      type: list
-      sample:
-        - Spines
-        - Leaves
-        - Fabric
-    success:
-      description: Flag to track if process has succeeded
-      returned: success
-      type: bool
-    taskIds:
-      description: List of tasks returned by Cloudvision
-      returned: success
-      type: list
-      sample:
-        - 330
-        - 340
-        - 350
-container_deleted:
-  description: Information related to container deletion process
-  returned: On success
-  type: Complex
-  sample:
-    container_deleted:
-      changed: false
-      container_deleted_count: 0
-      container_deleted_list: []
-      diff: {}
-      success: false
-      taskIds: []
-  contains:
-    changed:
-      description: Flag to track if process has proceed to change Cloudvision
-      returned: success
-      type: bool
-    container_deleted_count:
-      description: Counter for number of containers deleted
-      returned: success
-      type: int
-    container_deleted_lsit:
-      description: List of containers deleted
-      returned: success
-      type: list
-      sample:
-        - Spines
-        - Leaves
-        - Fabric
-    success:
-      description: Flag to track if process has succeeded
-      returned: success
-      type: bool
-    taskIds:
-      description: List of tasks returned by Cloudvision
-      returned: success
-      type: list
-      sample:
-        - 330
-        - 340
-        - 350
-'''
+# RETURN = r'''
+# taskIds:
+#   description: List of tasks returned by Cloudvision
+#   returned: On success
+#   type: list
+#   sample:
+#     - '666'
+#     - '667'
+# configlet_attachmenet:
+#   description: Information related to configlet add process
+#   returned: On success
+#   type: Complex
+#   contains:
+#     changed:
+#       description: Flag to track if process has proceed to change Cloudvision
+#       returned: success
+#       type: bool
+#     configlet_attachmenet_count:
+#       description: Counter for number of containers impacted by configlet changes
+#       returned: success
+#       type: int
+#     configlet_attachmenet_list:
+#       description: List of containers with configlets
+#       returned: success
+#       type: list
+#       sample:
+#         - Spines:ASE_DEVICE-ALIASES
+#     success:
+#       description: Flag to track if process has succeeded
+#       returned: success
+#       type: bool
+#     taskIds:
+#       description: List of tasks returned by Cloudvision
+#       returned: success
+#       type: list
+#       sample:
+#         - 666
+#         - 667
+# container_added:
+#   description: Information related to container creation process
+#   returned: On success
+#   type: Complex
+#   sample:
+#     container_added:
+#       changed: false
+#       container_added_count: 0
+#       container_added_list: []
+#       diff: {}
+#       success: false
+#       taskIds: []
+#   contains:
+#     changed:
+#       description: Flag to track if process has proceed to change Cloudvision
+#       returned: success
+#       type: bool
+#     container_added_count:
+#       description: Counter for number of containers created
+#       returned: success
+#       type: int
+#     container_added_lsit:
+#       description: List of containers created
+#       returned: success
+#       type: list
+#       sample:
+#         - Spines
+#         - Leaves
+#         - Fabric
+#     success:
+#       description: Flag to track if process has succeeded
+#       returned: success
+#       type: bool
+#     taskIds:
+#       description: List of tasks returned by Cloudvision
+#       returned: success
+#       type: list
+#       sample:
+#         - 330
+#         - 340
+#         - 350
+# container_deleted:
+#   description: Information related to container deletion process
+#   returned: On success
+#   type: Complex
+#   sample:
+#     container_deleted:
+#       changed: false
+#       container_deleted_count: 0
+#       container_deleted_list: []
+#       diff: {}
+#       success: false
+#       taskIds: []
+#   contains:
+#     changed:
+#       description: Flag to track if process has proceed to change Cloudvision
+#       returned: success
+#       type: bool
+#     container_deleted_count:
+#       description: Counter for number of containers deleted
+#       returned: success
+#       type: int
+#     container_deleted_lsit:
+#       description: List of containers deleted
+#       returned: success
+#       type: list
+#       sample:
+#         - Spines
+#         - Leaves
+#         - Fabric
+#     success:
+#       description: Flag to track if process has succeeded
+#       returned: success
+#       type: bool
+#     taskIds:
+#       description: List of tasks returned by Cloudvision
+#       returned: success
+#       type: list
+#       sample:
+#         - 330
+#         - 340
+#         - 350
+# '''
 
 import logging
 import traceback

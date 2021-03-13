@@ -10,13 +10,7 @@ Module added in version 2.9
 
 ## Synopsis
 
-C l o u d V i s o n
-
-P o r t a l
-
-T a s k
-
-m o d u l e
+CloudVison Portal Task module to action pending tasks on CLoudvision
 
 ## Module-specific Options
 
@@ -55,17 +49,6 @@ The following options may be specified for this module:
 </td>
 </tr>
 
-<tr>
-<td>wait<br/><div style="font-size: small;"></div></td>
-<td>int</td>
-<td>no</td>
-<td>0</td>
-<td></td>
-<td>
-    <div>Time to wait for tasks to transition to &#x27;Completed&#x27;</div>
-</td>
-</tr>
-
 </table>
 </br>
 
@@ -74,23 +57,12 @@ The following options may be specified for this module:
     ---
     - name: Execute all tasks registered in cvp_configlets variable
       arista.cvp.cv_task:
-        tasks: "{{ cvp_configlets.data.tasks }}"
+        tasks: "{{ cvp_configlets.taskIds }}"
 
     - name: Cancel a list of pending tasks
       arista.cvp.cv_task:
-        tasks: "{{ cvp_configlets.data.tasks }}"
+        tasks: "{{ cvp_configlets.taskIds }}"
         state: cancelled
-
-    # Execute all pending tasks and wait for completion for 60 seconds
-    # In order to get a list of all pending tasks, execute cv_facts first
-    - name: Update cvp facts
-      arista.cvp.cv_facts:
-
-    - name: Execute all pending tasks and wait for completion for 60 seconds
-      arista.cvp.cv_task:
-        port: '{{cvp_port}}'
-        tasks: "{{ tasks }}"
-        wait: 60
 
 ### Author
 

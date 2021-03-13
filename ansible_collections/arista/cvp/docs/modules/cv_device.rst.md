@@ -122,7 +122,7 @@ The following options may be specified for this module:
           register: cvp_facts
           tags:
             - always
-    
+
         - name: "Configure devices on {{inventory_hostname}}"
           tags:
             - provision
@@ -131,7 +131,7 @@ The following options may be specified for this module:
             cvp_facts: '{{cvp_facts.ansible_facts}}'
             device_filter: ['veos']
           register: cvp_device
-    
+
         - name: "Add configlet to device on {{inventory_hostname}}"
           tags:
             - provision
@@ -145,8 +145,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.

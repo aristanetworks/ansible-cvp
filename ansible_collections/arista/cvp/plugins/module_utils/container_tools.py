@@ -47,6 +47,7 @@ MODULE_LOGGER.info('Start cv_container_v3 module execution')
 FIELD_COUNT_DEVICES = 'childNetElementCount'
 FIELD_COUNT_CONTAINERS = 'childContainerCount'
 FIELD_PARENT_ID = 'parentContainerId'
+FIELD_PARENT_NAME = 'parentContainerName'
 FIELD_NAME = 'name'
 FIELD_KEY = 'key'
 FIELD_TOPOLOGY = 'topology'
@@ -61,10 +62,10 @@ class ContainerInput(object):
     """
 
     def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema: jsonschema = schema.SCHEMA_CV_CONTAINER):
-        self.___topology = user_topology
-        self.___parent_field: str = 'parent_container'
-        self.___root_name = container_root_name
-        self.___schema = schema
+        self.__topology = user_topology
+        self.__parent_field: str = FIELD_PARENT_NAME
+        self.__root_name = container_root_name
+        self.__schema = schema
 
     def __get_container_data(self, container_name: str, key_name: str):
         """
@@ -84,11 +85,11 @@ class ContainerInput(object):
         """
         MODULE_LOGGER.debug('Receive request to get data for container %s about its %s key', str(
             container_name), str(key_name))
-        if container_name in self.___topology:
-            if key_name in self.___topology[container_name]:
+        if container_name in self.__topology:
+            if key_name in self.__topology[container_name]:
                 MODULE_LOGGER.debug('  -> Found data for container %s: %s', str(
-                    container_name), str(self.___topology[container_name][key_name]))
-                return self.___topology[container_name][key_name]
+                    container_name), str(self.__topology[container_name][key_name]))
+                return self.__topology[container_name][key_name]
         return None
 
     @property
@@ -97,9 +98,9 @@ class ContainerInput(object):
         check_schemas Validate schemas for user's input
         """
         MODULE_LOGGER.info('start json schema validation')
-        if not schema.validate_cv_inputs(user_json=self.___topology, schema=self.___schema):
+        if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
             MODULE_LOGGER.error(
-                "Invalid configlet input : \n%s\n\n%s", str(self.___data), self.___schema)
+                "Invalid configlet input : \n%s\n\n%s", str(self.__topology), self.__schema)
             return False
         return True
 
@@ -115,12 +116,12 @@ class ContainerInput(object):
         """
         result_list = list()
         MODULE_LOGGER.info(
-            "Build list of container to create from %s", str(self.___topology))
-        while(len(result_list) < len(self.___topology)):
-            for container in self.___topology:
-                if self.___topology[container][self.___parent_field] == self.___root_name:
+            "Build list of container to create from %s", str(self.__topology))
+        while(len(result_list) < len(self.__topology)):
+            for container in self.__topology:
+                if self.__topology[container][self.__parent_field] == self.__root_name:
                     result_list.append(container)
-                if (any(element == self.___topology[container][self.___parent_field] for element in result_list)
+                if (any(element == self.__topology[container][self.__parent_field] for element in result_list)
                         and container not in result_list):
                     result_list.append(container)
         MODULE_LOGGER.info(

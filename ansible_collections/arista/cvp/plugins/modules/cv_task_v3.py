@@ -30,7 +30,8 @@ module: cv_task
 version_added: "2.9"
 author: EMEA AS Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
-description: CloudVison Portal Task module
+description:
+  - CloudVison Portal Task module to action pending tasks on CLoudvision
 options:
   tasks:
     description: CVP taskIDs to act on

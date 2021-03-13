@@ -79,8 +79,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.
