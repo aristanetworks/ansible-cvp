@@ -46,13 +46,15 @@ def CvResponse_Manager(request):
 @pytest.mark.usefixtures("CvResponse_Manager")
 @pytest.mark.generic
 class TestCvReponseAction():
-    def test_api_result_creation(self, api_action_name):
-        api_result = CvApiResult(action_name=api_action_name)
-        assert api_result.name == api_action_name
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_result_creation(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
+        assert api_result.name == api_results_name
 
     @pytest.mark.generic
-    def test_api_flags(self):
-        api_result = CvApiResult(action_name='TEST_FLAG')
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_flags(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
         assert api_result.changed is False
         assert api_result.success is False
         api_result.success = True
@@ -63,8 +65,9 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    def test_api_add_action(self):
-        api_result = CvApiResult(action_name='TEST')
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_add_action(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
         assert api_result.count == 0
         api_result.add_entry(entry='action1')
         assert api_result.count == 1
@@ -76,8 +79,9 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    def test_api_add_actions(self):
-        api_result = CvApiResult(action_name='TEST')
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_add_actions(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
         assert api_result.count == 0
         api_result.add_entries(entries=['action1', 'action2'])
         assert api_result.count == 2
@@ -85,8 +89,9 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    def test_api_get_actions(self):
-        api_result = CvApiResult(action_name='TEST')
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_get_actions(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
         api_result.add_entries(entries=['action1', 'action2'])
         api_result.add_entry(entry='action3')
         assert len(api_result.list_changes) == 3
@@ -96,16 +101,17 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    def test_api_get_results(self):
-        api_result = CvApiResult(action_name='TEST')
+    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    def test_api_get_results(self, api_results_name):
+        api_result = CvApiResult(action_name=api_results_name)
         api_result.success = True
         api_result.changed = True
         api_result.add_entries(entries=['action1', 'action2'])
         api_result.add_entry(entry='action3')
         assert api_result.results['success']
         assert api_result.results['changed']
-        assert api_result.results['TEST_count'] == 3
-        assert len(api_result.results['TEST_list']) == 3
+        assert api_result.results[api_results_name+'_count'] == 3
+        assert len(api_result.results[api_results_name+'_list']) == 3
         logging.info('API strct result is {}'.format(api_result.results))
 
 @pytest.mark.usefixtures("CvResponse_Manager")
