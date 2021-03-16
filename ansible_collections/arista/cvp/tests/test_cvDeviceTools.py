@@ -1,13 +1,19 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
-
+# pylint: disable=logging-format-interpolation
+# pylint: disable=dangerous-default-value
+# flake8: noqa: W503
+# flake8: noqa: W1202
 
 from __future__ import (absolute_import, division, print_function)
+import pytest
+import logging
+from datetime import datetime
 import sys
 sys.path.append("../../../../")
 from cvprac.cvp_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME
 # from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
 
 # Hack to silent SSL warning
@@ -16,7 +22,7 @@ import requests.packages.urllib3
 ssl._create_default_https_context = ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
 
-CVP_DEVICES_INITIAL = [
+CVP_DEVICES = [
     {
         "fqdn": "CV-ANSIBLE-EOS01",
         "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
@@ -29,153 +35,237 @@ CVP_DEVICES_INITIAL = [
         "imageBundle": []
     }
 ]
-
-CVP_DEVICES_MOVE = [
+CVP_DEVICES_UNKNOWN = [
     {
-        "fqdn": "CV-ANSIBLE-EOS01",
+        "fqdn": "CV-ANSIBLE-TEST01",
         "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
         "systemMacAddress": "50:8d:00:e3:78:aa",
-        "parentContainerName": "ANSIBLE2",
+        "parentContainerName": "ANSIBLE",
         "configlets": [
                 "01TRAINING-01",
                 "CV-EOS-ANSIBLE01"
         ],
         "imageBundle": []
-    }
-]
-
-CVP_DEVICES_DEPLOY = [
+    },
     {
-        "fqdn": "CV-ANSIBLE-EOS02",
-        "serialNumber": "",
-        "systemMacAddress": "50:8d:00:91:64:59",
+        "fqdn": "TEST",
+        "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
+        "systemMacAddress": "50:8d:00:e3:78:aa",
         "parentContainerName": "ANSIBLE",
-        "configlets": [
-                "01TRAINING-01",
-                "CV-EOS-ANSIBLE02"
-        ]
     }
 ]
 
-# Get Data:
-# curl - X GET - -header 'Accept: application/json' '\
-# https://x.x.x.x/cvpservice/provisioning/searchTopology.do?queryParam=CV-ANSIBLE-EOS01&startIndex=0&endIndex=0'
-DEVICE_NAME = 'DC1-SPINE1.eve.emea.lab'
-DEVICE_CONTAINER = 'DC1_SPINES'
-DEVICE_ID = '0c:1d:c0:a3:86:f3'
-CONTAINER_ID = 'container_fd431ab2-25bb-4281-8bcc-c7249f55241b'
 
 CHECK_MODE = True
+
+# Generic helpers
+
+def time_log():
+    now = datetime.now()
+    return now.strftime('%H:%M:%S.%f')
+
+# ---------------------------------------------------------------------------- #
+#   PARAMETRIZE Management
+# ---------------------------------------------------------------------------- #
+
+
+def get_devices():
+    return CVP_DEVICES
+
+def get_devices_unknown():
+    return CVP_DEVICES_UNKNOWN
+
+def get_devices_to_move():
+    to_move = list()
+    for entry in CVP_DEVICES:
+        if FIELD_PARENT_NAME in entry:
+            entry[FIELD_PARENT_NAME] = 'ANSIBLE2'
+        to_move.append(entry)
+    return to_move
+
+# ---------------------------------------------------------------------------- #
+#   FIXTURES Management
+# ---------------------------------------------------------------------------- #
 
 def cvp_login():
     requests.packages.urllib3.disable_warnings()
     cvp_client = CvpClient()
+    logging.info('Start CV login process at {}'.format(time_log()))
     cvp_client.connect(
         nodes=['10.83.28.164'],
         username='ansible',
         password='interdata'
     )
+    logging.info('End of CV login process at {}'.format(time_log()))
+    logging.info('Connected to CVP')
     return cvp_client
 
-CVP_CLIENT = cvp_login()
 
-def test_create_object():
-    # inventory = DeviceInventory(data=CVP_DEVICES)
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)  # noqa # pylint: disable=unused-variable
+@pytest.fixture(scope="class")
+def CvDeviceTools_Manager(request):
+    logging.info("Execute fixture to create class elements")
+    request.cls.cvp = cvp_login()
+    request.cls.inventory = CvDeviceTools(cv_connection=request.cls.cvp)
 
-def test_search_by_getter_setter():
-    # inventory = DeviceInventory(data=CVP_DEVICES)
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    assert cv_devices.search_by == FIELD_FQDN
-    cv_devices.search_by = FIELD_SYSMAC
-    assert cv_devices.search_by == FIELD_SYSMAC
+# ---------------------------------------------------------------------------- #
+#   PYTEST
+# ---------------------------------------------------------------------------- #
 
-def test_is_device_exists_by_fqdn():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    assert cv_devices.is_device_exist(device_lookup=DEVICE_NAME) is True
+@pytest.mark.usefixtures("CvDeviceTools_Manager")
+@pytest.mark.parametrize('CV_DEVICE', get_devices())
+class TestCvDeviceTools():
 
-def test_device_is_not_present():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    assert cv_devices.is_device_exist(device_lookup='test') is False
+    # def teardown(self):
+    #     # Sleep between test method in current class
+    #     # Set to 30 seconds
+    #     time.sleep(5)
 
-def test_device_in_container():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    assert cv_devices.is_in_container(
-        device_lookup=DEVICE_NAME, container_name=DEVICE_CONTAINER)
+    def test_cvp_connection(self, CV_DEVICE):
+        assert True
+        logging.info('Connected to CVP')
 
-def test_device_not_in_container():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    assert cv_devices.is_in_container(
-        device_lookup=DEVICE_NAME, container_name='DC12_SPINES') is False
+    @pytest.mark.api
+    def test_search_by_getter_setter(self, CV_DEVICE):
+        self.inventory.search_by = FIELD_SYSMAC
+        assert self.inventory.search_by == FIELD_SYSMAC
+        logging.info('Setter & Getter for search_by using {} is valid'.format(FIELD_SYSMAC))
+        self.inventory.search_by = FIELD_FQDN
+        assert self.inventory.search_by == FIELD_FQDN
+        logging.info(
+            'Setter & Getter for search_by using {} is valid'.format(FIELD_FQDN))
 
-def test_device_facts_default():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    device_facts = cv_devices.get_device_facts(device_lookup=DEVICE_NAME)
-    assert device_facts is not None
-    assert FIELD_FQDN in device_facts
-    assert device_facts[FIELD_FQDN] == DEVICE_NAME
-
-def test_get_device_id():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    device_facts = cv_devices.get_device_id(device_lookup=DEVICE_NAME)
-    assert device_facts is not None
-    assert device_facts == DEVICE_ID
-
-def test_get_configlets():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    configlets = cv_devices.get_device_configlets(device_lookup=DEVICE_NAME)
-    assert configlets is not None
-
-def test_container_id():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    user_inventory = DeviceInventory(data=CVP_DEVICES_INITIAL)
-    result = cv_devices.get_container_info(container_name=user_inventory.devices[0].container)
-    assert result[FIELD_ID] == CONTAINER_ID
-
-def test_device_move():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    user_inventory = DeviceInventory(data=CVP_DEVICES_MOVE)
-    resp = cv_devices.move_device(user_inventory=user_inventory)
-    assert resp[0].results['success']
-    assert resp[0].results['changed']
-    assert len(resp[0].results['taskIds']) > 0
-    assert int(resp[0].count) > 0
-
-def test_configlet_apply():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    user_inventory = DeviceInventory(data=CVP_DEVICES_INITIAL)
-    resp = cv_devices.apply_configlets(user_inventory=user_inventory)
-    assert resp[0].results['success']
-    assert resp[0].results['changed']
-    assert int(resp[0].count) > 0
-
-def test_device_deploy():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    user_inventory = DeviceInventory(data=CVP_DEVICES_DEPLOY)
-    resp = cv_devices.deploy_device(user_inventory=user_inventory)
-    assert resp[0].results['success']
-    assert resp[0].results['changed']
-    print('DEPLOYED configlet response is: {}'.format(resp[0].results))
+    @pytest.mark.api
+    def test_is_device_exists_by_fqdn(self, CV_DEVICE):
+        logging.info('Search device {} in Cloudvision'.format(CV_DEVICE[FIELD_FQDN]))
+        logging.info('Start CV query at {}'.format(time_log()))
+        requests.packages.urllib3.disable_warnings()
+        assert self.inventory.is_device_exist(device_lookup=CV_DEVICE[FIELD_FQDN]) is True
+        logging.info('End of CV query at {}'.format(time_log()))
+        logging.info('Device {} is present in Cloudvision'.format(CV_DEVICE[FIELD_FQDN]))
 
 
-def test_device_manager():
-    requests.packages.urllib3.disable_warnings()
-    cv_devices = CvDeviceTools(cv_connection=CVP_CLIENT, check_mode=CHECK_MODE)
-    user_inventory = DeviceInventory(data=CVP_DEVICES_INITIAL)
-    resp = cv_devices.manager(user_inventory=user_inventory)
-    # assert resp.results['success']
-    # assert resp.results['changed']
-    # assert 'device_deployed_count' in resp.results and int(
-    #     resp.results['device_deployed_count']) > 0
-    print('MANAGER response is: {}'.format(resp))
+    @pytest.mark.api
+    @pytest.mark.parametrize('CV_DEVICE_UNKNOWN', get_devices_unknown())
+    def test_device_is_not_present(self, CV_DEVICE, CV_DEVICE_UNKNOWN):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        assert self.inventory.is_device_exist(device_lookup=CV_DEVICE_UNKNOWN[FIELD_FQDN]) is False
+        logging.info('End of CV query at {}'.format(time_log()))
+        logging.info('Device {} is not present on Cloudvision'.format(CV_DEVICE_UNKNOWN[FIELD_FQDN]))
+
+
+    @pytest.mark.api
+    def test_device_in_container(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        assert self.inventory.is_in_container(
+            device_lookup=CV_DEVICE[FIELD_FQDN], container_name=CV_DEVICE[FIELD_PARENT_NAME])
+        logging.info('End of CV query at {}'.format(time_log()))
+        logging.info('Device {} is correctly configured under {}'.format(CV_DEVICE[FIELD_FQDN], CV_DEVICE[FIELD_PARENT_NAME]))
+
+    @pytest.mark.api
+    @pytest.mark.parametrize('CV_DEVICE_UNKNOWN', get_devices_unknown())
+    def test_device_not_in_container(self, CV_DEVICE, CV_DEVICE_UNKNOWN):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        assert self.inventory.is_in_container(
+            device_lookup=CV_DEVICE[FIELD_FQDN], container_name=CV_DEVICE_UNKNOWN[FIELD_FQDN]) is False
+        logging.info('End of CV query at {}'.format(time_log()))
+
+    @pytest.mark.api
+    def test_device_facts_default(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        device_facts = self.inventory.get_device_facts(device_lookup=CV_DEVICE[FIELD_FQDN])
+        logging.info('End of CV query at {}'.format(time_log()))
+        assert device_facts is not None
+        assert FIELD_FQDN in device_facts
+        assert device_facts[FIELD_FQDN] == CV_DEVICE[FIELD_FQDN]
+        logging.info('Facts for device {} are correct: {}'.format(CV_DEVICE[FIELD_FQDN], device_facts))
+
+
+    @pytest.mark.api
+    def test_get_device_id(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        device_facts = self.inventory.get_device_id(device_lookup=CV_DEVICE[FIELD_FQDN])
+        logging.info('End of CV query at {}'.format(time_log()))
+        assert device_facts is not None
+        assert device_facts == CV_DEVICE[FIELD_SYSMAC]
+        logging.info('Device {} has ID: {}'.format(
+            CV_DEVICE[FIELD_FQDN], device_facts))
+
+    @pytest.mark.api
+    def test_get_configlets(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        logging.info('Start CV query at {}'.format(time_log()))
+        configlets = self.inventory.get_device_configlets(device_lookup=CV_DEVICE[FIELD_FQDN])
+        logging.info('End of CV query at {}'.format(time_log()))
+        assert configlets is not None
+
+
+    @pytest.mark.api
+    def test_container_id(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        user_inventory = DeviceInventory(data=[CV_DEVICE])
+        logging.info('Start CV query at {}'.format(time_log()))
+        result = self.inventory.get_container_info(
+            container_name=user_inventory.devices[0].container)
+        logging.info('End of CV query at {}'.format(time_log()))
+        assert result[FIELD_ID] == self.cvp.api.get_container_by_name(CV_DEVICE[FIELD_PARENT_NAME])[FIELD_ID]
+
+
+    @pytest.mark.create
+    @pytest.mark.parametrize('CV_DEVICE_MOVE', get_devices_to_move())
+    def test_device_move(self, CV_DEVICE, CV_DEVICE_MOVE):
+        requests.packages.urllib3.disable_warnings()
+        logging.critical('{}'.format(CV_DEVICE_MOVE))
+        user_inventory = DeviceInventory(data=[CV_DEVICE_MOVE])
+        logging.info('Start CV query at {}'.format(time_log()))
+        resp = self.inventory.move_device(user_inventory=user_inventory)
+        logging.info('End of CV query at {}'.format(time_log()))
+        if resp[0].results['success']:
+            assert resp[0].results['success']
+            assert resp[0].results['changed']
+            assert len(resp[0].results['taskIds']) > 0
+            assert int(resp[0].count) > 0
+            logging.info('Move device {} to {} with result: {}'.format(
+                CV_DEVICE_MOVE[FIELD_FQDN], CV_DEVICE_MOVE[FIELD_PARENT_NAME], resp[0].results))
+        else:
+            pytest.skip("NOT TESTED as device is already in correct container")
+
+    @pytest.mark.create
+    def test_configlet_apply(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        user_inventory = DeviceInventory(data=[CV_DEVICE])
+        logging.info('Start CV query at {}'.format(time_log()))
+        resp = self.inventory.apply_configlets(user_inventory=user_inventory)
+        logging.info('End of CV query at {}'.format(time_log()))
+        assert resp[0].results['success']
+        assert resp[0].results['changed']
+        assert int(resp[0].count) > 0
+
+    @pytest.mark.skip(reason="No test environment to support test")
+    @pytest.mark.create
+    @pytest.mark.parametrize('CV_DEVICE_MOVE', get_devices_to_move())
+    def test_device_deploy(self, CV_DEVICE, CV_DEVICE_MOVE):
+        requests.packages.urllib3.disable_warnings()
+        user_inventory = DeviceInventory(data=[CV_DEVICE_MOVE])
+        resp = self.inventory.deploy_device(user_inventory=user_inventory)
+        assert resp[0].results['success']
+        assert resp[0].results['changed']
+        print('DEPLOYED configlet response is: {}'.format(resp[0].results))
+
+    @pytest.mark.create
+    @pytest.mark.skip(reason="No test environment to support test")
+    def test_device_manager(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        user_inventory = DeviceInventory(data=CV_DEVICE[FIELD_FQDN])
+        logging.info('Start CV query at {}'.format(time_log()))
+        resp = self.inventory.manager(user_inventory=user_inventory)
+        logging.info('End of CV query at {}'.format(time_log()))
+        # assert resp.results['success']
+        # assert resp.results['changed']
+        # assert 'device_deployed_count' in resp.results and int(
+        #     resp.results['device_deployed_count']) > 0
+        logging.info('MANAGER response is: {}'.format(resp))
