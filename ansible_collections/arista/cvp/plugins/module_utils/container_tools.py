@@ -19,6 +19,8 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
+
+from cvprac.cvp_client_errors import CvpClientError
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 
 import jsonschema
@@ -128,7 +130,7 @@ class ContainerInput(object):
             'List of containers to apply on CV: %s', str(result_list))
         return result_list
 
-    def get_parent(self, container_name: str, parent_key: str = 'parent_container'):
+    def get_parent(self, container_name: str, parent_key: str = FIELD_PARENT_NAME):
         """
         get_parent Expose name of parent container for the given container
 
@@ -190,9 +192,10 @@ class CvContainerTools(object):
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
     """
 
-    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule):
+    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None, check_mode: bool = False):
         self.__cvp_client = cv_connection
         self.__ansible = ansible_module
+        self.__check_mode = ansible_module.check_mode if ansible_module is not None else check_mode
 
     #############################################
     ### Private functions
@@ -344,7 +347,7 @@ class CvContainerTools(object):
             configlet_names = [entry.get('name')
                                for entry in configlets if entry.get('name')]
             change_response.name = container['name']+ ':' + ':'.join(configlet_names)
-            if self.__ansible.check_mode:
+            if self.__check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
                 change_response.add_entry(
@@ -408,7 +411,7 @@ class CvContainerTools(object):
         configlet_names = [entry.get('name')
                            for entry in configlets if entry.get('name')]
         change_response = CvApiResult(action_name=container['name'] + ':' + ':'.join(configlet_names))
-        if self.__ansible.check_mode:
+        if self.__check_mode:
             change_response.success = True
             change_response.taskIds = ['check_mode']
             change_response.add_entry(
@@ -551,8 +554,9 @@ class CvContainerTools(object):
         """
         try:
             cv_data = self.__cvp_client.api.get_container_by_name(name=container_name)
-        except CvpApiError as error:
+        except (CvpApiError, CvpClientError) as error:
             MODULE_LOGGER.error('Error getting information for container %s: %s', str(container_name), str(error))
+            return True
         if cv_data is not None:
             return True
         return False
@@ -593,7 +597,7 @@ class CvContainerTools(object):
                 FIELD_KEY]
             MODULE_LOGGER.debug('Parent container (%s) for container %s exists', str(parent), str(container))
             if self.is_container_exists(container_name=container) is False:
-                if self.__ansible.check_mode:
+                if self.__check_mode:
                     change_result.success = True
                     change_result.changed = True
                     change_result.add_entry(container['name'])
@@ -652,7 +656,7 @@ class CvContainerTools(object):
             # validation that attached containers would be removed in a       #
             # previous run of this function                                   #
             # ----------------------------------------------------------------#
-            if self.__ansible.check_mode:
+            if self.__check_mode:
                 change_result.success = True
                 change_result.add_entry(container['name'])
 
