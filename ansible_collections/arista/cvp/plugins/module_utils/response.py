@@ -323,7 +323,8 @@ class CvManagerResult():
         """
         MODULE_LOGGER.debug('receive add_change with %s', str(change.results))
         if change.success:
-            self.__success = change.success
+            if change.success:
+                self.__success = change.success
             if self.__changed is not True:
                 self.__changed = change.changed
             self.__taskIds += change.taskIds
@@ -464,7 +465,8 @@ class CvAnsibleResponse():
             Api Manager with information to display by Ansible
         """
         self.data[api_manager.name] = api_manager.changes
-        self.success = api_manager.success
+        if api_manager.success:
+            self.success = api_manager.success
         if self.changed is False:
             self.changed = api_manager.changed
         for task in api_manager.changes[FIELD_TASKIDS]:
