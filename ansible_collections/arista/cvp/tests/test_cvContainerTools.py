@@ -7,7 +7,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 from datetime import datetime
-import time
 import sys
 import logging
 import pytest
@@ -207,10 +206,10 @@ class TestCvContainerTools():
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 class TestCvContainerToolsTopology():
 
-    def teardown(self):
-        # Sleep between test method in current class
-        # Set to 30 seconds
-        time.sleep(30)
+    # def teardown(self):
+    #     # Sleep between test method in current class
+    #     # Set to 30 seconds
+    #     time.sleep(30)
 
     def test_cv_connection(self):
         logging.debug(str('Class is connected to CV'))
