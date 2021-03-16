@@ -31,8 +31,8 @@ nav:
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
-    - Get Facts: docs/how-to/cv_facts.md
     - Version v1:
+      - Get Facts: docs/how-to/cv_facts.md
       - Manage configlets: docs/how-to/v1/cv_configlet.md
       - Manage containers: docs/how-to/v1/cv_container.md
       - Manage devices: docs/how-to/v1/cv_device.md
