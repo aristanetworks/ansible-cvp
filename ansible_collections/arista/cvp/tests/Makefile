@@ -1,12 +1,42 @@
 CURRENT_DIR = $(shell pwd)
-TAG ?= 'not delete and not create'
-TEST ?= unit
-REPORT = --html=report.html --self-contained-html --cov=ansible_collections.arista.cvp.plugins.module_utils.container_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.configlet_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.generic_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.device_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.response  --cov=ansible_collections.arista.cvp.plugins.module_utils.schema --cov-report=html --color yes
+TAG ?= -m 'not delete and not create'
+TEST_PATH ?= unit
+TEST_OPT = -v --cov-report term:skip-covered
+REPORT = -v --html=report.html --self-contained-html --cov-report=html --color yes
+COVERAGE = --cov=ansible_collections.arista.cvp.plugins.module_utils.container_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.configlet_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.generic_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.device_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.response  --cov=ansible_collections.arista.cvp.plugins.module_utils.schema
+
+AUTH_CONFIG_FILE = $(TEST_PATH)/config.py
+
+define AUTH_CONFIG
+#!/usr/bin/python
+# coding: utf-8 -*-
+
+username = "ansible"
+password = "ansible"
+server = "cv-server-ip"
+endef
+export AUTH_CONFIG
 
 .PHONY: test
-test:  ## Run Pytest in verbose mode with CLI report only
-	pytest -v -m $(TAG) $(TEST)
+test:  ## Run Pytest in verbose mode with CLI report only for basic tests
+	pytest $(TEST_OPT) $(COVERAGE) $(TAG) $(TEST_PATH)
+
+.PHONY: test-all
+test-all:  ## Run Pytest in verbose mode with CLI report only for all tests
+	pytest $(TEST_OPT) $(COVERAGE) $(TEST_PATH)
 
 .PHONY: report
 report:  ## Run Pytest and generate HTML report + code coverage
-	pytest $(REPORT) -m $(TAG) $(TEST)
+	pytest $(REPORT) $(COVERAGE) $(TAG) $(TEST_PATH)
+
+.PHONY: report-all
+report-all:  ## Run Pytest and generate HTML report + code coverage
+	pytest $(REPORT) $(COVERAGE) $(TEST_PATH)
+
+
+.PHONY: config.py
+config.py:  ## Generate Auth Configuration file
+	@echo "Generate config.py for Cloudvision auth"
+	@echo "$$AUTH_CONFIG" > $(AUTH_CONFIG_FILE)
+	@echo "---"
+	@echo "Update unit/config.py with your credentials"

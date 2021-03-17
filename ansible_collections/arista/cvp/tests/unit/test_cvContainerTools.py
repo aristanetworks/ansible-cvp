@@ -11,9 +11,11 @@ import sys
 import logging
 import pytest
 sys.path.append("../../../../")
+sys.path.append(".")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from cvprac.cvp_client import CvpClient
 import requests
+import config
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
 
@@ -63,9 +65,9 @@ def cvp_login():
     logging.info('Start CV login process at {}'.format(time_log()))
     cvp_client = CvpClient()
     cvp_client.connect(
-        nodes=['10.83.28.164'],
-        username='ansible',
-        password='interdata'
+        nodes=[config.server],
+        username=config.username,
+        password=config.password
     )
     logging.info('End of CV login process at {}'.format(time_log()))
     logging.info('Connected to CVP')

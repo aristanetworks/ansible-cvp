@@ -11,10 +11,12 @@ import logging
 from datetime import datetime
 import sys
 sys.path.append("../../../../")
+sys.path.append(".")
 from cvprac.cvp_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME
 # from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
+import config
 
 # Hack to silent SSL warning
 import ssl
@@ -92,9 +94,9 @@ def cvp_login():
     cvp_client = CvpClient()
     logging.info('Start CV login process at {}'.format(time_log()))
     cvp_client.connect(
-        nodes=['10.83.28.164'],
-        username='ansible',
-        password='interdata'
+        nodes=[config.server],
+        username=config.username,
+        password=config.password
     )
     logging.info('End of CV login process at {}'.format(time_log()))
     logging.info('Connected to CVP')
