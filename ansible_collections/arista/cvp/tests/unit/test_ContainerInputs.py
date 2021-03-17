@@ -11,7 +11,7 @@ from datetime import datetime
 import logging
 import pytest
 sys.path.append("../../../../")
-from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput
+from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
 
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
@@ -24,6 +24,9 @@ CVP_CONTAINERS_2_LEVELS = {"DC2": {"parentContainerName": "Tenant"}, "Leafs": {
 
 CVP_CONTAINERS_1_LEVELS = {"DC2": {"parentContainerName": "Tenant"}}
 
+CVP_CONTAINERS_01 = {"DC-2": {"parentContainerName": "Tenant"}, "Leafs": {
+    "parentContainerName": "DC-2"}}
+
 
 # Generic helpers
 def time_log():
@@ -35,7 +38,7 @@ def time_log():
 # ---------------------------------------------------------------------------- #
 
 def get_cv_container_definition():
-    return [CVP_CONTAINERS_1_LEVELS, CVP_CONTAINERS_2_LEVELS, CVP_CONTAINERS_3_LEVELS]
+    return [CVP_CONTAINERS_1_LEVELS, CVP_CONTAINERS_2_LEVELS, CVP_CONTAINERS_3_LEVELS, CVP_CONTAINERS_01]
 
 
 # ---------------------------------------------------------------------------- #
@@ -67,10 +70,11 @@ class TestContainerInput():
         logging.info('Format is valid against JSON schema')
 
     def test_get_parent_root(self, CVP_CONTAINER):
-        parent_name = self.inventory.get_parent(container_name='DC2')
-        assert parent_name == 'Tenant'
-        logging.info(
-            'Get correct parent name for sub-root container: DC2 under {}'.format(parent_name))
+        for cnt_name, cnt in CVP_CONTAINER.items():
+            parent_name = self.inventory.get_parent(container_name=cnt_name)
+            assert parent_name == cnt[FIELD_PARENT_NAME]
+            logging.info(
+                'Get correct parent name for sub-root container: {} under {}'.format(cnt_name, parent_name))
 
     def test_ordered_list(self, CVP_CONTAINER):
         ordered_list = self.inventory.ordered_list_containers
