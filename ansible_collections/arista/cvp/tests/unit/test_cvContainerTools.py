@@ -19,7 +19,9 @@ import requests
 
 USER_CONTAINERS = [
     {"PYTEST": {"parentContainerName": "Tenant"}, "Leafs": {"parentContainerName": "PYTEST"}, "Spines": {
-        "parentContainerName": "PYTEST", "configlets": ["01TRAINING-01"]}, "POD01": {"parentContainerName": "Leafs"}}
+        "parentContainerName": "PYTEST", "configlets": ["01TRAINING-01"]}, "POD01": {"parentContainerName": "Leafs"}},
+    {"DC-2": {"parentContainerName": "Tenant"}, "DC_Leafs": {
+        "parentContainerName": "DC-2"}}
 ]
 
 CV_CONTAINERS_NAME_ID_LIST = [{'name': 'Tenant', 'id': 'root'}]
@@ -74,6 +76,7 @@ def cvp_login():
 # @pytest.mark.parametrize('CVP_CONTAINER', get_user_container_definition())
 def CvContainerTools_Manager(request):
     logging.info("Execute fixture to create class elements")
+    requests.packages.urllib3.disable_warnings()
     request.cls.cvp = cvp_login()
     request.cls.inventory = CvContainerTools(cv_connection=request.cls.cvp)
 
@@ -85,6 +88,7 @@ def CvContainerTools_Manager(request):
 @pytest.mark.api
 class TestCvContainerTools():
     def test_cv_connection(self):
+        requests.packages.urllib3.disable_warnings()
         logging.debug(str('Class is connected to CV'))
         assert True
 
@@ -101,20 +105,26 @@ class TestCvContainerTools():
     @pytest.mark.parametrize('CV_CONTAINER', get_container_name_id())
     @pytest.mark.api
     def test_get_container_id(self, CV_CONTAINER):
-        contaier_id = self.inventory.get_container_id(container_name=CV_CONTAINER['name'])
+        requests.packages.urllib3.disable_warnings()
+        contaier_id = self.inventory.get_container_id(
+            container_name=CV_CONTAINER['name'])
         assert contaier_id == CV_CONTAINER['id']
         logging.info('container id for {} is: {}'.format(CV_CONTAINER['name'], contaier_id))
 
     @pytest.mark.parametrize('CV_CONTAINER', get_container_name_id())
     @pytest.mark.api
     def test_container_exists(self, CV_CONTAINER):
-        assert self.inventory.is_container_exists(container_name=CV_CONTAINER['name'])
+        requests.packages.urllib3.disable_warnings()
+        assert self.inventory.is_container_exists(
+            container_name=CV_CONTAINER['name'])
         logging.info('Container {} exists'.format(CV_CONTAINER))
 
     @pytest.mark.parametrize('CV_CONTAINER', get_container_name_id())
     @pytest.mark.api
     def test_is_empty(self, CV_CONTAINER):
-        assert self.inventory.is_empty(container_name=CV_CONTAINER['name']) is False
+        requests.packages.urllib3.disable_warnings()
+        assert self.inventory.is_empty(
+            container_name=CV_CONTAINER['name']) is False
         logging.info('Container {} is empty'.format(CV_CONTAINER))
 
 
