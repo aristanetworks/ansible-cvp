@@ -25,7 +25,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_facts
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
@@ -42,6 +42,7 @@ options:
     required: false
     default: ['default']
     type: list
+    elements: str
     choices:
       - default
       - config
@@ -56,6 +57,7 @@ options:
     required: false
     default: ['all']
     type: list
+    elements: str
     choices:
       - all
       - devices

@@ -22,13 +22,12 @@
 #
 
 from __future__ import absolute_import, division, print_function
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
 module: cv_configlet_v3
-version_added: "2.9"
+version_added: "3.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
@@ -48,7 +47,7 @@ options:
   configlets_notes:
     description: Add a note to the configlets.
     required: false
-    default: 'Managed by Ansible AVD'
+    default: 'Managed by Ansible'
     type: str
   state:
     description:
@@ -86,6 +85,7 @@ import logging
 import traceback
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import ConfigletInput, CvConfigletTools
@@ -96,8 +96,12 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
+# Ansible module preparation
+ansible_module: AnsibleModule
+
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
+
 
 def check_import():
     """
@@ -115,7 +119,8 @@ def check_import():
 #               MAIN section -- starting point                 #
 # ------------------------------------------------------------ #
 
-if __name__ == '__main__':
+
+def main():
     """
     Main entry point for module execution.
     """
@@ -125,7 +130,10 @@ if __name__ == '__main__':
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'absent'])
+                   choices=['present', 'absent']),
+        configlets_notes=dict(type='str',
+                              default='Managed by Ansible',
+                              required=False)
     )
 
     # Make module global to use it in all functions when required
@@ -150,7 +158,7 @@ if __name__ == '__main__':
     # Test user input against schema definition
     if user_configlets.is_valid is False:
         ansible_module.fail_json(
-            msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['configlets']))
+            msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['configlets']))
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
@@ -162,7 +170,12 @@ if __name__ == '__main__':
     # if ansible_module.check_mode is True:
     #     ansible_module.fail_json(msg="Not yet implemented !")
 
-    cv_response: CvAnsibleResponse = cv_configlet_manager.apply(configlet_list=user_configlets.configlets, present=is_present)
+    cv_response: CvAnsibleResponse = cv_configlet_manager.apply(
+        configlet_list=user_configlets.configlets, present=is_present)
     result = cv_response.content
 
     ansible_module.exit_json(**result)
+
+
+if __name__ == '__main__':
+    main()

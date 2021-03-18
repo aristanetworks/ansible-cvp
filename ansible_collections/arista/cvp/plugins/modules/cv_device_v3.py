@@ -27,7 +27,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_device_v3
-version_added: "2.9"
+version_added: "3.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
@@ -39,6 +39,7 @@ options:
     description: List of devices with their container and configlets information
     required: true
     type: list
+    elements: dict
   state:
     description: Set if ansible should build or remove devices on CLoudvision
     required: false
@@ -48,7 +49,7 @@ options:
 '''
 
 EXAMPLES = r'''
-# Minimum usage
+---
 - name: Device Management in Cloudvision
   hosts: cv_server
   connection: local
@@ -59,13 +60,13 @@ EXAMPLES = r'''
   vars:
     CVP_DEVICES:
       - fqdn: CV-ANSIBLE-EOS01
-        parentContainerName: 'ANSIBLE'
-        configlets:'
+        parentContainerName: ANSIBLE
+        configlets:
             - 'CV-EOS-ANSIBLE01'
   tasks:
     - name: "Configure devices on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
-        devices: "{{CVP_DEVICES}}"
+        devices: '{{CVP_DEVICES}}'
         state: present
 '''
 
@@ -104,13 +105,13 @@ def check_import():
             msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
 
-if __name__ == '__main__':
+def main():
     """
     Main entry point for module execution.
     """
     argument_spec = dict(
         # Topology to configure on CV side.
-        devices=dict(type='list', required=True),
+        devices=dict(type='list', required=True, elements='dict'),
         state=dict(type='str',
                    required=False,
                    default='present',
@@ -136,7 +137,7 @@ if __name__ == '__main__':
 
     if user_topology.is_valid is False:
         ansible_module.fail_json(
-            msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['devices']))
+            msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['devices']))
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
@@ -148,3 +149,7 @@ if __name__ == '__main__':
     result = cv_topology.manager(user_inventory=user_topology)
 
     ansible_module.exit_json(**result)
+
+
+if __name__ == '__main__':
+    main()

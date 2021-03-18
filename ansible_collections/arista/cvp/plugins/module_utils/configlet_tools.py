@@ -19,9 +19,6 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
-
-import jsonschema
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 __metaclass__ = type
 
 import traceback
@@ -29,15 +26,21 @@ import logging
 import re
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
-    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
+# try:
+#     import jsonschema
+#     HAS_JSONSCHEMA = True
+# except ImportError:
+#     HAS_JSONSCHEMA = False
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
     import difflib
     HAS_DIFFLIB = True
@@ -50,7 +53,7 @@ MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
 class ConfigletInput(object):
 
-    def __init__(self, user_topology: dict, schema: jsonschema = schema.SCHEMA_CV_CONFIGLET):
+    def __init__(self, user_topology: dict, schema=schema.SCHEMA_CV_CONFIGLET):
         self.__topology = user_topology
         self.__schema = schema
 
@@ -74,7 +77,7 @@ class ConfigletInput(object):
 
 
 class CvConfigletTools(object):
-    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None):
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None):
         self._cvp_client = cv_connection
         self._ansible = ansible_module
         self.WINDOWS_LINE_ENDING = '\r\n'

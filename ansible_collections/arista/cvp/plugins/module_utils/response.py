@@ -36,6 +36,7 @@ FIELD_CHANGE_LIST = '_list'
 FIELD_DIFFS = 'diff'
 FIELD_DIFF = 'diff'
 
+
 class CvApiResult():
     """
     CvApiResult Object Class to represent Ansible response for an API call execution.

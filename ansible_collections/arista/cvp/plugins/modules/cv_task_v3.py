@@ -19,15 +19,13 @@
 #
 
 from __future__ import absolute_import, division, print_function
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
-from ansible_collections.arista.cvp.plugins.module_utils.task_tools import CvTaskTools
 
 __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: cv_task
-version_added: "2.9"
+module: cv_task_v3
+version_added: "3.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
@@ -37,6 +35,7 @@ options:
     description: CVP taskIDs to act on
     required: True
     type: list
+    elements: str
   state:
     description: action to carry out on the task
                  executed - execute tasks
@@ -57,7 +56,7 @@ EXAMPLES = '''
 
 - name: Cancel a list of pending tasks
   arista.cvp.cv_task:
-    tasks: "{{ cvp_configlets.taskIds }}"
+    tasks: ['666', '667']
     state: cancelled
 '''
 
@@ -66,6 +65,8 @@ import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
+from ansible_collections.arista.cvp.plugins.module_utils.task_tools import CvTaskTools
 try:
     from cvprac.cvp_client_errors import CvpClientError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
@@ -73,6 +74,8 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
+# Ansible module preparation
+ansible_module: AnsibleModule
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
 MODULE_LOGGER.info('Start cv_tasks module execution')
@@ -91,13 +94,13 @@ def check_import():
     #         msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
 
-if __name__ == '__main__':
+def main():
     """
     Main entry point for module execution.
     """
     argument_spec = dict(
         # Topology to configure on CV side.
-        tasks=dict(type='list', required=True),
+        tasks=dict(type='list', required=True, elements='str'),
         state=dict(type='str',
                    required=False,
                    default='executed',
@@ -124,3 +127,7 @@ if __name__ == '__main__':
     result = ansible_response.content
 
     ansible_module.exit_json(**result)
+
+
+if __name__ == '__main__':
+    main()

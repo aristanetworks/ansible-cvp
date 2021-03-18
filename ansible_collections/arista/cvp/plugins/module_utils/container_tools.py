@@ -19,27 +19,29 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
-
-from cvprac.cvp_client_errors import CvpClientError
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
-
-import jsonschema
 __metaclass__ = type
+
 import traceback
 import logging
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 try:
-    from cvprac.cvp_client import CvpClient
-    from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpClientError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpApiError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
-
+# try:
+#     import jsonschema
+#     HAS_JSONSCHEMA = True
+# except ImportError:
+#     HAS_JSONSCHEMA = False
+import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.container_tools_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
@@ -63,7 +65,7 @@ class ContainerInput(object):
     [extended_summary]
     """
 
-    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema: jsonschema = schema.SCHEMA_CV_CONTAINER):
+    def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema=schema.SCHEMA_CV_CONTAINER):
         self.__topology = user_topology
         self.__parent_field: str = FIELD_PARENT_NAME
         self.__root_name = container_root_name
@@ -192,13 +194,13 @@ class CvContainerTools(object):
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
     """
 
-    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None, check_mode: bool = False):
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, check_mode: bool = False):
         self.__cvp_client = cv_connection
         self.__ansible = ansible_module
         self.__check_mode = ansible_module.check_mode if ansible_module is not None else check_mode
 
     #############################################
-    ### Private functions
+    #   Private functions
     #############################################
 
     def __standard_output(self, source: dict):
@@ -346,7 +348,7 @@ class CvContainerTools(object):
         if container is not None:
             configlet_names = [entry.get('name')
                                for entry in configlets if entry.get('name')]
-            change_response.name = container['name']+ ':' + ':'.join(configlet_names)
+            change_response.name = container['name'] + ':' + ':'.join(configlet_names)
             if self.__check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
@@ -438,7 +440,7 @@ class CvContainerTools(object):
         return change_response
 
     #############################################
-    ### Generic functions
+    #   Generic functions
     #############################################
 
     def get_container_info(self, container_name: str):
@@ -505,7 +507,7 @@ class CvContainerTools(object):
         return None
 
     #############################################
-    ### Boolean & getters functions
+    #   Boolean & getters functions
     #############################################
 
     def is_empty(self, container_name: str):
@@ -562,7 +564,7 @@ class CvContainerTools(object):
         return False
 
     #############################################
-    ### Public API
+    #   Public API
     #############################################
 
     def create_container(self, container: str, parent: str):

@@ -26,7 +26,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_configlet
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
@@ -60,6 +60,7 @@ options:
     required: false
     default: ['none']
     type: list
+    elements: str
   state:
     description:
         - If absent, configlets will be removed from CVP if they are not bound
@@ -647,7 +648,7 @@ def main():
         configlets=dict(type='dict', required=True),
         configlets_notes=dict(type='str', default='Managed by Ansible', required=False),
         cvp_facts=dict(type='dict', required=True),
-        configlet_filter=dict(type='list', default='none'),
+        configlet_filter=dict(type='list', default='none', elements='str'),
         state=dict(type='str',
                    choices=['present', 'absent'],
                    default='present',

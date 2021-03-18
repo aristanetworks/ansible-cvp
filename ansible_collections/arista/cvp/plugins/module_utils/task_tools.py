@@ -19,16 +19,15 @@
 #
 
 from __future__ import (absolute_import, division, print_function)
-
-import jsonschema  # noqa # pylint: disable=unused-import
 __metaclass__ = type
+
 import traceback
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
-    from cvprac.cvp_client import CvpClient
+    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
 except ImportError:
@@ -45,7 +44,7 @@ class CvTaskTools():
     CvTaskTools Class to manage Cloudvision tasks execution
     """
 
-    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None, check_mode: bool = False):
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
         self.__check_mode = check_mode
@@ -102,7 +101,6 @@ class CvTaskTools():
         """
         return self.__cv_client.api.execute_task(task_id)
 
-
     def cancel_task(self, task_id: str):
         """
         cancel_task Send order to cancel task on Cloudvision
@@ -138,7 +136,7 @@ class CvTaskTools():
         ansible_response = CvAnsibleResponse()
         tasker_manager = CvManagerResult(builder_name='actions_manager')
         for task_id in taskIds_list:
-            api_result = CvApiResult(action_name='task_'+str(task_id))
+            api_result = CvApiResult(action_name='task_' + str(task_id))
             if self.is_actionable(task_data=self.__get_task_data(task_id)):
                 if self.__ansible.check_mode is False:
                     self.__cv_client.api.add_note_to_task(task_id, "Executed by Ansible")

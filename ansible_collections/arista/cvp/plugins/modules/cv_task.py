@@ -25,7 +25,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_task
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description: CloudVison Portal Task module
@@ -34,6 +34,7 @@ options:
     description: CVP taskIDs to act on
     required: True
     type: list
+    elements: dict
   wait:
     description: Time to wait for tasks to transition to 'Completed'
     required: False
@@ -174,7 +175,7 @@ def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
-        tasks=dict(required=True, type='list'),
+        tasks=dict(required=True, type='list', elements='dict'),
         wait=dict(default=0, type='int'),
         state=dict(default='executed', choices=['executed', 'cancelled']))
 

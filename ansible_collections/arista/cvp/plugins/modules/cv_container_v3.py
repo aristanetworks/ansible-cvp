@@ -27,7 +27,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_container_v3
-version_added: "2.9"
+version_added: "3.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
@@ -68,127 +68,6 @@ EXAMPLES = r'''
         topology: "{{CVP_CONTAINERS}}"
 '''
 
-# RETURN = r'''
-# taskIds:
-#   description: List of tasks returned by Cloudvision
-#   returned: On success
-#   type: list
-#   sample:
-#     - '666'
-#     - '667'
-# configlet_attachmenet:
-#   description: Information related to configlet add process
-#   returned: On success
-#   type: Complex
-#   contains:
-#     changed:
-#       description: Flag to track if process has proceed to change Cloudvision
-#       returned: success
-#       type: bool
-#     configlet_attachmenet_count:
-#       description: Counter for number of containers impacted by configlet changes
-#       returned: success
-#       type: int
-#     configlet_attachmenet_list:
-#       description: List of containers with configlets
-#       returned: success
-#       type: list
-#       sample:
-#         - Spines:ASE_DEVICE-ALIASES
-#     success:
-#       description: Flag to track if process has succeeded
-#       returned: success
-#       type: bool
-#     taskIds:
-#       description: List of tasks returned by Cloudvision
-#       returned: success
-#       type: list
-#       sample:
-#         - 666
-#         - 667
-# container_added:
-#   description: Information related to container creation process
-#   returned: On success
-#   type: Complex
-#   sample:
-#     container_added:
-#       changed: false
-#       container_added_count: 0
-#       container_added_list: []
-#       diff: {}
-#       success: false
-#       taskIds: []
-#   contains:
-#     changed:
-#       description: Flag to track if process has proceed to change Cloudvision
-#       returned: success
-#       type: bool
-#     container_added_count:
-#       description: Counter for number of containers created
-#       returned: success
-#       type: int
-#     container_added_lsit:
-#       description: List of containers created
-#       returned: success
-#       type: list
-#       sample:
-#         - Spines
-#         - Leaves
-#         - Fabric
-#     success:
-#       description: Flag to track if process has succeeded
-#       returned: success
-#       type: bool
-#     taskIds:
-#       description: List of tasks returned by Cloudvision
-#       returned: success
-#       type: list
-#       sample:
-#         - 330
-#         - 340
-#         - 350
-# container_deleted:
-#   description: Information related to container deletion process
-#   returned: On success
-#   type: Complex
-#   sample:
-#     container_deleted:
-#       changed: false
-#       container_deleted_count: 0
-#       container_deleted_list: []
-#       diff: {}
-#       success: false
-#       taskIds: []
-#   contains:
-#     changed:
-#       description: Flag to track if process has proceed to change Cloudvision
-#       returned: success
-#       type: bool
-#     container_deleted_count:
-#       description: Counter for number of containers deleted
-#       returned: success
-#       type: int
-#     container_deleted_lsit:
-#       description: List of containers deleted
-#       returned: success
-#       type: list
-#       sample:
-#         - Spines
-#         - Leaves
-#         - Fabric
-#     success:
-#       description: Flag to track if process has succeeded
-#       returned: success
-#       type: bool
-#     taskIds:
-#       description: List of tasks returned by Cloudvision
-#       returned: success
-#       type: list
-#       sample:
-#         - 330
-#         - 340
-#         - 350
-# '''
 
 import logging
 import traceback
@@ -229,12 +108,13 @@ def check_import():
 #               MAIN section -- starting point                 #
 # ------------------------------------------------------------ #
 
-if __name__ == '__main__':
+def main():
     """
     Main entry point for module execution.
     """
     argument_spec = dict(
-        topology=dict(type='dict', required=True),                      # Topology to configure on CV side.
+        # Topology to configure on CV side.
+        topology=dict(type='dict', required=True),
         state=dict(type='str',
                    required=False,
                    default='present',
@@ -263,17 +143,23 @@ if __name__ == '__main__':
 
     if user_topology.is_valid is False:
         ansible_module.fail_json(
-            msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['topology']))
+            msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['topology']))
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
 
     # Instantiate data
-    cv_topology = CvContainerTools(cv_connection=cv_client, ansible_module=ansible_module)
+    cv_topology = CvContainerTools(
+        cv_connection=cv_client, ansible_module=ansible_module)
 
-    cv_response: CvAnsibleResponse = cv_topology.build_topology(user_topology=user_topology, present=state_present)
+    cv_response: CvAnsibleResponse = cv_topology.build_topology(
+        user_topology=user_topology, present=state_present)
     MODULE_LOGGER.debug(
         'Received response from Topology builder: %s', str(cv_response))
     result = cv_response.content
 
     ansible_module.exit_json(**result)
+
+
+if __name__ == '__main__':
+    main()
