@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
+# pylint: disable=logging-format-interpolation
+# flake8: noqa: W1202
 #
 # GNU General Public License v3.0+
 #
@@ -59,20 +61,13 @@ FIELD_IMAGE_BUNDLE = 'image_bundle'
 UNDEFINED_CONTAINER = 'undefined_container'
 
 
-class CvClient(object):
-    def __failure(self, msg: str):
-        MODULE_LOGGER.error(msg)
-        if self.__ansible is not None:
-            self.__ansible.fail_json(msg=msg)
-
-
 class DeviceElement(object):
 
     def __init__(self, data: dict):
         self.__data = data
-        self.__fqdn = self.__data[FIELD_FQDN]
-        self.__sysmac = None
-        self.__serial = None
+        self.__fqdn = self.__data[FIELD_FQDN] if FIELD_FQDN in self.__data else None
+        self.__sysmac = self.__data[FIELD_SYSMAC] if FIELD_SYSMAC in self.__data else None
+        self.__serial = self.__data[FIELD_SERIAL] if FIELD_SERIAL in self.__data else None
         self.__container = self.__data[FIELD_PARENT_NAME]
         self.__image_bundle = []
         self.__current_parent_container_id = None
@@ -127,7 +122,10 @@ class DeviceElement(object):
             res[FIELD_SYSMAC] = self.__sysmac
             res[FIELD_ID] = self.__sysmac
         res[FIELD_PARENT_NAME] = self.__container
-        res[FIELD_CONFIGLETS] = self.__data[FIELD_CONFIGLETS]
+        if FIELD_CONFIGLETS in self.__data:
+            res[FIELD_CONFIGLETS] = self.__data[FIELD_CONFIGLETS]
+        else:
+            res[FIELD_CONFIGLETS] = []
         # res[FIELD_PARENT_ID] = self.__current_parent_container_id
         return res
 
@@ -143,7 +141,8 @@ class DeviceInventory(object):
         self.__schema = schema
         self.search_method = search_method
         for entry in data:
-            self.__inventory.append(DeviceElement(data=entry))
+            if FIELD_FQDN in entry:
+                self.__inventory.append(DeviceElement(data=entry))
 
     @property
     def is_valid(self):
@@ -174,7 +173,7 @@ class DeviceInventory(object):
         return None
 
 
-class CvDeviceTools(CvClient):
+class CvDeviceTools(object):
 
     def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule = None, search_by: str = FIELD_FQDN, check_mode: bool = False):
         self.__cv_client = cv_connection
@@ -215,6 +214,7 @@ class CvDeviceTools(CvClient):
                 return configlet
         return None
 
+
     # ------------------------------------------ #
     # Get CV data functions
     # ------------------------------------------ #
@@ -237,11 +237,10 @@ class CvDeviceTools(CvClient):
             try:
                 device_id = self.get_device_id(device_lookup=device_lookup)
             except CvpApiError:
-                self.__failure(msg='Error getting device ID from cloudvision')
+                MODULE_LOGGER.error('Error getting device ID from cloudvision')
             else:
                 if device_id is None:
-                    self.__failure(
-                        msg='Error cannot get device ID from Cloudvision')
+                    MODULE_LOGGER.error('Error cannot get device ID from Cloudvision')
                 configlets_data = self.__cv_client.api.get_configlets_by_device_id(
                     mac=device_id)
                 for configlet in configlets_data:
@@ -250,16 +249,17 @@ class CvDeviceTools(CvClient):
         return None
 
     def get_device_container(self, device_lookup):
-        cv_data = self.get_device(device_lookup=device_lookup)
+        cv_data = self.get_device_facts(device_lookup=device_lookup)
         if cv_data is not None:
-            return CvElement(cv_data={'key': cv_data['parentContainerId'], FIELD_FQDN: cv_data['containerName']})
+            return {FIELD_PARENT_ID: cv_data[FIELD_PARENT_ID], FIELD_PARENT_NAME: cv_data[FIELD_CONTAINER_NAME]}
         return None
 
     def get_container_info(self, container_name: str):
         try:
             resp = self.__cv_client.api.get_container_by_name(name=str(container_name))
         except CvpApiError:
-            self.__failure(msg='Error getting container ID from Cloudvision')
+            MODULE_LOGGER.debug(
+                'Error getting container ID from Cloudvision')
         else:
             return resp
         return None
@@ -271,6 +271,33 @@ class CvDeviceTools(CvClient):
         else:
             return None
 
+    def refresh_systemMacAddress(self, user_inventory: DeviceInventory):
+        """
+        refresh_systemMacAddress Get System Mac Address from Cloudvision to update missing information
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user and that need to be refreshed
+
+        Returns
+        -------
+        DeviceInventory
+            Updated device inventory
+        """
+        device: DeviceElement = None
+        user_result: list = list()
+        for device in user_inventory.devices:
+            if device.system_mac is None and device.fqdn is not None:
+                system_mac = self.get_device_facts(
+                    device_lookup=device.fqdn)[FIELD_SYSMAC]
+                MODULE_LOGGER.debug(
+                    'Get sysmac {} for device {}'.format(device.fqdn, system_mac))
+                device.system_mac = system_mac
+                user_result.append(device.info)
+        MODULE_LOGGER.warning('Update list is: {}'.format(user_result))
+        return DeviceInventory(data=user_result)
+
     # ------------------------------------------ #
     # Workers function
     # ------------------------------------------ #
@@ -281,6 +308,11 @@ class CvDeviceTools(CvClient):
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_add = CvManagerResult(builder_name='configlets_attached')
+
+        # Need to collect all missing device systemMacAddress
+        # deploy needs to locate devices by mac-address
+        if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
         action_result = self.deploy_device(user_inventory=user_inventory)
         if action_result is not None:
@@ -328,7 +360,7 @@ class CvDeviceTools(CvClient):
                                                                                 container=new_container_info,
                                                                                 create_task=True)
                         except CvpApiError:
-                            self.__failure(msg='Error to move device {} to container {}'.format(
+                            MODULE_LOGGER.error('Error to move device {} to container {}'.format(
                                 device.fqdn, device.container))
                         else:
                             if resp['data']['status'] == 'success':
@@ -345,7 +377,10 @@ class CvDeviceTools(CvClient):
         for device in user_inventory.devices:
             result_data = CvApiResult(
                 action_name='{}_configlet_attached'.format(device.fqdn))
-            if device.configlets is not None:
+            current_container_info = self.get_container_current(
+                device_mac=device.system_mac)
+            if (device.configlets is not None
+                and current_container_info['name'] != UNDEFINED_CONTAINER):
                 # get configlet information from CV
                 configlets_info = list()
                 for configlet in device.configlets:
@@ -363,7 +398,7 @@ class CvDeviceTools(CvClient):
                                                                            new_configlets=configlets_info,
                                                                            create_task=True)
                 except CvpApiError:
-                    self.__failure(msg='Error applying configlets to device')
+                    MODULE_LOGGER.error('Error applying configlets to device')
                     result_data.success = False
                 else:
                     if resp['data']['status'] == 'success':
@@ -398,7 +433,7 @@ class CvDeviceTools(CvClient):
                                                                               del_configlets=configlets_info,
                                                                               create_task=True)
                 except CvpApiError:
-                    self.__failure(msg='Error applying configlets to device')
+                    MODULE_LOGGER.error('Error applying configlets to device')
                     result_data.success = False
                 else:
                     if resp['data']['status'] == 'success':
@@ -419,24 +454,29 @@ class CvDeviceTools(CvClient):
                 for configlet in device.configlets:
                     configlets_info.append(
                         self.__get_configlet_info(configlet_name=configlet))
-                new_container_info = self.get_container_info(
-                    container_name=device.container)
                 # Move devices when they are not in undefined container
-                if (self.get_device_facts(device_lookup=device.fqdn)[FIELD_CONTAINER_NAME] == 'Undefined'):
+                current_container_info = self.get_container_current(
+                    device_mac=device.system_mac)
+                MODULE_LOGGER.debug('Device {} is currently under {}'.format(
+                    device.fqdn, current_container_info['name']))
+                device_info = self.get_device_facts(device_lookup=device.fqdn)
+                if (current_container_info['name'] == 'Undefined'):
                     if self.__check_mode:
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = ['unsupported_in_check_mode']
                     else:
                         try:
+                            MODULE_LOGGER.debug('Ansible is going to deploy device {} in container {} with configlets {}'.format(device.fqdn, device.container, configlets_info))
                             resp = self.__cv_client.api.deploy_device(app_name='CvDeviceTools.deploy',
-                                                                      device=device.info,
-                                                                      container=new_container_info,
+                                                                      device=device_info,
+                                                                      container=device.container,
                                                                       configlets=configlets_info,
                                                                       create_task=True)
-                        except CvpApiError:
-                            self.__failure(msg='Error to move device {} to container {}'.format(
+                        except CvpApiError as error:
+                            self.__ansible.fail_json(msg='Error to deploy device {} to container {}'.format(
                                 device.fqdn, device.container))
+                            MODULE_LOGGER.critical('Error deploying device {} : {}'.format(device.fqdn, error))
                         else:
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
