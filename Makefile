@@ -7,7 +7,9 @@ HOME_DIR_DOCKER = '/home/docker'
 # ansible-test path
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
-ANSIBLE_TEST_MODE ?= docker
+ANSIBLE_TEST_MODE ?= venv
+# Python version to use in testing.
+ANSIBLE_TEST_PYTHON ?= 3.6
 # Root path for MKDOCS content
 WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
 COMPOSE_FILE ?= development/docker-compose.yml
@@ -44,13 +46,13 @@ sanity-info: ## Show information about ansible-test
 .PHONY: sanity-lint
 sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --skip-test import ; \
+	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --python $(ANSIBLE_TEST_PYTHON) ; \
 	rm -rf tests/output/
 
 .PHONY: sanity-import
 sanity-import: ## Run ansible-test sanity for code import
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --test import ; \
+	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --python $(ANSIBLE_TEST_PYTHON) --test import ; \
 	rm -rf tests/output/
 
 
