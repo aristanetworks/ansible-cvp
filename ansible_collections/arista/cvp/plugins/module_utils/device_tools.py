@@ -65,6 +65,9 @@ UNDEFINED_CONTAINER = 'undefined_container'
 
 
 class DeviceElement(object):
+    """
+    DeviceElement Object to represent Device Element from user inventory
+    """
 
     def __init__(self, data: dict):
         self.__data = data
@@ -83,40 +86,112 @@ class DeviceElement(object):
 
     @property
     def fqdn(self):
+        """
+        fqdn Getter for FQDN value
+
+        Returns
+        -------
+        str
+            FQDN configured for the device
+        """
         return self.__fqdn
 
     @property
     def system_mac(self):
+        """
+        system_mac Getter for SystemMac value
+
+        Returns
+        -------
+        str
+            SystemMac address for the device
+        """
         return self.__sysmac
 
     @system_mac.setter
     def system_mac(self, mac: str):
+        """
+        system_mac Setter for SystemMac address
+
+        Parameters
+        ----------
+        mac : str
+            systemMac address to configure on device
+        """
         self.__sysmac = mac
 
     @property
     def serial_number(self):
+        """
+        serial_number Getter for device serial number
+
+        Returns
+        -------
+        str
+            Device serial number
+        """
         return self.__serial
 
     @property
     def container(self):
+        """
+        container Getter for container
+
+        Returns
+        -------
+        str
+            Name of the container
+        """
         return self.__container
 
     @property
     def configlets(self):
+        """
+        configlets Getter for list of configlets
+
+        Returns
+        -------
+        list
+            List of configlets name
+        """
         if FIELD_CONFIGLETS in self.__data:
             return self.__data[FIELD_CONFIGLETS]
         return []
 
     @property
     def parent_container_id(self):
+        """
+        parent_container_id Getter for parent container ID
+
+        Returns
+        -------
+        str
+            Name of the parent Container
+        """
         return self.__current_parent_container_id
 
     @parent_container_id.setter
     def parent_container_id(self, id):
+        """
+        parent_container_id Setter for parent container ID
+
+        Parameters
+        ----------
+        id : str
+            parent container ID to configure on device
+        """
         self.__current_parent_container_id = id
 
     @property
     def info(self):
+        """
+        info Provides all information from device
+
+        Returns
+        -------
+        dict
+            All information related to device.
+        """
         res = dict()
         res[FIELD_FQDN] = self.__fqdn
         if self.__serial is not None:
@@ -160,9 +235,32 @@ class DeviceInventory(object):
 
     @property
     def devices(self):
+        """
+        devices Getter to list all devices in inventory
+
+        Returns
+        -------
+        list:
+            A list of DeviceElement
+        """
         return self.__inventory
 
     def get_device(self, device_string: str, search_method: str = FIELD_FQDN):
+        """
+        get_device Extract device from inventory
+
+        Parameters
+        ----------
+        device_string : str
+            Data to lookup device from inventory. Can be FQDN or sysMac field
+        search_method : str, optional
+            Field to search for device, by default fqdn
+
+        Returns
+        -------
+        DeviceElement
+            Data structure with device information.
+        """
         # Lookup using systemMacAddress
         if self.search_method is FIELD_SYSMAC or search_method is FIELD_SYSMAC:
             for device in self.__inventory:
@@ -177,6 +275,9 @@ class DeviceInventory(object):
 
 
 class CvDeviceTools(object):
+    """
+    CvDeviceTools Object to operate Device operation on Cloudvision
+    """
 
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = FIELD_FQDN, check_mode: bool = False):
         self.__cv_client = cv_connection
@@ -191,10 +292,26 @@ class CvDeviceTools(object):
 
     @property
     def search_by(self):
+        """
+        search_by Getter to expose search mechanism
+
+        Returns
+        -------
+        str
+            Field name used for search
+        """
         return self.__search_by
 
     @search_by.setter
     def search_by(self, mode: str):
+        """
+        search_by Setter to configure how object are search
+
+        Parameters
+        ----------
+        mode : str
+            Field name to use for search
+        """
         self.__search_by = mode
 
     # ------------------------------------------ #
@@ -202,6 +319,23 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     def __get_device(self, search_value: str, search_by: str = FIELD_FQDN):
+        """
+        __get_device Method to get data from Cloudvision
+
+        Search on cloudvision information related to given device.
+
+        Parameters
+        ----------
+        search_value : str
+            Device content to look for (FQDN or SYSMAC)
+        search_by : str, optional
+            Field to use to search information, by default FQDN
+
+        Returns
+        -------
+        dict
+            Information returns by Cloudvision
+        """
         cv_data: dict = dict()
         if search_by == FIELD_FQDN:
             cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value)
@@ -209,7 +343,22 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
         return cv_data
 
-    def __get_configlet_info(self, configlet_name):
+    def __get_configlet_info(self, configlet_name: str):
+        """
+        __get_configlet_info Provides mechanism to get information about a configlet.
+
+        Extract information from CV configlet mapper and save as a cache in instance.
+
+        Parameters
+        ----------
+        configlet_name : str
+            Name of the configlet
+
+        Returns
+        -------
+        dict
+            Configlet data
+        """
         if self.__configlets_and_mappers_cache is None:
             self.__configlets_and_mappers_cache = self.__cv_client.api.get_configlets_and_mappers()
         for configlet in self.__configlets_and_mappers_cache['data']['configlets']:
@@ -222,17 +371,56 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     def get_device_facts(self, device_lookup: str):
+        """
+        get_device_facts Public method to get device information from Cloudvision
+
+        Parameters
+        ----------
+        device_lookup : str
+            Name of the device to look for
+
+        Returns
+        -------
+        dict
+            Data from Cloudvision
+        """
         data = self.__get_device(
             search_value=device_lookup, search_by=self.__search_by)
         return data
 
     def get_device_id(self, device_lookup: str):
+        """
+        get_device_id Retrieve device ID from Cloudvision
+
+        Parameters
+        ----------
+        device_lookup : str
+            Name of the device
+
+        Returns
+        -------
+        str
+            Device ID
+        """
         data = self.get_device_facts(device_lookup=device_lookup)
         if data is not None:
             return data[FIELD_SYSMAC]
         return None
 
     def get_device_configlets(self, device_lookup: str):
+        """
+        get_device_configlets Retrieve configlets attached to a device
+
+        Parameters
+        ----------
+        device_lookup : str
+            Name of the device
+
+        Returns
+        -------
+        list
+            List of CvElement with KEY and NAME of every configlet.
+        """
         if self.__search_by == FIELD_FQDN:
             configlet_list = list()
             # get_configlets_by_device_id
@@ -250,13 +438,39 @@ class CvDeviceTools(object):
                 return configlet_list
         return None
 
-    def get_device_container(self, device_lookup):
+    def get_device_container(self, device_lookup: str):
+        """
+        get_device_container Retrieve container where device is attached.
+
+        Parameters
+        ----------
+        device_lookup : str
+            Device name to look for
+
+        Returns
+        -------
+        dict
+            A dict with key and name
+        """
         cv_data = self.get_device_facts(device_lookup=device_lookup)
         if cv_data is not None:
             return {FIELD_PARENT_ID: cv_data[FIELD_PARENT_ID], FIELD_PARENT_NAME: cv_data[FIELD_CONTAINER_NAME]}
         return None
 
     def get_container_info(self, container_name: str):
+        """
+        get_container_info Retrieve container information from Cloudvision
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container
+
+        Returns
+        -------
+        dict
+            Data from Cloudvision
+        """
         try:
             resp = self.__cv_client.api.get_container_by_name(name=str(container_name))
         except CvpApiError:
@@ -267,6 +481,19 @@ class CvDeviceTools(object):
         return None
 
     def get_container_current(self, device_mac: str):
+        """
+        get_container_current Retrieve name of current container where device is attached to
+
+        Parameters
+        ----------
+        device_mac : str
+            Mac address of the device to lokk for container
+
+        Returns
+        -------
+        dict
+            A dict with key and name
+        """
         container_id = self.__cv_client.api.get_device_by_mac(device_mac=device_mac)
         if FIELD_PARENT_ID in container_id:
             return {'name': container_id[FIELD_CONTAINER_NAME], 'key': container_id[FIELD_PARENT_ID]}
@@ -338,6 +565,22 @@ class CvDeviceTools(object):
         return response.content
 
     def move_device(self, user_inventory: DeviceInventory):
+        """
+        move_device Entry point to move device from one container to another container
+
+        Execute API calls to move a device from a container to another one.
+        This method is not defined to support onboarding process
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
@@ -375,6 +618,22 @@ class CvDeviceTools(object):
         return results
 
     def apply_configlets(self, user_inventory: DeviceInventory):
+        """
+        apply_configlets Entry point to a list of configlets to device
+
+        Execute API calls to attach configlets to device
+        This method is not defined to support onboarding process
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
@@ -414,6 +673,9 @@ class CvDeviceTools(object):
         return results
 
     def remove_configlets(self, user_inventory: DeviceInventory):
+        """
+        remove_configlets UNSUPPORTED and NOT TESTED YET
+        """
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name='{}_configlet_removed'.format(*device.fqdn))
@@ -448,6 +710,23 @@ class CvDeviceTools(object):
         return results
 
     def deploy_device(self, user_inventory: DeviceInventory):
+        """
+        deploy_device Entry point to deploy a device in ZTP mode
+
+        Execute API calls to move a device from undefined to a container and
+        attached configlets to this device as well.
+        This method is defined to ONLY support onboarding process
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name='{}_deployed'.format(*device.fqdn))
@@ -498,6 +777,9 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     def list_devices_to_move(self, inventory: DeviceInventory):
+        """
+        list_devices_to_move UNSUPPORTED and NOT TESTED YET
+        """
         devices_to_move = list()
         for device in inventory.devices:
             if self.__search_by == FIELD_FQDN:
@@ -515,6 +797,21 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     def is_in_container(self, device_lookup: str, container_name: str):
+        """
+        is_in_container Test on Cloudvision if a device is in container
+
+        Parameters
+        ----------
+        device_lookup : str
+            Device name
+        container_name : str
+            Container name
+
+        Returns
+        -------
+        bool
+            True if in container False in other situations
+        """
         data = self.__get_device(search_value=device_lookup, search_by=self.__search_by)
         if data is not None and FIELD_PARENT_ID in data:
             container_data = self.get_container_info(container_name=container_name)
@@ -524,6 +821,19 @@ class CvDeviceTools(object):
         return False
 
     def is_device_exist(self, device_lookup: str):
+        """
+        is_device_exist Test if a device exists in Cloudvision
+
+        Parameters
+        ----------
+        device_lookup : str
+            Device name
+
+        Returns
+        -------
+        bool
+            True if device available in Cloudvision, False by default
+        """
         data = self.__get_device(
             search_value=device_lookup, search_by=self.__search_by)
         if data is not None and len(data) > 0:
@@ -531,6 +841,19 @@ class CvDeviceTools(object):
         return False
 
     def has_correct_id(self, device: DeviceElement):
+        """
+        has_correct_id Test and compare device ID (SYSMAC) between inventory and Cloudvision
+
+        Parameters
+        ----------
+        device : DeviceElement
+            Device information
+
+        Returns
+        -------
+        bool
+            True if both inventory and CV has same sysmac for given hostname.
+        """
         device_id_cv: str = None
         # Get ID with correct search method
         device_id_cv = self.get_device_id(device_lookup=device.fqdn)
