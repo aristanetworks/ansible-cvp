@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # Test user input against schema definition
     user_topology = DeviceInventory(data=ansible_module.params['devices'])
 
-    if user_topology.is_valid:
+    if user_topology.is_valid is False:
         ansible_module.fail_json(
             msg='Error, your input is not valid against current schema:\n {}'.format(ansible_module.params['devices']))
 
