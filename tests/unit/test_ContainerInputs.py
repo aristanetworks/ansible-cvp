@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 import logging
 import pytest
-sys.path.append("../../../../")
+sys.path.append("../")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
 
 

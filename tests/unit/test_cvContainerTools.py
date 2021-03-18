@@ -4,13 +4,14 @@
 # pylint: disable=dangerous-default-value
 # flake8: noqa: W503
 # flake8: noqa: W1202
+# flake8: noqa: R0801
 
 from __future__ import (absolute_import, division, print_function)
 from datetime import datetime
 import sys
 import logging
 import pytest
-sys.path.append("../../../../")
+sys.path.append("../")
 sys.path.append(".")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from cvprac.cvp_client import CvpClient
@@ -134,6 +135,7 @@ class TestCvContainerTools():
     @pytest.mark.api
     @pytest.mark.create
     def test_create_container(self, UNIT_TEST):
+        requests.packages.urllib3.disable_warnings()
         state = self.inventory.is_container_exists(
             container_name=UNIT_TEST['name'])
         logging.debug('Is Container state present? {}'.format(state))
@@ -154,6 +156,7 @@ class TestCvContainerTools():
     @pytest.mark.api
     @pytest.mark.create
     def test_configlet_attach(self, UNIT_TEST):
+        requests.packages.urllib3.disable_warnings()
         state = self.inventory.is_container_exists(
             container_name=UNIT_TEST['name'])
         logging.debug('Is Container state present ? {}'.format(state))
@@ -174,6 +177,7 @@ class TestCvContainerTools():
     @pytest.mark.api
     @pytest.mark.delete
     def test_configlet_detach(self, UNIT_TEST):
+        requests.packages.urllib3.disable_warnings()
         state = self.inventory.is_container_exists(
             container_name=UNIT_TEST['name'])
         logging.debug('Is Container state present ? {}'.format(state))
@@ -196,6 +200,7 @@ class TestCvContainerTools():
     @pytest.mark.api
     @pytest.mark.delete
     def test_delete_container(self, UNIT_TEST):
+        requests.packages.urllib3.disable_warnings()
         state = self.inventory.is_container_exists(
             container_name=UNIT_TEST['name'])
         logging.debug('Is Container state present ? {}'.format(state))
@@ -214,7 +219,7 @@ class TestCvContainerTools():
 
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.api
-@pytest.mark.create
+@pytest.mark.builder
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 class TestCvContainerToolsTopology():
 
@@ -224,13 +229,14 @@ class TestCvContainerToolsTopology():
     #     time.sleep(30)
 
     def test_cv_connection(self):
+        requests.packages.urllib3.disable_warnings()
         logging.debug(str('Class is connected to CV'))
         assert True
 
     @pytest.mark.parametrize('USER_INPUT', get_topology_user_input())
     @pytest.mark.api
-    @pytest.mark.create
     def test_build_topology(self, USER_INPUT):
+        requests.packages.urllib3.disable_warnings()
         user_inventory = ContainerInput(user_topology=USER_INPUT)
         logging.info('Start of topology build process at {}'.format(time_log()))
         result = self.inventory.build_topology(
@@ -243,9 +249,8 @@ class TestCvContainerToolsTopology():
 
     @pytest.mark.parametrize('USER_INPUT', get_topology_user_input())
     @pytest.mark.api
-    @pytest.mark.delete
-    # @pytest.mark.topology
     def test_remove_topology(self, USER_INPUT):
+        requests.packages.urllib3.disable_warnings()
         user_inventory = ContainerInput(user_topology=USER_INPUT)
         logging.info(
             'Start of topology del process at {}'.format(time_log()))
