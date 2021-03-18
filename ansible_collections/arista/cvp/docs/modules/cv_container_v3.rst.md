@@ -2,7 +2,7 @@
 
 Manage Provisioning topology.
 
-Module added in version 2.9
+Module added in version 3.0.0
 
 <div class="contents" data-local="" data-depth="2">
 

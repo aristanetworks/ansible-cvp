@@ -4,7 +4,7 @@ cv_container_v3
 +++++++++++++++
 Manage Provisioning topology.
 
-Module added in version 2.9
+Module added in version 3.0.0
 
 
 

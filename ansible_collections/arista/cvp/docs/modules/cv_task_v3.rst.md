@@ -1,8 +1,8 @@
-# cv\_task
+# cv\_task\_v3
 
 Execute or Cancel CVP Tasks.
 
-Module added in version 2.9
+Module added in version 3.0.0
 
 <div class="contents" data-local="" data-depth="2">
 
@@ -61,7 +61,7 @@ The following options may be specified for this module:
 
     - name: Cancel a list of pending tasks
       arista.cvp.cv_task:
-        tasks: "{{ cvp_configlets.taskIds }}"
+        tasks: ['666', '667']
         state: cancelled
 
 ### Author

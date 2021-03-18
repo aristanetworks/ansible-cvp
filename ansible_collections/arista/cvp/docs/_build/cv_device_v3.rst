@@ -4,7 +4,7 @@ cv_device_v3
 ++++++++++++
 Manage Provisioning topology.
 
-Module added in version 2.9
+Module added in version 3.0.0
 
 
 
@@ -72,7 +72,7 @@ Examples:
 
 ::
 
-    # Minimum usage
+    ---
     - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
@@ -83,13 +83,13 @@ Examples:
       vars:
         CVP_DEVICES:
           - fqdn: CV-ANSIBLE-EOS01
-            parentContainerName: 'ANSIBLE'
-            configlets:'
+            parentContainerName: ANSIBLE
+            configlets:
                 - 'CV-EOS-ANSIBLE01'
       tasks:
         - name: "Configure devices on {{inventory_hostname}}"
           arista.cvp.cv_device_v3:
-            devices: "{{CVP_DEVICES}}"
+            devices: '{{CVP_DEVICES}}'
             state: present
 
 

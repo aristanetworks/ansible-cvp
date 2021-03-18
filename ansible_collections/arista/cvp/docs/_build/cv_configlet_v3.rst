@@ -4,7 +4,7 @@ cv_configlet_v3
 +++++++++++++++
 Create, Delete, or Update CloudVision Portal Configlets.
 
-Module added in version 2.9
+Module added in version 3.0.0
 
 
 
@@ -61,7 +61,7 @@ The following options may be specified for this module:
     <td>configlets_notes<br/><div style="font-size: small;"></div></td>
     <td>str</td>
     <td>no</td>
-    <td>Managed by Ansible AVD</td>
+    <td>Managed by Ansible</td>
     <td></td>
     <td>
         <div>Add a note to the configlets.</div>
