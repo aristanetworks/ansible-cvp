@@ -418,6 +418,38 @@ class CvConfigletTools(object):
         return response_data
 
     def delete(self, to_delete):
+        """
+        delete Function to delete a list of configlets on Cloudvision server
+
+        Delete all configlets listed in to_create list.
+        to_create list shall contain a list of dict with:
+        - configlet name
+        - configlet key
+
+        Example
+        -------
+        >>> delete = self.delete(to_delete=to_delete)
+        >>> print(update.result)
+        [
+            {
+                'success': True,
+                'changed': True,
+                'taskIds': [],
+                '01TRAINING-alias_count': 1,
+                '01TRAINING-alias_list': ['configlet deleted']
+            }
+        ]
+
+        Parameters
+        ----------
+        to_create : list
+            List of configlets to delete
+
+        Returns
+        -------
+        list
+            List of CvApiResult instances
+        """
         response_data = list()
         for configlet in to_delete:
             change_response = CvApiResult(action_name=configlet['name'])
