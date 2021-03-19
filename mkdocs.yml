@@ -6,7 +6,8 @@ site_favicon: docs/_media/favicon.ico
 theme:
   name: material
   features:
-    - instant
+    - navigation.instant
+    - toc.integrate
   highlightjs: true
   hljs_languages:
         - yaml
@@ -18,6 +19,33 @@ copyright: Copyright &copy; 2019 - 2020 Arista Networks
 repo_name: CVP on Github
 repo_url: https://github.com/aristanetworks/ansible-cvp
 use_directory_urls: true
+
+markdown_extensions:
+  - mdx_truly_sane_lists
+  - smarty
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - fontawesome_markdown
+  - admonition
+  - codehilite:
+      guess_lang: true
+  - toc:
+      separator: "-"
+      permalink: "#"
+      baselevel: 1
+
 nav:
   - Home: README.md
   - Getting Started: docs/getting-started.md
@@ -66,29 +94,3 @@ nav:
     - Ansible Galaxy page: https://galaxy.ansible.com/arista/cvp
     - Arista Validated Design Collection: https://www.avd.sh
     - Arista Automation Examples: https://aristanetworks.github.io/netdevops-examples/
-
-markdown_extensions:
-  - mdx_truly_sane_lists
-  - smarty
-  - pymdownx.arithmatex
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.inlinehilite
-  - pymdownx.magiclink
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
-  - fontawesome_markdown
-  - admonition
-  - codehilite:
-      guess_lang: true
-  - toc:
-      separator: "-"
-      permalink: "#"
-      baselevel: 1
