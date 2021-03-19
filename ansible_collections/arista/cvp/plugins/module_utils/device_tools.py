@@ -532,6 +532,26 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN):
+        """
+        manager Main entry point to support all device
+
+        Entry point to start following actions:
+        - Deploy devices
+        - Move deployed devices to container
+        - Attach configlets to devices
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            User defined inventory from Ansible input
+        search_mode : str, optional
+            Search method to get device information from Cloudvision, by default FQDN
+
+        Returns
+        -------
+        dict
+            All Ansible output formated using CvAnsibleResponse
+        """
         response = CvAnsibleResponse()
 
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
