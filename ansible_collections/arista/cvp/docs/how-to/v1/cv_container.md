@@ -15,17 +15,17 @@ The `cv_container` actions are based on cv_facts results:
 
 ## Inputs
 
-Full documentation available in [module section](../modules/cv_container.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_container.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ### Input variables
 
 - Container Name
 - Parent container where to create container
 - Optional list of devices to attach to container
-    - Devices must be already registered
-    - Should not be in undefined container
+  - Devices must be already registered
+  - Should not be in undefined container
 - Optional list of configlets to attach to container:
-    - Configlets must be created previously
+  - Configlets must be created previously
 
 ```yaml
 ---
@@ -55,9 +55,9 @@ CVP_CONTAINERS:
 #### Optional inputs
 
 - `mode`: Define how to manage container available on CV and not in customer topology
-    - `merge` (default)
-    - `delete`
-    - `override`
+  - `merge` (default)
+  - `delete`
+  - `override`
 
 ```yaml
 - name: lab04 - cv_container lab

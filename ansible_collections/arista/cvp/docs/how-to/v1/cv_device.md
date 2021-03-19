@@ -15,7 +15,7 @@ The `cv_device` actions are based on cv_facts results:
 
 ## Inputs
 
-Full documentation available in [module section](../modules/cv_container.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_container.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ### Input variables
 
