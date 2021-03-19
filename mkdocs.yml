@@ -31,15 +31,16 @@ nav:
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
-    - Version v1:
+    - CV Authentication: docs/how-to/cvp-authentication.md
+    - CV Modules version v1:
       - Get Facts: docs/how-to/cv_facts.md
       - Manage configlets: docs/how-to/v1/cv_configlet.md
       - Manage containers: docs/how-to/v1/cv_container.md
       - Manage devices: docs/how-to/v1/cv_device.md
-    - Version v3:
-      - Manage configlets: docs/how-to/v3/cv_configlet.md
-      - Manage containers: docs/how-to/v3/cv_container.md
-      - Manage devices: docs/how-to/v3/cv_device.md
+    - CV Modules version v3:
+      - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
+      - Manage containers: docs/how-to/v3/cv_container_v3.md
+      - Manage devices: docs/how-to/v3/cv_device_v3.md
     - Development tips & tricks: docs/installation/development.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
@@ -48,13 +49,13 @@ nav:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
-    - Version 1:
+    - Modules version 1:
       - Module cv_facts: docs/modules/cv_facts.rst.md
       - Module cv_configlet: docs/modules/cv_configlet.rst.md
       - Module cv_container: docs/modules/cv_container.rst.md
       - Module cv_device: docs/modules/cv_device.rst.md
       - Module cv_task: docs/modules/cv_task.rst.md
-    - Version 3:
+    - Module version 3:
       - Module cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
       - Module cv_container_v3: docs/modules/cv_container_v3.rst.md
       - Module cv_device_v3: docs/modules/cv_device_v3.rst.md

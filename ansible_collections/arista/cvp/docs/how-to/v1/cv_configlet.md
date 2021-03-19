@@ -15,7 +15,7 @@ To import content from text file, leverage template rendering and then load from
 
 ## Inputs
 
-Full documentation available in [module section](../modules/cv_configlet.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_configlet.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ## Input variables
 
@@ -27,7 +27,7 @@ CVP_CONFIGLETS:
 
 ## Module inputs
 
-#### Required Inputs
+### Required Inputs
 
 - `cvp_facts`: Facts from cv_facts
 - `configlets`: List of configlets to create
@@ -36,7 +36,6 @@ CVP_CONFIGLETS:
 #### Optional inputs
 
 - `state`: Keyword to define if we want to create(present) or delete(absent) configlets
-
 
 ```yaml
 ---
