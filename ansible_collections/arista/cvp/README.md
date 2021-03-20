@@ -62,7 +62,7 @@ Installing 'arista.cvp:1.1.0' to '~/.ansible/collections/ansible_collections/ari
 
 Complete installation process is available on [repository website](docs/installation/requirements/)
 
-## Modules overview
+## Collection overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
@@ -164,7 +164,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ## License
 
@@ -172,7 +172,7 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
-Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
+The best platform for general feedback, assistance, and other discussion is our [GitHub discussions](). To report a bug or request a specific feature, please open a [GitHub issue](https://github.com/aristanetworks/ansible-cvp/issues) using the appropriate template.
 
 ## Contributing
 
