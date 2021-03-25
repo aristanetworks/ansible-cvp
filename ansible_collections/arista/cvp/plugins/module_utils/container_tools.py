@@ -119,17 +119,25 @@ class ContainerInput(object):
             List of containers
         """
         result_list = list()
-        MODULE_LOGGER.info(
-            "Build list of container to create from %s", str(self.__topology))
+        MODULE_LOGGER.info("Build list of container to create from %s", str(self.__topology))
+    
         while(len(result_list) < len(self.__topology)):
+            container_added = False
             for container in self.__topology:
-                if self.__topology[container][self.__parent_field] == self.__root_name:
+                if self.__topology[container][self.__parent_field] == self.__root_name and container not in result_list:
+                    container_added = True
                     result_list.append(container)
                 if (any(element == self.__topology[container][self.__parent_field] for element in result_list)
                         and container not in result_list):
+                    container_added = True
                     result_list.append(container)
-        MODULE_LOGGER.info(
-            'List of containers to apply on CV: %s', str(result_list))
+            if container_added == False:
+                containerWithoutParent = [item for item in self.__topology.keys() if item not in result_list]
+                MODULE_LOGGER.warning('Breaking the while loop as the following containers dont have a parent present in the topology %s', str(containerWithoutParent))
+                result_list = result_list + containerWithoutParent
+                break
+
+        MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
         return result_list
 
     def get_parent(self, container_name: str, parent_key: str = FIELD_PARENT_NAME):
@@ -618,8 +626,9 @@ class CvContainerTools(object):
                             change_result.changed = True
                             change_result.count += 1
         else:
-            MODULE_LOGGER.debug('Parent container (%s) is missing for container %s', str(
-                parent), str(container))
+            message = "Parent container ({}) is missing for container {}".format(str(parent), str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
         MODULE_LOGGER.info('Container creation result is %s', str(change_result.results))
         return change_result
 
