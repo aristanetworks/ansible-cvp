@@ -13,10 +13,12 @@ Module added in version 2.9
 CloudVison Portal Device compares the list of Devices in in devices
 against cvp-facts then adds, resets, or updates them as appropriate. If
 a device is in cvp\_facts but not in devices it will be reset to factory
-defaults If a device is in devices but not in cvp\_facts it will be
-provisioned If a device is in both devices and cvp\_facts its configlets
-and imageBundles will be compared and updated with the version in
-devices if the two are different.
+defaults in ZTP mode If a device is in devices but not in cvp\_facts it
+will be provisioned If a device is in both devices and cvp\_facts its
+configlets and imageBundles will be compared and updated with the
+version in devices if the two are different. Warning - reset means
+devices will be erased and will run full ZTP process. Use this function
+with caution \!
 
 ## Module-specific Options
 
@@ -122,7 +124,7 @@ The following options may be specified for this module:
           register: cvp_facts
           tags:
             - always
-    
+
         - name: "Configure devices on {{inventory_hostname}}"
           tags:
             - provision
@@ -131,7 +133,7 @@ The following options may be specified for this module:
             cvp_facts: '{{cvp_facts.ansible_facts}}'
             device_filter: ['veos']
           register: cvp_device
-    
+
         - name: "Add configlet to device on {{inventory_hostname}}"
           tags:
             - provision
@@ -145,8 +147,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.
