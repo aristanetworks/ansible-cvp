@@ -78,29 +78,26 @@ The following options may be specified for this module:
 </tr>
 
 <tr>
-<td>state<br/><div style="font-size: small;"></div></td>
-<td>str</td>
-<td>no</td>
-<td>present</td>
-<td><ul><li>present</li><li>absent</li></ul></td>
-<td>
-    <div>If absent, configlets will be removed from CVP if they are not bound</div>
-    <div>to either a container or a device.</div>
-    <div>If present, configlets will be created or updated.</div>
-</td>
-</tr>
-
-<tr>
 <td>filter_mode<br/><div style="font-size: small;"></div></td>
 <td>str</td>
 <td>no</td>
 <td>loose</td>
 <td><ul><li>loose</li><li>strict</li></ul></td>
 <td>
-    <div>If loose, a match is when a configlet matches a substring of a</div>
-    <div>configlet defined in the filter</div>
-    <div>If strict, a match is when a configlet exactly matches a</div>
-    <div>configlet defined in the filter</div>
+    <div>If loose, a match is when a configlet matches a substring of a configlet defined in the filter</div>
+    <div>If strict, a match is when a configlet exactly matches a configlet defined in the filter</div>
+</td>
+</tr>
+
+<tr>
+<td>state<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>present</td>
+<td><ul><li>present</li><li>absent</li></ul></td>
+<td>
+    <div>If absent, configlets will be removed from CVP if they are not bound to either a container or a device.</div>
+    <div>If present, configlets will be created or updated.</div>
 </td>
 </tr>
 
@@ -124,7 +121,7 @@ The following options may be specified for this module:
             - always
           cv_facts:
           register: cvp_facts
-    
+
         - name: 'Create configlets on CVP {{inventory_hostname}}.'
           tags:
             - provision
@@ -138,8 +135,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.

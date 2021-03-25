@@ -75,17 +75,17 @@ The following options may be specified for this module:
     - name: Execute all tasks registered in cvp_configlets variable
       arista.cvp.cv_task:
         tasks: "{{ cvp_configlets.data.tasks }}"
-    
+
     - name: Cancel a list of pending tasks
       arista.cvp.cv_task:
         tasks: "{{ cvp_configlets.data.tasks }}"
         state: cancelled
-    
+
     # Execute all pending tasks and wait for completion for 60 seconds
     # In order to get a list of all pending tasks, execute cv_facts first
     - name: Update cvp facts
       arista.cvp.cv_facts:
-    
+
     - name: Execute all pending tasks and wait for completion for 60 seconds
       arista.cvp.cv_task:
         port: '{{cvp_port}}'
@@ -95,8 +95,3 @@ The following options may be specified for this module:
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.
