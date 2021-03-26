@@ -46,16 +46,21 @@ options:
     default: 'present'
     choices: ['present', 'absent']
     type: str
+  apply_mode:
+    description: Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.
+    required: false
+    default: 'loose'
+    choices: ['loose', 'strict']
 '''
 
 EXAMPLES = r'''
+# task in loose mode (default)
 ---
 - name: Device Management in Cloudvision
   hosts: cv_server
   connection: local
   gather_facts: false
   collections:
-    - arista.avd
     - arista.cvp
   vars:
     CVP_DEVICES:
@@ -68,6 +73,27 @@ EXAMPLES = r'''
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES}}'
         state: present
+
+# task in strict mode
+---
+- name: Device Management in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_DEVICES:
+      - fqdn: CV-ANSIBLE-EOS01
+        parentContainerName: ANSIBLE
+        configlets:
+            - 'CV-EOS-ANSIBLE01'
+  tasks:
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: present
+        apply_mode: strict
 '''
 
 import logging
@@ -115,8 +141,12 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'absent'])
-    )
+                   choices=['present', 'absent']),
+        apply_mode=dict(type='str',
+                        required=False,
+                        default='loose',
+                        choices=['loose', 'strict'])
+        )
 
     # Make module global to use it in all functions when required
     ansible_module = AnsibleModule(argument_spec=argument_spec,
@@ -146,7 +176,7 @@ def main():
     cv_topology = CvDeviceTools(
         cv_connection=cv_client, ansible_module=ansible_module, check_mode=ansible_module.check_mode)
 
-    result = cv_topology.manager(user_inventory=user_topology)
+    result = cv_topology.manager(user_inventory=user_topology, apply_mode=ansible_module.params['apply_mode'])
 
     ansible_module.exit_json(**result)
 
