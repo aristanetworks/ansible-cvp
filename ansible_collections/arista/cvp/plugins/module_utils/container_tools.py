@@ -683,9 +683,9 @@ class CvContainerTools(object):
                 try:
                     resp = self.__cvp_client.api.delete_container(
                         container_name=container, container_key=container_id, parent_key=parent_id, parent_name=parent)
-                except CvpApiError:
+                except CvpApiError as e:
                     # Add Ansible error management
-                    message = "Error deleting container {} on CV. Exception: {}".format(str(container), str(CvpApiError))
+                    message = "Error deleting container {} on CV. Exception: {}".format(str(container), str(e))
                     MODULE_LOGGER.error(message)
                     self.__ansible.fail_json(msg=message)
                 else:
