@@ -567,7 +567,9 @@ class CvContainerTools(object):
         try:
             cv_data = self.__cvp_client.api.get_container_by_name(name=container_name)
         except (CvpApiError, CvpClientError) as error:
-            MODULE_LOGGER.error('Error getting information for container %s: %s', str(container_name), str(error))
+            message = "Error getting information for container {}: {}".format(str(container_name), str(error))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
             return True
         if cv_data is not None:
             return True
