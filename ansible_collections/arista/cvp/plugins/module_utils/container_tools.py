@@ -665,11 +665,11 @@ class CvContainerTools(object):
         resp = dict()
         change_result = CvApiResult(action_name=container)
         if self.is_container_exists(container_name=container) == False:
-            message = "Container {} does not exist on CVP - unable to delete it".format(str(container))
+            message = "Unable to delete container {}: container does not exist on CVP".format(str(container))
             MODULE_LOGGER.error(message)
             self.__ansible.fail_json(msg=message)
         elif self.is_empty(container_name=container) == False:
-            message = "Container {} is not empty: either it has child container(s) or device(s) attached on CVP - unable to delete it".format(str(container))
+            message = "Unable to delete container {}: container not empty - either it has child container(s) or some device(s) are attached on CVP".format(str(container))
             MODULE_LOGGER.error(message)
             self.__ansible.fail_json(msg=message)
         else:
