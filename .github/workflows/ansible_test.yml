@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
       - 'devel'
+      - 'devel-v3.x'
       - 'releases/**'
 jobs:
   'ansible-test':
