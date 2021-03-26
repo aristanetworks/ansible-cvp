@@ -51,6 +51,7 @@ options:
     required: false
     default: 'loose'
     choices: ['loose', 'strict']
+    type: str
 '''
 
 EXAMPLES = r'''

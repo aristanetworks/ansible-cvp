@@ -46,7 +46,7 @@ SCHEMA_CV_CONFIGLET = {
     ],
     "type": "object",
     "patternProperties": {
-        "^[A-Za-z0-9\\._%\\+-]+$": {
+        "^[A-Za-z0-9\\s\\._%\\+-]+$": {
             "type": "string"
         }
     },
@@ -149,6 +149,10 @@ SCHEMA_CV_DEVICE = {
                         "title": "The configlets schema",
                         "description": "An explanation about the purpose of this instance.",
                         "default": [],
+                        "contains": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
                         "examples": [
                             [
                                 "01TRAINING-01",
