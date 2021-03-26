@@ -659,7 +659,15 @@ class CvContainerTools(object):
         """
         resp = dict()
         change_result = CvApiResult(action_name=container)
-        if self.is_container_exists(container_name=container) and self.is_empty(container_name=container):
+        if self.is_container_exists(container_name=container) == False:
+            message = "Container {} does not exist on CVP - unable to delete it".format(str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
+        elif self.is_empty(container_name=container) == False:
+            message = "Container {} is not empty: either it has child container(s) or device(s) attached on CVP - unable to delete it".format(str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
+        else:
             parent_id = self.get_container_id(container_name=parent)
             container_id = self.get_container_id(container_name=container)
             # ----------------------------------------------------------------#
@@ -677,16 +685,15 @@ class CvContainerTools(object):
                         container_name=container, container_key=container_id, parent_key=parent_id, parent_name=parent)
                 except CvpApiError:
                     # Add Ansible error management
-                    MODULE_LOGGER.error(
-                        "Error deleting container %s on CV", str(container))
+                    message = "Error deleting container {} on CV. Exception: {}".format(str(container), str(CvpApiError))
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 else:
                     if resp['data']['status'] == "success":
                         change_result.taskIds = resp['data']['taskIds']
                         change_result.success = True
                         change_result.changed = True
                         change_result.count += 1
-        else:
-            MODULE_LOGGER.debug('Container is missing %s', str(container))
         return change_result
 
     def configlets_attach(self, container: str, configlets: List[str], strict: bool = False):
