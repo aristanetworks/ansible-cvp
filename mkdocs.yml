@@ -60,12 +60,12 @@ nav:
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
     - CV Authentication: docs/how-to/cvp-authentication.md
-    - CV Modules version v1:
+    - CV Modules v1:
       - Get Facts: docs/how-to/cv_facts.md
       - Manage configlets: docs/how-to/v1/cv_configlet.md
       - Manage containers: docs/how-to/v1/cv_container.md
       - Manage devices: docs/how-to/v1/cv_device.md
-    - CV Modules version v3:
+    - CV Modules v3:
       - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
       - Manage containers: docs/how-to/v3/cv_container_v3.md
       - Manage devices: docs/how-to/v3/cv_device_v3.md

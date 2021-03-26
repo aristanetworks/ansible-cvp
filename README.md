@@ -166,7 +166,7 @@ __Ansible version:__
 
 __3rd party Python libraries:__
 
-- [cvprac](https://github.com/aristanetworks/cvprac) version >= `1.0.4`
+- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.5`
 - requests >= `2.22.0`
 - jsonschema `3.2.0`
 - treelib `1.5.5` (for modules in version 1)
