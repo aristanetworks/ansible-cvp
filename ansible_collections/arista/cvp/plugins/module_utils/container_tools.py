@@ -435,9 +435,10 @@ class CvContainerTools(object):
                     container=container,
                     create_task=save_topology
                 )
-            except CvpApiError:
-                MODULE_LOGGER.error('Error removing configlets %s from container %s', str(
-                    configlets), str(container))
+            except CvpApiError as e:
+                message = "Error removing configlets {} from container {}. Exception: {}".format(str(configlets), str(container), str(e))
+                MODULE_LOGGER.error(message)
+                self.__ansible.fail_json(msg=message)
             else:
                 if 'data' in resp and resp['data']['status'] == 'success':
                     change_response.taskIds = resp['data']['taskIds']
