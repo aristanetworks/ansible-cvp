@@ -617,10 +617,11 @@ class CvContainerTools(object):
                     try:
                         resp = self.__cvp_client.api.add_container(
                             container_name=container, parent_key=parent_id, parent_name=parent)
-                    except CvpApiError:
+                    except CvpApiError as e:
                         # Add Ansible error management
-                        MODULE_LOGGER.error(
-                            "Error creating container %s on CV", str(container))
+                        message = "Error creating container {} on CV. Exception: {}".format(str(container), str(e))
+                        MODULE_LOGGER.error(message)
+                        self.__ansible.fail_json(msg=message)
                     else:
                         if resp['data']['status'] == "success":
                             change_result.taskIds = resp['data']['taskIds']
