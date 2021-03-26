@@ -394,32 +394,40 @@ class CvDeviceTools(object):
                     and current_container_info['name'] != UNDEFINED_CONTAINER):
                 # get configlet information from CV
                 configlets_info = list()
+                configlets_attached = self.get_device_configlets(
+                    device_lookup=device.fqdn)
+                MODULE_LOGGER.debug('Attached configlets for device {}: {}'.format(device.fqdn, configlets_attached))
+                # Pour chaque configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
+                    if configlet not in [x.name for x in configlets_attached]:
+                        configlets_info.append(
+                            self.__get_configlet_info(configlet_name=configlet))
                 # get device facts from CV
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn)
                 # Attach configlets to device
-                try:
-                    resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                           dev=device_facts,
-                                                                           new_configlets=configlets_info,
-                                                                           create_task=True)
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error applying configlets to device')
-                    result_data.success = False
+                if len(configlets_info) > 0:
+                    try:
+                        resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
+                                                                            dev=device_facts,
+                                                                            new_configlets=configlets_info,
+                                                                            create_task=True)
+                    except CvpApiError:
+                        MODULE_LOGGER.error('Error applying configlets to device')
+                        result_data.success = False
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data']['taskIds']
+                            result_data.add_entry('{} adds {}'.format(
+                                device.fqdn, *device.configlets))
+                    result_data.add_entry('{} to {}'.format(device.fqdn, *device.container))
                 else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
-                        result_data.success = True
-                        result_data.taskIds = resp['data']['taskIds']
-                        result_data.add_entry('{} adds {}'.format(
-                            device.fqdn, *device.configlets))
-                result_data.add_entry('{} to {}'.format(device.fqdn, *device.container))
-            results.append(result_data)
+                    result_data.name = result_data.name + ' - nothing attached'
+                results.append(result_data)
         return results
 
     def detach_configlets(self, user_inventory: DeviceInventory):
@@ -443,23 +451,26 @@ class CvDeviceTools(object):
                         result_data.name = result_data.name + ' - {}'.format(configlet.name)
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
-                try:
-                    resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
-                                                                              dev=device_facts,
-                                                                              del_configlets=configlets_to_remove,
-                                                                              create_task=True)
-                except CvpApiError as catch_error:
-                    MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
-                    self.__ansible.fail_json(msg='Error detaching configlets from device {}: {}'.format(device.fqdn, catch_error))
-                    result_data.success = False
+                if len(configlets_to_remove) > 0:
+                    try:
+                        resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
+                                                                                dev=device_facts,
+                                                                                del_configlets=configlets_to_remove,
+                                                                                create_task=True)
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error detaching configlets from device {}: {}'.format(device.fqdn, catch_error))
+                        result_data.success = False
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data']['taskIds']
+                            result_data.add_entry('{} removes {}'.format(
+                                device.fqdn, *device.configlets))
                 else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
-                        result_data.success = True
-                        result_data.taskIds = resp['data']['taskIds']
-                        result_data.add_entry('{} removes {}'.format(
-                            device.fqdn, *device.configlets))
-            results.append(result_data)
+                    result_data.name = result_data.name + ' - nothing detached'
+                results.append(result_data)
         return results
 
     def remove_configlets(self, user_inventory: DeviceInventory):
