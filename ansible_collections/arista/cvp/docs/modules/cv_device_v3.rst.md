@@ -30,6 +30,17 @@ The following options may be specified for this module:
 </tr>
 
 <tr>
+<td>apply_mode<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>loose</td>
+<td><ul><li>loose</li><li>strict</li></ul></td>
+<td>
+    <div>Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.</div>
+</td>
+</tr>
+
+<tr>
 <td>devices<br/><div style="font-size: small;"></div></td>
 <td>list</td>
 <td>yes</td>
@@ -56,13 +67,13 @@ The following options may be specified for this module:
 
 ## Examples:
 
+    # task in loose mode (default)
     ---
     - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
       gather_facts: false
       collections:
-        - arista.avd
         - arista.cvp
       vars:
         CVP_DEVICES:
@@ -75,6 +86,27 @@ The following options may be specified for this module:
           arista.cvp.cv_device_v3:
             devices: '{{CVP_DEVICES}}'
             state: present
+
+    # task in strict mode
+    ---
+    - name: Device Management in Cloudvision
+      hosts: cv_server
+      connection: local
+      gather_facts: false
+      collections:
+        - arista.cvp
+      vars:
+        CVP_DEVICES:
+          - fqdn: CV-ANSIBLE-EOS01
+            parentContainerName: ANSIBLE
+            configlets:
+                - 'CV-EOS-ANSIBLE01'
+      tasks:
+        - name: "Configure devices on {{inventory_hostname}}"
+          arista.cvp.cv_device_v3:
+            devices: '{{CVP_DEVICES}}'
+            state: present
+            apply_mode: strict
 
 ### Author
 
