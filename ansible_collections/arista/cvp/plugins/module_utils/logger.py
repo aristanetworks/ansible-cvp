@@ -22,6 +22,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import logging
+import uuid
 import os
 from logging.handlers import RotatingFileHandler  # noqa # pylint: disable=unused-import
 
@@ -42,9 +43,10 @@ LOGLEVEL = LEVELS.get(LOGGING_LEVEL, logging.NOTSET)
 LOGGING_LEVEL_URLLIB3 = os.getenv('ANSIBLE_CVP_LOG_APICALL', 'error')
 LOGLEVEL_URLLIB3 = LEVELS.get(LOGGING_LEVEL_URLLIB3, logging.ERROR)
 
-# Get filename to write logs / default /temp/arista.cvp.debug.log
+# Get filename to write logs / default /temp/arista.cvp.debug-<uuid>.log
+DEFAULT_LOG_FILE = '/tmp/arista.cvp.debug.' + str(uuid.uuid4()) + '.log'
 LOGGING_FILENAME = os.getenv(
-    'ANSIBLE_CVP_LOG_FILE', '/tmp/arista.cvp.debug.log')
+    'ANSIBLE_CVP_LOG_FILE', DEFAULT_LOG_FILE)
 
 # set a format which is simpler for console use
 formatter = logging.Formatter(

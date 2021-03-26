@@ -1,7 +1,5 @@
 # Ansible Modules for Arista CloudVision Platform
 
-> All the CV communication are now managed by [__cvprac library__](https://github.com/aristanetworks/cvprac). So a new [requirements](#dependencies) __MUST__ be installed first before any code execution.
-
 ## About
 
 [Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks.
@@ -12,34 +10,45 @@
 
 ## Requirements
 
-__Arista CloudVision:__
+### Arista CloudVision
+
+Current active branch:
+
+- __CVP 2020.2.x and onward__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
+
+!!! info
+    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
+
+__Old and unsupported versions:__
 
 - __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
 - __CVP 2020.1.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
-- __CVP 2020.2.x__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
 
-__Python:__
+### Python
 
-- Python 3.x
+- Python >=3.6
 
-__Additional Python Libraries required:__
+### Additional Python Libraries required
 
-- python `3.6` and higher
+__Ansible version:__
+
 - ansible >= `2.9.0`
-- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.4`
-- requests >= `2.22.0`
-- treelib `1.5.5`
-- jsonschema `3.2.0`
 
-__Supported Ansible Versions:__ ansible 2.9 or later
+__3rd party Python libraries:__
+
+- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.5`
+- requests >= `2.22.0`
+- jsonschema `3.2.0`
+- treelib `1.5.5` (for modules in version 1)
 
 ## Installation
 
 ```shell
-pip install requests>=2.22.0
+pip install ansible_collections/arista/cvp/requirements.txt
+
+# For modules in version 1
 pip install treelib>=1.5.5
-pip install cvprac==1.0.4
 ```
 
 Ansible galaxy hosts all stable version of this collection. Installation from ansible-galaxy is the most convenient approach for consuming `arista.cvp` content
@@ -53,11 +62,20 @@ Installing 'arista.cvp:1.1.0' to '~/.ansible/collections/ansible_collections/ari
 
 Complete installation process is available on [repository website](docs/installation/requirements/)
 
-## Modules overview
+## Collection overview
 
 This repository provides content for Ansible's collection __arista.cvp__ with following content:
 
-__List of available modules:__
+### List of available modules
+
+__Version 3:__
+
+- [__arista.cvp.cv_configlet_v3__](docs/modules/cv_configlet_v3.rst/) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
+- [__arista.cvp.cv_task_v3__](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
+
+__Legacy / Version 1:__
 
 - [__arista.cvp.cv_facts__](docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
@@ -65,7 +83,7 @@ __List of available modules:__
 - [__arista.cvp.cv_device__](docs/modules/cv_device.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](docs/modules/cv_task.rst/) - Run tasks created on CVP.
 
-__List of available roles:__
+### List of available roles
 
 - [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
 - [__arista.cvp.configlet_sync__](roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
@@ -82,45 +100,59 @@ Below is a very basic example to build a container topology on a CloudVision pla
 
 ```yaml
 ---
-- name: Playbook to demonstrate cv_container module.
-  hosts: cvp
+- name: Playbook to demonstrate cvp modules.
+  hosts: cv_server
   connection: local
   gather_facts: no
   collections:
     - arista.cvp
   vars:
+    # Configlet definition
+    device_configuration:
+      mlag-01a-config: "{{lookup('file', './config-router-mlag01a.conf')}}"
+      mlag-01b-config: "{{lookup('file', './config-router-mlag01b.conf')}}"
+
+    # Container definition
     containers_provision:
         Fabric:
-          parent_container: Tenant
+          parentContainerName: Tenant
         Spines:
-          parent_container: Fabric
+          parentContainerName: Fabric
         Leaves:
-          parent_container: Fabric
+          parentContainerName: Fabric
           configlets:
               - alias
-          devices:
-            - veos03
         MLAG01:
-          parent_container: Leaves
-          devices:
-            - veos01
-            - veos02
-  tasks:
-    - name: "Gather CVP facts from {{inventory_hostname}}"
-      cv_facts:
-      register: cvp_facts
+          parentContainerName: Leaves
 
+    # Device definition
+    devices_provision:
+      - fqdn: mlag-01a
+        parentContainerName: 'MLAG01'
+        configlets:
+            - 'mlag-01a-config'
+        systemMacAddress: '50:8d:00:e3:78:aa'
+      - fqdn: mlag-01b
+        parentContainerName: 'MLAG01'
+        configlets:
+            - 'mlag-01b-config'
+        systemMacAddress: '50:8d:00:e3:78:bb'
+
+  tasks:
     - name: "Build Container topology on {{inventory_hostname}}"
-      cv_container:
+      arista.cvp.cv_container_v3:
         topology: '{{containers_provision}}'
-        cvp_facts: '{{cvp_facts.ansible_facts}}'
+
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{devices_provision}}'
 ```
 
 As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ```ini
 [development]
-cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
+cv_server  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
 
 [development:vars]
 ansible_connection=httpapi
@@ -132,7 +164,7 @@ ansible_network_os=eos
 ansible_httpapi_port=443
 ```
 
-As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/connection/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
+As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ## License
 
@@ -140,7 +172,7 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
-Support for this `arista.cvp` collection is provided by the community directly in this repository. Easiest way to get support is to open [an issue](https://github.com/aristanetworks/ansible-cvp/issues).
+The best platform for general feedback, assistance, and other discussion is our [GitHub discussions](). To report a bug or request a specific feature, please open a [GitHub issue](https://github.com/aristanetworks/ansible-cvp/issues) using the appropriate template.
 
 ## Contributing
 
