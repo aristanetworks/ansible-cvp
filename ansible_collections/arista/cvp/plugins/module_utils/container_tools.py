@@ -669,7 +669,7 @@ class CvContainerTools(object):
             MODULE_LOGGER.error(message)
             self.__ansible.fail_json(msg=message)
         elif self.is_empty(container_name=container) == False:
-            message = "Unable to delete container {}: container not empty - either it has child container(s) or some device(s) are attached on CVP".format(str(container))
+            message = "Unable to delete container {}: container not empty - either it has child container(s) or some device(s) are attached to it on CVP".format(str(container))
             MODULE_LOGGER.error(message)
             self.__ansible.fail_json(msg=message)
         else:
