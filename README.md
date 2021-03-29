@@ -56,10 +56,10 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 ### List of available modules
 
 - [__arista.cvp.cv_facts__](http://cvp.avd.sh/docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- [__arista.cvp.cv_configlet__](http://cvp.avd.sh/docs/modules/cv_configlet.md) -  Manage configlet configured on CVP.
-- [__arista.cvp.cv_container__](http://cvp.avd.sh/docs/modules/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
-- [__arista.cvp.cv_device__](http://cvp.avd.sh/docs/modules/cv_device.md) - Manage devices configured on CVP
-- [__arista.cvp.cv_task__](http://cvp.avd.sh/docs/modules/cv_task.md) - Run tasks created on CVP.
+- [__arista.cvp.cv_configlet__](http://cvp.avd.sh/docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container__](http://cvp.avd.sh/docs/modules/cv_container.rst/) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device__](http://cvp.avd.sh/docs/modules/cv_device.rst/) - Manage devices configured on CVP
+- [__arista.cvp.cv_task__](http://cvp.avd.sh/docs/modules/cv_task.rst/) - Run tasks created on CVP.
 
 ### List of available roles
 
