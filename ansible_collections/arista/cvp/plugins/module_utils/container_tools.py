@@ -41,7 +41,7 @@ except ImportError:
 #     HAS_JSONSCHEMA = True
 # except ImportError:
 #     HAS_JSONSCHEMA = False
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.container_tools_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')

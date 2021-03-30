@@ -40,7 +40,7 @@ except ImportError:
 #     HAS_JSONSCHEMA = True
 # except ImportError:
 #     HAS_JSONSCHEMA = False
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 try:
     import difflib
     HAS_DIFFLIB = True

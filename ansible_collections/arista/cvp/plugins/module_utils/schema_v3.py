@@ -194,65 +194,6 @@ SCHEMA_CV_DEVICE = {
     }
 }
 
-SCHEMA_CV_DEVICE_OLD = {
-    "type": "object",
-    "$schema": "http://json-schema.org/draft-03/schema",
-    "id": "#",
-    "title": "CV DEVICE SCHEMA",
-    "description": "The root schema to validate cv_device inputs",
-    "default": {},
-    "examples": [
-        {
-            "DC1-SPINE1": {
-                "name": "DC1-SPINE1",
-                "parentContainerName": "DC1_SPINES",
-                "configlets": [
-                    "AVD_DC1-SPINE1",
-                    "01TRAINING-01"
-                ],
-                "imageBundle": []
-            },
-            "DC1-SPINE2": {
-                "name": "DC1-SPINE1",
-                "parentContainerName": "DC1_SPINES",
-                "configlets": [
-                    "AVD_DC1-SPINE2",
-                    "01TRAINING-01"
-                ],
-                "imageBundle": []
-            }
-        }
-    ],
-    "patternProperties": {
-        "^[A-Za-z0-9\\._%\\+-]+$": {
-            "type": "object",
-            "properties": {
-                "parentContainerName": {
-                    "id": "parentContainerName",
-                    "type": "string",
-                    "required": True
-                },
-                "configlets": {
-                    "id": "configlets",
-                    "type": "array",
-                    "contains": {
-                        "type": "string"
-                    },
-                    "required": False
-                },
-                "imageBundle": {
-                    "id": "imageBundle",
-                    "type": "array",
-                    "contains": {
-                        "type": "string"
-                    },
-                    "required": False
-                },
-            }
-        }
-    }
-}
-
 # JSON Schema to represent CV_CONTAINER inputs.
 SCHEMA_CV_CONTAINER = {
     "type": "object",

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 # pylint: disable=bare-except
+# pylint: disable=logging-format-interpolation
+# flake8: noqa: W1202
 #
 # GNU General Public License v3.0+
 #
@@ -20,6 +22,7 @@
 #
 
 from __future__ import absolute_import, division, print_function
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 
 __metaclass__ = type
 
@@ -98,7 +101,6 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
 from ansible.module_utils.basic import AnsibleModule
 
 # List of Ansible default containers
@@ -841,7 +843,7 @@ def main():
 
     if not schema.validate_cv_inputs(user_json=module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
         MODULE_LOGGER.error("Invalid configlet input : %s",
-                            str(module.params['configlets']))
+                            str(module.params['topology']))
         module.fail_json(
             msg='Container input data are not compliant with module.')
 
