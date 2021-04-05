@@ -119,17 +119,25 @@ class ContainerInput(object):
             List of containers
         """
         result_list = list()
-        MODULE_LOGGER.info(
-            "Build list of container to create from %s", str(self.__topology))
+        MODULE_LOGGER.info("Build list of container to create from %s", str(self.__topology))
+    
         while(len(result_list) < len(self.__topology)):
+            container_added = False
             for container in self.__topology:
-                if self.__topology[container][self.__parent_field] == self.__root_name:
+                if self.__topology[container][self.__parent_field] == self.__root_name and container not in result_list:
+                    container_added = True
                     result_list.append(container)
                 if (any(element == self.__topology[container][self.__parent_field] for element in result_list)
                         and container not in result_list):
+                    container_added = True
                     result_list.append(container)
-        MODULE_LOGGER.info(
-            'List of containers to apply on CV: %s', str(result_list))
+            if container_added == False:
+                containerWithoutParent = [item for item in self.__topology.keys() if item not in result_list]
+                MODULE_LOGGER.warning('Breaking the while loop as the following containers dont have a parent present in the topology %s', str(containerWithoutParent))
+                result_list = result_list + containerWithoutParent
+                break
+
+        MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
         return result_list
 
     def get_parent(self, container_name: str, parent_key: str = FIELD_PARENT_NAME):
@@ -364,9 +372,10 @@ class CvContainerTools(object):
                         container=container,
                         create_task=save_topology
                     )
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error configuring configlets %s to container %s', str(
-                        configlets), str(container))
+                except CvpApiError as e:
+                    message = "Error configuring configlets {} to container {}. Exception: {}".format(str(configlets), str(container), str(e))
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 else:
                     if 'data' in resp and resp['data']['status'] == 'success':
                         # We assume there is a change as API does not provide information
@@ -426,9 +435,10 @@ class CvContainerTools(object):
                     container=container,
                     create_task=save_topology
                 )
-            except CvpApiError:
-                MODULE_LOGGER.error('Error removing configlets %s from container %s', str(
-                    configlets), str(container))
+            except CvpApiError as e:
+                message = "Error removing configlets {} from container {}. Exception: {}".format(str(configlets), str(container), str(e))
+                MODULE_LOGGER.error(message)
+                self.__ansible.fail_json(msg=message)
             else:
                 if 'data' in resp and resp['data']['status'] == 'success':
                     change_response.taskIds = resp['data']['taskIds']
@@ -557,7 +567,9 @@ class CvContainerTools(object):
         try:
             cv_data = self.__cvp_client.api.get_container_by_name(name=container_name)
         except (CvpApiError, CvpClientError) as error:
-            MODULE_LOGGER.error('Error getting information for container %s: %s', str(container_name), str(error))
+            message = "Error getting information for container {}: {}".format(str(container_name), str(error))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
             return True
         if cv_data is not None:
             return True
@@ -607,10 +619,11 @@ class CvContainerTools(object):
                     try:
                         resp = self.__cvp_client.api.add_container(
                             container_name=container, parent_key=parent_id, parent_name=parent)
-                    except CvpApiError:
+                    except CvpApiError as e:
                         # Add Ansible error management
-                        MODULE_LOGGER.error(
-                            "Error creating container %s on CV", str(container))
+                        message = "Error creating container {} on CV. Exception: {}".format(str(container), str(e))
+                        MODULE_LOGGER.error(message)
+                        self.__ansible.fail_json(msg=message)
                     else:
                         if resp['data']['status'] == "success":
                             change_result.taskIds = resp['data']['taskIds']
@@ -618,8 +631,9 @@ class CvContainerTools(object):
                             change_result.changed = True
                             change_result.count += 1
         else:
-            MODULE_LOGGER.debug('Parent container (%s) is missing for container %s', str(
-                parent), str(container))
+            message = "Parent container ({}) is missing for container {}".format(str(parent), str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
         MODULE_LOGGER.info('Container creation result is %s', str(change_result.results))
         return change_result
 
@@ -650,7 +664,15 @@ class CvContainerTools(object):
         """
         resp = dict()
         change_result = CvApiResult(action_name=container)
-        if self.is_container_exists(container_name=container) and self.is_empty(container_name=container):
+        if self.is_container_exists(container_name=container) == False:
+            message = "Unable to delete container {}: container does not exist on CVP".format(str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
+        elif self.is_empty(container_name=container) == False:
+            message = "Unable to delete container {}: container not empty - either it has child container(s) or some device(s) are attached to it on CVP".format(str(container))
+            MODULE_LOGGER.error(message)
+            self.__ansible.fail_json(msg=message)
+        else:
             parent_id = self.get_container_id(container_name=parent)
             container_id = self.get_container_id(container_name=container)
             # ----------------------------------------------------------------#
@@ -666,18 +688,17 @@ class CvContainerTools(object):
                 try:
                     resp = self.__cvp_client.api.delete_container(
                         container_name=container, container_key=container_id, parent_key=parent_id, parent_name=parent)
-                except CvpApiError:
+                except CvpApiError as e:
                     # Add Ansible error management
-                    MODULE_LOGGER.error(
-                        "Error deleting container %s on CV", str(container))
+                    message = "Error deleting container {} on CV. Exception: {}".format(str(container), str(e))
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 else:
                     if resp['data']['status'] == "success":
                         change_result.taskIds = resp['data']['taskIds']
                         change_result.success = True
                         change_result.changed = True
                         change_result.count += 1
-        else:
-            MODULE_LOGGER.debug('Container is missing %s', str(container))
         return change_result
 
     def configlets_attach(self, container: str, configlets: List[str], strict: bool = False):

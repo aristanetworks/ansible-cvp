@@ -23,21 +23,48 @@ __metaclass__ = type
 
 
 class CvElement(object):
+    """
+    CvElement Structure for simple element representation
+    """
 
     def __init__(self, cv_data: dict):
         self.__cv_data = cv_data
 
     @property
     def name(self):
+        """
+        name Getter to expose NAME field
+
+        Returns
+        -------
+        str
+            Value of KEY field
+        """
         if 'name' in self.__cv_data:
             return self.__cv_data['name']
         return None
 
     @property
     def key(self):
+        """
+        key Getter to expose KEY field
+
+        Returns
+        -------
+        str
+            Value of the KEY field
+        """
         if 'key' in self.__cv_data:
             return self.__cv_data['key']
 
     @property
     def data(self):
+        """
+        data Getter to expose structure in a dict way
+
+        Returns
+        -------
+        dict
+            A dict with KEY and NAME data
+        """
         return self.__cv_data

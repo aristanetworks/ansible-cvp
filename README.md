@@ -11,7 +11,7 @@
 - [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
   - [About](#about)
   - [List of CVP versions supported](#list-of-cvp-versions-supported)
-  - [Modules overview](#modules-overview)
+  - [Collection overview](#collection-overview)
     - [List of available modules](#list-of-available-modules)
     - [List of available roles](#list-of-available-roles)
   - [Example](#example)
