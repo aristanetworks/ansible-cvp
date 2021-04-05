@@ -211,9 +211,9 @@ def create_new_containers(module, intended, facts):
     topology_root = tools_tree.get_root_container(containers_fact=facts['containers'])
     # Build ordered list of containers to create: from Tenant to leaves.
     container_intended_tree = tools_tree.tree_build_from_dict(containers=intended, root=topology_root)
-    MODULE_LOGGER.debug("The ordered dict is: {}".format(container_intended_tree))
+    MODULE_LOGGER.debug("The ordered dict is: %s", str(container_intended_tree))
     container_intended_ordered_list = tools_tree.tree_to_list(json_data=container_intended_tree, myList=list())
-    MODULE_LOGGER.debug("The ordered list is: {}".format(container_intended_ordered_list))
+    MODULE_LOGGER.debug("The ordered list is: %s", str(container_intended_ordered_list))
     # Parse ordered list of container and check if they are configured on CVP.
     # If not, then call container creation process.
     for container_name in container_intended_ordered_list:
@@ -841,7 +841,7 @@ def main():
 
     if not schema.validate_cv_inputs(user_json=module.params['topology'], schema=schema.SCHEMA_CV_CONTAINER):
         MODULE_LOGGER.error("Invalid configlet input : %s",
-                            str(module.params['configlets']))
+                            str(module.params['topology']))
         module.fail_json(
             msg='Container input data are not compliant with module.')
 

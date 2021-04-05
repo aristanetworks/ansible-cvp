@@ -16,10 +16,11 @@ Synopsis
 
 CloudVison Portal Device compares the list of Devices in
 in devices against cvp-facts then adds, resets, or updates them as appropriate.
-If a device is in cvp_facts but not in devices it will be reset to factory defaults
+If a device is in cvp_facts but not in devices it will be reset to factory defaults in ZTP mode
 If a device is in devices but not in cvp_facts it will be provisioned
 If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
 and updated with the version in devices if the two are different.
+Warning - reset means devices will be erased and will run full ZTP process. Use this function with caution !
 
 
 .. _module-specific-options-label:

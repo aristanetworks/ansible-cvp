@@ -46,7 +46,7 @@ SCHEMA_CV_CONFIGLET = {
     ],
     "type": "object",
     "patternProperties": {
-        "^[A-Za-z0-9\\._%\\+-]+$": {
+        "^[A-Za-z0-9\\s\\._%\\+-]+$": {
             "type": "string"
         }
     },
