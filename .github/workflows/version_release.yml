@@ -7,7 +7,7 @@ jobs:
   local_build:
     name: Build Ansible CVP Collection
     runs-on: ubuntu-latest
-    container: avdteam/base:centos-8
+    container: avdteam/base:3.6-v1.0
     steps:
       - uses: actions/checkout@v2
 

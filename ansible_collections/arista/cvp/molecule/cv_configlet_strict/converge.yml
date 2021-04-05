@@ -1,6 +1,6 @@
 ---
-- name: cv_configlet unit testing
-  hosts: cv_server
+- name: cv_configlet unit testing in strict filter mode
+  hosts: localhost
   # connection: local
   gather_facts: false
   collections:
@@ -8,7 +8,10 @@
   vars:
     CVP_CONFIGLETS:
       01TRAINING-01: "alias a110 show version"
+      01TRAINING: "alias a120 show version"
+      01TRAINING-101: "alias a120 show version"
       01TRAINING-02: "alias a102 show version"
+      01TRAINING-03: "alias a102 show version"
       02DEMO-01: "alias a102 show version"
   tasks:
     - name: "Include offline facts"
@@ -18,8 +21,9 @@
       arista.cvp.cv_configlet:
         cvp_facts: "{{ansible_facts}}"
         configlets: "{{CVP_CONFIGLETS}}"
-        configlet_filter: ["TRAINING"]
+        configlet_filter: ["TRAINING","01TRAINING-01","01TRAINING-02"]
         state: present
+        filter_mode: strict
       register: CVP_CONFIGLET_RESULT
       check_mode: yes
 
@@ -30,7 +34,7 @@
     - name: "Check deletion process"
       assert:
         that:
-          - "CVP_CONFIGLET_RESULT.data.deleted[0]['01TRAINING-alias'] is defined"
+          - "CVP_CONFIGLET_RESULT.data.deleted[0] is not defined "
         fail_msg: "Incorrect deletion process"
         success_msg: "Deletion process is running as expected"
 
@@ -38,6 +42,7 @@
       assert:
         that:
           - "CVP_CONFIGLET_RESULT.data.new[0]['01TRAINING-02'] is defined"
+          - "CVP_CONFIGLET_RESULT.data.new[0]['01TRAINING-101'] is not defined"
         fail_msg: "Incorrect creation process"
         success_msg: "Creation process is running as expected"
 
@@ -47,3 +52,11 @@
           - "CVP_CONFIGLET_RESULT.data.updated[0]['01TRAINING-01'] is defined"
         fail_msg: "Incorrect update process"
         success_msg: "Update process is running as expected"
+
+    - name: "Check filter processing"
+      assert:
+        that:
+          - "CVP_CONFIGLET_RESULT.data.updated[0]['01TRAINING'] is not defined"
+          - "CVP_CONFIGLET_RESULT.data.updated[0]['01TRAINING-101'] is not defined"
+        fail_msg: "Incorrect filter processing"
+        success_msg: "Filter processing is running as expected"

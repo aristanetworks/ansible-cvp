@@ -60,10 +60,20 @@ options:
     required: false
     default: ['none']
     type: list
+  filter_mode:
+    description:
+        - If loose, a match is when a configlet matches a substring of a
+          configlet defined in the filter
+        - If strict, a match is when a configlet exactly matches a
+          configlet defined in the filter
+    required: false
+    default: 'loose'
+    choices: ['loose', 'strict']
+    type: str
   state:
     description:
         - If absent, configlets will be removed from CVP if they are not bound
-        - to either a container or a device.
+          to either a container or a device.
         - If present, configlets will be created or updated.
     required: false
     default: 'present'
@@ -196,7 +206,8 @@ def build_configlets_list(module):
     # Place to save configlets to delete from CV
     intend['delete'] = list()
 
-    MODULE_LOGGER.info(' * build_configlets_list - configlet filter is: %s', str(module.params['configlet_filter']))
+    MODULE_LOGGER.debug(' * build_configlets_list - configlet filter is: %s', str(module.params['configlet_filter']))
+    MODULE_LOGGER.debug(' * build_configlets_list - filter_mode is set to: %s', str(module.params['filter_mode']))
 
     for configlet in module.params['cvp_facts']['configlets']:
         # Only deal with Static configlets not Configletbuilders or
@@ -204,7 +215,8 @@ def build_configlets_list(module):
         # Include only configlets that match filter elements "all" or any user's defined names.
         if configlet['type'] == 'Static':
             if tools.match_filter(input=configlet['name'],
-                                  filter=module.params['configlet_filter']):
+                                  filter=module.params['configlet_filter'],
+                                  filter_mode=module.params['filter_mode']):
                 # Test if module should keep, update or delete configlet
                 if configlet['name'] in module.params['configlets']:
                     # Scenario where configlet module is set to create.
@@ -231,7 +243,9 @@ def build_configlets_list(module):
         for cvp_configlet in module.params['cvp_facts']['configlets']:
             if str(ansible_configlet) == str(cvp_configlet['name']):
                 found = True
-        if not found and tools.match_filter(input=ansible_configlet, filter=module.params['configlet_filter']):
+        if not found and tools.match_filter(input=ansible_configlet,
+                                            filter=module.params['configlet_filter'],
+                                            filter_mode=module.params['filter_mode']):
             intend['create'].append(
                 {'data': {'name': str(ansible_configlet)},
                  'config': str(module.params['configlets'][ansible_configlet])}
@@ -648,6 +662,10 @@ def main():
         configlets_notes=dict(type='str', default='Managed by Ansible', required=False),
         cvp_facts=dict(type='dict', required=True),
         configlet_filter=dict(type='list', default='none'),
+        filter_mode=dict(type='str',
+                         choices=['loose', 'strict'],
+                         default='loose',
+                         required=False),
         state=dict(type='str',
                    choices=['present', 'absent'],
                    default='present',

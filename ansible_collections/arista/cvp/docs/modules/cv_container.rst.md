@@ -101,13 +101,11 @@ The following options may be specified for this module:
           register: cvp_facts
         - name: "Build Container topology on {{inventory_hostname}}"
           cv_container:
-            cvp_facts: '{{cvp_facts.ansible_facts}}'
+            cvp_facts: "{{cvp_facts.ansible_facts}}"
+            topology: "{{containers}}"
+            mode: merge
+          register: CVP_CONTAINERS_RESULT
 
 ### Author
 
   - EMEA AS Team (@aristanetworks)
-
-### Status
-
-This module is flagged as **preview** which means that it is not
-guaranteed to have a backwards compatible interface.

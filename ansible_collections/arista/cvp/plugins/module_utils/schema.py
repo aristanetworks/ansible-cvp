@@ -18,6 +18,9 @@
 # limitations under the License.
 #
 
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
 import logging
 try:
     import jsonschema
@@ -43,7 +46,7 @@ SCHEMA_CV_CONFIGLET = {
     ],
     "type": "object",
     "patternProperties": {
-        "^[A-Za-z0-9\\._%\\+-]+$": {
+        "^[A-Za-z0-9\\s\\._%\\+-]+$": {
             "type": "string"
         }
     },

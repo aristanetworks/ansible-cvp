@@ -6,18 +6,16 @@ scenario:
     - converge
     # - verify
 driver:
-  name: docker
+  name: delegated
 platforms:
   - name: cv_server
-    image: avdteam/base:3.6
+    image: avdteam/base:3.6-v1.0
     pre_build_image: true
     managed: true
     groups:
       - CVP
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_COLLECTIONS_PATHS: '../../../../../'
   config_options:
     defaults:
       jinja2_extensions: 'jinja2.ext.loopcontrols,jinja2.ext.do,jinja2.ext.i18n'

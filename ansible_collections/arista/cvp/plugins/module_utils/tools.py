@@ -61,12 +61,12 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
           T is the total number of elements in both sequences,
           M is the number of matches.
           Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
-        unified diff list
-          Code	Meaning
-          '- '	line unique to sequence 1
-          '+ '	line unique to sequence 2
-          '  '	line common to both sequences
-          '? '	line not present in either input sequence
+          unified diff list
+          Code    Meaning
+          '- '    line unique to sequence 1
+          '+ '    line unique to sequence 2
+          '  '    line common to both sequences
+          '? '    line not present in either input sequence
     """
     fromlines = str_cleanup_line_ending(content=fromText).splitlines(1)
     tolines = str_cleanup_line_ending(content=toText).splitlines(1)
@@ -95,7 +95,7 @@ def isIterable(testing_object=None):
         return False
 
 
-def match_filter(input, filter, default_always='all'):
+def match_filter(input, filter, default_always='all', filter_mode='loose'):
     """
     Function to test if an object match userdefined filter.
 
@@ -113,6 +113,8 @@ def match_filter(input, filter, default_always='all'):
         Keyword to consider as always matching, by default 'all'
     default_none : str, optional
         Keyword to consider as never matching, by default 'none'
+    filter_mode : str, optional
+        Keyword to consider substring match or exact match
 
     Returns
     -------
@@ -128,12 +130,22 @@ def match_filter(input, filter, default_always='all'):
 
     LOGGER.debug(" * is_in_filter - filter is %s", str(filter))
     LOGGER.debug(" * is_in_filter - input string is %s", str(input))
+    LOGGER.debug(" * is_in_filter - filter_mode is %s", str(filter_mode))
 
     if "all" in filter:
         return True
-    elif any(element in input for element in filter):
-        return True
-    LOGGER.debug(" * is_in_filter - NOT matched")
+
+    if filter_mode == "strict":
+        LOGGER.debug(" * is_in_filter - doing strict validation between %s and %s", str(input), str(filter))
+        for element in filter:
+            if element == input:
+                return True
+    else:
+        LOGGER.debug(" * is_in_filter - doing loose validation between %s and %s", str(input), str(filter))
+        if any(element in input for element in filter):
+            return True
+
+    LOGGER.debug(" * is_in_filter - NOT matched is %s", str(input))
     return False
 
 
