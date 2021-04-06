@@ -120,7 +120,7 @@ class ContainerInput(object):
         """
         result_list = list()
         MODULE_LOGGER.info("Build list of container to create from %s", str(self.__topology))
-    
+
         while(len(result_list) < len(self.__topology)):
             container_added = False
             for container in self.__topology:

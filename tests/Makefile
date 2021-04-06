@@ -17,6 +17,10 @@ server = "cv-server-ip"
 endef
 export AUTH_CONFIG
 
+.PHONY: ci-test
+ci-test:  ## Run Pytest with only local tests and no API interactions
+	pytest -v --cov-report term:skip-covered -m 'generic' unit
+
 .PHONY: test
 test:  ## Run Pytest in verbose mode with CLI report only for basic tests
 	pytest $(TEST_OPT) $(COVERAGE) $(TAG) $(TEST_PATH)
