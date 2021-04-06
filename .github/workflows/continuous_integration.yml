@@ -13,17 +13,14 @@ on:
       - "v*"
 
 env:
-  GOVER: 1.15.8
-  CGO_ENABLED: 0
-  MKDOCS_MATERIAL_VER: 7.1.0
   ANSIBLE_VERSION: 2.9.6
 
 jobs:
   file-changes:
     runs-on: ubuntu-20.04
     outputs:
-      code_v1: ${{ steps.filter.outputs.code }}
-      code_v3: ${{ steps.filter.outputs.code }}
+      code_v1: ${{ steps.filter.outputs.code_v1 }}
+      code_v3: ${{ steps.filter.outputs.code_v3 }}
       docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v2
@@ -54,6 +51,7 @@ jobs:
               - 'ansible_collections/arista/cvp/plugins/modules/cv_container_v3.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_device_v3.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_task_v3.py'
+              - '.github/workflows/continuous_integration.yml'
             docs:
               - 'mkdocs.yml'
               - 'ansible_collections/arista/cvp/docs/**'
