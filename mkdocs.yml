@@ -61,7 +61,7 @@ nav:
   - How-To:
     - CV Authentication: docs/how-to/cvp-authentication.md
     - CV Modules v1:
-      - Get Facts: docs/how-to/cv_facts.md
+      - Get Facts: docs/how-to/v1/cv_facts.md
       - Manage configlets: docs/how-to/v1/cv_configlet.md
       - Manage containers: docs/how-to/v1/cv_container.md
       - Manage devices: docs/how-to/v1/cv_device.md
@@ -78,11 +78,11 @@ nav:
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
     - Modules version 1:
-      - Module cv_facts: docs/modules/cv_facts.rst.md
-      - Module cv_configlet: docs/modules/cv_configlet.rst.md
-      - Module cv_container: docs/modules/cv_container.rst.md
-      - Module cv_device: docs/modules/cv_device.rst.md
-      - Module cv_task: docs/modules/cv_task.rst.md
+      - Module cv_facts: docs/modules/cv_facts.rst/
+      - Module cv_configlet: docs/modules/cv_configlet.rst/
+      - Module cv_container: docs/modules/cv_container.rst/
+      - Module cv_device: docs/modules/cv_device.rst/
+      # - Module cv_task: docs/modules/cv_task.rst/
     - Module version 3:
       - Module cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
       - Module cv_container_v3: docs/modules/cv_container_v3.rst.md
