@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 sys.path.append("../")
 import logging
-from ansible_collections.arista.cvp.plugins.module_utils.schema import validate_cv_inputs
-from ansible_collections.arista.cvp.plugins.module_utils.schema import SCHEMA_CV_CONTAINER
+from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import validate_cv_inputs
+from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER
 import pytest
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
