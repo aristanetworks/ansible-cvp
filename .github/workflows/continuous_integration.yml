@@ -107,7 +107,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'Execute pytest validation'
         run: |
-          pip install ansible_collections/arista/cvp/requirements-dev.txt
+          pip install -r ansible_collections/arista/cvp/requirements-dev.txt
           cd tests/
           make ci-test
 
