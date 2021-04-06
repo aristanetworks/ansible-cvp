@@ -531,7 +531,7 @@ class CvDeviceTools(object):
     # Workers function
     # ------------------------------------------ #
 
-    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN):
+    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN, apply_mode: str = 'loose'):
         """
         manager Main entry point to support all device
 
@@ -546,6 +546,8 @@ class CvDeviceTools(object):
             User defined inventory from Ansible input
         search_mode : str, optional
             Search method to get device information from Cloudvision, by default FQDN
+        apply_mode: str, optional
+            Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
 
         Returns
         -------
@@ -556,7 +558,8 @@ class CvDeviceTools(object):
 
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
-        cv_configlets_add = CvManagerResult(builder_name='configlets_attached')
+        cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
+        cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
 
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
@@ -576,11 +579,19 @@ class CvDeviceTools(object):
         action_result = self.apply_configlets(user_inventory=user_inventory)
         if action_result is not None:
             for update in action_result:
-                cv_configlets_add.add_change(change=update)
+                cv_configlets_attach.add_change(change=update)
+
+        if apply_mode == 'strict':
+            action_result = self.detach_configlets(
+                user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_configlets_detach.add_change(change=update)
 
         response.add_manager(cv_move)
         response.add_manager(cv_deploy)
-        response.add_manager(cv_configlets_add)
+        response.add_manager(cv_configlets_attach)
+        response.add_manager(cv_configlets_detach)
 
         return response.content
 
@@ -604,7 +615,7 @@ class CvDeviceTools(object):
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
-                action_name='{}_to_{}'.format(*device.fqdn, *device.container))
+                action_name='{}_to_{}'.format(device.fqdn, *device.container))
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(
                     container_name=device.container)
@@ -626,14 +637,14 @@ class CvDeviceTools(object):
                                                                                  create_task=True)
                         except CvpApiError:
                             MODULE_LOGGER.error('Error to move device {} to container {}'.format(
-                                *device.fqdn, *device.container))
+                                device.fqdn, *device.container))
                         else:
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp['data']['taskIds']
 
-                    result_data.add_entry('{}-{}'.format(*device.fqdn, *device.container))
+                    result_data.add_entry('{}-{}'.format(device.fqdn, *device.container))
             results.append(result_data)
         return results
 
@@ -657,39 +668,90 @@ class CvDeviceTools(object):
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
-                action_name='{}_configlet_attached'.format(*device.fqdn))
+                action_name='{}_configlet_attached'.format(device.fqdn))
             current_container_info = self.get_container_current(
                 device_mac=device.system_mac)
             if (device.configlets is not None
                     and current_container_info['name'] != UNDEFINED_CONTAINER):
                 # get configlet information from CV
                 configlets_info = list()
+                configlets_attached = self.get_device_configlets(
+                    device_lookup=device.fqdn)
+                MODULE_LOGGER.debug('Attached configlets for device {}: {}'.format(device.fqdn, configlets_attached))
+                # Pour chaque configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
+                    if configlet not in [x.name for x in configlets_attached]:
+                        configlets_info.append(
+                            self.__get_configlet_info(configlet_name=configlet))
                 # get device facts from CV
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn)
                 # Attach configlets to device
-                try:
-                    resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                           dev=device_facts,
-                                                                           new_configlets=configlets_info,
-                                                                           create_task=True)
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error applying configlets to device')
-                    result_data.success = False
+                if len(configlets_info) > 0:
+                    try:
+                        resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
+                                                                            dev=device_facts,
+                                                                            new_configlets=configlets_info,
+                                                                            create_task=True)
+                    except CvpApiError:
+                        MODULE_LOGGER.error('Error applying configlets to device')
+                        result_data.success = False
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data']['taskIds']
+                            result_data.add_entry('{} adds {}'.format(
+                                device.fqdn, *device.configlets))
+                    result_data.add_entry('{} to {}'.format(device.fqdn, *device.container))
                 else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
-                        result_data.success = True
-                        result_data.taskIds = resp['data']['taskIds']
-                        result_data.add_entry('{} adds {}'.format(
-                            *device.fqdn, *device.configlets))
-                result_data.add_entry('{} to {}'.format(*device.fqdn, *device.container))
-            results.append(result_data)
+                    result_data.name = result_data.name + ' - nothing attached'
+                results.append(result_data)
+        return results
+
+    def detach_configlets(self, user_inventory: DeviceInventory):
+        results = list()
+        for device in user_inventory.devices:
+            result_data = CvApiResult(
+                action_name='{}_configlet_removed'.format(device.fqdn))
+            # FIXME: Should we ignore devices listed with no configlets ?
+            if device.configlets is not None:
+                device_facts = dict()
+                if self.__search_by == FIELD_FQDN:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn)
+                configlets_to_remove = list()
+                # get list of configured configlets
+                configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
+                # Pour chaque configlet not in the list, add to list of configlets to remove
+                for configlet in configlets_attached:
+                    if configlet.name not in device.configlets:
+                        MODULE_LOGGER.info('Configlet %s is added to detach list', str(configlet.name))
+                        result_data.name = result_data.name + ' - {}'.format(configlet.name)
+                        configlets_to_remove.append(configlet.data)
+                # Detach configlets to device
+                if len(configlets_to_remove) > 0:
+                    try:
+                        resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
+                                                                                dev=device_facts,
+                                                                                del_configlets=configlets_to_remove,
+                                                                                create_task=True)
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error detaching configlets from device {}: {}'.format(device.fqdn, catch_error))
+                        result_data.success = False
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data']['taskIds']
+                            result_data.add_entry('{} removes {}'.format(
+                                device.fqdn, *device.configlets))
+                else:
+                    result_data.name = result_data.name + ' - nothing detached'
+                results.append(result_data)
         return results
 
     def remove_configlets(self, user_inventory: DeviceInventory):
@@ -698,7 +760,7 @@ class CvDeviceTools(object):
         """
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name='{}_configlet_removed'.format(*device.fqdn))
+            result_data = CvApiResult(action_name='{}_configlet_removed'.format(device.fqdn))
             if device.configlets is not None:
                 # get configlet information from CV
                 configlets_info = list()
@@ -712,7 +774,7 @@ class CvDeviceTools(object):
                         fqdn=device.fqdn)
                 # Attach configlets to device
                 try:
-                    resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.apply_configlets',
+                    resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.remove_configlets',
                                                                               dev=device_facts,
                                                                               del_configlets=configlets_info,
                                                                               create_task=True)
@@ -725,7 +787,7 @@ class CvDeviceTools(object):
                         result_data.success = True
                         result_data.taskIds = resp['data']['taskIds']
                         result_data.add_entry('{} removes {}'.format(
-                            *device.fqdn, *device.configlets))
+                            device.fqdn, *device.configlets))
             results.append(result_data)
         return results
 
@@ -749,7 +811,7 @@ class CvDeviceTools(object):
         """
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name='{}_deployed'.format(*device.fqdn))
+            result_data = CvApiResult(action_name='{}_deployed'.format(device.fqdn))
             if device.system_mac is not None:
                 configlets_info = list()
                 for configlet in device.configlets:
@@ -759,7 +821,7 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {} is currently under {}'.format(
-                    *device.fqdn, *current_container_info['name']))
+                    device.fqdn, *current_container_info['name']))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
                 if (current_container_info['name'] == 'Undefined'):
                     if self.__check_mode:
@@ -779,8 +841,8 @@ class CvDeviceTools(object):
                                                                       create_task=True)
                         except CvpApiError as error:
                             self.__ansible.fail_json(msg='Error to deploy device {} to container {}'.format(
-                                *device.fqdn, *device.container))
-                            MODULE_LOGGER.critical('Error deploying device {} : {}'.format(*device.fqdn, *error))
+                                device.fqdn, *device.container))
+                            MODULE_LOGGER.critical('Error deploying device {} : {}'.format(device.fqdn, *error))
                         else:
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
@@ -788,7 +850,7 @@ class CvDeviceTools(object):
                                 result_data.taskIds = resp['data']['taskIds']
 
                     result_data.add_entry('{} deployed to {}'.format(
-                        *device.fqdn, *device.container))
+                        device.fqdn, *device.container))
             results.append(result_data)
         return results
 

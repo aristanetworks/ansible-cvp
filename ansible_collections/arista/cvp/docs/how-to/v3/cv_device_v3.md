@@ -35,11 +35,22 @@ CVP_DEVICES:
 #### Optional inputs
 
 - `state`: Define if module should `create`(default) or `delete` devices from CV
+- `apply_mode`: Define how configlets configured to the devices are managed by ansible:
+  - `loose` (default): Configure new configlets to device and __ignore__ configlet already configured but not listed.
+  - `strict`: Configure new configlets to device and __remove__ configlet already configured but not listed.
 
 ```yaml
+# Use default loose apply_mode
 - name: "Configure devices on {{inventory_hostname}}"
   arista.cvp.cv_device_v3:
     devices: "{{CVP_DEVICES}}"
+  register: CVP_DEVICES_RESULTS
+
+# Use strict apply_mode
+- name: "Configure devices on {{inventory_hostname}}"
+  arista.cvp.cv_device_v3:
+    devices: "{{CVP_DEVICES}}"
+    apply_mode: strict
   register: CVP_DEVICES_RESULTS
 ```
 
@@ -57,11 +68,20 @@ msg:
     changed: true
     configlets_attached_count: 2
     configlets_attached_list:
-    - C_configlet_attached
+    - CV-ANSIBLE-EOS01_configlet_attached - CV-EOS-ANSIBLE01
     diff: {}
     success: true
     taskIds:
-    - '460'
+    - '469'
+  configlets_detached:
+    changed: true
+    configlets_detached_count: 1
+    configlets_detached_list:
+    - CV-ANSIBLE-EOS01_configlet_removed - 01DEMO-alias - 01TRAINING-alias
+    diff: {}
+    success: true
+    taskIds:
+    - '469'
   devices_deployed:
     changed: false
     devices_deployed_count: 0
@@ -70,15 +90,15 @@ msg:
     success: false
     taskIds: []
   devices_moved:
-    changed: true
-    devices_moved_count: 1
-    devices_moved_list:
-    - C_to_V
+    changed: false
+    devices_moved_count: 0
+    devices_moved_list: []
     diff: {}
-    success: true
+    success: false
     taskIds: []
   failed: false
   success: true
   taskIds:
-  - '460'
+  - '469'
+
 ```
