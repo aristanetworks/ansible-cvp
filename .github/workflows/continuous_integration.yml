@@ -67,8 +67,7 @@ jobs:
 
   ansible_test:
     name: Run ansible-test validation
-    runs-on: ubuntu-latest
-    container: avdteam/base:3.6-v2.0
+    runs-on: ubuntu-16.04
     needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/tags/v')
     env:
