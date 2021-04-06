@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: avdteam/base:3.6-v1.0
     needs: file-changes
-    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1
+    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
     steps:
       - uses: actions/checkout@v2
       - uses: pre-commit/action@v2.0.2
@@ -118,6 +118,7 @@ jobs:
           make ci-test
 
   molecule:
+    name: Validate code V2 with Molecule
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
@@ -129,7 +130,7 @@ jobs:
           - cv_configlet_loose
           - cv_configlet_strict
           - cv_device
-    needs: [file-changes, pre_commit, ansible_test]
+    needs: [ file-changes, pre_commit, ansible_test ]
     if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: 'set environment variables'
@@ -150,10 +151,10 @@ jobs:
           check_git: true
           check_git_enforced: false
 
-  offline_validation:
-    name: 'Validate mkdoc content'
+  offline_link_check:
+    name: 'Validate mkdoc links'
     runs-on: ubuntu-20.04
-    needs: [file-changes, pre_commit]
+    needs: [ file-changes ]
     if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v2
