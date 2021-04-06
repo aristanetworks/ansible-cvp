@@ -1,0 +1,25 @@
+---
+name: Modules v3 testing
+on:
+  pull_request:
+    branches:
+      - 'devel'
+      - 'devel-v3.x'
+      - 'releases/**'
+jobs:
+  pytest:
+    name: Validate code with Pytest
+    runs-on: ubuntu-latest
+    container: avdteam/base:3.6-v1.0
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+
+      - name: 'Execute pytest validation'
+        run: |
+          cd tests/
+          make ci-test

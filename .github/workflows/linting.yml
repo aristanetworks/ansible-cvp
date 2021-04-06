@@ -9,10 +9,4 @@ jobs:
     container: avdteam/base:3.6-v1.0
     steps:
       - uses: actions/checkout@v2
-      - name: test pre-commit
-        run: |
-          pip --no-cache-dir install -r development/requirements-dev.txt
-          pre-commit help
-      - name: 'Pre Commit run'
-        run: |
-          make pre-commit
+      - uses: pre-commit/action@v2.0.2
