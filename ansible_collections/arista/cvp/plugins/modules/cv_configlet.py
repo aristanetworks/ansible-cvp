@@ -117,7 +117,7 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')

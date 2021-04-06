@@ -3,6 +3,8 @@
 # pylint: disable=bare-except
 # pylint: disable=dangerous-default-value
 # flake8: noqa: W503
+# pylint: disable=logging-format-interpolation
+# flake8: noqa: W1202
 #
 # GNU General Public License v3.0+
 #
@@ -74,7 +76,7 @@ import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools, ContainerInput
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 try:
