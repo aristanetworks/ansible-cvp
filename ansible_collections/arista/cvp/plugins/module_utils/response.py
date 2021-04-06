@@ -244,6 +244,7 @@ class CvApiResult():
             List of TaskIds coming from Cloudvision
         """
         self.__taskIds += tasks
+        self.__taskIds = list(set(self.__taskIds))
 
     @property
     def results(self):
@@ -472,6 +473,7 @@ class CvAnsibleResponse():
             self.changed = api_manager.changed
         for task in api_manager.changes[FIELD_TASKIDS]:
             self.taskIds.append(task)
+        self.taskIds = list(set(self.taskIds))
 
     @property
     def content(self):
