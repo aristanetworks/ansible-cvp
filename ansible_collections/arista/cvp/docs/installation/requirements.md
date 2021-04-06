@@ -33,7 +33,7 @@ In a shell, run following command:
 $ pip3 install -r ansible_collections/arista/cvp/requirements.txt
 ```
 
-[`requirements.txt`](https://github.com/aristanetworks/ansible-avd/blob/devel/ansible_collections/arista/cvp/requirements.txt) has the following content:
+[`requirements.txt`](https://github.com/aristanetworks/ansible-avd/blob/devel/development/requirements.txt) has the following content:
 
 ```cfg
 netaddr==0.7.19
