@@ -114,7 +114,7 @@ except ImportError:
 
 # Ansible module preparation
 ansible_module: AnsibleModule
-
+# Logger creation
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device_v3')
 MODULE_LOGGER.info('Start cv_device_v3 module execution')
 
