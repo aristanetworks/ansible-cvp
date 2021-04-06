@@ -15,7 +15,7 @@ repos:
     - id: pylint # Use pylintrc file in repository
       name: Check for Linting error on Python files
       description: This hook runs pylint.
-      exclude: ansible_collections/arista/cvp/docs
+      exclude: ^.*(docs|tests).*
   - repo: https://github.com/adrienverge/yamllint.git
     rev: 'v1.23.0'
     hooks:

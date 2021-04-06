@@ -5,6 +5,8 @@
 # flake8: noqa: W503
 # pylint: disable=logging-format-interpolation
 # flake8: noqa: W1202
+# pylint: disable = duplicate-code
+# flake8: noqa: R0801
 #
 # GNU General Public License v3.0+
 #
