@@ -123,7 +123,7 @@ jobs:
     name: 'Validate mkdoc links'
     runs-on: ubuntu-20.04
     needs: [ file-changes ]
-    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v' || startsWith(github.ref, 'refs/releases')
+    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/releases')
     steps:
       - uses: actions/checkout@v2
       - name: 'start docker-compose stack'
