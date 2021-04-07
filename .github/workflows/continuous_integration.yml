@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: avdteam/base:3.6-v1.0
     needs: file-changes
-    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, refs/releases/t')
+    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, refs/relea')
     steps:
       - uses: actions/checkout@v2
       - uses: pre-commit/action@v2.0.2
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: avdteam/base:3.6-v1.0
     needs: [file-changes, pre_commit]
-    if: needs.file-changes.outputs.code_v3 == 'true' || startsWith(github.ref, refs/releases/t')
+    if: needs.file-changes.outputs.code_v3 == 'true' || startsWith(github.ref, refs/relea')
     steps:
       - name: 'set environment variables'
         run: |
@@ -101,7 +101,7 @@ jobs:
           - cv_configlet_strict
           - cv_device
     needs: [ file-changes, pre_commit ]
-    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, refs/releases/t')
+    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, refs/relea')
     steps:
       - name: 'set environment variables'
         run: |
@@ -125,7 +125,7 @@ jobs:
     name: 'Validate mkdoc links'
     runs-on: ubuntu-20.04
     needs: [ file-changes ]
-    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, refs/releases/t')
+    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, refs/relea')
     steps:
       - uses: actions/checkout@v2
       - name: 'start docker-compose stack'
@@ -158,7 +158,7 @@ jobs:
       - molecule
       - pytest
       - offline_link_check
-    if: startsWith(github.ref, refs/releases/t')
+    if: startsWith(github.ref, refs/relea')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
@@ -188,7 +188,7 @@ jobs:
     container: avdteam/base:3.6-v2.0
     needs:
       - ansible_test
-    if: startsWith(github.ref, refs/releases/t')
+    if: startsWith(github.ref, refs/relea')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
