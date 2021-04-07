@@ -21,6 +21,10 @@ export AUTH_CONFIG
 ci-test:  ## Run Pytest with only local tests and no API interactions
 	pytest -v --cov-report term:skip-covered -m 'generic' unit
 
+.PHONY: ci-report
+ci-report:  ## Run Pytest with reporting for CI
+	pytest $(REPORT) $(COVERAGE) -m 'generic' $(TEST_PATH)
+
 .PHONY: test
 test:  ## Run Pytest in verbose mode with CLI report only for basic tests
 	pytest $(TEST_OPT) $(COVERAGE) $(TAG) $(TEST_PATH)
