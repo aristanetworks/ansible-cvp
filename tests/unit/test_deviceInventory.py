@@ -12,6 +12,7 @@ import sys
 import pytest
 import logging
 sys.path.append("../")
+sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, DeviceInventory   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC   # noqa # pylint: disable=unused-import
 

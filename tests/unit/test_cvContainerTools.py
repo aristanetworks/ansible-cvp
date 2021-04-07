@@ -12,6 +12,7 @@ import sys
 import logging
 import pytest
 sys.path.append("../")
+sys.path.append("../../")
 # sys.path.append(".")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from cvprac.cvp_client import CvpClient

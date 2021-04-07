@@ -13,6 +13,7 @@ import logging
 from datetime import datetime
 import sys
 sys.path.append("../")
+sys.path.append("../../")
 # sys.path.append(".")
 from cvprac.cvp_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME

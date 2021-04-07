@@ -10,6 +10,7 @@ import sys
 import pytest
 import logging
 sys.path.append("../")
+sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse   # noqa # pylint: disable=unused-import
 
 # @pytest.mark.parametrize("api_action_name", ["","a","action","action_test",])
