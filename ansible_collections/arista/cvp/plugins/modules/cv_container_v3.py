@@ -109,7 +109,7 @@ def check_import():
 
 
 # ------------------------------------------------------------ #
-#               MAIN section -- starting point                 #
+#               MAIN section ** starting point                 #
 # ------------------------------------------------------------ #
 
 def main():
