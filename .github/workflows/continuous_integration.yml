@@ -1,5 +1,5 @@
 ---
-name: "PR testing"
+name: "Collection code testing"
 on:
   pull_request:
     branches:
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: avdteam/base:3.6-v1.0
     needs: file-changes
-    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
+    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/releases/'
     steps:
       - uses: actions/checkout@v2
       - uses: pre-commit/action@v2.0.2
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: avdteam/base:3.6-v1.0
     needs: [file-changes, pre_commit]
-    if: needs.file-changes.outputs.code_v3 == 'true'
+    if: needs.file-changes.outputs.code_v3 == 'true' || startsWith(github.ref, 'refs/releases/'
     steps:
       - name: 'set environment variables'
         run: |
@@ -99,7 +99,7 @@ jobs:
           - cv_configlet_strict
           - cv_device
     needs: [ file-changes, pre_commit ]
-    if: needs.file-changes.outputs.code_v1 == 'true'
+    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/releases/'
     steps:
       - name: 'set environment variables'
         run: |
@@ -123,7 +123,7 @@ jobs:
     name: 'Validate mkdoc links'
     runs-on: ubuntu-20.04
     needs: [ file-changes ]
-    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v')
+    if: needs.file-changes.outputs.docs == 'true' || startsWith(github.ref, 'refs/tags/v' || startsWith(github.ref, 'refs/releases/'
     steps:
       - uses: actions/checkout@v2
       - name: 'start docker-compose stack'
@@ -146,3 +146,56 @@ jobs:
       - name: 'stop docker-compose stack'
         run: |
           docker-compose -f docker-compose.yml down
+
+  ansible_test:
+    name: Run ansible-test validation
+    runs-on: ubuntu-latest
+    container: avdteam/base:3.6-v2.0
+    needs:
+      - file-changes
+      - molecule
+      - pytest
+      - offline_link_check
+    if: startsWith(github.ref, 'refs/releases/'
+    env:
+      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: [ 3.6 ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: 'Install Python requirements'
+        run: make install-requirements
+
+      - name: 'ansible-test linting'
+        run: make sanity-lint
+
+      - name: 'ansible-test import'
+        run: make sanity-import
+
+  build_package:
+    name: Build collection package
+    runs-on: ubuntu-latest
+    container: avdteam/base:3.6-v2.0
+    needs:
+      - ansible_test
+    if: startsWith(github.ref, 'refs/releases/'
+    env:
+      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'build ansible package'
+        run: make collection-build
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: ansible-package
+          path: ./*.tar.gz
