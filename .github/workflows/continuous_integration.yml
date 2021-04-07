@@ -47,6 +47,8 @@ jobs:
               - 'ansible_collections/arista/cvp/plugins/modules/cv_device_v3.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_task_v3.py'
               - '.github/workflows/continuous_integration.yml'
+              - 'tests/**/*'
+              - 'tests/*'
             docs:
               - 'mkdocs.yml'
               - 'ansible_collections/arista/cvp/docs/**'
