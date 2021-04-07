@@ -7,6 +7,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import sys
+sys.path.append(".")
 sys.path.append("../")
 sys.path.append("../../")
 import logging
