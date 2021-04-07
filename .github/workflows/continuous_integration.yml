@@ -3,10 +3,6 @@ name: "Collection code testing"
 on:
   push:
   pull_request:
-    branches:
-      - 'devel'
-      - 'devel-v3.x'
-      - 'releases/*'
 
 jobs:
   file-changes:
