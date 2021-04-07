@@ -86,6 +86,12 @@ jobs:
           cd tests/
           make config.py
           make ci-report
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pytest-report
+          path: |
+            ./tests/report.html
+            ./tests/htmlcov
 
   molecule:
     name: Validate code V2 with Molecule
@@ -120,6 +126,10 @@ jobs:
           ansible: "ansible==2.9.6"
           check_git: true
           check_git_enforced: false
+      - uses: actions/upload-artifact@v2
+        with:
+          name: molecule-${{ matrix.avd_scenario }}-artifacts
+          path: ansible_collections/arista/cvp/molecule/${{ matrix.avd_scenario }}
 
   offline_link_check:
     name: 'Validate mkdoc links'
