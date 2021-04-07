@@ -86,6 +86,8 @@ jobs:
       - name: 'Execute pytest validation'
         run: |
           cd tests/
+          make config.py
+          cp config.py unit/
           make ci-test
 
   molecule:
