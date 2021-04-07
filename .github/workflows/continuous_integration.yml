@@ -8,9 +8,6 @@ on:
       - 'devel-v3.x'
       - '!releases/*'
 
-env:
-  ANSIBLE_VERSION: 2.9.6
-
 jobs:
   file-changes:
     runs-on: ubuntu-20.04
@@ -34,6 +31,7 @@ jobs:
               - 'ansible_collections/arista/cvp/plugins/modules/cv_container.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_device.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_task.py'
+              - '.github/workflows/continuous_integration.yml'
             code_v3:
               - 'ansible_collections/arista/cvp/plugins/module_utils/configlet_tools.py'
               - 'ansible_collections/arista/cvp/plugins/module_utils/container_tools.py'
@@ -119,7 +117,7 @@ jobs:
           molecule_command: 'test'
           molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
           pip_file: ansible_collections/arista/cvp/requirements.txt
-          ansible: "ansible==${ANSIBLE_VERSION}"
+          ansible: "ansible==2.9.6"
           check_git: true
           check_git_enforced: false
 
