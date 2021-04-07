@@ -12,7 +12,7 @@ import pytest
 import logging
 from datetime import datetime
 import sys
-sys.path.append(".")
+sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from cvprac.cvp_client import CvpClient

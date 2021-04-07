@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 import pytest
 import logging
-sys.path.append(".")
+sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, DeviceInventory   # noqa # pylint: disable=unused-import

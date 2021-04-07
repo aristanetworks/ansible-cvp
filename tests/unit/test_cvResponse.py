@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 import pytest
 import logging
-sys.path.append(".")
+sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse   # noqa # pylint: disable=unused-import
