@@ -1,6 +1,7 @@
 ---
 name: "Collection code testing"
 on:
+  push:
   pull_request:
     branches:
       - 'devel'
