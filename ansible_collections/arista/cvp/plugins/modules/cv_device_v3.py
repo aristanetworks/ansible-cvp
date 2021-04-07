@@ -147,7 +147,7 @@ def main():
                         required=False,
                         default='loose',
                         choices=['loose', 'strict'])
-        )
+    )
 
     # Make module global to use it in all functions when required
     ansible_module = AnsibleModule(argument_spec=argument_spec,

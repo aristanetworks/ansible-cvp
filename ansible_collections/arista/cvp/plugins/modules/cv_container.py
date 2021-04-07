@@ -22,8 +22,6 @@
 #
 
 from __future__ import absolute_import, division, print_function
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
-
 __metaclass__ = type
 
 DOCUMENTATION = r'''
@@ -101,6 +99,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 from ansible.module_utils.basic import AnsibleModule
 
 # List of Ansible default containers
