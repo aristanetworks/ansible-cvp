@@ -19,7 +19,8 @@ export AUTH_CONFIG
 
 .PHONY: ci-test
 ci-test:  ## Run Pytest with only local tests and no API interactions
-	pytest -v --cov-report term:skip-covered -m 'generic' unit
+	cd unit
+	pytest -v --cov-report term:skip-covered -m 'generic'
 
 .PHONY: ci-report
 ci-report:  ## Run Pytest with reporting for CI
