@@ -195,15 +195,17 @@ jobs:
       matrix:
         python_version: [ 3.6 ]
     steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python_version }}
-
       - name: 'Install Python requirements'
         run: make install-requirements
-
       - name: 'ansible-test linting'
         run: |
           cd ansible_collections/arista/cvp/
