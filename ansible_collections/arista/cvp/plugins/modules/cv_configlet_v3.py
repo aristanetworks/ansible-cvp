@@ -99,6 +99,7 @@ except ImportError:
 # Ansible module preparation
 ansible_module: AnsibleModule
 
+# Logger startup
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
 
