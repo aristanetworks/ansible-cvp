@@ -170,17 +170,14 @@ jobs:
           sed -i 's/ansible-cvp\///g' docker-compose.yml
           docker-compose -f docker-compose.yml up -d webdoc_cvp
           docker-compose -f docker-compose.yml ps
-
       - name: 'test connectivity to mkdoc server'
         run: |
           sleep 30
           docker run --network container:webdoc_cvp appropriate/curl -s -I --retry 10 --retry-connrefused http://localhost:8000/
           docker ps
-
       - name: check links for 404
         run: |
           docker run --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8000 -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=30
-
       - name: 'stop docker-compose stack'
         run: |
           docker-compose -f docker-compose.yml down
@@ -189,10 +186,8 @@ jobs:
     name: Run ansible-test validation
     runs-on: ubuntu-16.04
     needs:
-      - file-changes
       - molecule_dhcp
       - pytest
-      - offline_link_check
     if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
