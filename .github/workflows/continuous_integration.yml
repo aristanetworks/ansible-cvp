@@ -1,15 +1,15 @@
 ---
-name: continuous_testing
+name: "PR testing"
 on:
   pull_request:
     branches:
       - 'devel'
       - 'devel-v3.x'
-      - 'releases/**'
-  push:
+      - '!releases/*'
 
 env:
   ANSIBLE_VERSION: 2.9.6
+  AVD_RUNNER: avdteam/base:3.6-v1.0
 
 jobs:
   file-changes:
@@ -58,56 +58,31 @@ jobs:
   pre_commit:
     name: Run pre-commit validation hooks
     runs-on: ubuntu-20.04
-    container: avdteam/base:3.6-v1.0
+    container: ${AVD_RUNNER}
     needs: file-changes
     if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
     steps:
       - uses: actions/checkout@v2
       - uses: pre-commit/action@v2.0.2
 
-  ansible_test:
-    name: Run ansible-test validation
-    runs-on: ubuntu-16.04
-    needs: [file-changes, pre_commit]
-    if: needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/tags/v')
-    env:
-      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
-      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
-    strategy:
-      fail-fast: true
-      matrix:
-        python_version: [ 3.6 ]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python_version }}
-
-      - name: 'Install Python requirements'
-        run: make install-requirements
-
-      - name: 'ansible-test linting'
-        run: make sanity-lint
-
-      - name: 'ansible-test import'
-        run: make sanity-import
-
   pytest:
     name: Validate code V3 with Pytest
     runs-on: ubuntu-20.04
-    container: avdteam/base:3.6-v1.0
+    container: ${AVD_RUNNER}
     needs: [file-changes, pre_commit, ansible_test]
-    if: needs.file-changes.outputs.code_v3 == 'true' || startsWith(github.ref, 'refs/tags/v')
+    if: needs.file-changes.outputs.code_v3 == 'true'
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
       - uses: actions/checkout@v2
-      - name: 'Execute pytest validation'
+      - name: Install requirements
         run: |
           pip install -r ansible_collections/arista/cvp/requirements-dev.txt
+          pip install -r ansible_collections/arista/cvp/requirements.txt
+      - name: 'Execute pytest validation'
+        run: |
           cd tests/
           make ci-test
 
@@ -125,7 +100,7 @@ jobs:
           - cv_configlet_strict
           - cv_device
     needs: [ file-changes, pre_commit, ansible_test ]
-    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/tags/v')
+    if: needs.file-changes.outputs.code_v1 == 'true'
     steps:
       - name: 'set environment variables'
         run: |
@@ -135,7 +110,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run molecule action
-        uses: arista-netdevops-community/action-molecule-avd@v1.0
+        uses: arista-netdevops-community/action-molecule-avd@v1.1
         with:
           molecule_parentdir: 'ansible_collections/arista/cvp'
           molecule_command: 'test'
