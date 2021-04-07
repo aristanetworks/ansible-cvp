@@ -93,8 +93,8 @@ jobs:
             ./tests/report.html
             ./tests/htmlcov
 
-  molecule:
-    name: Validate code V2 with Molecule
+  molecule_cv_modules:
+    name: Validate code V1 with Molecule
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
@@ -131,6 +131,35 @@ jobs:
           name: molecule-${{ matrix.avd_scenario }}-artifacts
           path: ansible_collections/arista/cvp/molecule/${{ matrix.avd_scenario }}
 
+  molecule_dhcp:
+    name: Validate Roles for DHCP management
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        avd_scenario:
+          - dhcp_management_mac
+          - dhcp_management_offline
+          - dhcp_system_mac
+    needs: [ molecule_cv_modules ]
+    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/heads/release')
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Run molecule action
+        uses: arista-netdevops-community/action-molecule-avd@v1.1
+        with:
+          molecule_parentdir: 'ansible_collections/arista/cvp'
+          molecule_command: 'test'
+          molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
+          pip_file: ansible_collections/arista/cvp/requirements.txt
+          ansible: "ansible==2.9.6"
+          check_git: true
+          check_git_enforced: false
+
   offline_link_check:
     name: 'Validate mkdoc links'
     runs-on: ubuntu-20.04
@@ -164,7 +193,7 @@ jobs:
     runs-on: ubuntu-16.04
     needs:
       - file-changes
-      - molecule
+      - molecule_dhcp
       - pytest
       - offline_link_check
     if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
