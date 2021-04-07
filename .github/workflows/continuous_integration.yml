@@ -69,7 +69,7 @@ jobs:
     name: Validate code V3 with Pytest
     runs-on: ubuntu-20.04
     container: ${AVD_RUNNER}
-    needs: [file-changes, pre_commit, ansible_test]
+    needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.code_v3 == 'true'
     steps:
       - name: 'set environment variables'
@@ -99,7 +99,7 @@ jobs:
           - cv_configlet_loose
           - cv_configlet_strict
           - cv_device
-    needs: [ file-changes, pre_commit, ansible_test ]
+    needs: [ file-changes, pre_commit ]
     if: needs.file-changes.outputs.code_v1 == 'true'
     steps:
       - name: 'set environment variables'
