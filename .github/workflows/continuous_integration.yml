@@ -151,14 +151,13 @@ jobs:
 
   ansible_test:
     name: Run ansible-test validation
-    runs-on: ubuntu-latest
-    container: avdteam/base:3.6-v2.0
+    runs-on: ubuntu-16.04
     needs:
       - file-changes
       - molecule
       - pytest
       - offline_link_check
-    if: startsWith(github.ref, 'refs/heads/release')
+    if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
@@ -188,7 +187,7 @@ jobs:
     container: avdteam/base:3.6-v2.0
     needs:
       - ansible_test
-    if: startsWith(github.ref, 'refs/heads/release')
+    if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
