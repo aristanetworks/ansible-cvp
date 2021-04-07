@@ -207,10 +207,10 @@ jobs:
         run: make install-requirements
 
       - name: 'ansible-test linting'
-        run: make sanity-lint
-
-      - name: 'ansible-test import'
-        run: make sanity-import
+        run: |
+          cd ansible_collections/arista/cvp/
+          ansible-test sanity -v --requirements --docker --python 3.6
+          rm -rf tests/output/
 
   build_package:
     name: Build collection package
