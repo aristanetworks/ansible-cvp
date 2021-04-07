@@ -193,10 +193,11 @@ jobs:
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
     steps:
       - uses: actions/checkout@v2
+      - name: install requirements
+        run: make install-requirements
       - name: 'build ansible package'
         run: make collection-build
       - uses: actions/upload-artifact@v2
-        if: always()
         with:
           name: ansible-package
           path: ./*.tar.gz
