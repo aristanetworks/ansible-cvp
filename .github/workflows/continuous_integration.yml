@@ -87,7 +87,6 @@ jobs:
         run: |
           cd tests/
           make config.py
-          cp config.py unit/
           make ci-test
 
   molecule:
