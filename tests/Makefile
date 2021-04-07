@@ -25,7 +25,9 @@ ci-test:  ## Run Pytest with only local tests and no API interactions
 
 .PHONY: ci-report
 ci-report:  ## Run Pytest with reporting for CI
+	cp unit/pytest.ini .
 	pytest $(REPORT) $(COVERAGE) -m 'generic' $(TEST_PATH)
+	rm pytest.ini
 
 .PHONY: test
 test:  ## Run Pytest in verbose mode with CLI report only for basic tests

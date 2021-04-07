@@ -87,7 +87,7 @@ jobs:
         run: |
           cd tests/
           make config.py
-          make ci-test
+          make ci-report
 
   molecule:
     name: Validate code V2 with Molecule
