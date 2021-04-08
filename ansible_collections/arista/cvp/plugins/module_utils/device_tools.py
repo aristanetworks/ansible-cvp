@@ -669,7 +669,7 @@ class CvDeviceTools(object):
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
-                action_name='{}_configlet_attached'.format(device.fqdn))
+                action_name=device.fqdn + '_configlet_attached')
             current_container_info = self.get_container_current(
                 device_mac=device.system_mac)
             if (device.configlets is not None
@@ -678,7 +678,7 @@ class CvDeviceTools(object):
                 configlets_info = list()
                 configlets_attached = self.get_device_configlets(
                     device_lookup=device.fqdn)
-                MODULE_LOGGER.debug('Attached configlets for device {}: {}'.format(device.fqdn, configlets_attached))
+                MODULE_LOGGER.debug('Attached configlets for device ' + device.fqdn + ': ' + configlets_attached)
                 # Pour chaque configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
                     if configlet not in [x.name for x in configlets_attached]:
@@ -693,9 +693,9 @@ class CvDeviceTools(object):
                 if len(configlets_info) > 0:
                     try:
                         resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                            dev=device_facts,
-                                                                            new_configlets=configlets_info,
-                                                                            create_task=True)
+                                                                               dev=device_facts,
+                                                                               new_configlets=configlets_info,
+                                                                               create_task=True)
                     except CvpApiError:
                         MODULE_LOGGER.error('Error applying configlets to device')
                         self.__ansible.fail_json(msg='Error applying configlets to device')
@@ -716,7 +716,7 @@ class CvDeviceTools(object):
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(
-                action_name='{}_configlet_removed'.format(device.fqdn))
+                action_name=device.fqdn + '_configlet_removed')
             # FIXME: Should we ignore devices listed with no configlets ?
             if device.configlets is not None:
                 device_facts = dict()
@@ -730,18 +730,18 @@ class CvDeviceTools(object):
                 for configlet in configlets_attached:
                     if configlet.name not in device.configlets:
                         MODULE_LOGGER.info('Configlet %s is added to detach list', str(configlet.name))
-                        result_data.name = result_data.name + ' - {}'.format(configlet.name)
+                        result_data.name = result_data.name + ' - ' + configlet.name
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
                 if len(configlets_to_remove) > 0:
                     try:
                         resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
-                                                                                dev=device_facts,
-                                                                                del_configlets=configlets_to_remove,
-                                                                                create_task=True)
+                                                                                  dev=device_facts,
+                                                                                  del_configlets=configlets_to_remove,
+                                                                                  create_task=True)
                     except CvpApiError as catch_error:
                         MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
-                        self.__ansible.fail_json(msg='Error detaching configlets from device {}: {}'.format(device.fqdn, catch_error))
+                        self.__ansible.fail_json(msg='Error detaching configlets from device ' + device.fqdn + ': ' + catch_error)
                     else:
                         if resp['data']['status'] == 'success':
                             result_data.changed = True
@@ -760,7 +760,7 @@ class CvDeviceTools(object):
         """
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name='{}_configlet_removed'.format(device.fqdn))
+            result_data = CvApiResult(action_name=device.fqdn + '_configlet_removed')
             if device.configlets is not None:
                 # get configlet information from CV
                 configlets_info = list()
@@ -811,7 +811,7 @@ class CvDeviceTools(object):
         """
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name='{}_deployed'.format(device.fqdn))
+            result_data = CvApiResult(action_name=device.fqdn + '_deployed')
             if device.system_mac is not None:
                 configlets_info = list()
                 for configlet in device.configlets:
