@@ -50,9 +50,16 @@ options:
     default: 'present'
     choices: ['present', 'absent']
     type: str
+  apply_mode:
+    description: Set how configlets are attached/detached on container. If set to strict all configlets not listed in your vars are detached.
+    required: false
+    default: 'loose'
+    choices: ['loose', 'strict']
+    type: str
 '''
 
 EXAMPLES = r'''
+# task in loose mode (default)
 - name: Create container topology on CVP
   hosts: cvp
   connection: local
@@ -70,6 +77,26 @@ EXAMPLES = r'''
     - name: 'running cv_container'
       arista.cvp.cv_container_v3:
         topology: "{{CVP_CONTAINERS}}"
+
+# task in strict mode
+- name: Create container topology on CVP
+  hosts: cvp
+  connection: local
+  gather_facts: no
+  vars:
+    verbose: False
+    containers:
+        Fabric:
+            parentContainerName: Tenant
+        Spines:
+            parentContainerName: Fabric
+            configlets:
+                - container_configlet
+  tasks:
+    - name: 'running cv_container'
+      arista.cvp.cv_container_v3:
+        topology: "{{CVP_CONTAINERS}}"
+        apply_mode: strict
 '''
 
 
@@ -122,7 +149,11 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'absent'])
+                   choices=['present', 'absent']),
+        apply_mode=dict(type='str',
+                   required=False,
+                   default='loose',
+                   choices=['loose', 'strict'])
     )
 
     # Make module global to use it in all functions when required
@@ -157,7 +188,7 @@ def main():
         cv_connection=cv_client, ansible_module=ansible_module)
 
     cv_response: CvAnsibleResponse = cv_topology.build_topology(
-        user_topology=user_topology, present=state_present)
+        user_topology=user_topology, present=state_present, apply_mode=ansible_module.params['apply_mode'])
     MODULE_LOGGER.debug(
         'Received response from Topology builder: %s', str(cv_response))
     result = cv_response.content

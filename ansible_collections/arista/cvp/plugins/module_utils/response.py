@@ -301,9 +301,9 @@ class CvManagerResult():
     }
 
     """
-    def __init__(self, builder_name: str):
+    def __init__(self, builder_name: str, default_success: bool = False):
         self.__name = builder_name
-        self.__success = False
+        self.__success = default_success
         self.__changed = False
         self.__counter: int = 0
         self.__taskIds = list()
