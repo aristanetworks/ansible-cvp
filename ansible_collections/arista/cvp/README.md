@@ -19,11 +19,12 @@ Current active branch:
 !!! info
     Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
 
-__Old and unsupported versions:__
-
-- __CVP 2018.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __CVP 2019.x.x__: starting version [`ansible-cvp 1.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.0.0)
-- __CVP 2020.1.x__: starting version [`ansible-cvp 1.1.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v1.1.0)
+| ansible-cvp | 1.0.0 | 1.1.0 | 2.0.0 & higher |
+| ----------- | ----- | ----- | -------------- |
+| 2018.2 | X | X | X |
+| 2019.x | X | X | X |
+| 2020.1 | | X | X |
+| >= 2020.2 | | | X |
 
 ### Python
 
@@ -71,8 +72,8 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 __Version 3:__
 
 - [__arista.cvp.cv_configlet_v3__](docs/modules/cv_configlet_v3.rst/) -  Manage configlet configured on CVP.
-- [__arista.cvp.cv_container__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
-- [__arista.cvp.cv_device__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
+- [__arista.cvp.cv_container_v3__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device_v3__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task_v3__](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
 
 __Legacy / Version 1:__
