@@ -3,7 +3,7 @@ TAG ?= -m 'generic, api'
 TEST_PATH ?= unit
 TEST_OPT = -v --cov-report term:skip-covered
 REPORT = -v --cov-report term:skip-covered --html=report.html --self-contained-html --cov-report=html --color yes
-COVERAGE = --cov=ansible_collections.arista.cvp.plugins.module_utils.container_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.configlet_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.generic_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.device_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.response  --cov=ansible_collections.arista.cvp.plugins.module_utils.schema
+COVERAGE = --cov=ansible_collections.arista.cvp.plugins.module_utils.container_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.configlet_tools --cov=ansible_collections.arista.cvp.plugins.module_utils.generic_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.device_tools  --cov=ansible_collections.arista.cvp.plugins.module_utils.response  --cov=ansible_collections.arista.cvp.plugins.module_utils.schema_v3
 
 AUTH_CONFIG_FILE = $(TEST_PATH)/config.py
 

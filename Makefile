@@ -7,7 +7,7 @@ HOME_DIR_DOCKER = '/home/docker'
 # ansible-test path
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
-ANSIBLE_TEST_MODE ?= venv
+ANSIBLE_TEST_MODE ?= docker
 # Python version to use in testing.
 ANSIBLE_TEST_PYTHON ?= 3.6
 # Root path for MKDOCS content
