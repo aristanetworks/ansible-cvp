@@ -1,4 +1,5 @@
 ansible==2.9.6
+galaxy-importer==0.3.1
 ansible-lint==4.2.0
 check-manifest
 coverage
