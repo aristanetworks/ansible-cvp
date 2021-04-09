@@ -7,7 +7,7 @@ theme:
   name: material
   features:
     - navigation.instant
-    - toc.integrate
+    # - toc.integrate
   highlightjs: true
   hljs_languages:
         - yaml
@@ -15,8 +15,8 @@ theme:
         - shell
 extra_css:
   - docs/stylesheets/extra.material.css
-copyright: Copyright &copy; 2019 - 2020 Arista Networks
-repo_name: CVP on Github
+copyright: Copyright &copy; 2019 - 2021 Arista Networks
+repo_name: CV Collection on Github
 repo_url: https://github.com/aristanetworks/ansible-cvp
 use_directory_urls: true
 
@@ -43,8 +43,9 @@ markdown_extensions:
       guess_lang: true
   - toc:
       separator: "-"
-      permalink: "#"
-      baselevel: 1
+      # permalink: "#"
+      permalink: true
+      baselevel: 3
 
 nav:
   - Home: README.md
@@ -52,6 +53,7 @@ nav:
   - Release Notes:
     - Versions 1.x: docs/release-notes/v1.x.md
     - Versions 2.x: docs/release-notes/v2.x.md
+    - Versions 3.x: docs/release-notes/v3.x.md
   - Installation:
     - Requirements: docs/installation/requirements.md
     - Configure your local environment: docs/installation/setup-environement.md

@@ -1,20 +1,5 @@
 # Contribute to Arista ansible-cvp collection
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
-- [Contribute to Arista ansible-cvp collection](#contribute-to-arista-ansible-cvp-collection)
-  - [Reporting Bugs](#reporting-bugs)
-  - [Feature Requests](#feature-requests)
-  - [Using the issue tracker](#using-the-issue-tracker)
-  - [Branches](#branches)
-    - [Current active branches](#current-active-branches)
-  - [Pull requests](#pull-requests)
-
-<!-- /code_chunk_output -->
-
-
 Please take a moment to review this document in order to make the contribution
 process easy and effective for everyone involved.
 
