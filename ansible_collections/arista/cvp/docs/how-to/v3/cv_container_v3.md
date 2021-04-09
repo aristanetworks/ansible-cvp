@@ -45,9 +45,9 @@ CVP_CONTAINERS:
   hosts: CloudVision
   connection: local
   gather_facts: no
-  tasks:
-    - name: "Configure containers on {{inventory_hostname}}"
-      arista.cvp.cv_container:
+  tasks:
+    - name: "Configure containers on {{inventory_hostname}}"
+      arista.cvp.cv_container_v3:
         topology: "{{CVP_CONTAINERS}}"
 ```
 
