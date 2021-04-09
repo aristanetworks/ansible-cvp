@@ -131,7 +131,6 @@ class TestCvContainerTools():
             container_name=CV_CONTAINER['name']) is False
         logging.info('Container {} is empty'.format(CV_CONTAINER))
 
-
     @pytest.mark.parametrize('UNIT_TEST', get_unit_container())
     @pytest.mark.api
     @pytest.mark.create
@@ -217,6 +216,17 @@ class TestCvContainerTools():
             logging.info(
                 'Container {} deleted from cloudvision: {}'.format(UNIT_TEST['name'], result.results))
 
+    @pytest.mark.parametrize('UNIT_TEST', get_unit_container())
+    @pytest.mark.api
+    @pytest.mark.delete
+    def test_get_configlet_from_container(self, UNIT_TEST):
+        requests.packages.urllib3.disable_warnings()
+        configlets = self.inventory.get_configlets(container_name='DC1_L3LEAFS')
+        assert len(configlets) > 0
+        for configlet in configlets:
+            assert configlet['name'] in ['ASE_GLOBAL-ALIASES', 'ASE_GLOBAL-ALIASES2']
+            logging.info('CVP returned {} and it is in the expected list'.format(configlet['name']))
+        logging.info('All returned configlets are in expected list')
 
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.api
@@ -235,13 +245,14 @@ class TestCvContainerToolsTopology():
         assert True
 
     @pytest.mark.parametrize('USER_INPUT', get_topology_user_input())
+    @pytest.mark.parametrize('APPLY_MODE', ['strict', 'loose'])
     @pytest.mark.api
-    def test_build_topology(self, USER_INPUT):
+    def test_build_topology(self, USER_INPUT, APPLY_MODE):
         requests.packages.urllib3.disable_warnings()
         user_inventory = ContainerInput(user_topology=USER_INPUT)
         logging.info('Start of topology build process at {}'.format(time_log()))
         result = self.inventory.build_topology(
-            user_topology=user_inventory, present=True)
+            user_topology=user_inventory, present=True, apply_mode=APPLY_MODE)
         logging.info('End of topology build process at {}'.format(time_log()))
         # assert result.success is True
         assert result.success is True

@@ -39,6 +39,10 @@ CVP_CONTAINERS:
 #### Optional inputs
 
 - `state`: Keyword to define if we want to create(present) or delete(absent) configlets. Default is set to `present`
+- `apply_mode`: Define how configlets configured to the containers are managed by ansible:
+  - `loose` (default): Configure new configlets to containers and __ignore__ configlet already configured but not listed.
+  - `strict`: Configure new configlets to containers and __remove__ configlet already configured but not listed.
+
 
 ```yaml
 - name: lab04 - cv_container lab

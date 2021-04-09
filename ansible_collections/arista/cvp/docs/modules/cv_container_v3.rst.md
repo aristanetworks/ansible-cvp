@@ -31,6 +31,17 @@ The following options may be specified for this module:
 </tr>
 
 <tr>
+<td>apply_mode<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>loose</td>
+<td><ul><li>loose</li><li>strict</li></ul></td>
+<td>
+    <div>Set how configlets are attached/detached on container. If set to strict all configlets not listed in your vars are detached.</div>
+</td>
+</tr>
+
+<tr>
 <td>state<br/><div style="font-size: small;"></div></td>
 <td>str</td>
 <td>no</td>
@@ -57,6 +68,7 @@ The following options may be specified for this module:
 
 ## Examples:
 
+    # task in loose mode (default)
     - name: Create container topology on CVP
       hosts: cvp
       connection: local
@@ -74,6 +86,26 @@ The following options may be specified for this module:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:
             topology: "{{CVP_CONTAINERS}}"
+
+    # task in strict mode
+    - name: Create container topology on CVP
+      hosts: cvp
+      connection: local
+      gather_facts: no
+      vars:
+        verbose: False
+        containers:
+            Fabric:
+                parentContainerName: Tenant
+            Spines:
+                parentContainerName: Fabric
+                configlets:
+                    - container_configlet
+      tasks:
+        - name: 'running cv_container'
+          arista.cvp.cv_container_v3:
+            topology: "{{CVP_CONTAINERS}}"
+            apply_mode: strict
 
 ### Author
 
