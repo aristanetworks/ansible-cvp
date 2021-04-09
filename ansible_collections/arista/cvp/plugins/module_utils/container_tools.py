@@ -321,6 +321,7 @@ class CvContainerTools(object):
         dict
             Configlet information in a filtered maner
         """
+        MODULE_LOGGER.info('Getting information for configlet %s', str(configlet_name))
         data = self.__cvp_client.api.get_configlet_by_name(name=configlet_name)
         if data is not None:
             return self.__standard_output(source=data)
@@ -495,10 +496,10 @@ class CvContainerTools(object):
             name=container_name)
         MODULE_LOGGER.debug('Get container ID (%s) response from cv for container %s', str(cv_response), str(container_name))
         if cv_response is not None and FIELD_KEY in cv_response:
-            container_id = self.__cvp_client.api.get_container_by_name(name=container_name)[
-                FIELD_KEY]
+            container_id = cv_response[FIELD_KEY]
             container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[
                 FIELD_TOPOLOGY]
+            MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
 
@@ -547,10 +548,15 @@ class CvContainerTools(object):
         configlets_list = configlets_and_mappers['data']['configlets']
         mappers = configlets_and_mappers['data']['configletMappers']
         configlets_configured = list()
+        MODULE_LOGGER.info('container %s has id %s', str(container_name), str(container_id))
         for mapper in mappers:
-            if mapper[FIELD_CONTAINER_ID] == container_id:
-                configlets_configured.append(next(
-                    (x for x in configlets_list if x['key'] == mapper['configletId'])))
+            if mapper['objectId'] == container_id:
+                MODULE_LOGGER.info(
+                    'Found 1 mappers for container %s : %s', str(container_name), str(mapper))
+                configlets_configured.append(
+                    next((x for x in configlets_list if x['key'] == mapper['configletId'])))
+        MODULE_LOGGER.debug('List of configlets from CV is: %s', str(
+            [x['name'] for x in configlets_configured]))
         return configlets_configured
 
     def get_container_id(self, container_name: str):
@@ -829,12 +835,14 @@ class CvContainerTools(object):
         dict
             Action result
         """
+        MODULE_LOGGER.info('Running configlet detach for container %s', str(container))
         container_info = self.get_container_info(container_name=container)
         detach_configlets = list()
         for configlet in configlets:
-            data = self.__get_configlet_info(configlet_name=configlet)
+            data = self.__get_configlet_info(configlet_name=configlet['name'])
             if data is not None:
                 detach_configlets.append(data)
+        MODULE_LOGGER.info('Sending data to self.__configlet_del: %s', str(detach_configlets))
         return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
     def build_topology(self, user_topology: ContainerInput, present: bool = True, apply_mode: str = 'loose'):
