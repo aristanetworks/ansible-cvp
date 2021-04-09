@@ -636,8 +636,9 @@ class CvDeviceTools(object):
                                                                                  container=new_container_info,
                                                                                  create_task=True)
                         except CvpApiError:
-                            MODULE_LOGGER.error('Error to move device {} to container {}'.format(
-                                device.fqdn, *device.container))
+                            error_message = 'Error to move device {} to container {}'.format(device.fqdn, *device.container)
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
                         else:
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
@@ -697,7 +698,7 @@ class CvDeviceTools(object):
                                                                                create_task=True)
                     except CvpApiError:
                         MODULE_LOGGER.error('Error applying configlets to device')
-                        result_data.success = False
+                        self.__ansible.fail_json(msg='Error applying configlets to device')
                     else:
                         if resp['data']['status'] == 'success':
                             result_data.changed = True
@@ -741,7 +742,6 @@ class CvDeviceTools(object):
                     except CvpApiError as catch_error:
                         MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
                         self.__ansible.fail_json(msg='Error detaching configlets from device ' + device.fqdn + ': ' + catch_error)
-                        result_data.success = False
                     else:
                         if resp['data']['status'] == 'success':
                             result_data.changed = True
@@ -779,8 +779,8 @@ class CvDeviceTools(object):
                                                                               del_configlets=configlets_info,
                                                                               create_task=True)
                 except CvpApiError:
-                    MODULE_LOGGER.error('Error applying configlets to device')
-                    result_data.success = False
+                    MODULE_LOGGER.error('Error removing configlets to device')
+                    self.__ansible.fail_json(msg='Error removing configlets to device')
                 else:
                     if resp['data']['status'] == 'success':
                         result_data.changed = True
