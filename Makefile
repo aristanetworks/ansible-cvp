@@ -55,6 +55,11 @@ sanity-import: ## Run ansible-test sanity for code import
 	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --python $(ANSIBLE_TEST_PYTHON) --test import ; \
 	rm -rf tests/output/
 
+.PHONY: galaxy-importer
+galaxy-importer:  ## Run galaxy importer tests
+	rm -f *.tar.gz && \
+	ansible-galaxy collection build --force ansible_collections/arista/cvp && \
+	python -m galaxy_importer.main *.tar.gz
 
 #########################################
 # Docker actions					 	#
