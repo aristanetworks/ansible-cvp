@@ -1,9 +1,8 @@
 ansible==2.9.6
-galaxy-importer==0.3.1
-ansible-lint==4.2.0
+ansible-lint
 check-manifest
-coverage
-docker
+docker==4.4.1
+galaxy-importer>=0.3.1
 httmock
 pycodestyle
 flake8
