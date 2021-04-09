@@ -222,6 +222,7 @@ class TestCvContainerTools():
     def test_get_configlet_from_container(self, UNIT_TEST):
         requests.packages.urllib3.disable_warnings()
         configlets = self.inventory.get_configlets(container_name='DC1_L3LEAFS')
+        assert len(configlets) > 0
         for configlet in configlets:
             assert configlet['name'] in ['ASE_GLOBAL-ALIASES', 'ASE_GLOBAL-ALIASES2']
             logging.info('CVP returned {} and it is in the expected list'.format(configlet['name']))
