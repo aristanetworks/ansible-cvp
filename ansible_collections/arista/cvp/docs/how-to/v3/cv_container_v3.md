@@ -1,14 +1,14 @@
 # Configure container on Cloudvision (v3)
 
-__cv_container_v3__ manage containers on CloudVision:
+__cv_container_v3__ manages containers on CloudVision:
 
-- Support creation/deletion of containers
-- Support devices binding to containers
-- Support configlets binding to containers
+- Supports creation/deletion of containers
+- Supports devices binding to containers
+- Supports configlets binding to containers
 
 ## Inputs
 
-Full documentation available in [module section](../../modules/cv_container_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_container_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
 
 ### Input variables
 
