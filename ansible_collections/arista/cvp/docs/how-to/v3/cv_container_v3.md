@@ -38,7 +38,7 @@ CVP_CONTAINERS:
 
 #### Optional inputs
 
-- `state`: Keyword to define if we want to create(present) or delete(absent) configlets. Default is set to `present`
+- `state`: Keyword to define if we want to create (present) or delete (absent) the containers. Default is set to `present`.
 - `apply_mode`: Define how configlets configured to the containers are managed by ansible:
   - `loose` (default): Configure new configlets to containers and __ignore__ configlet already configured but not listed.
   - `strict`: Configure new configlets to containers and __remove__ configlet already configured but not listed.
@@ -53,6 +53,8 @@ CVP_CONTAINERS:
     - name: "Configure containers on {{inventory_hostname}}"
       arista.cvp.cv_container_v3:
         topology: "{{CVP_CONTAINERS}}"
+        state: present
+        apply_mode: loose
 ```
 
 ## Module output
