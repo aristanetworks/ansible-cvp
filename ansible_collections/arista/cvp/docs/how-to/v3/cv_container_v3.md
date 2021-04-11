@@ -1,10 +1,9 @@
 # Configure container on Cloudvision (v3)
 
-__cv_container_v3__ manages containers on CloudVision:
+__cv_container_v3__ manages containers on CloudVision. It supports:
 
-- Supports creation/deletion of containers
-- Supports devices binding to containers
-- Supports configlets binding to containers
+- Creation and deletion of containers
+- Configlets binding to containers
 
 ## Inputs
 
@@ -59,47 +58,52 @@ CVP_CONTAINERS:
 
 ## Module output
 
-`cv_container_v3` returns :
+`cv_container_v3` returns the list of:
 
-- List of created containers
-- List of deleted containers
-- List of moved devices
-- List of attached configlets
-- List of CV tasks generated
+- attached configlets
+- detached configlets
+- created containers
+- deleted containers
+- CV tasks generated 
 
 !!! info
     Generated tasks can be consumed directly by cv_tasks_v3.
 
 ```yaml
-msg:
-  changed: true
-  configlet_attachmenet:
+  msg:
     changed: true
-    configlet_attachmenet_count: 0
-    configlet_attachmenet_list:
-    - Spines:01TRAINING-01
-    diff: {}
+    configlets_attached:
+      changed: true
+      configlets_attached_count: 0
+      configlets_attached_list:
+      - TEAM01_LEAFS:GLOBAL-ALIASES
+      diff: {}
+      success: true
+      taskIds:
+      - '565'
+    configlets_detached:
+      changed: false
+      configlets_detached_count: 0
+      configlets_detached_list: []
+      diff: {}
+      success: true
+      taskIds: []
+    container_added:
+      changed: false
+      container_added_count: 0
+      container_added_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    container_deleted:
+      changed: false
+      container_deleted_count: 0
+      container_deleted_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    failed: false
     success: true
-    taskIds: []
-  container_added:
-    changed: true
-    container_added_count: 4
-    container_added_list:
-    - DC2
-    - Leafs
-    - Spines
-    - POD01
-    diff: {}
-    success: true
-    taskIds: []
-  container_deleted:
-    changed: false
-    container_deleted_count: 0
-    container_deleted_list: []
-    diff: {}
-    success: false
-    taskIds: []
-  failed: false
-  success: true
-  taskIds: []
+    taskIds:
+    - '565'
 ```
