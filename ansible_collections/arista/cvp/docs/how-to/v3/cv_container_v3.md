@@ -11,10 +11,10 @@ Full documentation available in [module section](../../modules/cv_container_v3.r
 
 ### Input variables
 
-- Container Name
-- Parent container where to create container
-- Optional list of configlets to attach to container:
-  - Configlets must be created previously
+- Container name
+- Parent container name
+- Optional list of configlets to attach to container
+  - The configlets must exist on the CVP server
 
 ```yaml
 ---
