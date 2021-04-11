@@ -1,6 +1,6 @@
 ---
 - name: gather os specific variables for Centos / Red Hat OS
-  include_vars: "centos-{{ansible_distribution_major_version}}.yml"
+  include_vars: "centos-{{ ansible_distribution_major_version }}.yml"
   when: ansible_distribution == "CentOS" or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: gather os specific variables for Debian / Ubuntu OS
@@ -9,7 +9,7 @@
 
 - name: update packages list
   apt:
-    update_cache: yes
+    update_cache: true
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
 - name: install packages
@@ -26,12 +26,12 @@
   template:
     src: 'dhcpd.conf.j2'
     dest: '{{ dhcp_config }}'
-    backup: yes
+    backup: true
   notify: "restart dhcpd"
 
 - name: check & activate DHCP service
   become: true
   service:
     name: '{{ dhcp_service }}'
-    enabled: yes
+    enabled: true
     state: started

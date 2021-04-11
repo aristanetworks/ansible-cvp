@@ -3,5 +3,5 @@
   template:
     src: 'dhcpd.conf.j2'
     dest: '{{ output_dir }}/dhcpd.conf'
-    backup: yes
+    backup: true
   delegate_to: localhost

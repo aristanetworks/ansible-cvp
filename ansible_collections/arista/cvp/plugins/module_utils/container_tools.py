@@ -63,6 +63,7 @@ FIELD_NAME = 'name'
 FIELD_KEY = 'key'
 FIELD_TOPOLOGY = 'topology'
 FIELD_CONFIGLETS = 'configlets'
+FIELD_CONTAINER_ID = 'containerId'
 
 
 class ContainerInput(object):
@@ -320,6 +321,7 @@ class CvContainerTools(object):
         dict
             Configlet information in a filtered maner
         """
+        MODULE_LOGGER.info('Getting information for configlet %s', str(configlet_name))
         data = self.__cvp_client.api.get_configlet_by_name(name=configlet_name)
         if data is not None:
             return self.__standard_output(source=data)
@@ -494,12 +496,68 @@ class CvContainerTools(object):
             name=container_name)
         MODULE_LOGGER.debug('Get container ID (%s) response from cv for container %s', str(cv_response), str(container_name))
         if cv_response is not None and FIELD_KEY in cv_response:
-            container_id = self.__cvp_client.api.get_container_by_name(name=container_name)[
-                FIELD_KEY]
+            container_id = cv_response[FIELD_KEY]
             container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[
                 FIELD_TOPOLOGY]
+            MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
+
+    def get_configlets(self, container_name: str):
+        """
+        get_configlets Get list of configured configlets for a container
+
+        Example
+        -------
+
+        >>> CvContainerTools.get_configlets(container_name='DC2')
+        [
+            {
+                "key": "configlet_267cc5b4-791d-47d4-a79c-000fc0732802",
+                "name": "ASE_GLOBAL-ALIASES",
+                "reconciled": false,
+                "config": "...",
+                "user": "ansible",
+                "note": "Managed by Ansible",
+                "containerCount": 0,
+                "netElementCount": 0,
+                "dateTimeInLongFormat": 1600694234181,
+                "isDefault": "no",
+                "isAutoBuilder": "",
+                "type": "Static",
+                "editable": true,
+                "sslConfig": false,
+                "visible": true,
+                "isDraft": false,
+                "typeStudioConfiglet": false
+            }
+        ]
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to lookup
+
+        Returns
+        -------
+        list
+            List of configlets configured on container
+        """
+        container_id = self.get_container_id(container_name=container_name)
+        configlets_and_mappers = self.__cvp_client.api.get_configlets_and_mappers()
+        configlets_list = configlets_and_mappers['data']['configlets']
+        mappers = configlets_and_mappers['data']['configletMappers']
+        configlets_configured = list()
+        MODULE_LOGGER.info('container %s has id %s', str(container_name), str(container_id))
+        for mapper in mappers:
+            if mapper['objectId'] == container_id:
+                MODULE_LOGGER.info(
+                    'Found 1 mappers for container %s : %s', str(container_name), str(mapper))
+                configlets_configured.append(
+                    next((x for x in configlets_list if x['key'] == mapper['configletId'])))
+        MODULE_LOGGER.debug('List of configlets from CV is: %s', str(
+            [x['name'] for x in configlets_configured]))
+        return configlets_configured
 
     def get_container_id(self, container_name: str):
         """
@@ -751,7 +809,7 @@ class CvContainerTools(object):
                 attach_configlets.append(data)
         return self.__configlet_add(container=container_info, configlets=attach_configlets)
 
-    def configlets_detach(self, container: str, configlets: List[str], strict: bool = False):
+    def configlets_detach(self, container: str, configlets: List[str]):
         """
         configlets_attach Worker to send configlet detach from container API call
 
@@ -771,23 +829,23 @@ class CvContainerTools(object):
             Name of the container
         configlets : List[str]
             List of configlets to detach
-        strict : bool, optional
-            Remove configlet not listed in configlets var -- NOT SUPPORTED -- , by default False
 
         Returns
         -------
         dict
             Action result
         """
+        MODULE_LOGGER.info('Running configlet detach for container %s', str(container))
         container_info = self.get_container_info(container_name=container)
         detach_configlets = list()
         for configlet in configlets:
-            data = self.__get_configlet_info(configlet_name=configlet)
+            data = self.__get_configlet_info(configlet_name=configlet['name'])
             if data is not None:
                 detach_configlets.append(data)
+        MODULE_LOGGER.info('Sending data to self.__configlet_del: %s', str(detach_configlets))
         return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
-    def build_topology(self, user_topology: ContainerInput, present: bool = True):
+    def build_topology(self, user_topology: ContainerInput, present: bool = True, apply_mode: str = 'loose'):
         """
         build_topology Class entry point to build container topology on Cloudvision
 
@@ -803,6 +861,8 @@ class CvContainerTools(object):
             User defined containers topology to build
         present : bool, optional
             Enable creation or deletion process, by default True
+        apply_mode: str, optional
+            Define how builder will apply configlets to container: loose (only attach listed configlets) or strict (attach listed configlets, remove others)
 
         Returns
         -------
@@ -813,8 +873,10 @@ class CvContainerTools(object):
         container_add_manager = CvManagerResult(builder_name='container_added')
         container_delete_manager = CvManagerResult(
             builder_name='container_deleted')
-        configlet_attachment = CvManagerResult(
-            builder_name='configlet_attachmenet')
+        cv_configlets_attach = CvManagerResult(
+            builder_name='configlets_attached')
+        cv_configlets_detach = CvManagerResult(
+            builder_name='configlets_detached', default_success=True)
 
         # Create containers topology in Cloudvision
         if present is True:
@@ -828,7 +890,16 @@ class CvContainerTools(object):
                 if user_topology.has_configlets(container_name=user_container):
                     resp = self.configlets_attach(
                         container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
-                    configlet_attachment.add_change(resp)
+                    cv_configlets_attach.add_change(resp)
+                    if apply_mode == 'strict':
+                        attached_configlets = self.get_configlets(container_name=user_container)
+                        configlet_to_remove = list()
+                        for attach_configlet in attached_configlets:
+                            if attach_configlet['name'] not in user_topology.get_configlets(container_name=user_container):
+                                configlet_to_remove.append(attach_configlet)
+                        if len(configlet_to_remove) > 0:
+                            resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
+                            cv_configlets_detach.add_change(resp)
 
         # Remove containers topology from Cloudvision
         else:
@@ -842,7 +913,8 @@ class CvContainerTools(object):
         # Create ansible message
         response.add_manager(container_add_manager)
         response.add_manager(container_delete_manager)
-        response.add_manager(configlet_attachment)
+        response.add_manager(cv_configlets_attach)
+        response.add_manager(cv_configlets_detach)
         MODULE_LOGGER.debug(
             'Container manager is sending result data: %s', str(response))
         return response
