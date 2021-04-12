@@ -1,21 +1,20 @@
 # Configure container on Cloudvision (v3)
 
-__cv_container_v3__ manage containers on CloudVision:
+__cv_container_v3__ manages containers on CloudVision. It supports:
 
-- Support creation/deletion of containers
-- Support devices binding to containers
-- Support configlets binding to containers
+- Creation and deletion of containers
+- Configlets binding to containers
 
 ## Inputs
 
-Full documentation available in [module section](../../modules/cv_container_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_container_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
 
 ### Input variables
 
-- Container Name
-- Parent container where to create container
-- Optional list of configlets to attach to container:
-  - Configlets must be created previously
+- Container name
+- Parent container name
+- Optional list of configlets to attach to container
+  - The configlets must exist on the CVP server
 
 ```yaml
 ---
@@ -38,7 +37,7 @@ CVP_CONTAINERS:
 
 #### Optional inputs
 
-- `state`: Keyword to define if we want to create(present) or delete(absent) configlets. Default is set to `present`
+- `state`: Keyword to define if we want to create (present) or delete (absent) the containers. Default is set to `present`.
 - `apply_mode`: Define how configlets configured to the containers are managed by ansible:
   - `loose` (default): Configure new configlets to containers and __ignore__ configlet already configured but not listed.
   - `strict`: Configure new configlets to containers and __remove__ configlet already configured but not listed.
@@ -49,55 +48,62 @@ CVP_CONTAINERS:
   hosts: CloudVision
   connection: local
   gather_facts: no
-  tasks:
-    - name: "Configure containers on {{inventory_hostname}}"
-      arista.cvp.cv_container:
+  tasks:
+    - name: "Configure containers on {{inventory_hostname}}"
+      arista.cvp.cv_container_v3:
         topology: "{{CVP_CONTAINERS}}"
+        state: present
+        apply_mode: loose
 ```
 
 ## Module output
 
-`cv_container_v3` returns :
+`cv_container_v3` returns the list of:
 
-- List of created containers
-- List of deleted containers
-- List of moved devices
-- List of attached configlets
-- List of CV tasks generated
+- attached configlets
+- detached configlets
+- created containers
+- deleted containers
+- CV tasks generated 
 
 !!! info
     Generated tasks can be consumed directly by cv_tasks_v3.
 
 ```yaml
-msg:
-  changed: true
-  configlet_attachmenet:
+  msg:
     changed: true
-    configlet_attachmenet_count: 0
-    configlet_attachmenet_list:
-    - Spines:01TRAINING-01
-    diff: {}
+    configlets_attached:
+      changed: true
+      configlets_attached_count: 0
+      configlets_attached_list:
+      - TEAM01_LEAFS:GLOBAL-ALIASES
+      diff: {}
+      success: true
+      taskIds:
+      - '565'
+    configlets_detached:
+      changed: false
+      configlets_detached_count: 0
+      configlets_detached_list: []
+      diff: {}
+      success: true
+      taskIds: []
+    container_added:
+      changed: false
+      container_added_count: 0
+      container_added_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    container_deleted:
+      changed: false
+      container_deleted_count: 0
+      container_deleted_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    failed: false
     success: true
-    taskIds: []
-  container_added:
-    changed: true
-    container_added_count: 4
-    container_added_list:
-    - DC2
-    - Leafs
-    - Spines
-    - POD01
-    diff: {}
-    success: true
-    taskIds: []
-  container_deleted:
-    changed: false
-    container_deleted_count: 0
-    container_deleted_list: []
-    diff: {}
-    success: false
-    taskIds: []
-  failed: false
-  success: true
-  taskIds: []
+    taskIds:
+    - '565'
 ```
