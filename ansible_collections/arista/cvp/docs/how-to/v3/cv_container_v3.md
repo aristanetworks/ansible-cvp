@@ -64,7 +64,7 @@ CVP_CONTAINERS:
 - detached configlets
 - created containers
 - deleted containers
-- CV tasks generated 
+- CV tasks generated
 
 !!! info
     Generated tasks can be consumed directly by cv_tasks_v3.
