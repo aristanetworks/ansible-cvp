@@ -678,7 +678,7 @@ class CvDeviceTools(object):
                 configlets_info = list()
                 configlets_attached = self.get_device_configlets(
                     device_lookup=device.fqdn)
-                MODULE_LOGGER.debug('Attached configlets for device ' + device.fqdn + ': ' + configlets_attached)
+                MODULE_LOGGER.debug('Attached configlets for device ' + device.fqdn + ': ' + str(configlets_attached))
                 # Pour chaque configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
                     if configlet not in [x.name for x in configlets_attached]:
