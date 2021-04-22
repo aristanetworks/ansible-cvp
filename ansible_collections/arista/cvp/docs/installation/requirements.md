@@ -16,7 +16,6 @@
 ## Supported Ansible Versions
 
 - ansible __2.9.2__ or later
-- previous ansible version not supported as avd is shipped as an [ansible collection](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html)
 
 ## Additional Python Libraries required
 
@@ -24,6 +23,7 @@
 - [netaddr](https://pypi.org/project/netaddr/)
 - [requests](https://pypi.org/project/requests/)
 - [cvprac](https://github.com/aristanetworks/cvprac)
+- [json-schema](https://github.com/Julian/jsonschema)
 
 ### Python requirements installation
 
@@ -34,16 +34,6 @@ $ pip3 install -r ansible_collections/arista/cvp/requirements.txt
 ```
 
 [`requirements.txt`](https://github.com/aristanetworks/ansible-avd/blob/devel/development/requirements.txt) has the following content:
-
-```cfg
-netaddr==0.7.19
-Jinja2==2.10.3
-requests==2.22.0
-treelib==1.5.5
-paramiko==2.7.1
-cvprac==1.0.4
-jsonschema==3.2.0
-```
 
 > Depending of your operating system settings, `pip3` might be replaced by `pip`.
 
