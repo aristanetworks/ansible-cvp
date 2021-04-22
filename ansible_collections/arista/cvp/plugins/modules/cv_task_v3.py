@@ -122,7 +122,8 @@ def main():
     cv_client = tools_cv.cv_connect(ansible_module)
 
     task_manager = CvTaskTools(cv_connection=cv_client, ansible_module=ansible_module)
-    ansible_response: CvAnsibleResponse = task_manager.tasker(taskIds_list=ansible_module.params['tasks'])
+    ansible_response: CvAnsibleResponse = task_manager.tasker(taskIds_list=ansible_module.params['tasks'],
+                                                              state=ansible_module.params['state'])
 
     result = ansible_response.content
 
