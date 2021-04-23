@@ -720,11 +720,16 @@ class CvDeviceTools(object):
                 configlets_attached = self.get_device_configlets(
                     device_lookup=device.fqdn)
                 MODULE_LOGGER.debug('Attached configlets for device %s : %s', str(device.fqdn), str(configlets_attached))
-                # Pour chaque configlet not in the list, add to list of configlets to remove
+                # For each configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
                     if configlet not in [x.name for x in configlets_attached]:
-                        configlets_info.append(
-                            self.__get_configlet_info(configlet_name=configlet))
+                        new_configlet = self.__get_configlet_info(configlet_name=configlet)
+                        if new_configlet is None:
+                            error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
+                        else:
+                            configlets_info.append(new_configlet)
                 # get device facts from CV
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
