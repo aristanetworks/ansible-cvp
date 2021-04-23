@@ -656,10 +656,12 @@ class CvDeviceTools(object):
             result_data = CvApiResult(
                 action_name='{}_to_{}'.format(device.fqdn, *device.container))
             if device.system_mac is not None:
-                new_container_info = self.get_container_info(
-                    container_name=device.container)
-                current_container_info = self.get_container_current(
-                    device_mac=device.system_mac)
+                new_container_info = self.get_container_info(container_name=device.container)
+                if new_container_info is None: 
+                    error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                    MODULE_LOGGER.error(error_message)
+                    self.__ansible.fail_json(msg=error_message)
+                current_container_info = self.get_container_current(device_mac=device.system_mac)
                 # Move devices when they are not in undefined container
                 if (current_container_info is not None
                     and current_container_info['name'] != UNDEFINED_CONTAINER
