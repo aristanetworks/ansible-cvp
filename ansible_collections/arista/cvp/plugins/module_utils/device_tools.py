@@ -657,7 +657,7 @@ class CvDeviceTools(object):
                 action_name='{}_to_{}'.format(device.fqdn, *device.container))
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(container_name=device.container)
-                if new_container_info is None: 
+                if new_container_info is None:
                     error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
@@ -882,7 +882,7 @@ class CvDeviceTools(object):
                     else:
                         ## Check if the target container exists
                         target_container_info = self.get_container_info(container_name=device.container)
-                        if target_container_info is None: 
+                        if target_container_info is None:
                             error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
