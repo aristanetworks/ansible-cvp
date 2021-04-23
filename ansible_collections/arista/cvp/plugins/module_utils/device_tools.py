@@ -861,8 +861,13 @@ class CvDeviceTools(object):
             if device.system_mac is not None:
                 configlets_info = list()
                 for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
+                    new_configlet = self.__get_configlet_info(configlet_name=configlet)
+                    if new_configlet is None:
+                        error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                        MODULE_LOGGER.error(error_message)
+                        self.__ansible.fail_json(msg=error_message)
+                    else:
+                        configlets_info.append(new_configlet)
                 # Move devices when they are not in undefined container
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
@@ -875,6 +880,12 @@ class CvDeviceTools(object):
                         result_data.success = True
                         result_data.taskIds = ['unsupported_in_check_mode']
                     else:
+                        ## Check if the target container exists
+                        target_container_info = self.get_container_info(container_name=device.container)
+                        if target_container_info is None: 
+                            error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
                         try:
                             MODULE_LOGGER.debug('Ansible is going to deploy device %s in container %s with configlets %s',
                                                 str(device.fqdn),
