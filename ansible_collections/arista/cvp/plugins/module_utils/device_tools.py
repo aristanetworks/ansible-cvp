@@ -527,6 +527,36 @@ class CvDeviceTools(object):
         MODULE_LOGGER.warning('Update list is: %s', str(user_result))
         return DeviceInventory(data=user_result)
 
+    def check_device_exist(self, user_inventory: DeviceInventory, search_mode):
+        """
+        check_device_exist Check if the devices specified in the user_inventory exist in CVP.
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+        search_mode : str
+            Search method to get device information from Cloudvision
+        Returns
+        -------
+        list
+            List of devices not present in CVP
+        """
+        MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
+        device_not_present: list = list()
+        for device in user_inventory.devices:
+            if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+                if self.is_device_exist(device.fqdn) == False:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
+
+            elif self.__search_by == FIELD_SYSMAC:
+                if self.is_device_exist(device.system_mac) == False:
+                    device_not_present.append(device.system_mac)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
+            
+        return device_not_present
+
     # ------------------------------------------ #
     # Workers function
     # ------------------------------------------ #
@@ -560,6 +590,19 @@ class CvDeviceTools(object):
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
         cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
+
+        MODULE_LOGGER.debug('user_inventory: %s ', str(user_inventory))
+        MODULE_LOGGER.debug('user_inventory.devices: %s ', str(user_inventory.devices))
+        # MODULE_LOGGER.debug('user_inventory.devices.fqdn: %s ', str(user_inventory.devices.fqdn))
+        # MODULE_LOGGER.debug('user_inventory.devices.system_mac: %s ', str(user_inventory.devices.system_mac))
+
+        list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
+        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0: 
+            error_message = 'Error - the following devices do not exist in CVP {} but are defined in the playbook. \
+            \nMake sure that the devices are provisioned and defined with the full fqdn name (including the domain name) if needed.'.format(str(list_non_existing_devices))
+            MODULE_LOGGER.error(error_message)
+            self.__ansible.fail_json(msg=error_message)
+
 
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
