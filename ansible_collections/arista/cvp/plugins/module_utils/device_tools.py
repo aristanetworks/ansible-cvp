@@ -554,7 +554,6 @@ class CvDeviceTools(object):
                 if self.is_device_exist(device.system_mac) == False:
                     device_not_present.append(device.system_mac)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
-            
         return device_not_present
 
     # ------------------------------------------ #
@@ -593,7 +592,7 @@ class CvDeviceTools(object):
 
         # Check if the devices defined exist in CVP
         list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
-        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0: 
+        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
             error_message = 'Error - the following devices do not exist in CVP {} but are defined in the playbook. \
             \nMake sure that the devices are provisioned and defined with the full fqdn name (including the domain name) if needed.'.format(str(list_non_existing_devices))
             MODULE_LOGGER.error(error_message)
