@@ -591,11 +591,7 @@ class CvDeviceTools(object):
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
         cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
 
-        MODULE_LOGGER.debug('user_inventory: %s ', str(user_inventory))
-        MODULE_LOGGER.debug('user_inventory.devices: %s ', str(user_inventory.devices))
-        # MODULE_LOGGER.debug('user_inventory.devices.fqdn: %s ', str(user_inventory.devices.fqdn))
-        # MODULE_LOGGER.debug('user_inventory.devices.system_mac: %s ', str(user_inventory.devices.system_mac))
-
+        # Check if the devices defined exist in CVP
         list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0: 
             error_message = 'Error - the following devices do not exist in CVP {} but are defined in the playbook. \
