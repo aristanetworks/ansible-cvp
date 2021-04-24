@@ -527,6 +527,35 @@ class CvDeviceTools(object):
         MODULE_LOGGER.warning('Update list is: %s', str(user_result))
         return DeviceInventory(data=user_result)
 
+    def check_device_exist(self, user_inventory: DeviceInventory, search_mode):
+        """
+        check_device_exist Check if the devices specified in the user_inventory exist in CVP.
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+        search_mode : str
+            Search method to get device information from Cloudvision
+        Returns
+        -------
+        list
+            List of devices not present in CVP
+        """
+        MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
+        device_not_present: list = list()
+        for device in user_inventory.devices:
+            if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+                if self.is_device_exist(device.fqdn) == False:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
+
+            elif self.__search_by == FIELD_SYSMAC:
+                if self.is_device_exist(device.system_mac) == False:
+                    device_not_present.append(device.system_mac)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
+        return device_not_present
+
     # ------------------------------------------ #
     # Workers function
     # ------------------------------------------ #
@@ -560,6 +589,15 @@ class CvDeviceTools(object):
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
         cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
+
+        # Check if the devices defined exist in CVP
+        list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
+        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
+            error_message = 'Error - the following devices do not exist in CVP {} but are defined in the playbook. \
+            \nMake sure that the devices are provisioned and defined with the full fqdn name (including the domain name) if needed.'.format(str(list_non_existing_devices))
+            MODULE_LOGGER.error(error_message)
+            self.__ansible.fail_json(msg=error_message)
+
 
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
@@ -617,10 +655,12 @@ class CvDeviceTools(object):
             result_data = CvApiResult(
                 action_name='{}_to_{}'.format(device.fqdn, *device.container))
             if device.system_mac is not None:
-                new_container_info = self.get_container_info(
-                    container_name=device.container)
-                current_container_info = self.get_container_current(
-                    device_mac=device.system_mac)
+                new_container_info = self.get_container_info(container_name=device.container)
+                if new_container_info is None:
+                    error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                    MODULE_LOGGER.error(error_message)
+                    self.__ansible.fail_json(msg=error_message)
+                current_container_info = self.get_container_current(device_mac=device.system_mac)
                 # Move devices when they are not in undefined container
                 if (current_container_info is not None
                     and current_container_info['name'] != UNDEFINED_CONTAINER
@@ -679,11 +719,16 @@ class CvDeviceTools(object):
                 configlets_attached = self.get_device_configlets(
                     device_lookup=device.fqdn)
                 MODULE_LOGGER.debug('Attached configlets for device %s : %s', str(device.fqdn), str(configlets_attached))
-                # Pour chaque configlet not in the list, add to list of configlets to remove
+                # For each configlet not in the list, add to list of configlets to remove
                 for configlet in device.configlets:
                     if configlet not in [x.name for x in configlets_attached]:
-                        configlets_info.append(
-                            self.__get_configlet_info(configlet_name=configlet))
+                        new_configlet = self.__get_configlet_info(configlet_name=configlet)
+                        if new_configlet is None:
+                            error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
+                        else:
+                            configlets_info.append(new_configlet)
                 # get device facts from CV
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
@@ -815,8 +860,13 @@ class CvDeviceTools(object):
             if device.system_mac is not None:
                 configlets_info = list()
                 for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
+                    new_configlet = self.__get_configlet_info(configlet_name=configlet)
+                    if new_configlet is None:
+                        error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                        MODULE_LOGGER.error(error_message)
+                        self.__ansible.fail_json(msg=error_message)
+                    else:
+                        configlets_info.append(new_configlet)
                 # Move devices when they are not in undefined container
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
@@ -829,6 +879,12 @@ class CvDeviceTools(object):
                         result_data.success = True
                         result_data.taskIds = ['unsupported_in_check_mode']
                     else:
+                        ## Check if the target container exists
+                        target_container_info = self.get_container_info(container_name=device.container)
+                        if target_container_info is None:
+                            error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
                         try:
                             MODULE_LOGGER.debug('Ansible is going to deploy device %s in container %s with configlets %s',
                                                 str(device.fqdn),
