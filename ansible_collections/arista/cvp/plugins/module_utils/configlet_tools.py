@@ -303,6 +303,7 @@ class CvConfigletTools(object):
                     # Generate logging error message
                     MODULE_LOGGER.error('Error updating configlet %s: %s', str(
                         configlet['name']), str(error))
+                    self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(update_resp):
                         # Mark module execution with error
@@ -314,6 +315,7 @@ class CvConfigletTools(object):
                         # Generate logging error message
                         MODULE_LOGGER.error('Error updating configlet %s: %s', str(
                             configlet['name']), str(update_resp['errorMessage']))
+                        self._ansible.fail_json(msg=message)
                     else:
                         # Inform module a changed has been done
                         change_response.changed = False
@@ -396,6 +398,7 @@ class CvConfigletTools(object):
                     # Generate logging error message
                     MODULE_LOGGER.error('Error creating configlet %s: %s', str(
                         configlet['name']), str(error))
+                    self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(new_resp):
                         # Mark module execution with error
@@ -408,6 +411,7 @@ class CvConfigletTools(object):
                         # Generate logging error message
                         MODULE_LOGGER.error(
                             'Error creating configlet %s: %s', str(configlet['name']), str(new_resp))
+                        self._ansible.fail_json(msg=message)
                     else:
                         self._cvp_client.api.add_note_to_configlet(new_resp, configlets_notes)
                         change_response.add_entry('configlet created')
@@ -473,6 +477,7 @@ class CvConfigletTools(object):
                     # Generate logging error message
                     MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
                         configlet['name']), str(error))
+                    self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(delete_resp):
                         # Mark module execution with error
@@ -484,6 +489,7 @@ class CvConfigletTools(object):
                         # Generate logging error message
                         MODULE_LOGGER.error(
                             'Error deleting configlet %s: %s', str(configlet['name']), str(delete_resp))
+                        self._ansible.fail_json(msg=message)
                     else:
                         change_response.add_entry('configlet deleted')
                         change_response.changed = True
