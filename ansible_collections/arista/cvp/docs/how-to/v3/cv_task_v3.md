@@ -1,0 +1,75 @@
+# Execute / Cancel tasks on CloudVision
+
+__cv_task_v3__ manage tasks on CloudVision:
+
+- Execute tasks on CloudVision
+- Cancel tasks on Cloudvision
+
+## Inputs
+
+The documentation is available in the [module section](../../modules/cv_task_v3.rst.md).
+
+### Input variables
+
+- list of tasks
+- state (`executed` or `cancelled`). Default is `executed` 
+
+### Example:
+
+```
+- hosts: cv_server
+
+  tasks:
+    - name: Execute task 743
+      arista.cvp.cv_task_v3:
+        tasks: 
+          - 743
+        state: executed
+```
+
+We can as well execute automatically tasks by registering the output of previous tasks. 
+
+### Example of moving 2 devices to a container and execute the tasks:
+```
+- hosts: cv_server
+  vars:
+    devices: 
+      - fqdn: DC1-SPINE1
+        parentContainerName: mycontainer
+        configlets:
+          - DC1-SPINE1-configlet
+      - fqdn: DC1-SPINE2
+        parentContainerName: mycontainer
+        configlets:
+          - DC1-SPINE2-configlet
+
+  tasks:
+    - name: "Move devices to mycontainer and apply configlet"
+      arista.cvp.cv_device_v3:
+        devices: "{{devices}}"
+        state: present
+      register: CV_DEVICE_OUTPUT
+
+    - name: Execute generated tasks
+      arista.cvp.cv_task_v3:
+        tasks: "{{ CV_DEVICE_OUTPUT.taskIds }}"
+```
+
+
+## Module output
+```
+  msg:
+    actions_manager:
+      actions_manager_count: 2
+      actions_manager_list:
+      - task_747
+      - task_748
+      changed: true
+      diff: {}
+      success: true
+      taskIds: []
+    changed: true
+    failed: false
+    success: true
+    taskIds: []
+```
