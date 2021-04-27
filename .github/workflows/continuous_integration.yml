@@ -10,6 +10,7 @@ jobs:
     outputs:
       code_v1: ${{ steps.filter.outputs.code_v1 }}
       code_v3: ${{ steps.filter.outputs.code_v3 }}
+      dhcp_module: ${{ steps.filter.outputs.dhcp_module }}
       docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v2
@@ -46,6 +47,9 @@ jobs:
               - '.github/workflows/continuous_integration.yml'
               - 'tests/**/*'
               - 'tests/*'
+            dhcp_module:
+              - 'ansible_collections/arista/cvp/roles/dhcp_configuration/*'
+              - 'ansible_collections/arista/cvp/roles/dhcp_configuration/**/*'
             docs:
               - 'mkdocs.yml'
               - 'ansible_collections/arista/cvp/docs/**'
@@ -98,6 +102,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        ansible_version: ["ansible>=2.10,<2.11", "ansible>=3.3"]
         avd_scenario:
           - cv_configlet_loose
           - cv_configlet_strict
@@ -109,9 +114,7 @@ jobs:
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-
       - uses: actions/checkout@v2
-
       - name: Run molecule action
         uses: arista-netdevops-community/action-molecule-avd@v1.1
         with:
@@ -119,7 +122,7 @@ jobs:
           molecule_command: 'test'
           molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
           pip_file: ansible_collections/arista/cvp/requirements.txt
-          ansible: "ansible==2.9.6"
+          ansible: "${{ matrix.ansible_version }}"
           check_git: true
           check_git_enforced: false
       - uses: actions/upload-artifact@v2
@@ -133,12 +136,13 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        ansible_version: ["ansible>=2.10,<2.11", "ansible>=3.3"]
         avd_scenario:
           - dhcp_management_mac
           - dhcp_management_offline
           - dhcp_system_mac
-    needs: [ molecule_cv_modules ]
-    if: needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/heads/release')
+    needs: [ file-changes, pre_commit ]
+    if: needs.file-changes.outputs.dhcp_module == 'true' || startsWith(github.ref, 'refs/heads/release')
     steps:
       - name: 'set environment variables'
         run: |
@@ -152,7 +156,7 @@ jobs:
           molecule_command: 'test'
           molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
           pip_file: ansible_collections/arista/cvp/requirements.txt
-          ansible: "ansible>=2.10,<2.11"
+          ansible: "${{ matrix.ansible_version }}"
           check_git: true
           check_git_enforced: false
 
@@ -166,14 +170,13 @@ jobs:
       - name: 'start docker-compose stack'
         run: |
           cp development/docker-compose.yml .
-          sed -i 's/ansible-cvp\///g' docker-compose.yml
+          sed -i 's/cd\sansible-cvp\/\s\&\&//g' docker-compose.yml
           docker-compose -f docker-compose.yml up -d webdoc_cvp
           docker-compose -f docker-compose.yml ps
       - name: 'test connectivity to mkdoc server'
         run: |
           sleep 30
-          docker run --network container:webdoc_cvp appropriate/curl -s -I --retry 10 --retry-connrefused http://localhost:8000/
-          docker ps
+          until docker exec webdoc_cvp curl -s -I http://localhost:8000/ ; do sleep 2; done
       - name: check links for 404
         run: |
           docker run --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8000 -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=30
