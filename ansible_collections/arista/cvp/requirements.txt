@@ -1,7 +1,7 @@
-netaddr==0.7.19
-Jinja2==2.10.3
+netaddr>=0.7.19
+Jinja2>=2.10.3
+paramiko>=2.7.1
 requests==2.22.0
+cvprac>=1.0.5
+jsonschema>=3.2.0
 treelib==1.5.5
-paramiko==2.7.1
-cvprac==1.0.4
-jsonschema==3.2.0
