@@ -33,7 +33,11 @@ In a shell, run following command:
 $ pip3 install -r ansible_collections/arista/cvp/requirements.txt
 ```
 
-[`requirements.txt`](https://github.com/aristanetworks/ansible-avd/blob/devel/development/requirements.txt) has the following content:
+```pip
+--8<--
+requirements.txt
+--8<--
+```
 
 > Depending of your operating system settings, `pip3` might be replaced by `pip`.
 

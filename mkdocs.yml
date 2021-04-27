@@ -20,6 +20,12 @@ repo_name: CV Collection on Github
 repo_url: https://github.com/aristanetworks/ansible-cvp
 use_directory_urls: true
 
+plugins:
+  - search:
+      lang: en
+  - git-revision-date-localized:
+      type: date
+
 markdown_extensions:
   - mdx_truly_sane_lists
   - smarty
@@ -46,6 +52,10 @@ markdown_extensions:
       # permalink: "#"
       permalink: true
       baselevel: 3
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: 'ansible_collections/arista/cvp/'
 
 nav:
   - Home: README.md
