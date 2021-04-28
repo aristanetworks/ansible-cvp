@@ -13,6 +13,8 @@ theme:
         - yaml
         - python
         - shell
+  icon:
+    repo: fontawesome/brands/github
 extra_css:
   - docs/stylesheets/extra.material.css
 copyright: Copyright &copy; 2019 - 2021 Arista Networks
@@ -81,6 +83,7 @@ nav:
       - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
       - Manage containers: docs/how-to/v3/cv_container_v3.md
       - Manage devices: docs/how-to/v3/cv_device_v3.md
+      - Manage tasks: docs/how-to/v3/cv_task_v3.md
     - Development tips & tricks: docs/installation/development.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
