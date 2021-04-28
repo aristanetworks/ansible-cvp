@@ -4,9 +4,6 @@ cv_configlet
 ++++++++++++
 Create, Delete, or Update CloudVision Portal Configlets.
 
-Module added in version 2.9
-
-
 
 .. contents::
    :local:

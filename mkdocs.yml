@@ -7,18 +7,26 @@ theme:
   name: material
   features:
     - navigation.instant
-    - toc.integrate
+    # - toc.integrate
   highlightjs: true
   hljs_languages:
         - yaml
         - python
         - shell
+  icon:
+    repo: fontawesome/brands/github
 extra_css:
   - docs/stylesheets/extra.material.css
-copyright: Copyright &copy; 2019 - 2020 Arista Networks
-repo_name: CVP on Github
+copyright: Copyright &copy; 2019 - 2021 Arista Networks
+repo_name: CV Collection on Github
 repo_url: https://github.com/aristanetworks/ansible-cvp
 use_directory_urls: true
+
+plugins:
+  - search:
+      lang: en
+  - git-revision-date-localized:
+      type: date
 
 markdown_extensions:
   - mdx_truly_sane_lists
@@ -43,8 +51,13 @@ markdown_extensions:
       guess_lang: true
   - toc:
       separator: "-"
-      permalink: "#"
-      baselevel: 1
+      # permalink: "#"
+      permalink: true
+      baselevel: 3
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: 'ansible_collections/arista/cvp/'
 
 nav:
   - Home: README.md
@@ -52,6 +65,7 @@ nav:
   - Release Notes:
     - Versions 1.x: docs/release-notes/v1.x.md
     - Versions 2.x: docs/release-notes/v2.x.md
+    - Versions 3.x: docs/release-notes/v3.x.md
   - Installation:
     - Requirements: docs/installation/requirements.md
     - Configure your local environment: docs/installation/setup-environement.md
@@ -59,11 +73,17 @@ nav:
     - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
     - Docker & Development: docs/installation/setup-docker.md
   - How-To:
-    - Configure Cloudvision Authentication: docs/how-to/cvp-authentication.md
-    - Get Facts: docs/how-to/cv_facts.md
-    - Manage configlets: docs/how-to/cv_configlet.md
-    - Manage containers: docs/how-to/cv_container.md
-    - Manage devices: docs/how-to/cv_device.md
+    - CV Authentication: docs/how-to/cvp-authentication.md
+    - CV Modules v1:
+      - Get Facts: docs/how-to/v1/cv_facts.md
+      - Manage configlets: docs/how-to/v1/cv_configlet.md
+      - Manage containers: docs/how-to/v1/cv_container.md
+      - Manage devices: docs/how-to/v1/cv_device.md
+    - CV Modules v3:
+      - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
+      - Manage containers: docs/how-to/v3/cv_container_v3.md
+      - Manage devices: docs/how-to/v3/cv_device_v3.md
+      - Manage tasks: docs/how-to/v3/cv_task_v3.md
     - Development tips & tricks: docs/installation/development.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
@@ -72,11 +92,17 @@ nav:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
-    - Module cv_facts: docs/modules/cv_facts.rst.md
-    - Module cv_configlet: docs/modules/cv_configlet.rst.md
-    - Module cv_container: docs/modules/cv_container.rst.md
-    - Module cv_device: docs/modules/cv_device.rst.md
-    - Module cv_tasks: docs/modules/cv_task.rst.md
+    - Modules version 1:
+      - Module cv_facts: docs/modules/cv_facts.rst/
+      - Module cv_configlet: docs/modules/cv_configlet.rst/
+      - Module cv_container: docs/modules/cv_container.rst/
+      - Module cv_device: docs/modules/cv_device.rst/
+      # - Module cv_task: docs/modules/cv_task.rst/
+    - Module version 3:
+      - Module cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
+      - Module cv_container_v3: docs/modules/cv_container_v3.rst.md
+      - Module cv_device_v3: docs/modules/cv_device_v3.rst.md
+      - Module cv_task_v3: docs/modules/cv_task_v3.rst.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

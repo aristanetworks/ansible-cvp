@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 # pylint: disable=bare-except
+# pylint: disable=logging-format-interpolation
+# flake8: noqa: W1202
 #
 # GNU General Public License v3.0+
 #
@@ -20,13 +22,12 @@
 #
 
 from __future__ import absolute_import, division, print_function
-
 __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
 module: cv_container
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
@@ -59,6 +60,7 @@ options:
     required: false
     default: ['none']
     type: list
+    elements: str
 '''
 
 EXAMPLES = r'''
@@ -97,7 +99,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
 import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 from ansible.module_utils.basic import AnsibleModule
 
 # List of Ansible default containers
@@ -173,9 +175,9 @@ def process_container(module, container, parent, action):
                 return [False, {'container': cont}]
             elif action == "delete":
                 resp = module.client.api.delete_container(cont['name'],
-                                                        cont['key'],
-                                                        parent['name'],
-                                                        parent['key'])
+                                                          cont['key'],
+                                                          parent['name'],
+                                                          parent['key'])
                 if resp['data']['status'] == "success":
                     return [True, {'taskIDs': resp['data']['taskIds']},
                             {'container': cont}]
@@ -184,7 +186,7 @@ def process_container(module, container, parent, action):
                 return [False, {'container': "Not Found"}]
             elif action == "add":
                 resp = module.client.api.add_container(container, parent['name'],
-                                                    parent['key'])
+                                                       parent['key'])
                 if resp['data']['status'] == "success":
                     return [True, {'taskIDs': resp['data']['taskIds']},
                             {'container': cont}]
@@ -810,9 +812,9 @@ def main():
     Main entry point for module execution.
     """
     argument_spec = dict(
-        topology=dict(type='dict', required=True),          # Topology to configure on CV side.
-        cvp_facts=dict(type='dict', required=True),         # Facts from cv_facts module.
-        configlet_filter=dict(type='list', default='none'),  # Filter to protect configlets to be detached
+        topology=dict(type='dict', required=True),
+        cvp_facts=dict(type='dict', required=True),
+        configlet_filter=dict(type='list', default='none', elements='str'),
         mode=dict(type='str',
                   required=False,
                   default='merge',

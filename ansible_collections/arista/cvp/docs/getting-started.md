@@ -4,49 +4,68 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 
 A [complete end to end demo](https://github.com/aristanetworks/netdevops-examples#demo-content) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
 
-Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
+Below is a very basic example to build a container topology on a CloudVision platform assuming:
+
+- create a tree of containers
+- Move devices under `MLAG01` container
+- Create configlets with MLAG devices configuration
+- Attach configlets to device.
 
 ```yaml
 ---
-- name: Playbook to demonstrate cv_container module.
-  hosts: cvp
+- name: Playbook to demonstrate cvp modules.
+  hosts: cv_server
   connection: local
   gather_facts: no
   collections:
     - arista.cvp
   vars:
+    # Configlet definition
+    device_configuration:
+      mlag-01a-config: "{{lookup('file', './config-router-mlag01a.conf')}}"
+      mlag-01b-config: "{{lookup('file', './config-router-mlag01b.conf')}}"
+
+    # Container definition
     containers_provision:
         Fabric:
-          parent_container: Tenant
+          parentContainerName: Tenant
         Spines:
-          parent_container: Fabric
+          parentContainerName: Fabric
         Leaves:
-          parent_container: Fabric
+          parentContainerName: Fabric
           configlets:
               - alias
-          devices:
-            - veos03
         MLAG01:
-          parent_container: Leaves
-          devices:
-            - veos01
-            - veos02
-  tasks:
-    - name: "Gather CVP facts from {{inventory_hostname}}"
-      cv_facts:
-      register: cvp_facts
+          parentContainerName: Leaves
 
+    # Device definition
+    devices_provision:
+      - fqdn: mlag-01a
+        parentContainerName: 'MLAG01'
+        configlets:
+            - 'mlag-01a-config'
+        systemMacAddress: '50:8d:00:e3:78:aa'
+      - fqdn: mlag-01b
+        parentContainerName: 'MLAG01'
+        configlets:
+            - 'mlag-01b-config'
+        systemMacAddress: '50:8d:00:e3:78:bb'
+
+  tasks:
     - name: "Build Container topology on {{inventory_hostname}}"
-      cv_container:
+      arista.cvp.cv_container_v3:
         topology: '{{containers_provision}}'
-        cvp_facts: '{{cvp_facts.ansible_facts}}'
+
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{devices_provision}}'
 ```
 
 As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
 ```ini
 [development]
-cvp_foster  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
+cv_server  ansible_host= 10.90.224.122 ansible_httpapi_host=10.90.224.122
 
 [development:vars]
 ansible_connection=httpapi

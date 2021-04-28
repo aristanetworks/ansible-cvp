@@ -4,9 +4,6 @@ cv_task
 +++++++
 Execute or Cancel CVP Tasks.
 
-Module added in version 2.9
-
-
 
 .. contents::
    :local:

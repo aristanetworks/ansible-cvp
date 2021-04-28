@@ -8,6 +8,8 @@ HOME_DIR_DOCKER = '/home/docker'
 ANSIBLE_TEST ?= $(shell which ansible-test)
 # option to run ansible-test sanity: must be either venv or docker (default is docker)
 ANSIBLE_TEST_MODE ?= docker
+# Python version to use in testing.
+ANSIBLE_TEST_PYTHON ?= 3.6
 # Root path for MKDOCS content
 WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
 COMPOSE_FILE ?= development/docker-compose.yml
@@ -44,15 +46,20 @@ sanity-info: ## Show information about ansible-test
 .PHONY: sanity-lint
 sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --skip-test import ; \
+	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --skip-test yamllint --python $(ANSIBLE_TEST_PYTHON) ; \
 	rm -rf tests/output/
 
 .PHONY: sanity-import
 sanity-import: ## Run ansible-test sanity for code import
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --test import ; \
+	ansible-test sanity --requirements --$(ANSIBLE_TEST_MODE) --python $(ANSIBLE_TEST_PYTHON) --test import ; \
 	rm -rf tests/output/
 
+.PHONY: galaxy-importer
+galaxy-importer:  ## Run galaxy importer tests
+	rm -f *.tar.gz && \
+	ansible-galaxy collection build --force ansible_collections/arista/cvp && \
+	python -m galaxy_importer.main *.tar.gz
 
 #########################################
 # Docker actions					 	#
@@ -85,8 +92,6 @@ webdoc: ## Build documentation to publish static content
 	python ansible2rst.py ; \
 	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
-	cd $(CURRENT_DIR)
-	mkdocs build -f mkdocs.yml
 
 .PHONY: check-cvp-404
 check-cvp-404: ## Check local 404 links for AVD documentation
@@ -130,9 +135,9 @@ github-configure-ci-python3: ## Configure Python3 environment to run GA (Ubuntu:
 
 .PHONY: install-requirements
 install-requirements: ## Install python requirements for generic purpose
-	pip3 install --upgrade wheel
-	pip3 install -r development/requirements.txt
-	pip3 install -r development/requirements-dev.txt
+	pip3 install --upgrade wheel pip
+	pip3 install -r ansible_collections/arista/cvp/requirements.txt
+	pip3 install -r ansible_collections/arista/cvp/requirements-dev.txt
 
 .PHONY: install-docker
 install-docker: ## Install docker

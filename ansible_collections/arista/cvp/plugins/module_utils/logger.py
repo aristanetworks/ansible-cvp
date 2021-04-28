@@ -36,12 +36,12 @@ LEVELS = {'debug': logging.DEBUG,
           'critical': logging.CRITICAL}
 
 # Set loglevel for arista.cvp modules
-LOGGING_LEVEL = os.getenv('ANSIBLE_CVP_LOG_LEVEL', 'info')
+LOGGING_LEVEL = os.getenv('ANSIBLE_CVP_LOG_LEVEL', 'error')
 LOGLEVEL = LEVELS.get(LOGGING_LEVEL, logging.NOTSET)
 
 # Set loglevel for urllib3
-LOGGING_LEVEL_URLLIB3 = os.getenv('ANSIBLE_CVP_LOG_APICALL', 'warning')
-LOGLEVEL_URLLIB3 = LEVELS.get(LOGGING_LEVEL_URLLIB3, logging.WARNING)
+LOGGING_LEVEL_URLLIB3 = os.getenv('ANSIBLE_CVP_LOG_APICALL', 'error')
+LOGLEVEL_URLLIB3 = LEVELS.get(LOGGING_LEVEL_URLLIB3, logging.ERROR)
 
 # Get filename to write logs / default /temp/arista.cvp.debug-<uuid>.log
 DEFAULT_LOG_FILE = '/tmp/arista.cvp.debug.' + str(uuid.uuid4()) + '.log'

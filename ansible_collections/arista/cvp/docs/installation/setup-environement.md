@@ -24,17 +24,20 @@ To build local folder structure you manually run all the following commands to g
 In addition to this 3 `git clone`, you can also deployed a [Makefile](https://github.com/aristanetworks/ansible-avd/blob/devel/development/Makefile) built to provide some shortcut we will discuss in a second stage.
 
 ```shell
+# Prepare dedicated folder
 $ mkdir git_projects
-
 $ cd git_projects
 
+# Clone AVD repositories
 $ git clone https://github.com/aristanetworks/ansible-avd.git
 $ git clone https://github.com/aristanetworks/ansible-cvp.git
 $ git clone https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo.git
 
-# Copy Makefile at the root position
+# Deploy Makefile with helpful commands
 $ cp ansible-avd/development/Makefile ./
-$ make shell
+
+# Start a pre-configured runner
+$ make run
 ```
 
 Or you can use a one-liner script available in ansible-avd repository to create this structure for you. This script does following actions:
@@ -68,15 +71,15 @@ $ make <your command>
 
 #### Commands for docker-compose
 
-- `dev-start`: Start docker compose stack to develop with AVD and CVP collection (alias: `start`)
+- `start`: Start docker compose stack to develop with AVD and CVP collection (alias: `start`)
 
   - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose AVD documentation with live reload for development purposes.
   - Deploy an [mkdoc](https://hub.docker.com/repository/docker/titom73/mkdocs) instance to expose CVP documentation with live reload for development purposes.
   - Deploy an [AVD runner](https://hub.docker.com/repository/docker/avdteam/base) with a pseudo terminal connected to shell for ansible execution
 
-- `dev-stop`: Stop docker compose stack and remove containers (alias: `stop`)
-- `dev-run`: Run a shell attached to ansible container (alias: `shell`)
-- `dev-reload`: Stop and Start docker-compose stack
+- `stop`: Stop docker compose stack and remove containers (alias: `stop`)
+- `run`: Run a shell attached to ansible container (alias: `shell`)
+- `reload`: Stop and Start docker-compose stack
 
 ### Commands for docker only
 
@@ -212,6 +215,6 @@ $ virtualenv -p python3 .venv
 $ source .venv/bin/activate
 
 # Install Python requirements
-$ pip3 install -r ansible-avd/development/requirements.txt
+$ pip3 install -r ansible-cvp/ansible_collections/arista/cvp/requirements.txt
 ...
 ```

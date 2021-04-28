@@ -76,6 +76,7 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
     diffRatio = textComp.ratio()
     return [diffRatio, diff]
 
+
 def isIterable(testing_object=None):
     """
     Test if an object is iterable or not.

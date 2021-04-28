@@ -24,7 +24,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: cv_device
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
 description:
@@ -53,6 +53,7 @@ options:
     required: false
     default: ['all']
     type: list
+    elements: str
   state:
     description:
         - If absent, devices will be removed from CVP and moved back to undefined.
@@ -125,7 +126,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
@@ -820,9 +821,8 @@ def devices_update(module, mode="override"):
                 str(device_update["name"]),
                 str(unknown_configlet))
             module.fail_json(
-                msg="{} device has unknown configlets from CV: {}".format(device_update["name"],
-                unknown_configlet)
-            )
+                msg="{} device has unknown configlets from CV: {}".format(*device_update["name"],
+                                                                          *unknown_configlet))
 
     for device_update in devices_update:
         MODULE_LOGGER.info(" * devices_update - updating device: %s", str(device_update["name"]))
@@ -1151,7 +1151,7 @@ def main():
     argument_spec = dict(
         devices=dict(type="dict", required=True),
         cvp_facts=dict(type="dict", required=True),
-        device_filter=dict(type="list", default="all"),
+        device_filter=dict(type="list", default="all", elements='str'),
         state=dict(
             type="str", choices=["present", "absent"], default="present", required=False
         ),

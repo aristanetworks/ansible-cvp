@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
+# pylint: disable=logging-format-interpolation
+# pylint: disable = duplicate-code
+# flake8: noqa: R0801
 #
 # GNU General Public License v3.0+
 #

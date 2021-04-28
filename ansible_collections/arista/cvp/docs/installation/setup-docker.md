@@ -21,13 +21,20 @@ For example, see the file/folder structure below.
 This process is similar to [ansible-avd collection](https://github.com/aristanetworks/ansible-avd). It means if you use AVD, this step is not required.
 
 ```shell
-mkdir git_projects
-cd git_projects
-git clone https://github.com/aristanetworks/ansible-avd.git
-git clone https://github.com/aristanetworks/ansible-cvp.git
-git clone https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo.git
-cp ansible-cvp/development/Makefile ./
-make run
+# Prepare dedicated folder
+$ mkdir git_projects
+$ cd git_projects
+
+# Clone AVD repositories
+$ git clone https://github.com/aristanetworks/ansible-avd.git
+$ git clone https://github.com/aristanetworks/ansible-cvp.git
+$ git clone https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo.git
+
+# Deploy Makefile with helpful commands
+$ cp ansible-avd/development/Makefile ./
+
+# Start a pre-configured runner
+$ make run
 ```
 
 ## One liner installation

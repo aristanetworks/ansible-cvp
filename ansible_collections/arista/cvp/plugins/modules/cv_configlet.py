@@ -26,7 +26,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_configlet
-version_added: "2.9"
+version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
@@ -60,6 +60,7 @@ options:
     required: false
     default: ['none']
     type: list
+    elements: str
   filter_mode:
     description:
         - If loose, a match is when a configlet matches a substring of a
@@ -116,7 +117,7 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.schema as schema
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
@@ -661,7 +662,7 @@ def main():
         configlets=dict(type='dict', required=True),
         configlets_notes=dict(type='str', default='Managed by Ansible', required=False),
         cvp_facts=dict(type='dict', required=True),
-        configlet_filter=dict(type='list', default='none'),
+        configlet_filter=dict(type='list', default='none', elements='str'),
         filter_mode=dict(type='str',
                          choices=['loose', 'strict'],
                          default='loose',

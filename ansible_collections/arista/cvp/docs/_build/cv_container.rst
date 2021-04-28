@@ -4,9 +4,6 @@ cv_container
 ++++++++++++
 Manage Provisioning topology.
 
-Module added in version 2.9
-
-
 
 .. contents::
    :local:

@@ -4,14 +4,14 @@
 
 - CV version
 - List of devices part of CV.
-    - Active EOS devices
-    - Inactive EOS devices
-    - 3rd part devices
+  - Active EOS devices
+  - Inactive EOS devices
+  - 3rd part devices
 - List of configlets
 - List of containers
 - List of tasks
 
-Full documentation available in [module section](../modules/cv_facts.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_facts.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ## Playbook example
 
