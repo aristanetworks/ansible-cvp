@@ -116,14 +116,11 @@ except ImportError:
     CVPRAC_IMP_ERR = traceback.format_exc()
 
 
-# Ansible module preparation
-ansible_module: AnsibleModule
-
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
 
-def check_import():
+def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
     """
@@ -164,7 +161,7 @@ def main():
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
     # Test all libs are correctly installed
-    check_import()
+    check_import(ansible_module=ansible_module)
 
     # boolean for state flag
     if ansible_module.params['state'] == 'absent':
