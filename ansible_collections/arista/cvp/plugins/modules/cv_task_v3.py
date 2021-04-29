@@ -74,14 +74,12 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
-# Ansible module preparation
-ansible_module: AnsibleModule
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
 MODULE_LOGGER.info('Start cv_tasks module execution')
 
 
-def check_import():
+def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
     """
@@ -116,7 +114,7 @@ def main():
     result['data']['tasks'] = list()
 
     # Test all libs are correctly installed
-    check_import()
+    check_import(ansible_module=ansible_module)
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
