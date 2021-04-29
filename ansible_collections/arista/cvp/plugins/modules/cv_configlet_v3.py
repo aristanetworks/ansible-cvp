@@ -96,15 +96,13 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
-# Ansible module preparation
-ansible_module: AnsibleModule
 
 # Logger startup
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
 
 
-def check_import():
+def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
     """
@@ -151,7 +149,7 @@ def main():
         is_present = False
 
     # Test all libs are correctly installed
-    check_import()
+    check_import(ansible_module=ansible_module)
 
     user_configlets = ConfigletInput(
         user_topology=ansible_module.params['configlets'])
