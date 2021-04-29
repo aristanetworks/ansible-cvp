@@ -112,14 +112,12 @@ except ImportError:
     CVPRAC_IMP_ERR = traceback.format_exc()
 
 
-# Ansible module preparation
-ansible_module: AnsibleModule
 # Logger creation
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device_v3')
 MODULE_LOGGER.info('Start cv_device_v3 module execution')
 
 
-def check_import():
+def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
     """
@@ -161,7 +159,7 @@ def main():
         ansible_module.fail_json(msg='State==absent is not yet supported !')
 
     # Test all libs are correctly installed
-    check_import()
+    check_import(ansible_module=ansible_module)
 
     # Test user input against schema definition
     user_topology = DeviceInventory(data=ansible_module.params['devices'])
