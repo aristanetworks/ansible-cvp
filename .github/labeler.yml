@@ -1,11 +1,23 @@
 "module: cv_configlet":
   - ansible_collections/arista/cvp/plugins/modules/cv_configlet.py
 
+"module: cv_configlet_v3":
+  - ansible_collections/arista/cvp/plugins/modules/cv_configlet_v3.py
+  - ansible_collections/arista/cvp/plugins/module_utils/configlet_tools.py
+
 "module: cv_container":
   - ansible_collections/arista/cvp/plugins/modules/cv_container.py
 
+"module: cv_container_v3":
+  - ansible_collections/arista/cvp/plugins/modules/cv_container_v3.py
+  - ansible_collections/arista/cvp/plugins/module_utils/container_tools.py
+
 "module: cv_device":
   - ansible_collections/arista/cvp/plugins/modules/cv_device.py
+
+"module: cv_device_v3":
+  - ansible_collections/arista/cvp/plugins/modules/cv_device_v3.py
+  - ansible_collections/arista/cvp/plugins/module_utils/device_tools.py
 
 "module: cv_facts":
   - ansible_collections/arista/cvp/plugins/modules/cv_facts.py
@@ -13,9 +25,17 @@
 "module: cv_task":
   - ansible_collections/arista/cvp/plugins/modules/cv_task.py
 
+"module: cv_task_v3":
+  - ansible_collections/arista/cvp/plugins/modules/cv_task_v3.py
+  - ansible_collections/arista/cvp/plugins/module_utils/task_tools.py
+
 "module_utils: cv_client":
   - ansible_collections/arista/cvp/plugins/module_utils/*
   - ansible_collections/arista/cvp/plugins/module_utils/**/*
+
+"data-model changes":
+  - ansible_collections/arista/cvp/plugins/module_utils/schema_v1.py
+  - ansible_collections/arista/cvp/plugins/module_utils/schema_v3.py
 
 "role: ztp_configuration":
   - ansible_collections/arista/cvp/roles/dhcp_configuration/*
@@ -40,6 +60,6 @@
   - development/Makefile
 
 "type: dependencies":
-  - development/requirements-dev.txt
-  - development/requirements.txt
+  - ansible_collections/arista/cvp/requirements-dev.txt
+  - ansible_collections/arista/cvp/requirements.txt
   - ansible_collections/arista/cvp/docs/requirements.txt
