@@ -2,7 +2,7 @@
 name: Issue template
 about: Report an issue
 title: ""
-labels: Triage
+labels: 'status: Triage'
 assignees: ''
 
 ---
