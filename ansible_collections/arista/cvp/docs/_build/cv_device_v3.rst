@@ -82,7 +82,7 @@ Examples:
 ---------
 
 ::
-    
+
     # task in loose mode (default)
     ---
     - name: Device Management in Cloudvision
@@ -130,13 +130,3 @@ Author
 ~~~~~~
 
 * EMEA AS Team (@aristanetworks)
-
-
-
-
-Status
-~~~~~~
-
-This module is flagged as **preview** which means that it is not guaranteed to have a backwards compatible interface.
-
-

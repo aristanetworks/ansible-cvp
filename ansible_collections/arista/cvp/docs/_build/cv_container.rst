@@ -90,7 +90,7 @@ Examples:
 ---------
 
 ::
-    
+
     - name: Create container topology on CVP
       hosts: cvp
       connection: local
@@ -125,13 +125,3 @@ Author
 ~~~~~~
 
 * EMEA AS Team (@aristanetworks)
-
-
-
-
-Status
-~~~~~~
-
-This module is flagged as **preview** which means that it is not guaranteed to have a backwards compatible interface.
-
-
