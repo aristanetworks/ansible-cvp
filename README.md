@@ -56,29 +56,29 @@ This repository provides content for Ansible's collection __arista.cvp__ with fo
 
 __Version 3:__
 
-- [__arista.cvp.cv_configlet_v3__](docs/modules/cv_configlet_v3.rst/) -  Manage configlet configured on CVP.
-- [__arista.cvp.cv_container__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
-- [__arista.cvp.cv_device__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
-- [__arista.cvp.cv_task_v3__](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
+- [__arista.cvp.cv_configlet_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_configlet_v3.rst/) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
+- [__arista.cvp.cv_task_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
 
 __Legacy / Version 1:__
 
-- [__arista.cvp.cv_facts__](docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- [__arista.cvp.cv_configlet__](docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
-- [__arista.cvp.cv_container__](docs/modules/cv_container.rst/) -  Manage container topology and attach configlet and devices to containers.
-- [__arista.cvp.cv_device__](docs/modules/cv_device.rst/) - Manage devices configured on CVP
-- [__arista.cvp.cv_task__](docs/modules/cv_task.rst/) - Run tasks created on CVP.
+- [__arista.cvp.cv_facts__](https://cvp.avd.sh/en/latest/docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- [__arista.cvp.cv_configlet__](https://cvp.avd.sh/en/latest/docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
+- [__arista.cvp.cv_container__](https://cvp.avd.sh/en/latest/docs/modules/cv_container.rst/) -  Manage container topology and attach configlet and devices to containers.
+- [__arista.cvp.cv_device__](https://cvp.avd.sh/en/latest/docs/modules/cv_device.rst/) - Manage devices configured on CVP
+- [__arista.cvp.cv_task__](https://cvp.avd.sh/en/latest/docs/modules/cv_task.rst/) - Run tasks created on CVP.
 
 ### List of available roles
 
-- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
-- [__arista.cvp.configlet_sync__](roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
+- [__arista.cvp.dhcp_configuration__](https://cvp.avd.sh/en/latest/roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](https://cvp.avd.sh/en/latest/roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
 
 ## Example
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
-A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-toi).
+A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
 
 A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
 
@@ -202,14 +202,14 @@ collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/
 
 In an effort to support both [arista.avd](https://github.com/aristanetworks/ansible-avd) and arista.cvp collections, you can find a generic docker image in [this repository](https://github.com/arista-netdevops-community/docker-avd-base).
 
-Besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-toi)
+Besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ## Resources
 
 - Ansible for [Arista Validated Design](https://github.com/aristanetworks/ansible-avd)
 - Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
-- [Training Lab content](https://github.com/arista-netdevops-community/ansible-cvp-toi)
+- [Training Lab content](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 - Content for [demo using Arista Validated Design and `arista.cvp` collection.](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo)
 
 ## Ask a question

@@ -113,7 +113,7 @@ nav:
       - Module cv_configlet: docs/modules/cv_configlet.rst/
       - Module cv_container: docs/modules/cv_container.rst/
       - Module cv_device: docs/modules/cv_device.rst/
-      # - Module cv_task: docs/modules/cv_task.rst/
+      - Module cv_task: docs/modules/cv_task.rst/
     - Module version 3:
       - Module cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
       - Module cv_container_v3: docs/modules/cv_container_v3.rst.md

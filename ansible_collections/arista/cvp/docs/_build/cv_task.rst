@@ -14,35 +14,7 @@ Synopsis
 --------
 
 
-C
-l
-o
-u
-d
-V
-i
-s
-o
-n
-
-P
-o
-r
-t
-a
-l
-
-T
-a
-s
-k
-
-m
-o
-d
-u
-l
-e
+CloudVison Portal Task module
 
 
 .. _module-specific-options-label:
