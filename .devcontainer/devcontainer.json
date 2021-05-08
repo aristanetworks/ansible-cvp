@@ -1,34 +1,87 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
-// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/python-3
 {
-	"name": "Ansible CVP development",
-	"context": "..",
-	"dockerFile": "Dockerfile",
-
-	// Use 'settings' to set *default* container specific settings.json values on container create.
-	// You can edit these settings after create using File > Preferences > Settings > Remote.
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash",
-		"python.pythonPath": "/usr/local/bin/python",
-		"python.linting.enabled": true,
-		"python.linting.pylintEnabled": true,
-		"python.linting.pylintPath": "/usr/local/bin/pylint"
-	},
-
-	// Use 'appPort' to create a container with published ports. If the port isn't working, be sure
-	// your server accepts connections from all interfaces (0.0.0.0 or '*'), not just localhost.
-	// "appPort": [],
-
-	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "pip install -r requirements.txt && pip install -r requirements.dev.txt",
-
-	// Uncomment the next line to have VS Code connect as an existing non-root user in the container.
-	// On Linux, by default, the container user's UID/GID will be updated to match your local user. See
-	// https://aka.ms/vscode-remote/containers/non-root for details on adding a non-root user if none exist.
-	// "remoteUser": "vscode",
-
-	// Add the IDs of extensions you want installed when the container is created in the array below.
-	"extensions": [
-		"ms-python.python"
-	]
+    "name": "AVD Development",
+    "build": {
+        "dockerfile": "Dockerfile",
+        // Update 'VARIANT' to pick Python version of AVD runner: 3.6, 3.7, 3.8
+        "args": { "VARIANT": "3.6" },
+    },
+    "remoteUser": "avd",
+    "updateRemoteUserUID": true,
+    "workspaceMount": "source=${localWorkspaceFolder}/..,target=/workspace,type=bind,consistency=delegated",
+    "workspaceFolder": "/workspace",
+    "extensions": [
+        "christian-kohler.path-intellisense",
+        "codezombiech.gitignore",
+        "DavidAnson.vscode-markdownlint",
+        "donjayamanne.python-extension-pack",
+        "eamodio.gitlens",
+        "felipe-mendes.slack-theme",
+        "haaaad.ansible",
+        "jack89ita.copy-filename",
+        "jdinhlife.gruvbox",
+        "jebbs.markdown-extended",
+        "magicstack.MagicPython",
+        "mhutchie.git-graph",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "njpwerner.autodocstring",
+        "PKief.material-icon-theme",
+        "redhat.vscode-yaml",
+        "samuelcolvin.jinjahtml",
+        "timonwong.ansible-autocomplete",
+        "tuxtina.json2yaml",
+        "wholroyd.jinja",
+        "yzhang.markdown-all-in-one",
+        "coenraads.bracket-pair-colorizer-2",
+        "github.vscode-pull-request-github",
+        "ms-python.vscode-pylance"
+    ],
+    "settings": {
+        "python.pythonPath": "/usr/local/bin/python",
+        "python.analysis.extraPaths": [
+            "/workspace/"
+        ],
+        "python.linting.pylintEnabled": true,
+        "python.linting.enabled": true,
+        "editor.rulers": [
+            80,
+            120
+        ],
+        "editor.formatOnPaste": true,
+        "files.trimTrailingWhitespace": true,
+        "python.linting.pycodestyleEnabled": false,
+        "python.linting.pycodestyleArgs": [
+            "--max-line-length=120",
+            "--ignore=E501,722"
+        ],
+        "python.linting.flake8Enabled": true,
+        "python.linting.flake8Args": [
+            "--max-line-length=120",
+            "--ignore=E722,E501",
+            "--verbose",
+            "--exclude=*.pyc *.git",
+            "--format=pylint"
+        ],
+        "python.linting.pylintArgs": [
+            "--max-line-length=120",
+            "--disable=E501,W0142,W0403,W0613,W0232,R0903,R0913,C0103,R0914,C0304,F0401,W0402,E1101,W0614,C0111,C0301"
+        ],
+        "autoDocstring.startOnNewLine": true,
+        "telemetry.enableCrashReporter": false,
+        "telemetry.enableTelemetry": false,
+        "gitlens.views.repositories.location": "scm",
+        "gitlens.views.fileHistory.location": "explorer",
+        "gitlens.views.lineHistory.location": "explorer",
+        "gitlens.views.search.location": "scm",
+        "gitlens.views.compare.location": "scm",
+        "gitlens.views.repositories.files.layout": "tree",
+        "editor.renderWhitespace": "all",
+        "files.autoSave": "onFocusChange",
+        "autoDocstring.includeName": true,
+        "autoDocstring.docstringFormat": "numpy",
+        "autoDocstring.includeExtendedSummary": true,
+        "path-intellisense.autoSlashAfterDirectory": true,
+        "editor.find.autoFindInSelection": "multiline",
+        "githubIssues.issueBranchTitle": "issues/${issueNumber}"
+    }
 }
