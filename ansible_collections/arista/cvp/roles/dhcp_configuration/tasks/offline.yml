@@ -4,4 +4,5 @@
     src: 'dhcpd.conf.j2'
     dest: '{{ output_dir }}/dhcpd.conf'
     backup: true
+    mode: 0644
   delegate_to: localhost
