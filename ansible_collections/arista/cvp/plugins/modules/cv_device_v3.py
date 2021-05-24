@@ -140,7 +140,7 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'absent']),
+                   choices=['present', 'absent', 'factory_reset']),
         apply_mode=dict(type='str',
                         required=False,
                         default='loose',
@@ -154,9 +154,6 @@ def main():
     result = dict(changed=False, data={}, failed=False)
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
-
-    if ansible_module.params['state'] == 'absent':
-        ansible_module.fail_json(msg='State==absent is not yet supported !')
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
@@ -175,7 +172,7 @@ def main():
     cv_topology = CvDeviceTools(
         cv_connection=cv_client, ansible_module=ansible_module, check_mode=ansible_module.check_mode)
 
-    result = cv_topology.manager(user_inventory=user_topology, apply_mode=ansible_module.params['apply_mode'])
+    result = cv_topology.manager(user_inventory=user_topology, state=ansible_module.params['state'], apply_mode=ansible_module.params['apply_mode'])
 
     ansible_module.exit_json(**result)
 

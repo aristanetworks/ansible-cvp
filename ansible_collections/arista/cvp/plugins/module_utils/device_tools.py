@@ -560,7 +560,7 @@ class CvDeviceTools(object):
     # Workers function
     # ------------------------------------------ #
 
-    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN, apply_mode: str = 'loose'):
+    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN, state: str = 'present', apply_mode: str = 'loose'):
         """
         manager Main entry point to support all device
 
@@ -575,6 +575,8 @@ class CvDeviceTools(object):
             User defined inventory from Ansible input
         search_mode : str, optional
             Search method to get device information from Cloudvision, by default FQDN
+        state : str, optional
+            Define the desired state of the device (present, absent or factory_reset)
         apply_mode: str, optional
             Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
 
@@ -585,6 +587,7 @@ class CvDeviceTools(object):
         """
         response = CvAnsibleResponse()
 
+        cv_remove = CvManagerResult(builder_name='devices_removed')
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
@@ -604,34 +607,149 @@ class CvDeviceTools(object):
         if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
-        action_result = self.deploy_device(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_deploy.add_change(change=update)
-
-        action_result = self.move_device(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_move.add_change(change=update)
-
-        action_result = self.apply_configlets(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_configlets_attach.add_change(change=update)
-
-        if apply_mode == 'strict':
-            action_result = self.detach_configlets(
-                user_inventory=user_inventory)
+        if state == 'absent':
+            action_result = self.remove_device(user_inventory=user_inventory)
+            ## TODO: Add action result in add_change as below.
             if action_result is not None:
                 for update in action_result:
-                    cv_configlets_detach.add_change(change=update)
+                    cv_remove.add_change(change=update)
 
+        elif state == 'factory_reset':
+            action_result = self.factory_reset_device(user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_remove.add_change(change=update)
+            # MODULE_LOGGER.error('Module factory reset not yet implemented')
+            # self.__ansible.fail_json(msg='State==factory_reset is not yet supported!')
+
+        # State is present
+        else: 
+            action_result = self.deploy_device(user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_deploy.add_change(change=update)
+
+            action_result = self.move_device(user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_move.add_change(change=update)
+
+            action_result = self.apply_configlets(user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_configlets_attach.add_change(change=update)
+
+            if apply_mode == 'strict':
+                action_result = self.detach_configlets(
+                    user_inventory=user_inventory)
+                if action_result is not None:
+                    for update in action_result:
+                        cv_configlets_detach.add_change(change=update)
+
+        response.add_manager(cv_remove)
         response.add_manager(cv_move)
         response.add_manager(cv_deploy)
         response.add_manager(cv_configlets_attach)
         response.add_manager(cv_configlets_detach)
 
         return response.content
+
+    def factory_reset_device(self, user_inventory: DeviceInventory):
+        """
+        factory_reset_device Entry point to factory_reset a device.
+
+        Execute API calls to factory reset the device
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
+        results = list()
+        for device in user_inventory.devices:
+            result_data = CvApiResult(action_name='reset_device_{}'.format(device.fqdn))
+            if device.system_mac is not None:
+                try:
+                    container_current = self.get_container_current(device_mac=device.system_mac)
+                    
+                    # Factory reset from the undefined container is not supported
+                    if container_current['key'] == UNDEFINED_CONTAINER:
+                        msg = "Unable to factory_reset the device [{}] - Factory reset a device under the undefined_container is not supported.  \
+                            \nPlease move first the device to a container.".format(device.fqdn)
+                        MODULE_LOGGER.error(msg)
+                        self.__ansible.fail_json(msg=msg)
+
+                    msg = "Device Reset: " + device.fqdn
+                    data = {'data': [{'info': msg,
+                          'infoPreview': msg,
+                          'action': 'reset',
+                          'nodeType': 'netelement',
+                          'nodeId': device.system_mac,
+                          'toId': UNDEFINED_CONTAINER,
+                          'fromId': container_current['key'],
+                          'nodeName': device.fqdn,
+                          'fromName': container_current['name'],
+                          'toIdType': 'container'}]}
+                    MODULE_LOGGER.debug("data: " + str(data))
+                    
+                    resp1 = self.__cv_client.api._add_temp_action(data=data)
+                    MODULE_LOGGER.debug("Resp1: " + str(resp1))
+                    resp2 = self.__cv_client.api._save_topology_v2([])
+                    MODULE_LOGGER.debug("Resp2: " + str(resp2))
+
+                except CvpApiError:
+                    error_message = 'Error deleting device {}'.format(device.fqdn)
+                    MODULE_LOGGER.error(error_message)
+                    self.__ansible.fail_json(msg=error_message)
+                else: 
+                    result_data.changed = True
+                    result_data.success = True
+                    result_data.add_entry('factory_reset-{}'.format(device.fqdn))
+                    result_data.taskIds = resp2['data']['taskIds']
+                    results.append(result_data)
+            else: 
+                MODULE_LOGGER.error("Unable to factory_reset device  " + device.fqdn + " - No mac address found for this device.")
+        return results
+
+    def remove_device(self, user_inventory: DeviceInventory):
+        """
+        remove_device Entry point to remove device from the provisioning page
+
+        Execute API calls to remove devices from the provisioning page
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
+        results = list()
+        for device in user_inventory.devices:
+            result_data = CvApiResult(action_name='remove_device_{}'.format(device.fqdn))
+            if device.system_mac is not None:
+                try:
+                    resp = self.__cv_client.api.delete_device(device_mac=device.system_mac)
+                except CvpApiError:
+                    error_message = 'Error deleting device {}'.format(device.fqdn)
+                    MODULE_LOGGER.error(error_message)
+                    self.__ansible.fail_json(msg=error_message)
+                else: 
+                    result_data.changed = True
+                    result_data.success = True
+                    result_data.add_entry('remove-{}'.format(device.fqdn))
+                    results.append(result_data)
+            else: 
+                MODULE_LOGGER.error("Unable to delete device  " + device.fqdn + " - No mac address found for this device.")
+        return results
 
     def move_device(self, user_inventory: DeviceInventory):
         """
@@ -661,6 +779,7 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
                 current_container_info = self.get_container_current(device_mac=device.system_mac)
+                MODULE_LOGGER.debug("Current container is: " + current_container_info['name'])
                 # Move devices when they are not in undefined container
                 if (current_container_info is not None
                     and current_container_info['name'] != UNDEFINED_CONTAINER
