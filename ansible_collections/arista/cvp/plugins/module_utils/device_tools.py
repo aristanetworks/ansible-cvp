@@ -52,6 +52,7 @@ MODULE_LOGGER.info('Start device_tools module execution')
 # ------------------------------------------ #
 
 FIELD_FQDN = 'fqdn'
+FIELD_HOSTNAME = 'hostname'
 FIELD_SYSMAC = 'systemMacAddress'
 FIELD_SERIAL = 'serialNumber'
 FIELD_CONFIGLETS = 'configlets'
@@ -278,8 +279,8 @@ class CvDeviceTools(object):
     """
     CvDeviceTools Object to operate Device operation on Cloudvision
     """
-
-    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = FIELD_FQDN, check_mode: bool = False):
+    # Updated as per issue #365 to set default search with hostname field
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = FIELD_HOSTNAME, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
         self.__search_by = search_by
@@ -318,7 +319,8 @@ class CvDeviceTools(object):
     # Private functions
     # ------------------------------------------ #
 
-    def __get_device(self, search_value: str, search_by: str = FIELD_FQDN):
+    # Updated as per issue #365 to set default search with hostname field
+    def __get_device(self, search_value: str, search_by: str = FIELD_HOSTNAME):
         """
         __get_device Method to get data from Cloudvision
 
@@ -338,9 +340,12 @@ class CvDeviceTools(object):
         """
         cv_data: dict = dict()
         if search_by == FIELD_FQDN:
-            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value)
-        if search_by == FIELD_SYSMAC:
+            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=False)
+        elif search_by == FIELD_HOSTNAME:
+            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=True)
+        elif search_by == FIELD_SYSMAC:
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
+        MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
 
     def __get_configlet_info(self, configlet_name: str):
@@ -421,7 +426,7 @@ class CvDeviceTools(object):
         list
             List of CvElement with KEY and NAME of every configlet.
         """
-        if self.__search_by == FIELD_FQDN:
+        if self.__search_by == FIELD_FQDN or self.__search_by == FIELD_HOSTNAME:
             configlet_list = list()
             # get_configlets_by_device_id
             try:
@@ -494,6 +499,7 @@ class CvDeviceTools(object):
         dict
             A dict with key and name
         """
+        MODULE_LOGGER.debug("Get container for device %s", str(device_mac))
         container_id = self.__cv_client.api.get_device_by_mac(device_mac=device_mac)
         if FIELD_PARENT_ID in container_id:
             return {'name': container_id[FIELD_CONTAINER_NAME], 'key': container_id[FIELD_PARENT_ID]}
@@ -545,8 +551,8 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
         device_not_present: list = list()
         for device in user_inventory.devices:
-            if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
-                if self.is_device_exist(device.fqdn) == False:
+            if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
+                if self.is_device_exist(device.fqdn, search_field=FIELD_HOSTNAME) == False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
@@ -560,7 +566,7 @@ class CvDeviceTools(object):
     # Workers function
     # ------------------------------------------ #
 
-    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN, apply_mode: str = 'loose'):
+    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_HOSTNAME, apply_mode: str = 'loose'):
         """
         manager Main entry point to support all device
 
@@ -733,7 +739,10 @@ class CvDeviceTools(object):
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
+                        fqdn=device.fqdn, search_by_hostname=False)
+                elif self.__search_by == FIELD_HOSTNAME:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn, search_by_hostname=True)
                 # Attach configlets to device
                 if len(configlets_info) > 0:
                     try:
@@ -767,7 +776,10 @@ class CvDeviceTools(object):
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
+                        fqdn=device.fqdn, search_by_hostname=False)
+                elif self.__search_by == FIELD_HOSTNAME:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn, search_by_hostname=True)
                 configlets_to_remove = list()
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
@@ -816,7 +828,10 @@ class CvDeviceTools(object):
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
+                        fqdn=device.fqdn, search_by_hostname=False)
+                elif self.__search_by == FIELD_HOSTNAME:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn, search_by_hostname=True)
                 # Attach configlets to device
                 try:
                     resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.remove_configlets',
