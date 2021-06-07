@@ -709,10 +709,8 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('FIND ME: Using the apply_configlets PR function')
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(
-                action_name=device.fqdn + '_configlet_attached')
-            current_container_info = self.get_container_current(
-                device_mac=device.system_mac)
+            result_data = CvApiResult(action_name=device.fqdn + '_configlet_attached')
+            current_container_info = self.get_container_current(device_mac=device.system_mac)
             if (device.configlets is None or current_container_info['name'] == UNDEFINED_CONTAINER):
                 continue
             # get configlet information from CV
@@ -738,29 +736,29 @@ class CvDeviceTools(object):
                         if x.name == configlet:
                             configlets_attached.remove(x)
                             configlets_info.append(new_configlet)
-
             configlets_attached_get_configlet_info =  [ self.__get_configlet_info(configlet_name=x.name) for x in configlets_attached ]
-            
-            MODULE_LOGGER.debug("configlets_attached_get_configlet_info: %s", str(configlets_attached_get_configlet_info))
-            MODULE_LOGGER.debug("configlets_info: %s", str(configlets_info))
-
             # Joining the 2 new list (configlets already present + new configlet in right order)
-            configlets_info = configlets_attached_get_configlet_info + configlets_info
-            MODULE_LOGGER.debug("Final configlet list for device  [%s] is: %s", str(device.fqdn), str( [ x['name'] for x in configlets_info ] ))
-
+            configlets_joined = configlets_attached_get_configlet_info + configlets_info
+            MODULE_LOGGER.debug("Final configlet list for device  [%s] is: %s", str(device.fqdn), str( [ x['name'] for x in configlets_joined ] ))
             # get device facts from CV
             device_facts = dict()
             if self.__search_by == FIELD_FQDN:
-                device_facts = self.__cv_client.api.get_device_by_name(
-                    fqdn=device.fqdn)
+                device_facts = self.__cv_client.api.get_device_by_name(fqdn=device.fqdn)
             # Attach configlets to device
-            if len(configlets_info) > 0:
+            if len(configlets_joined) > 0:
                 try:
+                    
+                    resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
+                                                                            dev=device_facts,
+                                                                            new_configlets=configlets_joined,
+                                                                            create_task=True, 
+                                                                            reorder_configlets = True) 
+                except TypeError as e:
+                    MODULE_LOGGER.warning("The function to reorder the configlet is not present. Please check your cvprac version. Continuing without reordering.")
                     resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
                                                                             dev=device_facts,
                                                                             new_configlets=configlets_info,
-                                                                            create_task=True, 
-                                                                            reorder_configlets = True)
+                                                                            create_task=True) 
                 except CvpApiError:
                     MODULE_LOGGER.error('Error applying configlets to device')
                     self.__ansible.fail_json(msg='Error applying configlets to device')
