@@ -52,6 +52,12 @@ options:
     default: 'loose'
     choices: ['loose', 'strict']
     type: str
+  search_key:
+    description: Key name to use to look for device in Cloudvision.
+    required: false
+    default: 'hostname'
+    choices: ['fqdn', 'hostname']
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -144,7 +150,11 @@ def main():
         apply_mode=dict(type='str',
                         required=False,
                         default='loose',
-                        choices=['loose', 'strict'])
+                        choices=['loose', 'strict']),
+        search_key=dict(type='str',
+                        required=False,
+                        default='hostname',
+                        choices=['fqdn', 'hostname'])
     )
 
     # Make module global to use it in all functions when required
@@ -173,9 +183,14 @@ def main():
 
     # Instantiate data
     cv_topology = CvDeviceTools(
-        cv_connection=cv_client, ansible_module=ansible_module, check_mode=ansible_module.check_mode)
+        cv_connection=cv_client,
+        ansible_module=ansible_module,
+        check_mode=ansible_module.check_mode)
 
-    result = cv_topology.manager(user_inventory=user_topology, apply_mode=ansible_module.params['apply_mode'])
+    result = cv_topology.manager(
+        user_inventory=user_topology,
+        apply_mode=ansible_module.params['apply_mode'],
+        search_mode=ansible_module.params['search_key'])
 
     ansible_module.exit_json(**result)
 
