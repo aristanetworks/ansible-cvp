@@ -148,9 +148,9 @@ def main():
                    default='present',
                    choices=['present', 'absent']),
         apply_mode=dict(type='str',
-                   required=False,
-                   default='loose',
-                   choices=['loose', 'strict'])
+                        required=False,
+                        default='loose',
+                        choices=['loose', 'strict'])
     )
 
     # Make module global to use it in all functions when required
