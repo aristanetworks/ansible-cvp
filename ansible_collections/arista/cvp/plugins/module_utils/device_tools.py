@@ -721,7 +721,7 @@ class CvDeviceTools(object):
             for configlet in device.configlets:
                 new_configlet = self.__get_configlet_info(configlet_name=configlet)
                 if new_configlet is None:
-                    error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                    error_message = "The configlet \'%s\' defined to be applied on the device \'%s\' does not exist on CVP.", str(configlet), str(device.fqdn)
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
 
@@ -748,16 +748,16 @@ class CvDeviceTools(object):
             if len(configlets_joined) > 0:
                 try:
                     resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                            dev=device_facts,
-                                                                            new_configlets=configlets_joined,
-                                                                            create_task=True,
-                                                                            reorder_configlets=True)
+                                                                           dev=device_facts,
+                                                                           new_configlets=configlets_joined,
+                                                                           create_task=True,
+                                                                           reorder_configlets=True)
                 except TypeError:
-                    MODULE_LOGGER.warning("The function to reorder the configlet is not present. Please check your cvprac version if re-ordering the configlets is needed. Continuing without reordering.")
+                    MODULE_LOGGER.warning('The function to reorder the configlet is not present. Check cvprac version. Continuing without reordering.')
                     resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                            dev=device_facts,
-                                                                            new_configlets=new_configlets_list,
-                                                                            create_task=True)
+                                                                           dev=device_facts,
+                                                                           new_configlets=new_configlets_list,
+                                                                           create_task=True)
                 except CvpApiError:
                     MODULE_LOGGER.error('Error applying configlets to device')
                     self.__ansible.fail_json(msg='Error applying configlets to device')
