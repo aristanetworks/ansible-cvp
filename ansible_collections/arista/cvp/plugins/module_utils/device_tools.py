@@ -716,30 +716,30 @@ class CvDeviceTools(object):
             # get configlet information from CV
             new_configlets_list = list()
             configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
-            MODULE_LOGGER.debug('Attached configlets for device %s : %s', str(device.fqdn), str([x.name for x in configlets_attached ]))
-            
+            MODULE_LOGGER.debug('Attached configlets for device %s : %s', str(device.fqdn), str([x.name for x in configlets_attached]))
+
             for configlet in device.configlets:
                 new_configlet = self.__get_configlet_info(configlet_name=configlet)
                 if new_configlet is None:
                     error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
-                
+
                 # If the configlet is not applied, add it to the list
                 if configlet not in [x.name for x in configlets_attached]:
                     new_configlets_list.append(new_configlet)
 
                 # If the confilet is already applied, remove it from the main list and add it to the end of the new list
-                else: 
+                else:
                     MODULE_LOGGER.debug("Removing the configlet %s from the current configlet list and adding it to the new list.", str(configlet))
                     for x in configlets_attached:
                         if x.name == configlet:
                             configlets_attached.remove(x)
                             new_configlets_list.append(new_configlet)
-            configlets_attached_get_configlet_info =  [ self.__get_configlet_info(configlet_name=x.name) for x in configlets_attached ]
+            configlets_attached_get_configlet_info = [self.__get_configlet_info(configlet_name=x.name) for x in configlets_attached]
             # Joining the 2 new list (configlets already present + new configlet in right order)
             configlets_joined = configlets_attached_get_configlet_info + new_configlets_list
-            MODULE_LOGGER.debug("Final configlet list for device  [%s] is: %s", str(device.fqdn), str( [ x['name'] for x in configlets_joined ] ))
+            MODULE_LOGGER.debug("Final configlet list for device  [%s] is: %s", str(device.fqdn), str([x['name'] for x in configlets_joined]))
             # get device facts from CV
             device_facts = dict()
             if self.__search_by == FIELD_FQDN:
@@ -750,14 +750,14 @@ class CvDeviceTools(object):
                     resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
                                                                             dev=device_facts,
                                                                             new_configlets=configlets_joined,
-                                                                            create_task=True, 
-                                                                            reorder_configlets = True) 
-                except TypeError as e:
+                                                                            create_task=True,
+                                                                            reorder_configlets=True)
+                except TypeError:
                     MODULE_LOGGER.warning("The function to reorder the configlet is not present. Please check your cvprac version if re-ordering the configlets is needed. Continuing without reordering.")
                     resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
                                                                             dev=device_facts,
                                                                             new_configlets=new_configlets_list,
-                                                                            create_task=True) 
+                                                                            create_task=True)
                 except CvpApiError:
                     MODULE_LOGGER.error('Error applying configlets to device')
                     self.__ansible.fail_json(msg='Error applying configlets to device')
