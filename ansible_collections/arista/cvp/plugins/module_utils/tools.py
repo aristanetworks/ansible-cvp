@@ -34,6 +34,7 @@ try:
 except ImportError:
     HAS_HASHLIB = False
 
+
 LOGGER = logging.getLogger('arista.cvp.tools')
 # replacement strings
 WINDOWS_LINE_ENDING = '\r\n'
