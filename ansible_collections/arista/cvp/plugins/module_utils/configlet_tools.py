@@ -340,7 +340,7 @@ class CvConfigletTools(object):
                                 change_response.diff = configlet['diff']
                                 change_response.changed = True
                                 MODULE_LOGGER.info(
-                                    'Found diff in configlet {}.'.format(str(configlet['name'])))
+                                    'Found diff in configlet %s.', str(configlet['name']))
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']

@@ -228,9 +228,9 @@ def build_configlets_list(module):
                         # Compare function returns a list containing a boolean and a unified diff list.
                         if configlet_compare[0] == False:
                             intend['keep'].append({'data': configlet})
-                            MODULE_LOGGER.debug("No change was detected in configlet {}.".format(configlet['name']))
+                            MODULE_LOGGER.debug("No change was detected in configlet %s.", str(configlet['name']))
                         else:
-                            MODULE_LOGGER.debug("Updating configlet {} due to a detected change.".format(configlet['name']))
+                            MODULE_LOGGER.debug("Updating configlet %s due to a detected change.", str(configlet['name']))
                             intend['update'].append(
                                 {'data': configlet, 'config': ansible_configlet, 'diff': ''.join(configlet_compare[1])})
                     # Mark configlet to be removed as module mode is absent.
