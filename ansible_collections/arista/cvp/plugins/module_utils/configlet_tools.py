@@ -204,7 +204,8 @@ class CvConfigletTools(object):
                     configlet['key'] = cv_data['key']
                     configlet['diff'] = self._compare(
                         fromText=cv_data['config'], toText=configlet['config'], fromName='CVP', toName='Ansible')
-                    to_update.append(configlet)
+                    if configlet['diff'][0] == True:
+                        to_update.append(configlet)
                 else:
                     to_create.append(configlet)
         elif present is False:
