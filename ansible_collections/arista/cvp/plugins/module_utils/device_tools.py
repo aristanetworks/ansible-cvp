@@ -552,7 +552,7 @@ class CvDeviceTools(object):
         device_not_present: list = list()
         for device in user_inventory.devices:
             if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
-                if self.is_device_exist(device.fqdn, search_field=FIELD_HOSTNAME) is False:
+                if self.is_device_exist(device.fqdn) is False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
@@ -608,6 +608,9 @@ class CvDeviceTools(object):
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
         if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
+
+        if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
         action_result = self.deploy_device(user_inventory=user_inventory)
