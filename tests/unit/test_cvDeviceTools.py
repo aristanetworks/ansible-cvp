@@ -28,6 +28,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
 
 ANSIBLE_CV_SEARCH_MODE = 'hostname'
+# IS_HOSTNAME_SEARCH = True
+
 
 CVP_DEVICES = [
     {
@@ -336,7 +338,7 @@ class TestCvDeviceTools():
         for device in user_inventory.devices:
             result = self.inventory.get_device_container(
                 device_lookup=device.fqdn)[FIELD_PARENT_NAME]
-            cv_result = self.cvp.api.get_device_by_name(device.fqdn, search_field=ANSIBLE_CV_SEARCH_MODE)[FIELD_CONTAINER_NAME]
+            cv_result = self.cvp.api.get_device_by_name(device.fqdn, search_by_hostname=ANSIBLE_CV_SEARCH_MODE)[FIELD_CONTAINER_NAME]
             assert result == cv_result
             logging.info(
                 'Collection: {} - CV: {}'.format(result, cv_result))
@@ -351,7 +353,7 @@ class TestCvDeviceTools():
             result = self.inventory.get_device_container(
                 device_lookup=device.fqdn)[FIELD_PARENT_ID]
             cv_result = self.cvp.api.get_device_by_name(
-                device.fqdn, search_field=ANSIBLE_CV_SEARCH_MODE)[FIELD_PARENT_ID]
+                device.fqdn, search_by_hostname=ANSIBLE_CV_SEARCH_MODE)[FIELD_PARENT_ID]
             assert result == cv_result
             logging.info(
                 'Collection: {} - CV: {}'.format(result, cv_result))
