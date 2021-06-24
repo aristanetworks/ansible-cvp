@@ -101,9 +101,19 @@ SCHEMA_CV_DEVICE = {
                         "imageBundle": []
                     }
                 ],
-                "required": [
-                    "fqdn",
-                    "parentContainerName",
+                "anyOf": [
+                    {
+                        "required": [
+                            "fqdn",
+                            "parentContainerName",
+                        ],
+                    },
+                    {
+                        "required": [
+                            "serialNumber",
+                            "parentContainerName",
+                        ],
+                    }
                 ],
                 "properties": {
                     "fqdn": {
