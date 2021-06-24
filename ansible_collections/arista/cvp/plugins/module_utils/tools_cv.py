@@ -32,7 +32,6 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
-
 LOGGER = logging.getLogger('arista.cvp.cv_tools')
 
 
