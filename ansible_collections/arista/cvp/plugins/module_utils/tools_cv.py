@@ -32,18 +32,6 @@ except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
 
-try:
-    import hashlib
-    HAS_HASHLIB = True
-except ImportError:
-    HAS_HASHLIB = False
-
-try:
-    import difflib
-    HAS_DIFFLIB = True
-except ImportError:
-    HAS_DIFFLIB = False
-
 LOGGER = logging.getLogger('arista.cvp.cv_tools')
 
 
