@@ -110,6 +110,14 @@ def check_import(ansible_module: AnsibleModule):
         ansible_module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
+    if not tools_cv.HAS_HASHLIB:
+        ansible_module.fail_json(
+            msg='hashlib required for this module. Please install using pip install hashlib')
+
+    if not tools_cv.HAS_DIFFLIB:
+        ansible_module.fail_json(
+            msg='difflib required for this module. Please install using pip install difflib')
+
     if not schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(
             msg="JSONSCHEMA is required. Please install using pip install jsonschema")
