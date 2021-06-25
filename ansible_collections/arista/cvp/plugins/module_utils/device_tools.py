@@ -838,7 +838,7 @@ class CvDeviceTools(object):
                         device_serial=device.serial_number)
                 configlets_to_remove = list()
                 # get list of configured configlets
-                configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
+                configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
                 # Pour chaque configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
                     if configlet.name not in device.configlets:
@@ -867,43 +867,6 @@ class CvDeviceTools(object):
                 results.append(result_data)
         return results
 
-    def remove_configlets(self, user_inventory: DeviceInventory):
-        """
-        remove_configlets UNSUPPORTED and NOT TESTED YET
-        """
-        results = list()
-        for device in user_inventory.devices:
-            result_data = CvApiResult(action_name=device.fqdn + '_configlet_removed')
-            if device.configlets is not None:
-                # get configlet information from CV
-                configlets_info = list()
-                for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
-                # get device facts from CV
-                device_facts = dict()
-                if self.__search_by == FIELD_FQDN:
-                    device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
-                # Attach configlets to device
-                try:
-                    resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.remove_configlets',
-                                                                              dev=device_facts,
-                                                                              del_configlets=configlets_info,
-                                                                              create_task=True)
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error removing configlets to device')
-                    self.__ansible.fail_json(msg='Error removing configlets to device')
-                else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
-                        result_data.success = True
-                        result_data.taskIds = resp['data']['taskIds']
-                        result_data.add_entry('{} removes {}'.format(
-                            device.fqdn, *device.configlets))
-            results.append(result_data)
-        return results
-
     def deploy_device(self, user_inventory: DeviceInventory):
         """
         deploy_device Entry point to deploy a device in ZTP mode
@@ -924,13 +887,13 @@ class CvDeviceTools(object):
         """
         results = list()
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name=device.fqdn + '_deployed')
+            result_data = CvApiResult(action_name=device.info[self.__search_by] + '_deployed')
             if device.system_mac is not None:
                 configlets_info = list()
                 for configlet in device.configlets:
                     new_configlet = self.__get_configlet_info(configlet_name=configlet)
                     if new_configlet is None:
-                        error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                        error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.info[self.__search_by]))
                         MODULE_LOGGER.error(error_message)
                         self.__ansible.fail_json(msg=error_message)
                     else:
@@ -973,8 +936,8 @@ class CvDeviceTools(object):
                                 result_data.success = True
                                 result_data.taskIds = resp['data']['taskIds']
 
-                    result_data.add_entry('{} deployed to {}'.format(
-                        device.fqdn, *device.container))
+                    result_data.add_entry('{1} deployed to {2}'.format(
+                        device.info[self.__search_by], device.container))
             results.append(result_data)
         return results
 
