@@ -99,12 +99,12 @@ class DeviceElement(object):
     @fqdn.setter
     def fqdn(self, fqdn: str):
         """
-        system_mac Setter for SystemMac address
+        fqdn Setter for fqdn
 
         Parameters
         ----------
-        mac : str
-            systemMac address to configure on device
+        fqdn : str
+            fqdn to configure on device
         """
         self.__fqdn = fqdn
 
