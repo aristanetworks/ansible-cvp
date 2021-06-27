@@ -326,6 +326,22 @@ class CvDeviceTools(object):
         """
         self.__search_by = mode
 
+    @property
+    def check_mode(self):
+        """
+        check_mode Getter to expose search mechanism
+
+        Returns
+        -------
+        str
+            Field name used for search
+        """
+        return self.__check_mode
+
+    @check_mode.setter
+    def check_mode(self, mode: str):
+        self.__check_mode = mode
+
     # ------------------------------------------ #
     # Private functions
     # ------------------------------------------ #
