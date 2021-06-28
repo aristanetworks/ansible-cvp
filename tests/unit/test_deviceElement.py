@@ -11,76 +11,26 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 import logging
 import pytest
+import logging
 sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, FIELD_CONFIGLETS, FIELD_CONTAINER_NAME, FIELD_PARENT_NAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
-
-
-CVP_DEVICES = [
-    {
-        "fqdn": "DC1-SPINE1.eve.emea.lab",
-        "serialNumber": "ddddddd",
-        "systemMacAddress": "0c:1d:c0:a3:86:f3",
-        "parentContainerName": "DC1_SPINES",
-        "configlets": [
-                "AVD_DC1-SPINE1",
-                "01TRAINING-01"
-        ],
-        "imageBundle": []
-    },
-    {
-        "fqdn": "DC1-SPINE1",
-        "parentContainerName": "DC1_SPINES",
-        "configlets": [
-                "AVD_DC1-SPINE1",
-                "01TRAINING-01"
-        ]
-    },
-    {
-        "fqdn": "DC1-SPINE1",
-        "parentContainerName": "DC1_SPINES"
-    },
-    {
-        "fqdn": "DC1-SPINE1",
-        "parentContainerName": "DC1_SPINES",
-        "imageBundle": []
-    }
-]
+from lib.parametrize import generate_devices_list
 
 CONTAINER_IDS = ['Tenant', 'container-1111-2222-3333-4444', 'container_222_ccc_rrr']
-
-# ---------------------------------------------------------------------------- #
-#   PARAMETRIZE Management
-# ---------------------------------------------------------------------------- #
-
-def get_device():
-    return CVP_DEVICES
 
 
 def get_container_ids():
     return CONTAINER_IDS
 
 # ---------------------------------------------------------------------------- #
-#   FIXTURES Management
-# ---------------------------------------------------------------------------- #
-
-
-@pytest.fixture(scope="class")
-# @pytest.mark.parametrize('CVP_CONTAINER', get_user_container_definition())
-def DeviceElement_Manager(request):
-    logging.info("Execute fixture to create class elements")
-
-
-# ---------------------------------------------------------------------------- #
 #   PYTEST
 # ---------------------------------------------------------------------------- #
 
-
-@pytest.mark.usefixtures("DeviceElement_Manager")
 @pytest.mark.generic
-@pytest.mark.parametrize('DEVICE', get_device())
+@pytest.mark.parametrize('DEVICE', generate_devices_list())
 class TestDeviceElement():
 
     def test_get_fqdn(self, DEVICE):

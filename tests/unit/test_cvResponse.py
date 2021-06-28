@@ -13,48 +13,22 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse   # noqa # pylint: disable=unused-import
-
-# @pytest.mark.parametrize("api_action_name", ["","a","action","action_test",])
-
-# ---------------------------------------------------------------------------- #
-#   PARAMETRIZE Management
-# ---------------------------------------------------------------------------- #
-
-def get_api_action_name():
-    return ["", "a", "action", "action_test", "action test"]
-
-
-def get_result_manager_name():
-    return ["", "r", "result", "result_manager", "result manager"]
-
-
-def get_ansible_name():
-    return ["", "a", "ansible", "ansible_response", "ansible content"]
-
-# ---------------------------------------------------------------------------- #
-#   FIXTURES Management
-# ---------------------------------------------------------------------------- #
-
-@pytest.fixture(scope="class")
-# @pytest.mark.parametrize('CVP_CONTAINER', get_user_container_definition())
-def CvResponse_Manager(request):
-    logging.info("Execute fixture to create class elements")
+from lib.parametrize import generate_cv_response_api_action_name, generate_cv_response_ansible_name, generate_cv_response_result_manager_name
 
 
 # ---------------------------------------------------------------------------- #
 #   PYTEST
 # ---------------------------------------------------------------------------- #
 
-@pytest.mark.usefixtures("CvResponse_Manager")
 @pytest.mark.generic
 class TestCvReponseAction():
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
     def test_api_result_creation(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         assert api_result.name == api_results_name
 
     @pytest.mark.generic
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
     def test_api_flags(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         assert api_result.changed is False
@@ -67,7 +41,7 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
     def test_api_add_action(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         assert api_result.count == 0
@@ -81,7 +55,7 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
     def test_api_add_actions(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         assert api_result.count == 0
@@ -91,8 +65,8 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    def test_api_get_actions(self, api_results_name):
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    def test_api_generate_cv_response_actions(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         api_result.add_entries(entries=['action1', 'action2'])
         api_result.add_entry(entry='action3')
@@ -103,8 +77,8 @@ class TestCvReponseAction():
 
 
     @pytest.mark.generic
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    def test_api_get_results(self, api_results_name):
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    def test_api_generate_cv_response_results(self, api_results_name):
         api_result = CvApiResult(action_name=api_results_name)
         api_result.success = True
         api_result.changed = True
@@ -116,21 +90,20 @@ class TestCvReponseAction():
         assert len(api_result.results[api_results_name+'_list']) == 3
         logging.info('API strct result is {}'.format(api_result.results))
 
-@pytest.mark.usefixtures("CvResponse_Manager")
 @pytest.mark.generic
 class TestCvReponseManager():
 
 
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    @pytest.mark.parametrize("management_name", get_result_manager_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    @pytest.mark.parametrize("management_name", generate_cv_response_result_manager_name())
     @pytest.mark.generic
     def test_manager_create(self, api_results_name, management_name):
         api_manager = CvManagerResult(builder_name=management_name)
         assert api_manager.name == management_name
         logging.info('API strct result is {}'.format(api_manager.changes))
 
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    @pytest.mark.parametrize("management_name", get_result_manager_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    @pytest.mark.parametrize("management_name", generate_cv_response_result_manager_name())
     @pytest.mark.generic
     def test_manager_flags(self, api_results_name, management_name):
         api_manager = CvManagerResult(builder_name='TEST_BUILDER')
@@ -138,8 +111,8 @@ class TestCvReponseManager():
         assert api_manager.success is False
         logging.info('API Manager strct result is {}'.format(api_manager.changes))
 
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    @pytest.mark.parametrize("management_name", get_result_manager_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    @pytest.mark.parametrize("management_name", generate_cv_response_result_manager_name())
     @pytest.mark.generic
     def test_manager_add_actions(self, api_results_name, management_name):
         api_manager = CvManagerResult(builder_name=management_name)
@@ -154,7 +127,6 @@ class TestCvReponseManager():
                                    '_list'] == [api_results_name]
         logging.info('API Manager strct result is {}'.format(api_manager.changes))
 
-@pytest.mark.usefixtures("CvResponse_Manager")
 @pytest.mark.generic
 class TestCvReponseAnsible():
     @pytest.mark.generic
@@ -165,8 +137,8 @@ class TestCvReponseAnsible():
         logging.info('Ansible response strct result is {}'.format(
             ansible_output.content))
 
-    @pytest.mark.parametrize("api_results_name", get_api_action_name())
-    @pytest.mark.parametrize("management_name", get_result_manager_name())
+    @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
+    @pytest.mark.parametrize("management_name", generate_cv_response_result_manager_name())
     @pytest.mark.generic
     def test_ansible_response_add(self, api_results_name, management_name):
         ansible_output = CvAnsibleResponse()
