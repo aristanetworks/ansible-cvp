@@ -93,7 +93,6 @@ class TestCvReponseAction():
 @pytest.mark.generic
 class TestCvReponseManager():
 
-
     @pytest.mark.parametrize("api_results_name", generate_cv_response_api_action_name())
     @pytest.mark.parametrize("management_name", generate_cv_response_result_manager_name())
     @pytest.mark.generic

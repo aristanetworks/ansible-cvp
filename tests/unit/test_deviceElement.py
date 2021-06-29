@@ -17,20 +17,16 @@ sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, FIELD_CONFIGLETS, FIELD_CONTAINER_NAME, FIELD_PARENT_NAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
-from lib.parametrize import generate_devices_list
+from lib.parametrize import generate_flat_data
 
 CONTAINER_IDS = ['Tenant', 'container-1111-2222-3333-4444', 'container_222_ccc_rrr']
 
 
-def get_container_ids():
+def generate_container_ids():
     return CONTAINER_IDS
 
-# ---------------------------------------------------------------------------- #
-#   PYTEST
-# ---------------------------------------------------------------------------- #
-
 @pytest.mark.generic
-@pytest.mark.parametrize('DEVICE', generate_devices_list())
+@pytest.mark.parametrize('DEVICE', generate_flat_data(type='device'))
 class TestDeviceElement():
 
     def test_get_fqdn(self, DEVICE):
@@ -75,7 +71,7 @@ class TestDeviceElement():
         assert device.container == DEVICE[FIELD_PARENT_NAME]
         logging.info('Device {} got correct container information from DeviceElement'.format(device.fqdn))
 
-    @pytest.mark.parametrize('CONTAINER_ID', get_container_ids())
+    @pytest.mark.parametrize('CONTAINER_ID', generate_container_ids())
     def test_container_id(self, DEVICE, CONTAINER_ID):
         device = DeviceElement(data=DEVICE)
         device.parent_container_id = CONTAINER_ID

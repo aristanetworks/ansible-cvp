@@ -14,22 +14,17 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
-from lib.parametrize import generate_cv_container_topology
+from lib.parametrize import generate_flat_data
 
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
-
-# Generic helpers
-def time_log():
-    now = datetime.now()
-    return now.strftime("%H:%M:%S")
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #
 
 @pytest.fixture()
-@pytest.mark.parametrize('CVP_CONTAINER', generate_cv_container_topology())
+@pytest.mark.parametrize('CVP_CONTAINER', generate_flat_data(type='container'))
 def ContainerInput_Creation(request, CVP_CONTAINER):
     logging.info("Execute fixture to create class elements")
     request.cls.inventory = ContainerInput(user_topology=CVP_CONTAINER)
@@ -40,7 +35,7 @@ def ContainerInput_Creation(request, CVP_CONTAINER):
 #   PYTEST
 # ---------------------------------------------------------------------------- #
 
-@pytest.mark.parametrize('CVP_CONTAINER', generate_cv_container_topology())
+@pytest.mark.parametrize('CVP_CONTAINER', generate_flat_data(type='container'))
 @pytest.mark.usefixtures("ContainerInput_Creation")
 @pytest.mark.generic
 class TestContainerInput():
