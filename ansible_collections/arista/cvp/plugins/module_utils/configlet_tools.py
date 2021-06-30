@@ -177,7 +177,7 @@ class CvConfigletTools(object):
             return None
         return data
 
-    def apply(self, configlet_list: list, present: bool = True):
+    def apply(self, configlet_list: list, present: bool = True, note: str = 'Managed by Ansible AVD'):
         """
         apply Worker to configure configlets on Cloudvision
 
@@ -226,13 +226,13 @@ class CvConfigletTools(object):
         update = dict()
         delete = dict()
         if present and len(to_create) > 0:
-            creation = self.create(to_create=to_create)
+            creation = self.create(to_create=to_create, note=note)
             for entry in creation:
                 MODULE_LOGGER.debug(
                     'configlet created: %s', str(entry.results))
                 created_configlets.add_change(entry)
         if present and len(to_update) > 0:
-            update = self.update(to_update=to_update)
+            update = self.update(to_update=to_update, note=note)
             for entry in update:
                 MODULE_LOGGER.debug(
                     'configlet updated: %s', str(entry.results))

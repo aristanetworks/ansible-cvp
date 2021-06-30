@@ -178,7 +178,7 @@ def main():
     #     ansible_module.fail_json(msg="Not yet implemented !")
 
     cv_response: CvAnsibleResponse = cv_configlet_manager.apply(
-        configlet_list=user_configlets.configlets, present=is_present)
+        configlet_list=user_configlets.configlets, present=is_present, note=ansible_module.params['configlets_notes'])
     result = cv_response.content
 
     ansible_module.exit_json(**result)
