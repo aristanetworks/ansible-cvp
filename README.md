@@ -35,7 +35,7 @@
   <img src='ansible_collections/arista/cvp/medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-More documentation is available in [project's website](https://aristanetworks.github.io/ansible-cvp/)
+More documentation is available in [project's website](https://cvp.avd.sh//)
 
 ## List of CVP versions supported
 

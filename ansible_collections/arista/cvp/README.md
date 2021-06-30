@@ -185,4 +185,4 @@ Contributing pull requests are gladly welcomed for this repository. If you are p
 
 You can also open an [issue](https://github.com/aristanetworks/ansible-cvp/issues) to report any problem or to submit enhancement.
 
-A more complete [guide for contribution](https://www.avd.sh/en/latest/docs/contributing/) is available in the repository
+A more complete [guide for contribution](https://avd.sh/en/latest/docs/contribution/overview.html) is available in the repository
