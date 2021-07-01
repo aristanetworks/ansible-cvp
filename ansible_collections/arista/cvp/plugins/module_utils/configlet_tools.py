@@ -204,8 +204,12 @@ class CvConfigletTools(object):
                     configlet['key'] = cv_data['key']
                     configlet['diff'] = self._compare(
                         fromText=cv_data['config'], toText=configlet['config'], fromName='CVP', toName='Ansible')
-                    if configlet['diff'][0] == True:
+                    configlet['notediff'] = self._compare(
+                        fromText=cv_data['note'], toText=note, fromName='CVP', toName='Ansible')
+                    MODULE_LOGGER.debug("configlet note diff: %s", str(configlet['notediff']))
+                    if (configlet['diff'][0]) == True or (configlet['notediff'][0] == True):
                         to_update.append(configlet)
+
                 else:
                     to_create.append(configlet)
         elif present is False:
@@ -247,7 +251,7 @@ class CvConfigletTools(object):
         response.add_manager(created_configlets)
         response.add_manager(updated_configlets)
         response.add_manager(deleted_configlets)
-        MODULE_LOGGER.info('Configlet change result is: %s', str(response))
+        MODULE_LOGGER.info('Configlet change result is: %s', str(response.content))
         return response
 
     def update(self, to_update: list, note: str = 'Managed by Ansible AVD'):
@@ -342,6 +346,12 @@ class CvConfigletTools(object):
                                 change_response.changed = True
                                 MODULE_LOGGER.info(
                                     'Found diff in configlet %s.', str(configlet['name']))
+                        if 'notediff' in configlet:
+                            if configlet['notediff'] is not None and configlet['notediff'][0] == True:
+                                change_response.diff = configlet['notediff']
+                                change_response.changed = True
+                                MODULE_LOGGER.info(
+                                    'Found diff in configlet note of configlet %s.', str(configlet['name']))
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']
