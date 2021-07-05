@@ -552,7 +552,12 @@ class CvDeviceTools(object):
         device_not_present: list = list()
         for device in user_inventory.devices:
             if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
-                if self.is_device_exist(device.fqdn) is False:
+                if self.is_device_exist(device.fqdn, search_mode=FIELD_FQDN) is False:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
+
+            elif self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+                if self.is_device_exist(device.fqdn, search_mode=FIELD_FQDN) is False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
@@ -591,6 +596,9 @@ class CvDeviceTools(object):
         """
         response = CvAnsibleResponse()
 
+        MODULE_LOGGER.debug('Manager search mode is set to: %s', str(search_mode))
+        self.__search_by = search_mode
+
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
@@ -607,10 +615,10 @@ class CvDeviceTools(object):
 
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
-        if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+        if self.__search_by == FIELD_FQDN:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
-        if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
+        if self.__search_by == FIELD_HOSTNAME:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
         action_result = self.deploy_device(user_inventory=user_inventory)
@@ -978,7 +986,7 @@ class CvDeviceTools(object):
                     return True
         return False
 
-    def is_device_exist(self, device_lookup: str):
+    def is_device_exist(self, device_lookup: str, search_mode: str = FIELD_HOSTNAME):
         """
         is_device_exist Test if a device exists in Cloudvision
 
@@ -993,7 +1001,7 @@ class CvDeviceTools(object):
             True if device available in Cloudvision, False by default
         """
         data = self.__get_device(
-            search_value=device_lookup, search_by=self.__search_by)
+            search_value=device_lookup, search_by=search_mode)
         if data is not None and len(data) > 0:
             return True
         return False
