@@ -46,6 +46,11 @@ try:
     HAS_DIFFLIB = True
 except ImportError:
     HAS_DIFFLIB = False
+try:
+    import hashlib
+    HAS_HASHLIB = True
+except ImportError:
+    HAS_HASHLIB = False
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.configlet_tools_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
@@ -106,10 +111,9 @@ class CvConfigletTools(object):
     def _compare(self, fromText: List[str], toText: List[str], fromName: str = 'CVP', toName: str = 'Ansible', lines: int = 10):
         """
         _compare - Compare text string in 'fromText' with 'toText' and produce
-            diffRatio - a score as a float in the range [0, 1] 2.0*M / T
-            T is the total number of elements in both sequences,
-            M is the number of matches.
-            Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
+            a boolean to indicate if there is a diff between them, along with
+            a unified diff list.
+            Boolean - False if the sequences are identical, True if they are not.
             unified diff list
             Code	Meaning
             '- '	line unique to sequence 1
@@ -121,9 +125,14 @@ class CvConfigletTools(object):
         tolines = self._str_cleanup_line_ending(content=toText).splitlines(1)
         diff = list(difflib.unified_diff(
             fromlines, tolines, fromName, toName, n=lines))
-        textComp = difflib.SequenceMatcher(None, fromText, toText)
-        diffRatio = textComp.ratio()
-        return [diffRatio, diff]
+        # Calculate and compare hash values to produce the boolean.
+        fromHash = hashlib.sha1(fromText.encode()).hexdigest()
+        toHash = hashlib.sha1(toText.encode()).hexdigest()
+        if fromHash == toHash:
+            cfglet_changed = False
+        else:
+            cfglet_changed = True
+        return [cfglet_changed, diff]
 
     def is_present(self, configlet_name: str):
         """
@@ -168,7 +177,7 @@ class CvConfigletTools(object):
             return None
         return data
 
-    def apply(self, configlet_list: list, present: bool = True):
+    def apply(self, configlet_list: list, present: bool = True, note: str = 'Managed by Ansible AVD'):
         """
         apply Worker to configure configlets on Cloudvision
 
@@ -195,7 +204,12 @@ class CvConfigletTools(object):
                     configlet['key'] = cv_data['key']
                     configlet['diff'] = self._compare(
                         fromText=cv_data['config'], toText=configlet['config'], fromName='CVP', toName='Ansible')
-                    to_update.append(configlet)
+                    configlet['notediff'] = self._compare(
+                        fromText=cv_data['note'], toText=note, fromName='CVP', toName='Ansible')
+                    MODULE_LOGGER.debug("configlet note diff: %s", str(configlet['notediff']))
+                    if (configlet['diff'][0]) == True or (configlet['notediff'][0] == True):
+                        to_update.append(configlet)
+
                 else:
                     to_create.append(configlet)
         elif present is False:
@@ -216,13 +230,13 @@ class CvConfigletTools(object):
         update = dict()
         delete = dict()
         if present and len(to_create) > 0:
-            creation = self.create(to_create=to_create)
+            creation = self.create(to_create=to_create, note=note)
             for entry in creation:
                 MODULE_LOGGER.debug(
                     'configlet created: %s', str(entry.results))
                 created_configlets.add_change(entry)
         if present and len(to_update) > 0:
-            update = self.update(to_update=to_update)
+            update = self.update(to_update=to_update, note=note)
             for entry in update:
                 MODULE_LOGGER.debug(
                     'configlet updated: %s', str(entry.results))
@@ -237,7 +251,7 @@ class CvConfigletTools(object):
         response.add_manager(created_configlets)
         response.add_manager(updated_configlets)
         response.add_manager(deleted_configlets)
-        MODULE_LOGGER.info('Configlet change result is: %s', str(response))
+        MODULE_LOGGER.info('Configlet change result is: %s', str(response.content))
         return response
 
     def update(self, to_update: list, note: str = 'Managed by Ansible AVD'):
@@ -326,10 +340,18 @@ class CvConfigletTools(object):
                         # Save configlet diff
                         change_response.add_entry('configlet updated')
                         if 'diff' in configlet:
-                            # Change changed flag if diff is not 1.0
-                            if configlet['diff'] is not None and configlet['diff'][0] < 1.0:
+                            # Change changed flag if diff is True
+                            if configlet['diff'] is not None and configlet['diff'][0] == True:
                                 change_response.diff = configlet['diff']
                                 change_response.changed = True
+                                MODULE_LOGGER.info(
+                                    'Found diff in configlet %s.', str(configlet['name']))
+                        if 'notediff' in configlet:
+                            if configlet['notediff'] is not None and configlet['notediff'][0] == True:
+                                change_response.diff = configlet['notediff']
+                                change_response.changed = True
+                                MODULE_LOGGER.info(
+                                    'Found diff in configlet note of configlet %s.', str(configlet['name']))
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']
