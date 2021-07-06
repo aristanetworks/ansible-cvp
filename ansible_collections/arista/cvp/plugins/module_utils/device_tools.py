@@ -753,11 +753,9 @@ class CvDeviceTools(object):
                                                                            create_task=True,
                                                                            reorder_configlets=True)
                 except TypeError:
-                    MODULE_LOGGER.warning('The function to reorder the configlet is not present. Check cvprac version. Continuing without reordering.')
-                    resp = self.__cv_client.api.apply_configlets_to_device(app_name='CvDeviceTools.apply_configlets',
-                                                                           dev=device_facts,
-                                                                           new_configlets=new_configlets_list,
-                                                                           create_task=True)
+                    error_message = 'The function to reorder the configlet is not present. Please, check your cvprac version ( >= 1.0.7 required).'
+                    MODULE_LOGGER.error(error_message)
+                    self.__ansible.fail_json(msg=error_message)
                 except CvpApiError:
                     MODULE_LOGGER.error('Error applying configlets to device')
                     self.__ansible.fail_json(msg='Error applying configlets to device')
