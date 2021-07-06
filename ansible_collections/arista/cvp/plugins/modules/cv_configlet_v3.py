@@ -88,7 +88,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
-from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import ConfigletInput, CvConfigletTools
+from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import ConfigletInput, CvConfigletTools, HAS_HASHLIB, HAS_DIFFLIB
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
@@ -109,6 +109,14 @@ def check_import(ansible_module: AnsibleModule):
     if HAS_CVPRAC is False:
         ansible_module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
+
+    if not HAS_HASHLIB:
+        ansible_module.fail_json(
+            msg='hashlib required for this module. Please install using pip install hashlib')
+
+    if not HAS_DIFFLIB:
+        ansible_module.fail_json(
+            msg='difflib required for this module. Please install using pip install difflib')
 
     if not schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(
@@ -170,7 +178,7 @@ def main():
     #     ansible_module.fail_json(msg="Not yet implemented !")
 
     cv_response: CvAnsibleResponse = cv_configlet_manager.apply(
-        configlet_list=user_configlets.configlets, present=is_present)
+        configlet_list=user_configlets.configlets, present=is_present, note=ansible_module.params['configlets_notes'])
     result = cv_response.content
 
     ansible_module.exit_json(**result)

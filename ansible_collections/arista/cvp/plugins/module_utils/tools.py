@@ -28,11 +28,17 @@ try:
 except ImportError:
     HAS_DIFFLIB = False
 
+try:
+    import hashlib
+    HAS_HASHLIB = True
+except ImportError:
+    HAS_HASHLIB = False
+
+
 LOGGER = logging.getLogger('arista.cvp.tools')
 # replacement strings
 WINDOWS_LINE_ENDING = '\r\n'
 UNIX_LINE_ENDING = '\n'
-
 
 def str_cleanup_line_ending(content):
     """
@@ -57,11 +63,10 @@ def str_cleanup_line_ending(content):
 
 def compare(fromText, toText, fromName='', toName='', lines=10):
     """ Compare text string in 'fromText' with 'toText' and produce
-        diffRatio - a score as a float in the range [0, 1] 2.0*M / T
-          T is the total number of elements in both sequences,
-          M is the number of matches.
-          Score - 1.0 if the sequences are identical, and 0.0 if they have nothing in common.
-          unified diff list
+          a boolean to indicate if there is a diff between them, along
+          with a unified diff list.
+          Boolean - False if the sequences are identical, True if they are not.
+          Unified diff list:
           Code    Meaning
           '- '    line unique to sequence 1
           '+ '    line unique to sequence 2
@@ -72,9 +77,14 @@ def compare(fromText, toText, fromName='', toName='', lines=10):
     tolines = str_cleanup_line_ending(content=toText).splitlines(1)
     diff = list(difflib.unified_diff(
         fromlines, tolines, fromName, toName, n=lines))
-    textComp = difflib.SequenceMatcher(None, fromText, toText)
-    diffRatio = textComp.ratio()
-    return [diffRatio, diff]
+    # Calculate and compare hash values to produce the boolean.
+    fromHash = hashlib.sha1(fromText.encode()).hexdigest()
+    toHash = hashlib.sha1(toText.encode()).hexdigest()
+    if fromHash == toHash:
+        cfglet_changed = False
+    else:
+        cfglet_changed = True
+    return [cfglet_changed, diff]
 
 
 def isIterable(testing_object=None):

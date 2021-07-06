@@ -225,20 +225,22 @@ def build_configlets_list(module):
                         ansible_configlet = module.params['configlets'][configlet['name']]
                         configlet_compare = tools.compare(
                             configlet['config'], ansible_configlet, 'CVP', 'Ansible')
-                        # compare function returns a floating point number
-                        if configlet_compare[0] == 1.0:
+                        # Compare function returns a list containing a boolean and a unified diff list.
+                        if configlet_compare[0] == False:
                             intend['keep'].append({'data': configlet})
+                            MODULE_LOGGER.debug("No change was detected in configlet %s.", str(configlet['name']))
                         else:
+                            MODULE_LOGGER.debug("Updating configlet %s due to a detected change.", str(configlet['name']))
                             intend['update'].append(
                                 {'data': configlet, 'config': ansible_configlet, 'diff': ''.join(configlet_compare[1])})
-                    # Mark configlet to be removed as module mode is absent
+                    # Mark configlet to be removed as module mode is absent.
                     elif module.params['state'] == 'absent':
                         intend['delete'].append({'data': configlet})
                 # Configlet is not in expected topology and match filter.
                 else:
                     intend['delete'].append({'data': configlet})
 
-    # Look for new configlets, if a configlet is not CVP assume it has to be created
+    # Look for new configlets, if a configlet is not CVP assume it has to be created.
     for ansible_configlet in module.params['configlets']:
         found = False
         for cvp_configlet in module.params['cvp_facts']['configlets']:
@@ -682,6 +684,9 @@ def main():
 
     if not tools.HAS_DIFFLIB:
         module.fail_json(msg='difflib required for this module')
+
+    if not tools.HAS_HASHLIB:
+        module.fail_json(msg='hashlib required for this module')
 
     if not tools_cv.HAS_CVPRAC:
         module.fail_json(
