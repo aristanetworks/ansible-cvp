@@ -706,7 +706,6 @@ class CvDeviceTools(object):
         list
             List of CvApiResult for all API calls
         """
-        MODULE_LOGGER.debug('FIND ME: Using the apply_configlets PR function')
         results = list()
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.fqdn + '_configlet_attached')
@@ -716,7 +715,7 @@ class CvDeviceTools(object):
             # get configlet information from CV
             new_configlets_list = list()
             configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
-            MODULE_LOGGER.debug('Attached configlets for device %s : %s', str(device.fqdn), str([x.name for x in configlets_attached]))
+            configlets_attached_before_changes = [x.name for x in configlets_attached]
 
             for configlet in device.configlets:
                 new_configlet = self.__get_configlet_info(configlet_name=configlet)
@@ -725,7 +724,7 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
 
-                # If the configlet is not applied, add it to the list
+                # If the configlet is not applied, add it to the new list
                 if configlet not in [x.name for x in configlets_attached]:
                     new_configlets_list.append(new_configlet)
 
@@ -739,7 +738,15 @@ class CvDeviceTools(object):
             configlets_attached_get_configlet_info = [self.__get_configlet_info(configlet_name=x.name) for x in configlets_attached]
             # Joining the 2 new list (configlets already present + new configlet in right order)
             configlets_joined = configlets_attached_get_configlet_info + new_configlets_list
-            MODULE_LOGGER.debug("Final configlet list for device  [%s] is: %s", str(device.fqdn), str([x['name'] for x in configlets_joined]))
+
+            # Check if changes have been made
+            MODULE_LOGGER.debug("[%s] - Old configlet list: %s", str(device.fqdn), str(configlets_attached_before_changes))
+            MODULE_LOGGER.debug("[%s] - New configlet list: %s", str(device.fqdn), str([x['name'] for x in configlets_joined]))
+            if str(configlets_attached_before_changes) == str([x['name'] for x in configlets_joined]):
+                MODULE_LOGGER.info("There was no changes detected in the configlets list, skipping task creation for  device %s.", str(device.fqdn))
+                continue
+
+            MODULE_LOGGER.info("Creating task for device [%s] configlet list is: %s", str(device.fqdn), str([x['name'] for x in configlets_joined]))
             # get device facts from CV
             device_facts = dict()
             if self.__search_by == FIELD_FQDN:
@@ -753,7 +760,7 @@ class CvDeviceTools(object):
                                                                            create_task=True,
                                                                            reorder_configlets=True)
                 except TypeError:
-                    error_message = 'The function to reorder the configlet is not present. Please, check your cvprac version ( >= 1.0.7 required).'
+                    error_message = 'The function to reorder the configlet is not present. Please, check your cvprac version (>= 1.0.7 required).'
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
                 except CvpApiError:
