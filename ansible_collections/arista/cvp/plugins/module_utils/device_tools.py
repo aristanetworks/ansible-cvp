@@ -376,7 +376,7 @@ class CvDeviceTools(object):
         ----------
         configlet_applied_to_device_list : list
             List of the configlet currently attached to the device
-        configlet_playbook_list: list   
+        configlet_playbook_list: list
             List of the configlet specified in the playbook in the correct order
         Returns
         -------
