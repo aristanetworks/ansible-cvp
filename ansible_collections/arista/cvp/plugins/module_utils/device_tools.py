@@ -648,7 +648,7 @@ class CvDeviceTools(object):
         # Check if the devices defined exist in CVP
         list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
-            error_message = 'Error - the following devices do not exist in CVP {1} but are defined in the playbook. \
+            error_message = 'Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
                 \nMake sure that the devices are provisioned and defined with the full fqdn name \
                 (including the domain name) if needed.'.format(str(list_non_existing_devices))
             MODULE_LOGGER.error(error_message)
