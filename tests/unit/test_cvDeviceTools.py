@@ -17,7 +17,7 @@ sys.path.append("../")
 sys.path.append("../../")
 from cvprac.cvp_client import CvpClient
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID, FIELD_HOSTNAME
 # from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult
 import config
 
@@ -26,6 +26,10 @@ import ssl
 import requests.packages.urllib3
 ssl._create_default_https_context = ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
+
+ANSIBLE_CV_SEARCH_MODE = 'hostname'
+# IS_HOSTNAME_SEARCH = True
+
 
 CVP_DEVICES = [
     {
@@ -37,7 +41,6 @@ CVP_DEVICES = [
                 "01TRAINING-01",
                 "CV-EOS-ANSIBLE01"
         ],
-        "imageBundle": []
     }
 ]
 CVP_DEVICES_UNKNOWN = [
@@ -171,6 +174,9 @@ class TestCvDeviceTools():
         logging.info('Setter & Getter for search_by using {} is valid'.format(FIELD_SYSMAC))
         self.inventory.search_by = FIELD_FQDN
         assert self.inventory.search_by == FIELD_FQDN
+        self.inventory.search_by = FIELD_HOSTNAME
+        assert self.inventory.search_by == FIELD_HOSTNAME
+        self.inventory.search_by = ANSIBLE_CV_SEARCH_MODE
         logging.info(
             'Setter & Getter for search_by using {} is valid'.format(FIELD_FQDN))
 
@@ -224,7 +230,10 @@ class TestCvDeviceTools():
         logging.info('End of CV query at {}'.format(time_log()))
         assert device_facts is not None
         assert FIELD_FQDN in device_facts
-        assert device_facts[FIELD_FQDN] == CV_DEVICE[FIELD_FQDN]
+        if self.inventory.search_by == 'fqdn':
+            assert device_facts[FIELD_FQDN] == CV_DEVICE[FIELD_FQDN]
+        elif self.inventory.search_by == 'hostname':
+            assert device_facts[FIELD_FQDN].split(".")[0] == CV_DEVICE[FIELD_FQDN]
         logging.info('Facts for device {} are correct: {}'.format(CV_DEVICE[FIELD_FQDN], device_facts))
 
 
@@ -329,7 +338,7 @@ class TestCvDeviceTools():
         for device in user_inventory.devices:
             result = self.inventory.get_device_container(
                 device_lookup=device.fqdn)[FIELD_PARENT_NAME]
-            cv_result = self.cvp.api.get_device_by_name(device.fqdn)[FIELD_CONTAINER_NAME]
+            cv_result = self.cvp.api.get_device_by_name(device.fqdn, search_by_hostname=ANSIBLE_CV_SEARCH_MODE)[FIELD_CONTAINER_NAME]
             assert result == cv_result
             logging.info(
                 'Collection: {} - CV: {}'.format(result, cv_result))
@@ -344,7 +353,7 @@ class TestCvDeviceTools():
             result = self.inventory.get_device_container(
                 device_lookup=device.fqdn)[FIELD_PARENT_ID]
             cv_result = self.cvp.api.get_device_by_name(
-                device.fqdn)[FIELD_PARENT_ID]
+                device.fqdn, search_by_hostname=ANSIBLE_CV_SEARCH_MODE)[FIELD_PARENT_ID]
             assert result == cv_result
             logging.info(
                 'Collection: {} - CV: {}'.format(result, cv_result))
@@ -359,7 +368,7 @@ class TestCvDeviceTools():
                 self.inventory.search_by = FIELD_SYSMAC
                 device_info = self.inventory.get_device_facts(
                     device_lookup=device.system_mac)
-                assert device_info[FIELD_FQDN] == device.fqdn
+                assert device_info[FIELD_FQDN].split(".")[0] == device.fqdn
                 assert device_info[FIELD_SYSMAC] == device.system_mac
                 self.inventory.search_by = FIELD_FQDN
                 logging.info('Data for device {} ({}) are correct'.format(

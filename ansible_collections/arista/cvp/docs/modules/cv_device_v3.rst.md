@@ -52,6 +52,17 @@ The following options may be specified for this module:
 </tr>
 
 <tr>
+<td>search_key<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>hostname</td>
+<td><ul><li>fqdn</li><li>hostname</li></ul></td>
+<td>
+    <div>Key name to use to look for device in Cloudvision.</div>
+</td>
+</tr>
+
+<tr>
 <td>state<br/><div style="font-size: small;"></div></td>
 <td>str</td>
 <td>no</td>

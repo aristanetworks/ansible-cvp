@@ -52,6 +52,7 @@ MODULE_LOGGER.info('Start device_tools module execution')
 # ------------------------------------------ #
 
 FIELD_FQDN = 'fqdn'
+FIELD_HOSTNAME = 'hostname'
 FIELD_SYSMAC = 'systemMacAddress'
 FIELD_SERIAL = 'serialNumber'
 FIELD_CONFIGLETS = 'configlets'
@@ -278,8 +279,8 @@ class CvDeviceTools(object):
     """
     CvDeviceTools Object to operate Device operation on Cloudvision
     """
-
-    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = FIELD_FQDN, check_mode: bool = False):
+    # Updated as per issue #365 to set default search with hostname field
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = FIELD_HOSTNAME, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
         self.__search_by = search_by
@@ -318,7 +319,8 @@ class CvDeviceTools(object):
     # Private functions
     # ------------------------------------------ #
 
-    def __get_device(self, search_value: str, search_by: str = FIELD_FQDN):
+    # Updated as per issue #365 to set default search with hostname field
+    def __get_device(self, search_value: str, search_by: str = FIELD_HOSTNAME):
         """
         __get_device Method to get data from Cloudvision
 
@@ -338,9 +340,12 @@ class CvDeviceTools(object):
         """
         cv_data: dict = dict()
         if search_by == FIELD_FQDN:
-            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value)
-        if search_by == FIELD_SYSMAC:
+            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=False)
+        elif search_by == FIELD_HOSTNAME:
+            cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=True)
+        elif search_by == FIELD_SYSMAC:
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
+        MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
 
     def __get_configlet_info(self, configlet_name: str):
@@ -462,7 +467,7 @@ class CvDeviceTools(object):
         list
             List of CvElement with KEY and NAME of every configlet.
         """
-        if self.__search_by == FIELD_FQDN:
+        if self.__search_by == FIELD_FQDN or self.__search_by == FIELD_HOSTNAME:
             configlet_list = list()
             # get_configlets_by_device_id
             try:
@@ -535,6 +540,7 @@ class CvDeviceTools(object):
         dict
             A dict with key and name
         """
+        MODULE_LOGGER.debug("Get container for device %s", str(device_mac))
         container_id = self.__cv_client.api.get_device_by_mac(device_mac=device_mac)
         if FIELD_PARENT_ID in container_id:
             return {'name': container_id[FIELD_CONTAINER_NAME], 'key': container_id[FIELD_PARENT_ID]}
@@ -586,13 +592,18 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
         device_not_present: list = list()
         for device in user_inventory.devices:
-            if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
-                if self.is_device_exist(device.fqdn) == False:
+            if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
+                if self.is_device_exist(device.fqdn, search_mode=FIELD_HOSTNAME) is False:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
+
+            elif self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+                if self.is_device_exist(device.fqdn, search_mode=FIELD_FQDN) is False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
             elif self.__search_by == FIELD_SYSMAC:
-                if self.is_device_exist(device.system_mac) == False:
+                if self.is_device_exist(device.system_mac) is False:
                     device_not_present.append(device.system_mac)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
         return device_not_present
@@ -601,7 +612,7 @@ class CvDeviceTools(object):
     # Workers function
     # ------------------------------------------ #
 
-    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_FQDN, apply_mode: str = 'loose'):
+    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_HOSTNAME, apply_mode: str = 'loose'):
         """
         manager Main entry point to support all device
 
@@ -626,6 +637,9 @@ class CvDeviceTools(object):
         """
         response = CvAnsibleResponse()
 
+        MODULE_LOGGER.debug('Manager search mode is set to: %s', str(search_mode))
+        self.__search_by = search_mode
+
         cv_deploy = CvManagerResult(builder_name='devices_deployed')
         cv_move = CvManagerResult(builder_name='devices_moved')
         cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
@@ -634,15 +648,18 @@ class CvDeviceTools(object):
         # Check if the devices defined exist in CVP
         list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
-            error_message = 'Error - the following devices do not exist in CVP {} but are defined in the playbook. \
-            \nMake sure that the devices are provisioned and defined with the full fqdn name (including the domain name) if needed.'.format(str(list_non_existing_devices))
+            error_message = 'Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
+                \nMake sure that the devices are provisioned and defined with the full fqdn name \
+                (including the domain name) if needed.'.format(str(list_non_existing_devices))
             MODULE_LOGGER.error(error_message)
             self.__ansible.fail_json(msg=error_message)
 
-
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
-        if self.__search_by == FIELD_FQDN or search_mode == FIELD_FQDN:
+        if self.__search_by == FIELD_FQDN:
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
+
+        if self.__search_by == FIELD_HOSTNAME:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
         action_result = self.deploy_device(user_inventory=user_inventory)
@@ -698,7 +715,7 @@ class CvDeviceTools(object):
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(container_name=device.container)
                 if new_container_info is None:
-                    error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                    error_message = 'The target container \'{1}\' for the device \'{2}\' does not exist on CVP.'.format(device.container, device.fqdn)
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
                 current_container_info = self.get_container_current(device_mac=device.system_mac)
@@ -771,7 +788,11 @@ class CvDeviceTools(object):
             # get device facts from CV
             device_facts = dict()
             if self.__search_by == FIELD_FQDN:
-                device_facts = self.__cv_client.api.get_device_by_name(fqdn=device.fqdn)
+                device_facts = self.__cv_client.api.get_device_by_name(
+                    fqdn=device.fqdn, search_by_hostname=False)
+            elif self.__search_by == FIELD_HOSTNAME:
+                device_facts = self.__cv_client.api.get_device_by_name(
+                    fqdn=device.fqdn, search_by_hostname=True)
             # Attach configlets to device
             if len(configlets_reordered_list) > 0:
                 try:
@@ -809,7 +830,10 @@ class CvDeviceTools(object):
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
+                        fqdn=device.fqdn, search_by_hostname=False)
+                elif self.__search_by == FIELD_HOSTNAME:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn, search_by_hostname=True)
                 configlets_to_remove = list()
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
@@ -858,7 +882,10 @@ class CvDeviceTools(object):
                 device_facts = dict()
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
-                        fqdn=device.fqdn)
+                        fqdn=device.fqdn, search_by_hostname=False)
+                elif self.__search_by == FIELD_HOSTNAME:
+                    device_facts = self.__cv_client.api.get_device_by_name(
+                        fqdn=device.fqdn, search_by_hostname=True)
                 # Attach configlets to device
                 try:
                     resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.remove_configlets',
@@ -904,7 +931,8 @@ class CvDeviceTools(object):
                 for configlet in device.configlets:
                     new_configlet = self.__get_configlet_info(configlet_name=configlet)
                     if new_configlet is None:
-                        error_message = "The configlet \'{}\' defined to be applied on the device \'{}\' does not exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                        error_message = "The configlet \'{1}\' defined to be applied on the device \'{2}\' does not \
+                            exist on the CVP server.".format(str(configlet), str(device.fqdn))
                         MODULE_LOGGER.error(error_message)
                         self.__ansible.fail_json(msg=error_message)
                     else:
@@ -921,10 +949,10 @@ class CvDeviceTools(object):
                         result_data.success = True
                         result_data.taskIds = ['unsupported_in_check_mode']
                     else:
-                        ## Check if the target container exists
+                        # Check if the target container exists
                         target_container_info = self.get_container_info(container_name=device.container)
                         if target_container_info is None:
-                            error_message = 'The target container \'{}\' for the device \'{}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                            error_message = 'The target container \'{1}\' for the device \'{2}\' does not exist on CVP.'.format(device.container, device.fqdn)
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
                         try:
@@ -1000,7 +1028,7 @@ class CvDeviceTools(object):
                     return True
         return False
 
-    def is_device_exist(self, device_lookup: str):
+    def is_device_exist(self, device_lookup: str, search_mode: str = FIELD_HOSTNAME):
         """
         is_device_exist Test if a device exists in Cloudvision
 
@@ -1015,7 +1043,7 @@ class CvDeviceTools(object):
             True if device available in Cloudvision, False by default
         """
         data = self.__get_device(
-            search_value=device_lookup, search_by=self.__search_by)
+            search_value=device_lookup, search_by=search_mode)
         if data is not None and len(data) > 0:
             return True
         return False
