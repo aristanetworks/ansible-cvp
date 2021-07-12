@@ -19,6 +19,7 @@
   template:
     src: "template.cvp.shared_configlets.j2"
     dest: '{{ cvp_servers_dir }}/{{ inventory_hostname }}_shared.yml'
+    mode: 0644
   delegate_to: '{{ ansible_runner }}'
   run_once: false
 

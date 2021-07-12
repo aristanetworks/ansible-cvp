@@ -8,6 +8,7 @@
   template:
     src: "template.shared_configlets.j2"
     dest: "{{ common_configlets_dir }}/{{ inventory_hostname }}.yml"
+    mode: 0644
   delegate_to: '{{ ansible_runner }}'
   run_once: false
 
@@ -21,12 +22,15 @@
   file:
     path: '{{ common_configlets_dir }}/master.yml'
     state: touch
-    mode: u=rw,g=r,o=r
+    mode: 0644
   when: status_shared_master.stat.exists is false
   delegate_to: '{{ ansible_runner }}'
 
 - name: "add YAML designators to {{ common_configlets_dir }}/master.yml"
-  copy: content="---" dest="{{ common_configlets_dir }}/master.yml"
+  copy:
+    content: "---"
+    dest: "{{ common_configlets_dir }}/master.yml"
+    mode: 0644
   when: status_shared_master.stat.exists is false
   delegate_to: '{{ ansible_runner }}'
 
@@ -46,4 +50,5 @@
   template:
     src: "template.compare_configlets.j2"
     dest: "{{ common_configlets_dir }}/master.yml"
+    mode: 0644
   delegate_to: '{{ ansible_runner }}'
