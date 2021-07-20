@@ -1,4 +1,4 @@
-ansible>=2.10,<2.11
+ansible>=2.9,<2.11
 ansible-lint
 check-manifest
 docker==4.4.1

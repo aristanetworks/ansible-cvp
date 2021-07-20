@@ -211,7 +211,8 @@ jobs:
       - name: 'ansible-test linting'
         run: |
           cd ansible_collections/arista/cvp/
-          ansible-test sanity -v --requirements --docker --python 3.6
+          rm -rf molecule/
+          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
           rm -rf tests/output/
 
   galaxy_importer:
