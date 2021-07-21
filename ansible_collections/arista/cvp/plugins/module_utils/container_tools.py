@@ -86,7 +86,7 @@ class ContainerInput(object):
         """
         for container_name in self.__topology:
             if FIELD_CONFIGLETS not in self.__topology[container_name]:
-                self.__topology[container_name].update({FIELD_CONFIGLETS:[]})
+                self.__topology[container_name].update({FIELD_CONFIGLETS: []})
 
     def __get_container_data(self, container_name: str, key_name: str):
         """
