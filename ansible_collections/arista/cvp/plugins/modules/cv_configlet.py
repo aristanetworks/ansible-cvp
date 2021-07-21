@@ -226,7 +226,7 @@ def build_configlets_list(module):
                         configlet_compare = tools.compare(
                             configlet['config'], ansible_configlet, 'CVP', 'Ansible')
                         # Compare function returns a list containing a boolean and a unified diff list.
-                        if configlet_compare[0] == False:
+                        if configlet_compare[0] is False:
                             intend['keep'].append({'data': configlet})
                             MODULE_LOGGER.debug("No change was detected in configlet %s.", str(configlet['name']))
                         else:
