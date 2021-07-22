@@ -207,7 +207,7 @@ class CvConfigletTools(object):
                     configlet['notediff'] = self._compare(
                         fromText=cv_data['note'], toText=note, fromName='CVP', toName='Ansible')
                     MODULE_LOGGER.debug("configlet note diff: %s", str(configlet['notediff']))
-                    if (configlet['diff'][0]) == True or (configlet['notediff'][0] == True):
+                    if (configlet['diff'][0]) is True or (configlet['notediff'][0] is True):
                         to_update.append(configlet)
 
                 else:
@@ -341,13 +341,13 @@ class CvConfigletTools(object):
                         change_response.add_entry('configlet updated')
                         if 'diff' in configlet:
                             # Change changed flag if diff is True
-                            if configlet['diff'] is not None and configlet['diff'][0] == True:
+                            if configlet['diff'] is not None and configlet['diff'][0] is True:
                                 change_response.diff = configlet['diff']
                                 change_response.changed = True
                                 MODULE_LOGGER.info(
                                     'Found diff in configlet %s.', str(configlet['name']))
                         if 'notediff' in configlet:
-                            if configlet['notediff'] is not None and configlet['notediff'][0] == True:
+                            if configlet['notediff'] is not None and configlet['notediff'][0] is True:
                                 change_response.diff = configlet['notediff']
                                 change_response.changed = True
                                 MODULE_LOGGER.info(

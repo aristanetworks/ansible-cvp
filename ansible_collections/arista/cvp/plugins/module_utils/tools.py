@@ -40,6 +40,7 @@ LOGGER = logging.getLogger('arista.cvp.tools')
 WINDOWS_LINE_ENDING = '\r\n'
 UNIX_LINE_ENDING = '\n'
 
+
 def str_cleanup_line_ending(content):
     """
     str_cleanup_line_ending Cleanup line ending to use UNIX style and not Windows style
