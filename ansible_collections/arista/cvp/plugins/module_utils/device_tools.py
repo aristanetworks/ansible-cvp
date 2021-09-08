@@ -441,7 +441,6 @@ class CvDeviceTools(object):
         # Joining the 2 new list (configlets already present + new configlet in right order)
         return configlets_attached_get_configlet_info + new_configlets_list
 
-
     # ------------------------------------------ #
     # Get CV data functions
     # ------------------------------------------ #

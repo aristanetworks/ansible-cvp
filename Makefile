@@ -24,7 +24,9 @@ help: ## Display help message (*: main entry points / []: part of an entry point
 #########################################
 .PHONY: collection-build
 collection-build: ## Build arista.cvp collection locally
-	ansible-galaxy collection build --force ansible_collections/arista/cvp
+	rm -rf ansible_collections/arista/cvp/molecule/ ; \
+	ansible-galaxy collection build --force ansible_collections/arista/cvp ; \
+	git checkout ansible_collections/arista/cvp/molecule/
 
 .PHONY: collection-install
 collection-install: ## Install arista.cvp collection to default location (~/.ansible/collections/ansible_collections)
