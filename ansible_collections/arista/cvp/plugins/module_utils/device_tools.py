@@ -84,6 +84,12 @@ class DeviceElement(object):
             self.__sysmac = data[FIELD_SYSMAC]
         if FIELD_SERIAL in data:
             self.__serial = data[FIELD_SERIAL]
+        if FIELD_HOSTNAME in data:
+            self.__hostname = data[FIELD_HOSTNAME]
+        elif FIELD_FQDN in data:
+            self.__hostname = data[FIELD_FQDN].split('.')[0]
+        else:
+            self.__hostname = None
 
     @property
     def fqdn(self):
@@ -108,6 +114,32 @@ class DeviceElement(object):
             fqdn to configure on device
         """
         self.__fqdn = fqdn
+
+
+    @property
+    def hostname(self):
+        """
+        hostname Getter for FQDN value
+
+        Returns
+        -------
+        str
+            HOSTNAME configured for the device
+        """
+        return self.__hostname
+
+    @fqdn.setter
+    def hostname(self, hostname: str):
+        """
+        hostname Setter for hostname
+
+        Parameters
+        ----------
+        hostname : str
+            hostname to configure on device
+        """
+        self.__hostname = hostname
+
 
     @property
     def system_mac(self):
@@ -207,6 +239,7 @@ class DeviceElement(object):
         """
         res = dict()
         res[FIELD_FQDN] = self.__fqdn
+        res[FIELD_HOSTNAME] = self.__hostname
         if self.__serial is not None:
             res[FIELD_SERIAL] = self.__serial
         if self.__sysmac is not None:
