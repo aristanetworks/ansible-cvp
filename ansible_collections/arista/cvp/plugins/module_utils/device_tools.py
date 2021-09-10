@@ -803,9 +803,13 @@ class CvDeviceTools(object):
                     cv_configlets_detach.add_change(change=update)
 
         response.add_manager(cv_move)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_move: %s', str(response.content))
         response.add_manager(cv_deploy)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_deploy: %s', str(response.content))
         response.add_manager(cv_configlets_attach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_attach: %s', str(response.content))
         response.add_manager(cv_configlets_detach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
 
         return response.content
 

@@ -209,13 +209,11 @@ def main():
         ansible_module=ansible_module,
         check_mode=ansible_module.check_mode)
 
+    MODULE_LOGGER.debug('Ansible user inventory is: %s', str(user_topology.devices))
     result = cv_topology.manager(
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
         search_mode=ansible_module.params['search_key'])
-
-    MODULE_LOGGER.debug('Ansible user inventory is: %s', str(user_topology.devices))
-    result = cv_topology.manager(user_inventory=user_topology, apply_mode=ansible_module.params['apply_mode'], search_mode=ansible_module.params['search_key'])
 
     ansible_module.exit_json(**result)
 
