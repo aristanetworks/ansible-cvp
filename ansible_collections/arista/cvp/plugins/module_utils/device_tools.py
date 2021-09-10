@@ -749,6 +749,8 @@ class CvDeviceTools(object):
         """
         response = CvAnsibleResponse()
 
+        self.__search_by = search_mode
+
         MODULE_LOGGER.debug('Manager search mode is set to: %s', str(search_mode))
         self.__search_by = search_mode
 
@@ -774,7 +776,7 @@ class CvDeviceTools(object):
         elif self.__search_by == FIELD_HOSTNAME:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
-        elif self.__search_by == FIELD_SERIAL or search_mode == FIELD_SERIAL:
+        elif self.__search_by == FIELD_SERIAL:
             user_inventory = self.refresh_fqdn(user_inventory=user_inventory)
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
