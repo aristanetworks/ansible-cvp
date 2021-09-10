@@ -966,6 +966,9 @@ class CvDeviceTools(object):
                 elif self.__search_by == FIELD_HOSTNAME:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=True)
+                elif self.__search_by == FIELD_SERIAL:
+                    device_facts = self.__cv_client.api.get_device_by_serial(
+                        device_serial=device.serial_number)
                 configlets_to_remove = list()
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
