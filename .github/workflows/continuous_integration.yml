@@ -236,7 +236,8 @@ jobs:
       - name: install requirements
         run: make install-requirements
       - name: 'build ansible package'
-        run: make collection-build
+        run: |
+          ansible-galaxy collection build --force ansible_collections/arista/cvp
       - name: 'run ansible-importer checks'
         run: python -m galaxy_importer.main *.tar.gz
       - uses: actions/upload-artifact@v2
