@@ -218,32 +218,32 @@ jobs:
           ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
           rm -rf tests/output/
 
-  galaxy_importer:
-    name: Test galaxy-importer
-    runs-on: ubuntu-latest
-    container: avdteam/base:3.6-v2.0
-    needs: [pre_commit]
-    if: needs.file-changes.outputs.python == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release')
-    env:
-      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
-      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
-    steps:
-      - name: 'set environment variables'
-        run: |
-          echo "PY_COLORS=1" >> $GITHUB_ENV
-          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
-      - name: install requirements
-        run: make install-requirements
-      - name: 'build ansible package'
-        run: |
-          ansible-galaxy collection build --force ansible_collections/arista/cvp
-      - name: 'run ansible-importer checks'
-        run: python -m galaxy_importer.main *.tar.gz
-      - uses: actions/upload-artifact@v2
-        with:
-          name: importer-logs
-          path: ./importer_result.json
+  # galaxy_importer:
+  #   name: Test galaxy-importer
+  #   runs-on: ubuntu-latest
+  #   container: avdteam/base:3.6-v2.0
+  #   needs: [pre_commit]
+  #   if: needs.file-changes.outputs.python == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release')
+  #   env:
+  #     PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+  #     ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+  #   steps:
+  #     - name: 'set environment variables'
+  #       run: |
+  #         echo "PY_COLORS=1" >> $GITHUB_ENV
+  #         echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+  #     - uses: actions/checkout@v2
+  #     - name: install requirements
+  #       run: make install-requirements
+  #     - name: 'build ansible package'
+  #       run: |
+  #         ansible-galaxy collection build --force ansible_collections/arista/cvp
+  #     - name: 'run ansible-importer checks'
+  #       run: python -m galaxy_importer.main *.tar.gz
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: importer-logs
+  #         path: ./importer_result.json
 
   build_package:
     name: Build collection package
@@ -251,7 +251,7 @@ jobs:
     container: avdteam/base:3.6-v2.0
     needs:
       - ansible_test
-      - galaxy_importer
+      # - galaxy_importer
     if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
