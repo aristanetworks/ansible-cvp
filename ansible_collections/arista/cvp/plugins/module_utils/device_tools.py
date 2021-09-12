@@ -407,7 +407,7 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=True)
         elif search_by == FIELD_SYSMAC:
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
-        if search_by == FIELD_SERIAL:
+        elif search_by == FIELD_SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
