@@ -28,7 +28,7 @@ Current active branch:
 
 ### Python
 
-- Python >=3.6
+- Python >=3.8
 
 ### Additional Python Libraries required
 

@@ -63,7 +63,7 @@ jobs:
   pre_commit:
     name: Run pre-commit validation hooks
     runs-on: ubuntu-20.04
-    container: avdteam/base:3.6-v1.0
+    container: avdteam/base:3.8-v2.0
     needs: file-changes
     if: needs.file-changes.outputs.dhcp_module == 'true' || needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true' || startsWith(github.ref, 'refs/heads/release')
     steps:
@@ -73,7 +73,7 @@ jobs:
   pytest:
     name: Validate code V3 with Pytest
     runs-on: ubuntu-20.04
-    container: avdteam/base:3.6-v1.0
+    container: avdteam/base:3.8-v2.0
     needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.code_v3 == 'true' || startsWith(github.ref, 'refs/heads/release')
     steps:
@@ -105,7 +105,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ansible_version: ["ansible>=2.10,<2.11", "ansible>=3.3"]
+        ansible_version: ['ansible-core==2.11.3', 'ansible-core>=2.11.3']
         avd_scenario:
           - cv_configlet_loose
           - cv_configlet_strict
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ansible_version: ["ansible>=2.10,<2.11", "ansible>=3.3"]
+        ansible_version: ['ansible-core==2.11.3', 'ansible-core>=2.11.3']
         avd_scenario:
           - dhcp_management_mac
           - dhcp_management_offline
@@ -218,36 +218,37 @@ jobs:
           ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
           rm -rf tests/output/
 
-  galaxy_importer:
-    name: Test galaxy-importer
-    runs-on: ubuntu-latest
-    container: avdteam/base:3.6-v2.0
-    needs: [pre_commit]
-    if: needs.file-changes.outputs.python == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release')
-    env:
-      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
-      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
-    steps:
-      - name: 'set environment variables'
-        run: |
-          echo "PY_COLORS=1" >> $GITHUB_ENV
-          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
-      - name: install requirements
-        run: make install-requirements
-      - name: 'build ansible package'
-        run: make collection-build
-      - name: 'run ansible-importer checks'
-        run: python -m galaxy_importer.main *.tar.gz
-      - uses: actions/upload-artifact@v2
-        with:
-          name: importer-logs
-          path: ./importer_result.json
+  # galaxy_importer:
+  #   name: Test galaxy-importer
+  #   runs-on: ubuntu-latest
+  #   container: avdteam/base:3.8-v2.0
+  #   needs: [pre_commit]
+  #   if: needs.file-changes.outputs.python == 'true' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release')
+  #   env:
+  #     PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+  #     ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+  #   steps:
+  #     - name: 'set environment variables'
+  #       run: |
+  #         echo "PY_COLORS=1" >> $GITHUB_ENV
+  #         echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+  #     - uses: actions/checkout@v2
+  #     - name: install requirements
+  #       run: make install-requirements
+  #     - name: 'build ansible package'
+  #       run: |
+  #         ansible-galaxy collection build --force ansible_collections/arista/cvp
+  #     - name: 'run ansible-importer checks'
+  #       run: python -m galaxy_importer.main *.tar.gz
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: importer-logs
+  #         path: ./importer_result.json
 
   build_package:
     name: Build collection package
     runs-on: ubuntu-latest
-    container: avdteam/base:3.6-v2.0
+    container: avdteam/base:3.8-v2.0
     needs:
       - ansible_test
       - galaxy_importer
