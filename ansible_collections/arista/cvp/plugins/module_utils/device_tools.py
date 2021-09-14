@@ -714,7 +714,7 @@ class CvDeviceTools(object):
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(container_name=device.container)
                 if new_container_info is None:
-                    error_message = 'The target container \'{1}\' for the device \'{2}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                    error_message = 'The target container \'{0}\' for the device \'{1}\' does not exist on CVP.'.format(device.container, device.fqdn)
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
                 current_container_info = self.get_container_current(device_mac=device.system_mac)
@@ -930,7 +930,7 @@ class CvDeviceTools(object):
                 for configlet in device.configlets:
                     new_configlet = self.__get_configlet_info(configlet_name=configlet)
                     if new_configlet is None:
-                        error_message = "The configlet \'{1}\' defined to be applied on the device \'{2}\' does not \
+                        error_message = "The configlet \'{0}\' defined to be applied on the device \'{1}\' does not \
                             exist on the CVP server.".format(str(configlet), str(device.fqdn))
                         MODULE_LOGGER.error(error_message)
                         self.__ansible.fail_json(msg=error_message)
@@ -951,7 +951,7 @@ class CvDeviceTools(object):
                         # Check if the target container exists
                         target_container_info = self.get_container_info(container_name=device.container)
                         if target_container_info is None:
-                            error_message = 'The target container \'{1}\' for the device \'{2}\' does not exist on CVP.'.format(device.container, device.fqdn)
+                            error_message = 'The target container \'{0}\' for the device \'{1}\' does not exist on CVP.'.format(device.container, device.fqdn)
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
                         try:
