@@ -56,12 +56,12 @@ options:
     description: Key name to use to look for device in Cloudvision.
     required: false
     default: 'hostname'
-    choices: ['fqdn', 'hostname']
+    choices: ['fqdn', 'hostname', 'serialNumber']
     type: str
 '''
 
 EXAMPLES = r'''
-# task in loose mode (default)
+# task in loose mode using fqdn (default)
 ---
 - name: Device Management in Cloudvision
   hosts: cv_server
@@ -80,6 +80,28 @@ EXAMPLES = r'''
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES}}'
         state: present
+        search_key: fqdn
+
+# task in loose mode using serial
+---
+- name: Device Management in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_DEVICES:
+      - serialNumber: xxxxxxxxxxxx
+        parentContainerName: ANSIBLE
+        configlets:
+            - 'CV-EOS-ANSIBLE01'
+  tasks:
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: present
+        search_key: serialNumber
 
 # task in strict mode
 ---
@@ -154,7 +176,7 @@ def main():
         search_key=dict(type='str',
                         required=False,
                         default='hostname',
-                        choices=['fqdn', 'hostname'])
+                        choices=['fqdn', 'hostname', 'serialNumber'])
     )
 
     # Make module global to use it in all functions when required
@@ -187,6 +209,7 @@ def main():
         ansible_module=ansible_module,
         check_mode=ansible_module.check_mode)
 
+    MODULE_LOGGER.debug('Ansible user inventory is: %s', str(user_topology.devices))
     result = cv_topology.manager(
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
