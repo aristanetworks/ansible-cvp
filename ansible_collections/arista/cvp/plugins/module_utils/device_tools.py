@@ -1110,7 +1110,7 @@ class CvDeviceTools(object):
                                 result_data.success = True
                                 result_data.taskIds = resp['data']['taskIds']
 
-                    result_data.add_entry('{1} deployed to {2}'.format(
+                    result_data.add_entry('{0} deployed to {1}'.format(
                         device.info[self.__search_by], device.container))
             results.append(result_data)
         return results
