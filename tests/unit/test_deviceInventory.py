@@ -54,7 +54,7 @@ CVP_INVENTORY_VALID = [
 
 CVP_INVENTORY_INVALID = [
     [{
-        "serialNumber": "ddddddd",
+        "serial_Number": "ddddddd",
         "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
         "configlets": [

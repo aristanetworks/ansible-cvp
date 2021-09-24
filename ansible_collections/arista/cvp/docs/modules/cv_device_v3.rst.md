@@ -56,7 +56,7 @@ The following options may be specified for this module:
 <td>str</td>
 <td>no</td>
 <td>hostname</td>
-<td><ul><li>fqdn</li><li>hostname</li></ul></td>
+<td><ul><li>fqdn</li><li>hostname</li><li>serialNumber</li></ul></td>
 <td>
     <div>Key name to use to look for device in Cloudvision.</div>
 </td>
@@ -78,7 +78,7 @@ The following options may be specified for this module:
 
 ## Examples:
 
-    # task in loose mode (default)
+    # task in loose mode using fqdn (default)
     ---
     - name: Device Management in Cloudvision
       hosts: cv_server
@@ -97,6 +97,28 @@ The following options may be specified for this module:
           arista.cvp.cv_device_v3:
             devices: '{{CVP_DEVICES}}'
             state: present
+            search_key: fqdn
+
+    # task in loose mode using serial
+    ---
+    - name: Device Management in Cloudvision
+      hosts: cv_server
+      connection: local
+      gather_facts: false
+      collections:
+        - arista.cvp
+      vars:
+        CVP_DEVICES:
+          - serialNumber: xxxxxxxxxxxx
+            parentContainerName: ANSIBLE
+            configlets:
+                - 'CV-EOS-ANSIBLE01'
+      tasks:
+        - name: "Configure devices on {{inventory_hostname}}"
+          arista.cvp.cv_device_v3:
+            devices: '{{CVP_DEVICES}}'
+            state: present
+            search_key: serialNumber
 
     # task in strict mode
     ---

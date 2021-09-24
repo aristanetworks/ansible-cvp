@@ -35,7 +35,7 @@
   <img src='ansible_collections/arista/cvp/medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-More documentation is available in [project's website](https://aristanetworks.github.io/ansible-cvp/)
+More documentation is available in [project's website](https://cvp.avd.sh/)
 
 ## List of CVP versions supported
 
@@ -81,6 +81,8 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
 
 A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
+
+Another [demonstration repository](https://github.com/arista-netdevops-community/atd-avd) is available to play with Arista Test Drive. Please reach out to your favorite SE for getting access to such instance.
 
 Below is a very basic example to build a container topology on a CloudVision platform assuming you have 3 veos named `veos0{1,3}` and a configlet named `alias`
 
