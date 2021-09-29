@@ -919,7 +919,7 @@ class CvDeviceTools(object):
                 device_facts = self.__cv_client.api.get_device_by_name(
                     fqdn=device.fqdn, search_by_hostname=True)
             elif self.__search_by == FIELD_SERIAL:
-                    device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
+                device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
             # Attach configlets to device
             if len(configlets_reordered_list) > 0:
                 try:
