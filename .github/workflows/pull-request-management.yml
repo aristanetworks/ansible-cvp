@@ -1,0 +1,274 @@
+---
+on:
+  # push:
+  #   branches-ignore:
+  #     - devel
+  #     - releases/**
+  #     - ci/**
+  # For a pull_request event, only branches and tags on the base are evaluated.
+  pull_request:
+    branches-ignore:
+      - releases/**
+
+jobs:
+  file-changes:
+    runs-on: ubuntu-20.04
+    outputs:
+      code_v1: ${{ steps.filter.outputs.code_v1 }}
+      code_v3: ${{ steps.filter.outputs.code_v3 }}
+      dhcp_module: ${{ steps.filter.outputs.dhcp_module }}
+      docs: ${{ steps.filter.outputs.docs }}
+      python: ${{ steps.filter.outputs.python }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            code_v1:
+              - 'ansible_collections/arista/cvp/plugins/module_utils/schema_v1.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/tools_inventory.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/tools_tree.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/tools.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_facts.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_configlet.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_container.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_device.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_task.py'
+              - '.github/workflows/*.yml'
+              - 'ansible_collections/arista/cvp/molecule/*'
+              - 'ansible_collections/arista/cvp/molecule/**/*'
+            code_v3:
+              - 'ansible_collections/arista/cvp/plugins/module_utils/configlet_tools.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/container_tools.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/device_tools.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/task_tools.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/response.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/generic_tools.py'
+              - 'ansible_collections/arista/cvp/plugins/module_utils/schema_v3.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_facts_v3.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_configlet_v3.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_container_v3.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_device_v3.py'
+              - 'ansible_collections/arista/cvp/plugins/modules/cv_task_v3.py'
+              - '.github/workflows/*.yml'
+              - 'tests/**/*'
+              - 'tests/*'
+            dhcp_module:
+              - 'ansible_collections/arista/cvp/roles/dhcp_configuration/*'
+              - 'ansible_collections/arista/cvp/roles/dhcp_configuration/**/*'
+              - '.github/workflows/*.yml'
+            docs:
+              - 'mkdocs.yml'
+              - 'ansible_collections/arista/cvp/docs/**'
+              - 'ansible_collections/arista/cvp/roles/**/README.md'
+              - '.github/workflows/*.yml'
+            python:
+              - 'ansible_collections/arista/cvp/plugins/**/*.py'
+              - '.github/workflows/*.yml'
+
+  pre_commit:
+    name: Run pre-commit validation hooks
+    runs-on: ubuntu-20.04
+    container: avdteam/base:3.8-v2.0
+    needs: file-changes
+    if: needs.file-changes.outputs.dhcp_module == 'true' || needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pre-commit/action@v2.0.2
+
+  pytest:
+    name: Validate code V3 with Pytest
+    runs-on: ubuntu-20.04
+    container: avdteam/base:3.8-v2.0
+    needs: [file-changes, pre_commit]
+    if: needs.file-changes.outputs.code_v3 == 'true'
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Install requirements
+        run: |
+          pip install -r ansible_collections/arista/cvp/requirements-dev.txt
+          pip install -r ansible_collections/arista/cvp/requirements.txt
+      - name: 'Execute pytest validation'
+        run: |
+          cd tests/
+          make config.py
+          ls -al unit/
+          make ci-report
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pytest-report
+          path: |
+            ./tests/report.html
+            ./tests/htmlcov
+
+  molecule_cv_modules:
+    name: Validate code V1 with Molecule
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        ansible_version: ['ansible-core==2.11.3', 'ansible-core>=2.11.3']
+        avd_scenario:
+          - cv_configlet_loose
+          - cv_configlet_strict
+          - cv_device
+    needs: [ file-changes, pre_commit ]
+    if: needs.file-changes.outputs.code_v1 == 'true'
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Run molecule action
+        uses: arista-netdevops-community/action-molecule-avd@v1.1
+        with:
+          molecule_parentdir: 'ansible_collections/arista/cvp'
+          molecule_command: 'test'
+          molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
+          pip_file: ansible_collections/arista/cvp/requirements.txt
+          ansible: "${{ matrix.ansible_version }}"
+          check_git: true
+          check_git_enforced: false
+      - uses: actions/upload-artifact@v2
+        with:
+          name: molecule-${{ matrix.avd_scenario }}-artifacts
+          path: ansible_collections/arista/cvp/molecule/${{ matrix.avd_scenario }}
+
+  molecule_dhcp:
+    name: Validate Roles for DHCP management
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        ansible_version: ['ansible-core==2.11.3', 'ansible-core>=2.11.3']
+        avd_scenario:
+          - dhcp_management_mac
+          - dhcp_management_offline
+          - dhcp_system_mac
+    needs: [ file-changes, pre_commit ]
+    if: needs.file-changes.outputs.dhcp_module == 'true'
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Run molecule action
+        uses: arista-netdevops-community/action-molecule-avd@v1.1
+        with:
+          molecule_parentdir: 'ansible_collections/arista/cvp'
+          molecule_command: 'test'
+          molecule_args: '--scenario-name ${{ matrix.avd_scenario }}'
+          pip_file: ansible_collections/arista/cvp/requirements.txt
+          ansible: "${{ matrix.ansible_version }}"
+          check_git: true
+          check_git_enforced: false
+
+  offline_link_check:
+    name: 'Validate mkdoc links'
+    runs-on: ubuntu-20.04
+    needs: [ file-changes ]
+    if: needs.file-changes.outputs.docs == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'start docker-compose stack'
+        run: |
+          cp development/docker-compose.yml .
+          sed -i 's/cd\sansible-cvp\/\s\&\&//g' docker-compose.yml
+          docker-compose -f docker-compose.yml up -d webdoc_cvp
+          docker-compose -f docker-compose.yml ps
+      - name: 'test connectivity to mkdoc server'
+        run: |
+          sleep 30
+          until docker exec webdoc_cvp curl -s -I http://localhost:8000/ ; do sleep 2; done
+      - name: check links for 404
+        run: |
+          docker run --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8000 -e ".*fonts.googleapis.com.*" -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=30
+      - name: 'stop docker-compose stack'
+        run: |
+          docker-compose -f docker-compose.yml down
+
+  ansible_test:
+    name: Run ansible-test validation
+    runs-on: ubuntu-16.04
+    needs: [ molecule_dhcp, molecule_cv_modules, molecule_dhcp, pytest]
+    env:
+      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: [ 3.6 ]
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: 'Install Python requirements'
+        run: make install-requirements
+      - name: 'ansible-test linting'
+        run: |
+          cd ansible_collections/arista/cvp/
+          rm -rf molecule/
+          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
+          rm -rf tests/output/
+
+  galaxy_importer:
+    name: Test galaxy-importer
+    runs-on: ubuntu-latest
+    container: avdteam/base:3.8-v2.0
+    needs: [ansible_test]
+    if: needs.file-changes.outputs.python == 'true'
+    env:
+      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: install requirements
+        run: make install-requirements
+      - name: 'build ansible package'
+        run: |
+          ansible-galaxy collection build --force ansible_collections/arista/cvp
+      - name: 'run ansible-importer checks'
+        run: python -m galaxy_importer.main *.tar.gz
+      - uses: actions/upload-artifact@v2
+        with:
+          name: importer-logs
+          path: ./importer_result.json
+
+  # build_package:
+  #   name: Build collection package
+  #   runs-on: ubuntu-latest
+  #   container: avdteam/base:3.8-v2.0
+  #   needs:
+  #     - ansible_test
+  #     # - galaxy_importer
+  #   if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.base_ref, 'refs/heads/release')
+  #   env:
+  #     PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
+  #     ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: install requirements
+  #       run: make install-requirements
+  #     - name: 'build ansible package'
+  #       run: make collection-build
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: ansible-package
+  #         path: ./*.tar.gz
