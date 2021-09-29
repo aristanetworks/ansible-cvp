@@ -1,4 +1,6 @@
 ---
+name: "Collection code testing"
+
 on:
   # push:
   #   branches-ignore:
