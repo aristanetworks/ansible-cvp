@@ -62,7 +62,6 @@ options:
 
 EXAMPLES = r'''
 # task in loose mode using fqdn (default)
----
 - name: Device Management in Cloudvision
   hosts: cv_server
   connection: local
@@ -83,7 +82,6 @@ EXAMPLES = r'''
         search_key: fqdn
 
 # task in loose mode using serial
----
 - name: Device Management in Cloudvision
   hosts: cv_server
   connection: local
@@ -104,7 +102,6 @@ EXAMPLES = r'''
         search_key: serialNumber
 
 # task in strict mode
----
 - name: Device Management in Cloudvision
   hosts: cv_server
   connection: local
