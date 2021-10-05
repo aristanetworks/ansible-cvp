@@ -20,10 +20,10 @@ jobs:
           sed -i 's/version: null/version: '"$(git describe --abbrev=0 --tags | sed 's/v//')"'/' ansible_collections/arista/cvp/galaxy.yml
           make collection-build
 
-      - name: Release on Github
-        uses: softprops/action-gh-release@v1
-        with:
-          files: '*.tar.gz'
+      # - name: Release on Github
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: '*.tar.gz'
 
       # - name: Publish Collection to galaxy
       #   uses: artis3n/ansible_galaxy_collection@v2
