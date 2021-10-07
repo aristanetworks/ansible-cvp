@@ -2,12 +2,6 @@
 name: "Collection code testing"
 
 on:
-  # push:
-  #   branches-ignore:
-  #     - devel
-  #     - releases/**
-  #     - ci/**
-  # For a pull_request event, only branches and tags on the base are evaluated.
   pull_request:
     branches-ignore:
       - releases/**
@@ -37,9 +31,10 @@ jobs:
               - 'ansible_collections/arista/cvp/plugins/modules/cv_container.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_device.py'
               - 'ansible_collections/arista/cvp/plugins/modules/cv_task.py'
-              - '.github/workflows/*.yml'
+              - '.github/workflows/*'
               - 'ansible_collections/arista/cvp/molecule/*'
               - 'ansible_collections/arista/cvp/molecule/**/*'
+              - '!ansible_collections/arista/cvp/galaxy.yml'
             code_v3:
               - 'ansible_collections/arista/cvp/plugins/module_utils/configlet_tools.py'
               - 'ansible_collections/arista/cvp/plugins/module_utils/container_tools.py'
@@ -48,22 +43,22 @@ jobs:
               - 'ansible_collections/arista/cvp/plugins/module_utils/response.py'
               - 'ansible_collections/arista/cvp/plugins/module_utils/generic_tools.py'
               - 'ansible_collections/arista/cvp/plugins/module_utils/schema_v3.py'
-              - 'ansible_collections/arista/cvp/plugins/modules/*.py'
-              - '.github/workflows/*.yml'
+              - 'ansible_collections/arista/cvp/plugins/modules/*_v3.py'
+              - '.github/workflows/*'
               - 'tests/**/*'
               - 'tests/*'
             dhcp_module:
               - 'ansible_collections/arista/cvp/roles/dhcp_configuration/*'
               - 'ansible_collections/arista/cvp/roles/dhcp_configuration/**/*'
-              - '.github/workflows/*.yml'
+              - '.github/workflows/*'
             docs:
               - 'mkdocs.yml'
               - 'ansible_collections/arista/cvp/docs/**'
               - 'ansible_collections/arista/cvp/roles/**/README.md'
-              - '.github/workflows/*.yml'
+              - '.github/workflows/*'
             python:
               - 'ansible_collections/arista/cvp/plugins/**/*.py'
-              - '.github/workflows/*.yml'
+              - '.github/workflows/*'
 
   pre_commit:
     name: Run pre-commit validation hooks
