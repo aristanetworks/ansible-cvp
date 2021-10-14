@@ -1225,13 +1225,6 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             MODULE_LOGGER.info('start process resetting device %s', str(device.info))
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_reset')
-            device_facts = dict()
-            if self.__search_by == FIELD_FQDN:
-                device_facts = self.__cv_client.api.get_device_by_name(
-                    fqdn=device.fqdn, search_by_hostname=False)
-            elif self.__search_by == FIELD_HOSTNAME:
-                device_facts = self.__cv_client.api.get_device_by_name(
-                    fqdn=device.fqdn, search_by_hostname=True)
             try:
                 MODULE_LOGGER.info('send reset request for device %s', str(device.info))
                 resp = self.__cv_client.api.reset_device(app_name='CvDeviceTools.reset_device',
