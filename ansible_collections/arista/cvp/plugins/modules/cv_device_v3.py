@@ -187,9 +187,6 @@ def main():
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
 
-    if ansible_module.params['state'] == 'absent':
-        ansible_module.fail_json(msg='State==absent is not yet supported !')
-
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
@@ -213,7 +210,8 @@ def main():
     result = cv_topology.manager(
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
-        search_mode=ansible_module.params['search_key'])
+        search_mode=ansible_module.params['search_key'],
+        state=ansible_module.params['state'])
 
     ansible_module.exit_json(**result)
 
