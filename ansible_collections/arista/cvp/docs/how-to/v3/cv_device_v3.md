@@ -35,7 +35,7 @@ CVP_DEVICES:
 
 #### Optional inputs
 
-- `state`: Define if module should `create`(default) or `delete` devices from CV
+- `state`: Define if module should `create`(default) or `delete` devices from CV. By default it is set to `present`.
 - `apply_mode`: Define how configlets configured to the devices are managed by ansible:
   - `loose` (default): Configure new configlets to device and __ignore__ configlet already configured but not listed.
   - `strict`: Configure new configlets to device and __remove__ configlet already configured but not listed.
@@ -44,6 +44,8 @@ CVP_DEVICES:
   - `fqdn`: Use Hostname + DNS to get devices.
   - `serialNumber`: Use device serial number to get devices.
 
+!!! danger "state option"
+    When set to `state: absent`, ansible will generate a task to reset switches to default configuration with ZTP mode enabled.
 
 ```yaml
 # Use default loose apply_mode
