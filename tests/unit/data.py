@@ -13,7 +13,7 @@ CVP_DEVICES = [
         "systemMacAddress": "50:8d:00:e3:78:aa",
         "parentContainerName": "ANSIBLE",
         "configlets": [
-                "CV-EOS-ANSIBLE01"
+            "CV-EOS-ANSIBLE01"
         ],
         "imageBundle": []
     }
