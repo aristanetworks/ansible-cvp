@@ -262,9 +262,12 @@ class DeviceInventory(object):
         self.__data = data
         self.__schema = schema
         self.search_method = search_method
-        for entry in data:
-            # if FIELD_FQDN in entry:
-            self.__inventory.append(DeviceElement(data=entry))
+        if self.__data is not None:
+            for entry in data:
+                # if FIELD_FQDN in entry:
+                self.__inventory.append(DeviceElement(data=entry))
+        else:
+            print("The device_filter did not match any devices. Please correct the value of the filter.")
 
     @property
     def is_valid(self):

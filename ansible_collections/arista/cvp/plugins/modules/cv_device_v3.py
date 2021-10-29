@@ -191,11 +191,13 @@ def main():
     check_import(ansible_module=ansible_module)
 
     # Test user input against schema definition
-    user_topology = DeviceInventory(data=ansible_module.params['devices'])
-
-    if user_topology.is_valid is False:
-        ansible_module.fail_json(
-            msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['devices']))
+    if ansible_module.params['devices'] is not None:
+      user_topology = DeviceInventory(data=ansible_module.params['devices'])
+      if user_topology.is_valid is False:
+          ansible_module.fail_json(
+              msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['devices']))
+      else:
+        print("User Topology is empty, please verify that the device_filter can match any devices!")
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
