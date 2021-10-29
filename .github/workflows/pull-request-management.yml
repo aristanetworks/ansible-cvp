@@ -6,6 +6,10 @@ on:
     branches-ignore:
       - releases/**
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   file-changes:
     runs-on: ubuntu-20.04
@@ -91,7 +95,7 @@ jobs:
           cd tests/
           make config.py
           ls -al unit/
-          make ci-report
+          make ci
       - uses: actions/upload-artifact@v2
         with:
           name: pytest-report
