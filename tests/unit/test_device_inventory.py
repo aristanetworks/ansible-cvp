@@ -122,7 +122,6 @@ class TestDeviceInventory():
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_empty_device_inventory(self, DEVICE_INVENTORY):
-        try:
-            DeviceInventory(data=None)
-        except AssertionError:
-            logging.info("data is empty - device inventory returns an AssertionError exception")
+        inventory = DeviceInventory(data=DEVICE_INVENTORY)
+        assert len(inventory.devices) == 0
+        logging.info("Device inventory is list. Device_filter did not find any matches.")

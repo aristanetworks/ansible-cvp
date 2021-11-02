@@ -186,6 +186,9 @@ def main():
 
     if ansible_module.params['state'] == 'absent':
         ansible_module.fail_json(msg='State==absent is not yet supported !')
+    # Check if the device list is empty in case the device_filter is incorrectly set
+    if len(ansible_module.params['devices']) == 0:
+        ansible_module.fail_json(msg='Device list is empty. Please check if the device_filter is correct!')
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
