@@ -119,9 +119,3 @@ class TestDeviceInventory():
                 device_string=dev_data[FIELD_FQDN],
                 search_method="test")
             assert dev_data[FIELD_FQDN] == dev_inventory.fqdn
-
-    @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
-    def test_empty_device_inventory(self, DEVICE_INVENTORY):
-        inventory = DeviceInventory(data=DEVICE_INVENTORY)
-        assert len(inventory.devices) != 0
-        logging.info("Device inventory is list. Device_filter did not find any matches.")
