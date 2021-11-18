@@ -103,11 +103,8 @@ nav:
     - Versions 2.x: docs/release-notes/v2.x.md
     - Versions 3.x: docs/release-notes/v3.x.md
   - Installation:
+    - Collection Installation: docs/installation/collection-installation.md
     - Requirements: docs/installation/requirements.md
-    - Configure your local environment: docs/installation/setup-environement.md
-    - Installation using git: docs/installation/setup-git.md
-    - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
-    - Docker & Development: docs/installation/setup-docker.md
   - How-To:
     - CV Authentication: docs/how-to/cvp-authentication.md
     - CV Modules v1:
@@ -120,7 +117,7 @@ nav:
       - Manage containers: docs/how-to/v3/cv_container_v3.md
       - Manage devices: docs/how-to/v3/cv_device_v3.md
       - Manage tasks: docs/how-to/v3/cv_task_v3.md
-    - Development tips & tricks: docs/installation/development.md
+    - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md

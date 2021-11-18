@@ -47,16 +47,16 @@ CVP_CONFIGLETS:
     CVP_CONFIGLETS:
       TEAM01-alias: "alias a1 show version"
       TEAM01-another-configlet: "alias a2 show version"
-  tasks:
+  tasks:
     - name: "Gather CVP facts {{inventory_hostname}}"
       arista.cvp.cv_facts:
       register: CVP_FACTS
-    - name: "Configure configlet on {{inventory_hostname}}"
-      arista.cvp.cv_configlet:
-        cvp_facts: "{{CVP_FACTS.ansible_facts}}"
-        configlets: "{{CVP_CONFIGLETS}}"
-        configlet_filter: ["TEAM01"]
-        state: present
+     - name: "Configure configlet on {{inventory_hostname}}"
+       arista.cvp.cv_configlet:
+         cvp_facts: "{{CVP_FACTS.ansible_facts}}"
+         configlets: "{{CVP_CONFIGLETS}}"
+         configlet_filter: ["TEAM01"]
+         state: present
 ```
 
 ## Module outputs
