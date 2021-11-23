@@ -11,7 +11,8 @@ sys.path.append("../../")
 from lib import config
 from cvprac.cvp_client import CvpClient
 from lib.helpers import time_log
-from system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST
+from system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST
+from system.constants_data import CHECK_MODE, CONTAINER_DESTINATION
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME
 from lib.json_data import CONTAINER_IDS
 
@@ -27,8 +28,10 @@ def cvp_login():
     logging.info("Start CV login process at {}".format(time_log()))
     cvp_client.connect(
         nodes=[config.server],
-        username=config.username,
-        password=config.password
+        username="",
+        password="",
+        is_cvaas=True,
+        api_token=config.user_token
     )
     logging.info("End of CV login process at {}".format(time_log()))
     logging.info("Connected to CVP")
@@ -93,6 +96,14 @@ def get_devices_unknown():
     return CVP_DEVICES_UNKNOWN
 
 
+def get_cvp_devices_after_move():
+    """Returns list of devices to move
+
+    Returns:
+      List: cvp devices to move
+    """
+    return CVP_DEVICES_1
+
 def get_devices_to_move():
     """Returns list of devices to move
 
@@ -100,9 +111,9 @@ def get_devices_to_move():
       List: cvp devices to move
     """
     to_move = []
-    for entry in CVP_DEVICES:
+    for entry in CVP_DEVICES_1:
         if FIELD_PARENT_NAME in entry:
-            entry[FIELD_PARENT_NAME] = "ANSIBLE2"
+            entry[FIELD_PARENT_NAME] = CONTAINER_DESTINATION
         to_move.append(entry)
     return to_move
 

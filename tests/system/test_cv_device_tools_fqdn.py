@@ -70,60 +70,67 @@ class TestCvDeviceToolsWithFQDN():
     # Test if device information is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_facts(self, CV_DEVICE):
+    def test_get_device_facts_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_FQDN in CV_DEVICE:
-            assert self.inventory.get_device_facts(
+            self.inventory.search_by = FIELD_FQDN
+            device_facts = self.inventory.get_device_facts(
                 device_lookup=CV_DEVICE[FIELD_FQDN])
+            assert device_facts is not None
+            assert FIELD_FQDN in device_facts
+            assert device_facts[FIELD_FQDN] == CV_DEVICE[FIELD_FQDN]
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_id(self, CV_DEVICE):
+    def test_get_device_id_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_FQDN in CV_DEVICE:
+            self.inventory.search_by = FIELD_FQDN
             assert self.inventory.get_device_id(
                 device_lookup=CV_DEVICE[FIELD_FQDN]) == CV_DEVICE[FIELD_SYSMAC]
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device configlets are OK
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_id(self, CV_DEVICE):
+    def test_get_configlets_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_FQDN in CV_DEVICE:
+            self.inventory.search_by = FIELD_FQDN
             cv_data = self.inventory.get_device_configlets(
                 device_lookup=CV_DEVICE[FIELD_FQDN])
             inventory_data = CV_DEVICE[FIELD_CONFIGLETS]
             comparison = list(set(cv_data).intersection(set(inventory_data)))
             assert len(comparison) == 0
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_container(self, CV_DEVICE):
+    def test_get_device_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_FQDN in CV_DEVICE:
+            self.inventory.search_by = FIELD_FQDN
             assert self.inventory.get_device_container(device_lookup=CV_DEVICE[FIELD_FQDN])[
                 FIELD_PARENT_NAME] == CV_DEVICE[FIELD_PARENT_NAME]
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     ######################################################################
@@ -143,22 +150,23 @@ class TestCvDeviceToolsWithFQDN():
                 CV_DEVICE[FIELD_FQDN]))
         else:
             logging.info(
-                "Device has no serial set in inventory: {}".format(CV_DEVICE))
+                "Device has no fqdn in inventory: {}".format(CV_DEVICE))
 
     # Test if device is in correct container from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_device_in_container(self, CV_DEVICE):
+    def test_device_in_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_FQDN in CV_DEVICE:
+            self.inventory.search_by = FIELD_FQDN
             assert self.inventory.is_in_container(
                 device_lookup=CV_DEVICE[FIELD_FQDN], container_name=CV_DEVICE[FIELD_PARENT_NAME])
             logging.info("Device {} is correctly configured under {}".format(
                 CV_DEVICE[FIELD_FQDN], CV_DEVICE[FIELD_PARENT_NAME]))
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     ######################################################################
@@ -167,12 +175,13 @@ class TestCvDeviceToolsWithFQDN():
 
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_configlet_apply(self, CV_DEVICE):
+    def test_configlet_apply_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         CV_DEVICE_LOCAL = CV_DEVICE
         if FIELD_FQDN in CV_DEVICE:
-            CV_DEVICE_LOCAL[FIELD_CONFIGLETS].append("01DEMO-01")
+            CV_DEVICE_LOCAL[FIELD_CONFIGLETS].append("leaf-2-unit-test")
             self.inventory.check_mode = CHECK_MODE
+            self.inventory.search_by = FIELD_FQDN
             user_inventory = DeviceInventory(data=[CV_DEVICE_LOCAL])
             logging.info("Start CV query at {}".format(time_log()))
             resp = self.inventory.apply_configlets(
@@ -181,16 +190,18 @@ class TestCvDeviceToolsWithFQDN():
             logging.debug("Data response: {}".format(resp[0].results))
             assert len(resp[0].results) > 0
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_device_move(self, CV_DEVICE):
+    def test_device_move_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         if FIELD_FQDN in CV_DEVICE:
+            parent_container = CV_DEVICE[FIELD_PARENT_NAME]
             CV_DEVICE[FIELD_PARENT_NAME] = CONTAINER_DESTINATION
             logging.info("Send update to CV with {}".format(CV_DEVICE))
+            self.inventory.search_by = FIELD_FQDN
             self.inventory.check_mode = CHECK_MODE
             user_inventory = DeviceInventory(data=[CV_DEVICE])
             logging.info("Start CV query at {}".format(time_log()))
@@ -200,6 +211,7 @@ class TestCvDeviceToolsWithFQDN():
             assert len(resp[0].results) > 0
             assert resp[0].results["success"]
             assert resp[0].results["changed"]
+            CV_DEVICE[FIELD_PARENT_NAME] = parent_container
         else:
-            logging.info("Device not based on serial number")
+            logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))

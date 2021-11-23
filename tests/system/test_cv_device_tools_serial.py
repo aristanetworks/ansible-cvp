@@ -69,11 +69,12 @@ class TestCvDeviceToolsWithSerial():
     # Test if device information is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_facts(self, CV_DEVICE):
+    def test_get_device_facts_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_SERIAL in CV_DEVICE:
+            self.inventory.search_by = FIELD_SERIAL
             assert self.inventory.get_device_facts(
                 device_lookup=CV_DEVICE[FIELD_SERIAL])
         else:
@@ -83,11 +84,12 @@ class TestCvDeviceToolsWithSerial():
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_id(self, CV_DEVICE):
+    def test_get_device_id_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_SERIAL in CV_DEVICE:
+            self.inventory.search_by = FIELD_SERIAL
             assert self.inventory.get_device_id(
                 device_lookup=CV_DEVICE[FIELD_SERIAL]) == CV_DEVICE[FIELD_SYSMAC]
         else:
@@ -97,11 +99,12 @@ class TestCvDeviceToolsWithSerial():
     # Test if device configlets are OK
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_id(self, CV_DEVICE):
+    def test_get_configlets_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_SERIAL in CV_DEVICE:
+            self.inventory.search_by = FIELD_SERIAL
             cv_data = self.inventory.get_device_configlets(
                 device_lookup=CV_DEVICE[FIELD_SERIAL])
             inventory_data = CV_DEVICE[FIELD_CONFIGLETS]
@@ -114,11 +117,12 @@ class TestCvDeviceToolsWithSerial():
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_get_device_container(self, CV_DEVICE):
+    def test_get_device_container_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_SERIAL in CV_DEVICE:
+            self.inventory.search_by = FIELD_SERIAL
             assert self.inventory.get_device_container(device_lookup=CV_DEVICE[FIELD_SERIAL])[
                 FIELD_PARENT_NAME] == CV_DEVICE[FIELD_PARENT_NAME]
         else:
@@ -131,7 +135,7 @@ class TestCvDeviceToolsWithSerial():
 
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_device_is_present_by_serial(self, CV_DEVICE):
+    def test_device_is_present__by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         if FIELD_SERIAL in CV_DEVICE:
@@ -147,11 +151,12 @@ class TestCvDeviceToolsWithSerial():
     # Test if device is in correct container from Cloudvision
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_device_in_container(self, CV_DEVICE):
+    def test_device_in_container_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
         if FIELD_SERIAL in CV_DEVICE:
+            self.inventory.search_by = FIELD_SERIAL
             assert self.inventory.is_in_container(
                 device_lookup=CV_DEVICE[FIELD_SERIAL], container_name=CV_DEVICE[FIELD_PARENT_NAME])
             logging.info("Device {} is correctly configured under {}".format(
@@ -166,11 +171,12 @@ class TestCvDeviceToolsWithSerial():
 
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_configlet_apply(self, CV_DEVICE):
+    def test_configlet_apply_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         CV_DEVICE_LOCAL = CV_DEVICE
         if FIELD_SERIAL in CV_DEVICE:
-            CV_DEVICE_LOCAL[FIELD_CONFIGLETS].append("01DEMO-01")
+            self.inventory.search_by = FIELD_SERIAL
+            CV_DEVICE_LOCAL[FIELD_CONFIGLETS].append("cvaas-unit-test-01")
             self.inventory.check_mode = CHECK_MODE
             user_inventory = DeviceInventory(data=[CV_DEVICE_LOCAL])
             logging.info("Start CV query at {}".format(time_log()))
@@ -185,12 +191,14 @@ class TestCvDeviceToolsWithSerial():
 
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
-    def test_device_move(self, CV_DEVICE):
+    def test_device_move_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         if FIELD_SERIAL in CV_DEVICE:
+            parent_container = CV_DEVICE[FIELD_PARENT_NAME]
             CV_DEVICE[FIELD_PARENT_NAME] = CONTAINER_DESTINATION
             logging.info("Send update to CV with {}".format(CV_DEVICE))
             self.inventory.check_mode = CHECK_MODE
+            self.inventory.search_by = FIELD_SERIAL
             user_inventory = DeviceInventory(data=[CV_DEVICE])
             logging.info("Start CV query at {}".format(time_log()))
             resp = self.inventory.move_device(user_inventory=user_inventory)
@@ -199,6 +207,7 @@ class TestCvDeviceToolsWithSerial():
             assert len(resp[0].results) > 0
             assert resp[0].results["success"]
             assert resp[0].results["changed"]
+            CV_DEVICE[FIELD_PARENT_NAME] = parent_container
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
