@@ -596,9 +596,9 @@ class CvDeviceTools(object):
 
         return response
 
-    def __state_absent(self, user_inventory: DeviceInventory):
+    def __state_factory_reset(self, user_inventory: DeviceInventory):
         """
-        __state_absent Execute actions when user configures state=absent
+        __state_factory_reset Execute actions when user configures state=absent
 
         Run following actions:
             - Reset device to ztp mode
@@ -912,9 +912,9 @@ class CvDeviceTools(object):
             MODULE_LOGGER.info('Processing data to create/update devices')
             response = self.__state_present(user_inventory=user_inventory, apply_mode=apply_mode)
 
-        elif state == 'absent':
+        elif state == 'factory_reset':
             MODULE_LOGGER.info('Processing data to reset devices')
-            response = self.__state_absent(user_inventory=user_inventory)
+            response = self.__state_factory_reset(user_inventory=user_inventory)
 
         return response.content
 
