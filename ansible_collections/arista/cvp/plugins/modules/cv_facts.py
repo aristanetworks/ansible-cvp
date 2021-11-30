@@ -415,12 +415,12 @@ def facts_images(module, facts):
     imageBundles = []
     
     MODULE_LOGGER.debug('  -> Collecting images')
-    images = module.client.api.client.api.get_images()['data']
+    images = module.client.api.get_images()['data']
     for image in images:
         facts['images'].append(image)
         
     MODULE_LOGGER.debug('  -> Collecting image bundles')        
-    imageBundles = module.client.api.client.api.get_image_bundles()['data']
+    imageBundles = module.client.api.get_image_bundles()['data']
     for bundle in imageBundles:
         facts['imageBundles'].append(bundle)    
     
