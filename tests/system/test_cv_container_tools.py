@@ -14,6 +14,7 @@ sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from lib.helpers import time_log
+from lib.config import user_token
 from constants_data import  STATIC_CONFIGLET_NAME_DETACH, STATIC_CONFIGLET_NAME_ATTACH
 from lib.utils import cvp_login, get_container_name_id, get_unit_container, get_topology_user_input
 import logging
@@ -45,11 +46,15 @@ def CvContainerTools_Manager(request):
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.api
 class TestCvContainerTools():
+
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
         requests.packages.urllib3.disable_warnings()
         logging.debug(str("Class is connected to CV"))
         assert True
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     def test_get_container_info(self):
         requests.packages.urllib3.disable_warnings()
@@ -62,6 +67,7 @@ class TestCvContainerTools():
         assert container_info["parentContainerId"] is None
         logging.info("Tenant has no parentContainer")
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_CONTAINER", get_container_name_id())
     @pytest.mark.api
     def test_get_container_id(self, CV_CONTAINER):
@@ -72,6 +78,7 @@ class TestCvContainerTools():
         logging.info("container id for {} is: {}".format(
             CV_CONTAINER["name"], contaier_id))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_CONTAINER", get_container_name_id())
     @pytest.mark.api
     def test_container_exists(self, CV_CONTAINER):
@@ -80,6 +87,7 @@ class TestCvContainerTools():
             container_name=CV_CONTAINER["name"])
         logging.info("Container {} exists".format(CV_CONTAINER))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_CONTAINER", get_container_name_id())
     @pytest.mark.api
     def test_is_empty(self, CV_CONTAINER):
@@ -88,6 +96,7 @@ class TestCvContainerTools():
             container_name=CV_CONTAINER["name"]) is False
         logging.info("Container {} is empty".format(CV_CONTAINER))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
     @pytest.mark.create
@@ -108,6 +117,7 @@ class TestCvContainerTools():
             logging.info(
                 "Container PYTEST created under Tenant: {}".format(result.results))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
     @pytest.mark.create
@@ -131,6 +141,7 @@ class TestCvContainerTools():
             logging.info(
                 "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME_ATTACH, UNIT_TEST["name"], result.results))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
     @pytest.mark.delete
@@ -154,6 +165,7 @@ class TestCvContainerTools():
             logging.info(
                 "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME_DETACH, UNIT_TEST["name"], result.results))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
     @pytest.mark.delete
@@ -175,6 +187,7 @@ class TestCvContainerTools():
             logging.info(
                 "Container {} deleted from cloudvision: {}".format(UNIT_TEST["name"], result.results))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
     @pytest.mark.delete
@@ -197,6 +210,8 @@ class TestCvContainerTools():
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 class TestCvContainerToolsTopology():
 
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
         requests.packages.urllib3.disable_warnings()
         logging.debug(str("Class is connected to CV"))
@@ -204,6 +219,7 @@ class TestCvContainerToolsTopology():
 
     @pytest.mark.parametrize("USER_INPUT", get_topology_user_input())
     @pytest.mark.parametrize("APPLY_MODE", ["strict", "loose"])
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     def test_build_topology(self, USER_INPUT, APPLY_MODE):
         requests.packages.urllib3.disable_warnings()
@@ -219,6 +235,7 @@ class TestCvContainerToolsTopology():
             "Topology build result is: {}".format(result.content))
 
     @pytest.mark.parametrize("USER_INPUT", get_topology_user_input())
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     def test_remove_topology(self, USER_INPUT):
         requests.packages.urllib3.disable_warnings()
