@@ -115,11 +115,10 @@ class DeviceElement(object):
         """
         self.__fqdn = fqdn
 
-
     @property
     def hostname(self):
         """
-        hostname Getter for FQDN value
+        hostname Getter for Hostname value
 
         Returns
         -------
@@ -139,7 +138,6 @@ class DeviceElement(object):
             hostname to configure on device
         """
         self.__hostname = hostname
-
 
     @property
     def system_mac(self):
@@ -870,7 +868,7 @@ class CvDeviceTools(object):
                     device_not_present.append(device.system_mac, search_mode=FIELD_SYSMAC)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
             elif search_mode == FIELD_SERIAL:
-                if self.is_device_exist(device.serial_number, search_mode=FIELD_SERIAL) == False:
+                if self.is_device_exist(device.serial_number, search_mode=FIELD_SERIAL) is False:
                     device_not_present.append(device.serial_number)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.serial_number)
         return device_not_present
@@ -1003,6 +1001,8 @@ class CvDeviceTools(object):
             configlets_attached = list()
             if self.__search_by == FIELD_SERIAL:
                 configlets_attached = self.get_device_configlets(device_lookup=device.serial_number)
+            elif self.__search_by == FIELD_HOSTNAME:
+                configlets_attached = self.get_device_configlets(device_lookup=device.hostname)
             else:
                 configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
             configlets_attached_before_changes = [x.name for x in configlets_attached]
@@ -1026,8 +1026,7 @@ class CvDeviceTools(object):
                 device_facts = self.__cv_client.api.get_device_by_name(
                     fqdn=device.fqdn, search_by_hostname=True)
             elif self.__search_by == FIELD_SERIAL:
-                    device_facts = self.__cv_client.api.get_device_by_serial(
-                        device_serial=device.serial_number)
+                device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
             # Attach configlets to device
             if len(configlets_reordered_list) > 0:
                 try:
@@ -1181,7 +1180,7 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {} is currently under {}'.format(
-                    device.fqdn, *current_container_info['name']))
+                    device.fqdn, current_container_info['name']))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
                 if (current_container_info['name'] == 'Undefined'):
                     if self.__check_mode:

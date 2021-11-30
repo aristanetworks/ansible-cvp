@@ -2,6 +2,10 @@
 
 ## Configure Pytest
 
+- Unit test with no CV interaction to test component: tests/unit
+- System test to run module backend component and which requires CV connection: tests/system
+- lib to provides a safe place for fixtures, parametrizes, mook data: tests/lib
+
 ### Test requirements
 
 - Cloudvision server with some devices
