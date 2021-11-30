@@ -14,7 +14,7 @@ sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from lib.helpers import time_log
-from constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, STATIC_CONFIGLET_NAME, TOPOLOGY_STATE
+from constants_data import  STATIC_CONFIGLET_NAME_DETACH, STATIC_CONFIGLET_NAME_ATTACH
 from lib.utils import cvp_login, get_container_name_id, get_unit_container, get_topology_user_input
 import logging
 import pytest
@@ -124,12 +124,12 @@ class TestCvContainerTools():
             logging.info(
                 "Start configlet add process at {}".format(time_log()))
             result = self.inventory.configlets_attach(
-                container=UNIT_TEST["name"], configlets=STATIC_CONFIGLET_NAME)
+                container=UNIT_TEST["name"], configlets=STATIC_CONFIGLET_NAME_ATTACH)
             logging.info(
                 "End of configlet add process at {}".format(time_log()))
             assert result.success is True
             logging.info(
-                "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME, UNIT_TEST["name"], result.results))
+                "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME_ATTACH, UNIT_TEST["name"], result.results))
 
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
@@ -147,12 +147,12 @@ class TestCvContainerTools():
             logging.info(
                 "Start configlet del process at {}".format(time_log()))
             result = self.inventory.configlets_detach(
-                container=UNIT_TEST["name"], configlets=STATIC_CONFIGLET_NAME)
+                container=UNIT_TEST["name"], configlets=STATIC_CONFIGLET_NAME_DETACH)
             logging.info(
                 "End of configlet del process at {}".format(time_log()))
             assert result.success is True
             logging.info(
-                "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME, UNIT_TEST["name"], result.results))
+                "Configlets {} added to {}: {}".format(STATIC_CONFIGLET_NAME_DETACH, UNIT_TEST["name"], result.results))
 
     @pytest.mark.parametrize("UNIT_TEST", get_unit_container())
     @pytest.mark.api
@@ -181,11 +181,11 @@ class TestCvContainerTools():
     def test_get_configlet_from_container(self, UNIT_TEST):
         requests.packages.urllib3.disable_warnings()
         configlets = self.inventory.get_configlets(
-            container_name="DC1_L3LEAFS")
+            container_name="ansible-cvp-tests-1")
         assert len(configlets) > 0
         for configlet in configlets:
             assert configlet["name"] in [
-                "ASE_GLOBAL-ALIASES", "ASE_GLOBAL-ALIASES2"]
+               "cvaas-unit-test-01", "cvaas-unit-test-02", "leaf-1-unit-test"]
             logging.info(
                 "CVP returned {} and it is in the expected list".format(configlet["name"]))
         logging.info("All returned configlets are in expected list")

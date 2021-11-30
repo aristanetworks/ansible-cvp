@@ -5,6 +5,5 @@
 """
 import os
 
-username = os.getenv('ARISTA_AVD_CV_USER', '')
-password = os.getenv('ARISTA_AVD_CV_TOKEN', '')
+user_token = os.getenv('ARISTA_AVD_CV_TOKEN', '')
 server = os.getenv('ARISTA_AVD_CV_SERVER', '')

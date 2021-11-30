@@ -896,6 +896,8 @@ class CvDeviceTools(object):
             configlets_attached = list()
             if self.__search_by == FIELD_SERIAL:
                 configlets_attached = self.get_device_configlets(device_lookup=device.serial_number)
+            elif self.__search_by == FIELD_HOSTNAME:
+                configlets_attached = self.get_device_configlets(device_lookup=device.hostname)
             else:
                 configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
             configlets_attached_before_changes = [x.name for x in configlets_attached]
@@ -1073,7 +1075,7 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {} is currently under {}'.format(
-                    device.fqdn, *current_container_info['name']))
+                    device.fqdn, current_container_info['name']))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
                 if (current_container_info['name'] == 'Undefined'):
                     if self.__check_mode:
