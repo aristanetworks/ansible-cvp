@@ -390,6 +390,43 @@ def facts_tasks(module, facts):
     return facts
 
 
+def facts_images(module, facts):
+    """
+    Collect facts of all images.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where image information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with image content added.
+    """
+
+    facts['images'] = []
+    facts['imageBundles'] = []
+    images = []
+    imageBundles = []
+    
+    MODULE_LOGGER.debug('  -> Collecting images')
+    images = module.client.api.client.api.get_images()['data']
+    for image in images:
+        facts['images'].append(image)
+        
+    MODULE_LOGGER.debug('  -> Collecting image bundles')        
+    imageBundles = module.client.api.client.api.get_image_bundles()['data']
+    for bundle in imageBundles:
+        facts['imageBundles'].append(bundle)    
+    
+    return facts
+
+
 def facts_builder(module):
     """
     Method to call every fact module for either devices/containers/configlets.
