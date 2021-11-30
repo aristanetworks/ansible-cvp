@@ -24,7 +24,7 @@ sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID, FIELD_HOSTNAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME
-from lib.utils import cvp_login
+from lib.config import user_token
 from lib.helpers import time_log
 from lib.utils import cvp_login, get_devices, get_devices_unknown, get_devices_to_move, get_cvp_devices_after_move
 from constants_data import ANSIBLE_CV_SEARCH_MODE, CHECK_MODE

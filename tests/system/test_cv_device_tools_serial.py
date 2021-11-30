@@ -21,9 +21,9 @@ import pytest
 import logging
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_PARENT_NAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONFIGLETS, FIELD_SERIAL
+from lib.config import user_token
 from lib.utils import cvp_login, get_devices
 from constants_data import CHECK_MODE, CONTAINER_DESTINATION
-from lib.utils import cvp_login
 from lib.helpers import time_log
 import requests.packages.urllib3
 

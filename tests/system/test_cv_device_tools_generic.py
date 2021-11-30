@@ -23,7 +23,7 @@ sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME, FIELD_SERIAL
 from lib.config import user_token
-from lib.utils import cvp_login
+from lib.utils import cvp_login, get_devices
 
 
 # Hack to silent SSL warning
