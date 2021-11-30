@@ -57,7 +57,6 @@ class TestCvDeviceToolsWithFQDN():
         assert True
         logging.info("Connected to CVP")
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_search_by_getter_setter(self, CV_DEVICE):

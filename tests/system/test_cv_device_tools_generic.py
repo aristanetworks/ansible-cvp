@@ -55,7 +55,6 @@ class TestCvDeviceToolsGeneric():
         assert True
         logging.info("Connected to CVP")
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     def test_search_by_getter_setter(self):
         self.inventory.search_by = FIELD_SYSMAC

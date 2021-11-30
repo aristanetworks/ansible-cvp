@@ -23,8 +23,10 @@ from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIE
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONFIGLETS, FIELD_SERIAL
 from lib.utils import cvp_login, get_devices
 from constants_data import CHECK_MODE, CONTAINER_DESTINATION
+from lib.utils import cvp_login
 from lib.helpers import time_log
 import requests.packages.urllib3
+
 
 # Hack to silent SSL warning
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -42,6 +44,7 @@ def CvDeviceTools_Manager(request):
     request.cls.cvp = cvp_login()
     request.cls.inventory = CvDeviceTools(cv_connection=request.cls.cvp)
 
+
 # ---------------------------------------------------------------------------- #
 #   PYTEST
 # ---------------------------------------------------------------------------- #
@@ -50,6 +53,8 @@ def CvDeviceTools_Manager(request):
 @pytest.mark.usefixtures("CvDeviceTools_Manager")
 class TestCvDeviceToolsWithSerial():
 
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cvp_connection(self):
         assert True
         logging.info("Connected to CVP")
@@ -67,6 +72,7 @@ class TestCvDeviceToolsWithSerial():
     ######################################################################
 
     # Test if device information is correctly retrieved from Cloudvision
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_facts_by_serial_number(self, CV_DEVICE):
@@ -82,6 +88,7 @@ class TestCvDeviceToolsWithSerial():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_id_by_serial_number(self, CV_DEVICE):
@@ -97,6 +104,7 @@ class TestCvDeviceToolsWithSerial():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device configlets are OK
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_configlets_by_serial_number(self, CV_DEVICE):
@@ -115,6 +123,7 @@ class TestCvDeviceToolsWithSerial():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_container_by_serial_number(self, CV_DEVICE):
@@ -133,6 +142,7 @@ class TestCvDeviceToolsWithSerial():
     ### ----------------------  Test functions  ---------------------- ###
     ######################################################################
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_is_present__by_serial_number(self, CV_DEVICE):
@@ -149,6 +159,7 @@ class TestCvDeviceToolsWithSerial():
                 "Device has no serial set in inventory: {}".format(CV_DEVICE))
 
     # Test if device is in correct container from Cloudvision
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_in_container_by_serial_number(self, CV_DEVICE):
@@ -169,6 +180,7 @@ class TestCvDeviceToolsWithSerial():
     ### -------------------  CV Actions functions  ------------------- ###
     ######################################################################
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_configlet_apply_by_serial_number(self, CV_DEVICE):
@@ -189,6 +201,7 @@ class TestCvDeviceToolsWithSerial():
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.create
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_serial_number(self, CV_DEVICE):
