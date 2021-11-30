@@ -29,7 +29,7 @@ Credentials are loaded from ENV variable from your shell:
 export ARISTA_AVD_CV_TOKEN='your-token-from-your-cv-instance'
 
 # Cloudvision address
-export ARISTA_AVD_CV_SERVER='https://lab.cv.io/'
+export ARISTA_AVD_CV_SERVER='lab.cv.io'
 ```
 
 ## Run tests
