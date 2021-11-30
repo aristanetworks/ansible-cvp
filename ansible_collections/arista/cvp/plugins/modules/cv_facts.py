@@ -472,7 +472,7 @@ def facts_builder(module):
     # Extract imageBundles information
     if 'all' in module.params['facts'] or 'images' in module.params['facts']:
         MODULE_LOGGER.info('** Collecting images facts ...')
-        facts['imageBundles'] = list()
+        facts = facts_images(module=module, facts=facts)
 
     # End of Facts module
     MODULE_LOGGER.info('** All facts done')
@@ -500,7 +500,8 @@ def main():
                             'configlets',
                             'containers',
                             'devices',
-                            'tasks'],
+                            'tasks',
+                            'images'],
                    default='all'))
 
     module = AnsibleModule(argument_spec=argument_spec,
