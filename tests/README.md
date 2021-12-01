@@ -48,7 +48,7 @@ It supports some options:
 make test TESTS=system/
 ```
 
-- `TAG`: Select pytest tag to run. By defaul, run `api` and `generic`
+- `TAG`: Select pytest tag to run. By default, run `api` and `generic`
 
 
 ## Tests Results
