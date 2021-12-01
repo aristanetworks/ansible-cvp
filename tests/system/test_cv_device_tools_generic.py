@@ -49,6 +49,7 @@ def CvDeviceTools_Manager(request):
 @pytest.mark.usefixtures("CvDeviceTools_Manager")
 class TestCvDeviceToolsGeneric():
 
+    @pytest.mark.api
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cvp_connection(self):
@@ -66,8 +67,8 @@ class TestCvDeviceToolsGeneric():
         logging.info(
             "Setter & Getter for search_by using {} is valid".format(FIELD_FQDN))
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_check_mode_getter_setter(self):
         self.inventory.check_mode = True
         assert self.inventory.check_mode is True

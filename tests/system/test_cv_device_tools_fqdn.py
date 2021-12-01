@@ -51,6 +51,7 @@ def CvDeviceTools_Manager(request):
 @pytest.mark.usefixtures("CvDeviceTools_Manager")
 class TestCvDeviceToolsWithFQDN():
 
+    @pytest.mark.api
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cvp_connection(self):
@@ -70,8 +71,8 @@ class TestCvDeviceToolsWithFQDN():
     ######################################################################
 
     # Test if device information is correctly retrieved from Cloudvision
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_facts_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -89,8 +90,8 @@ class TestCvDeviceToolsWithFQDN():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_id_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -105,8 +106,8 @@ class TestCvDeviceToolsWithFQDN():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device configlets are OK
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_configlets_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -124,8 +125,8 @@ class TestCvDeviceToolsWithFQDN():
         logging.info("End of CV query at {}".format(time_log()))
 
     # Test if device ID is correctly retrieved from Cloudvision
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -143,8 +144,8 @@ class TestCvDeviceToolsWithFQDN():
     ### ----------------------  Test functions  ---------------------- ###
     ######################################################################
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_is_present_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -160,8 +161,8 @@ class TestCvDeviceToolsWithFQDN():
                 "Device has no fqdn in inventory: {}".format(CV_DEVICE))
 
     # Test if device is in correct container from Cloudvision
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_in_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -181,8 +182,9 @@ class TestCvDeviceToolsWithFQDN():
     ### -------------------  CV Actions functions  ------------------- ###
     ######################################################################
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_configlet_apply_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -202,8 +204,9 @@ class TestCvDeviceToolsWithFQDN():
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
