@@ -1,6 +1,6 @@
 # Ansible CVP Collection testing
 
-## Availabale tests
+## Available tests
 
 - __Unit__: test with no CV interaction to test component: `tests/unit`
 - __System__: test to run module backend component and which requires CV connection: `tests/system`
@@ -10,11 +10,11 @@
 
 - Cloudvision server with some devices
 - Pytest install as per [collection dev requirements](../ansible_collections/arista/cvp/requirements-dev.txt):
-  - pytest
-  - pytest-cov
-  - pytest-html
-  - pytest-metadata
-  - pytest-dependency
+  - `pytest`
+  - `pytest-cov`
+  - `pytest-html`
+  - `pytest-metadata`
+  - `pytest-dependency`
 
 ```bash
 pip install -r ../ansible_collections/arista/cvp/requirements-dev.txt
@@ -53,7 +53,7 @@ make test TESTS=system/
 
 ## Tests Results
 
-Results are print to your screen and also saved in reports:
+Results are printed to your screen and also saved in reports:
 
 - `report.html`: Pytest result with logging
 - `htmlcov/index.html`: Coverage report
