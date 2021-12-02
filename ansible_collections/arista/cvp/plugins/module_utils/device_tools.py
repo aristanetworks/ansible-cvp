@@ -1074,7 +1074,7 @@ class CvDeviceTools(object):
                 # Move devices when they are not in undefined container
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
-                MODULE_LOGGER.debug('Device {} is currently under {}'.format(
+                MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
                     device.fqdn, current_container_info['name']))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
                 if (current_container_info['name'] == 'Undefined'):
