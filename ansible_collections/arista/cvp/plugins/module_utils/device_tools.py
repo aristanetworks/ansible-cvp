@@ -1026,16 +1026,16 @@ class CvDeviceTools(object):
                 elif self.__search_by == FIELD_SERIAL:
                     device_facts = self.__cv_client.api.get_device_by_serial(
                         device_serial=device.serial_number)
-            
+
                 # List of expected configlet applied to the device, taking into account the configlets inherited from parent containers
                 expected_device_configlet_list = self.__get_configlet_list_inherited_from_container(device) + device.configlets
-                
+
                 configlets_to_remove = list()
-                
+
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
                 MODULE_LOGGER.debug('Current configlet attached {}'.format(configlets_attached))
-                
+
                 # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
                     if configlet.name not in expected_device_configlet_list:
