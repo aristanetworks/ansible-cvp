@@ -316,3 +316,15 @@ class TestCvDeviceTools():
             else:
                 pytest.skip("Skipped as device {} has no {} field".format(
                     device.fqdn, FIELD_SYSMAC))
+                
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.parametrize("CV_DEVICE", get_devices())
+    def test__get_configlet_list_inherited_from_container(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        container_configlet = ['container-configlet-1']
+        user_inventory = DeviceInventory(data=[CV_DEVICE])
+        
+        for device in user_inventory.devices:
+            logging.info("Testing __get_configlet_list_inherited_from_container for device {}".format(device.fqdn))
+            assert(self.inventory._CvDeviceTools__get_configlet_list_inherited_from_container(device) == container_configlet)
