@@ -324,7 +324,7 @@ class TestCvDeviceTools():
         requests.packages.urllib3.disable_warnings()
         container_configlet = ['container-configlet-1']
         user_inventory = DeviceInventory(data=[CV_DEVICE])
-        
+
         for device in user_inventory.devices:
             logging.info("Testing __get_configlet_list_inherited_from_container for device {}".format(device.fqdn))
             assert(self.inventory._CvDeviceTools__get_configlet_list_inherited_from_container(device) == container_configlet)
