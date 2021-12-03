@@ -473,6 +473,52 @@ class CvDeviceTools(object):
         # Joining the 2 new list (configlets already present + new configlet in right order)
         return configlets_attached_get_configlet_info + new_configlets_list
 
+
+
+    def __get_configlet_list_inherited_from_container(self, device: DeviceElement):
+        """
+        __get_configlet_list_inherited_from_container Provides way to get the full list of configlets applied to the parent containers of the device.
+
+        Will be useful in order to avoid removing the inherited configlets while detaching configlets (for example, when using strict mode).
+
+        Parameters
+        ----------
+        device : DeviceElement
+            device on which we would like to return the full list of configlets
+        Returns
+        -------
+        list
+            List of configlet
+        """
+        MODULE_LOGGER.debug("Getting list of inherited configlet for device {}".format(device.hostname))
+        
+        # List of inherited configlet from all the parent containers
+        inherited_configlet_list = list()
+        
+        current_container = self.get_container_info(device.container)
+        # While loop in order to retrieve the lists of configlets applied to all the parents container
+        # Loop continue until the current container is the root container
+        # TODO: The following loop will be triggered for every device. Maybe it makes sense to create some sort of cache in order to avoid 
+        # doing unecessary API call to CVP.
+        while current_container['root'] is not True:
+            MODULE_LOGGER.debug("current_container: {}".format(current_container))
+            # Get list of configlet for current container and add them to the list
+            current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(current_container['key'])
+            inherited_configlet_list += [x['name'] for x in current_container_configlets_info['configletList']]
+            
+            # Get parent container name
+            parent_container_name = self.__cv_client.api.get_container_by_id(current_container['key'])['parentName']
+            
+            current_container = self.get_container_info(parent_container_name)
+            
+    
+        # Adding any potential configlet applied to the root container
+        current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(current_container['key'])
+        MODULE_LOGGER.debug("Root container info: {}".format(current_container_configlets_info))
+        inherited_configlet_list += [x['name'] for x in current_container_configlets_info['configletList']]
+
+        MODULE_LOGGER.debug("Container inherited configlet list is: {}".format(inherited_configlet_list))        
+        return inherited_configlet_list
     # ------------------------------------------ #
     # Get CV data functions
     # ------------------------------------------ #
@@ -968,17 +1014,25 @@ class CvDeviceTools(object):
                 elif self.__search_by == FIELD_SERIAL:
                     device_facts = self.__cv_client.api.get_device_by_serial(
                         device_serial=device.serial_number)
+            
+                # List of expected configlet applied to the device, taking into account the configlets inherited from parent containers
+                expected_device_configlet_list = self.__get_configlet_list_inherited_from_container(device) + device.configlets
+                
                 configlets_to_remove = list()
+                
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
-                # Pour chaque configlet not in the list, add to list of configlets to remove
+                MODULE_LOGGER.debug('Current configlet attached {}'.format(configlets_attached))
+                
+                # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
-                    if configlet.name not in device.configlets:
-                        MODULE_LOGGER.info('Configlet %s is added to detach list', str(configlet.name))
+                    if configlet.name not in expected_device_configlet_list:
+                        MODULE_LOGGER.info('Configlet [%s] is added to detach list', str(configlet.name))
                         result_data.name = result_data.name + ' - ' + configlet.name
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
                 if len(configlets_to_remove) > 0:
+                    MODULE_LOGGER.debug('List of configlet to remove for device {} is {}'.format(device.fqdn, [x['name'] for x in configlets_to_remove]))
                     try:
                         resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
                                                                                   dev=device_facts,
