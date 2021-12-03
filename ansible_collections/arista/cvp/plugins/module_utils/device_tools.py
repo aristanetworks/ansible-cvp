@@ -518,7 +518,6 @@ class CvDeviceTools(object):
                 MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(current_container['name']))
                 current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(current_container['key'])
                 configletList = [x['name'] for x in current_container_configlets_info['configletList']]
-                MODULE_LOGGER.debug("Configlet list to add: {}".format(configletList))
                 inherited_configlet_list += configletList
                 
                 # Get parent container name
@@ -527,8 +526,6 @@ class CvDeviceTools(object):
 
                 # Adding current container to cache
                 cache_new_entry = {"name_parent": parent_container_name, "configlets": configletList}
-                MODULE_LOGGER.debug("cache_new_entry: {}".format(cache_new_entry))
-                MODULE_LOGGER.debug("name_container cache: {}".format(name_container))
                 self.__containers_configlet_list_cache[name_container] = cache_new_entry
                 MODULE_LOGGER.debug("Cache updated: {}".format(self.__containers_configlet_list_cache))
 
