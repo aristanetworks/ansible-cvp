@@ -20,13 +20,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""
-    helpers.py - Declares the utility functions
-"""
 
+import logging
 from datetime import datetime
+from dataclasses import dataclass
 
-# Generic helpers
+
+"""
+    helpers.py - Declares the utility functions and classes
+"""
 
 
 def time_log():
@@ -37,3 +39,11 @@ def time_log():
     """
     now = datetime.now()
     return now.strftime("%H:%M:%S.%f")
+
+@dataclass
+class AnsibleModuleMock():
+    check_mode: bool = False
+    description: str = 'Fake Ansible Module'
+
+    def fail_json(self, msg: str):
+        logging.error(msg)
