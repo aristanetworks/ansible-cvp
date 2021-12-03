@@ -328,3 +328,4 @@ class TestCvDeviceTools():
         for device in user_inventory.devices:
             logging.info("Testing __get_configlet_list_inherited_from_container for device {}".format(device.fqdn))
             assert(self.inventory._CvDeviceTools__get_configlet_list_inherited_from_container(device) == container_configlet)
+            
