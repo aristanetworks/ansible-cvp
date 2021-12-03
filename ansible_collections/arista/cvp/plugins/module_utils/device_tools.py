@@ -493,13 +493,13 @@ class CvDeviceTools(object):
             List of configlet
         """
         MODULE_LOGGER.debug("Getting list of inherited configlet for device {}".format(device.hostname))
-        
+
         # List of inherited configlet from all the parent containers
         inherited_configlet_list = list()
-        
+
         parent_container_name = device.container
-        
-        # While loop in order to retrieve the lists of configlets applied to all the parents container
+
+        # While loop to retrieve the lists of configlets applied to all the parents container
         # Loop continue until the parent_container is empty
         # Cache variable is self.__containers_configlet_list_cache - format {<container_name>: {"name_parent": "<>", "configlets": ['', '']}
         while parent_container_name != '':
@@ -511,7 +511,7 @@ class CvDeviceTools(object):
                 parent_container_name = self.__containers_configlet_list_cache[name_container]['name_parent']
 
             # If the container is not in cache
-            else:             
+            else:
                 # Get list of configlet for current container and add them to the list
                 MODULE_LOGGER.debug("[API call] to get info for new container: {}".format(name_container))
                 current_container = self.get_container_info(name_container)
@@ -519,7 +519,7 @@ class CvDeviceTools(object):
                 current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(current_container['key'])
                 configletList = [x['name'] for x in current_container_configlets_info['configletList']]
                 inherited_configlet_list += configletList
-                
+
                 # Get parent container name
                 MODULE_LOGGER.debug("[API call] to get parent container name {}".format(current_container['name']))
                 parent_container_name = self.__cv_client.api.get_container_by_id(current_container['key'])['parentName']
