@@ -42,8 +42,13 @@ def time_log():
 
 @dataclass
 class AnsibleModuleMock():
+    """
+    AnsibleModuleMock Dataclass to mock AnsibleModule element
+
+    Emulate AnsibleModule in Pytest execution
+    """
     check_mode: bool = False
     description: str = 'Fake Ansible Module'
 
     def fail_json(self, msg: str):
-        logging.error(msg)
+        logging.error("AnsibleModule.fail_json: {}".format(msg))

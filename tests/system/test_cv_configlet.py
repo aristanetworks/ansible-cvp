@@ -46,6 +46,7 @@ def CvContainerTools_Manager(request):
 @pytest.mark.api
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+# Parametrize to build a ConfigletInput from list of configlet in SYSTEM_CONFIGLETS_TESTS. Only those set with is_present_expected to False
 @pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=['system-configlet-tests01', 'system-configlet-tests02', 'system-configlet-tests03', 'system-configlet-tests04'])
 @pytest.mark.parametrize("check_mode", [True, False], ids=['check_mode_on', 'check_mode_off'])
 class Test_CvConfiglet_Unit():
@@ -171,8 +172,7 @@ class Test_CvConfiglet_Manager():
         api_result = self.cv_configlet.apply(
             configlet_list=inventory.configlets,
             present=True,
-            note='Updated by pytest - {}'.format(now.strftime("%m/%d/%Y, %H:%M:%S"))
-            )
+            note='Updated by pytest - {}'.format(time_log()))
         logging.info('API call response is: {}'.format(api_result.content))
         # TODO: Should have assert test and not just test API execution
         assert True
@@ -187,8 +187,7 @@ class Test_CvConfiglet_Manager():
         api_result = self.cv_configlet.apply(
             configlet_list=inventory.configlets,
             present=False,
-            note='Updated by pytest - {}'.format(now.strftime("%m/%d/%Y, %H:%M:%S"))
-            )
+            note='Updated by pytest - {}'.format(time_log()))
         logging.info('API call response is: {}'.format(api_result.content))
         # TODO: Should have assert test and not just test API execution
         assert True

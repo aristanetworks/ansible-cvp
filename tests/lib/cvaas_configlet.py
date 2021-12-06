@@ -21,20 +21,27 @@
 # limitations under the License.
 #
 
-from .cvaas_content import CONFIGLET_CONTENT
+from .static_content import CONFIGLET_CONTENT
 
 """
 cvaas_configlet - Test data for system/test_cv_configlet.py
 """
 
+"""
+Configlet Test structure:
+    - `name`: Name of the configlet to use for CV
+    - `content`: Content of the configlet captured by ansible and pushed to CV (can deviate from CV)
+    - `content_expected`: Content that should be on CV. Used for diff tests
+    - `is_present_expected`: Set if configlet should be present on CV or not. Used for system tests.
 
-# List of specific tests:
-#   - is_present_expected is True:
-#       - test_configlet_data_from_cv
-#       - test_update_configlet
-#   - is_present_expected is False:
-#       - test_create_configlet
-#       - test_delete_configlet
+List of specific tests:
+    - `is_present_expected` is True:
+        - test_configlet_data_from_cv
+        - test_update_configlet
+    - `is_present_expected` is False:
+        - test_create_configlet
+        - test_delete_configlet
+"""
 
 SYSTEM_CONFIGLETS_TESTS = [
     {
