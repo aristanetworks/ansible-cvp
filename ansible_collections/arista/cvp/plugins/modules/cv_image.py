@@ -109,6 +109,27 @@ def is_image_present(imageName, module):
     return False
 
 
+def module_action(module):
+    changed = False
+    data = dict()
+    warnings = list()
+    cvp = module.client.api
+    
+    
+    if module.params['mode'] == 'images':
+        
+        if module.params['action'] == "get":
+            data = facts_images(module)
+            return changed, data, warnings
+            
+        pass
+    
+    else:
+        pass
+    
+    
+    
+    return changed, data, warnings
 
 
 def main():
@@ -116,18 +137,11 @@ def main():
     main entry point for module execution.
     """
     argument_spec = dict(
-        configlets=dict(type='dict', required=True),
-        configlets_notes=dict(type='str', default='Managed by Ansible', required=False),
         cvp_facts=dict(type='dict', required=True),
-        configlet_filter=dict(type='list', default='none', elements='str'),
-        filter_mode=dict(type='str',
-                         choices=['loose', 'strict'],
-                         default='loose',
-                         required=False),
-        state=dict(type='str',
-                   choices=['present', 'absent'],
-                   default='present',
-                   required=False))
+        image_name=dict(type='str'),
+        mode=dict(default='images', type='str', choices=['images','bundles']),
+        action=dict(default='get', type='str', choices=['get','add','remove']),
+        filter=dict(type='str') )
 
     module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
@@ -151,16 +165,14 @@ def main():
         module.fail_json(
             msg="jsonschema is required. Please install using pip install jsonschema")
 
-    if not schema.validate_cv_inputs(user_json=module.params['configlets'], schema=schema.SCHEMA_CV_CONFIGLET):
-        MODULE_LOGGER.error("Invalid configlet input : %s", str(module.params['configlets']))
-        module.fail_json(
-            msg='Configlet input data are not compliant with module.')
 
-    result = dict(changed=False, data={})
+
+    result = dict( changed=False )
     # messages = dict(issues=False)
     # Connect to CVP instance
     if not module.check_mode:
         module.client = tools_cv.cv_connect(module)
+        result['changed'], result['data'], warnings = module_action(module)
 
     # Pass module params to configlet_action to act on configlet
     #result = action_manager(module)
