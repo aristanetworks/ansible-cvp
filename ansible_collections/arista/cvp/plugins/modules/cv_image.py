@@ -169,13 +169,15 @@ def module_action(module):
                         MODULE_LOGGER.info(response)
                         changed = True
                     except Exception as e:
-                        warnings.append(e)
+                        module.fail_json( msg="%s" % str(e))
 
                 else:
-                    warnings.append("Same image name already exists on the system")
+                    MODULE_LOGGER.error("Same image name already exists on the system")
+                    module.fail_json(msg="Same image name already exists on the system")
     
             else:
-                warnings.append("Error, image file not set or does not exist")
+                MODULE_LOGGER.error("File does not exist")
+                module.fail_json(msg="Specified file ({}) does not exist".format(*module.params['image']) )
 
     # So we are dealing with bundles rather than images
     else:
