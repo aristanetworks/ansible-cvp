@@ -19,12 +19,47 @@
 #
 
 from __future__ import absolute_import, division, print_function
-
+import os
 __metaclass__ = type
 
 
 
+EXAMPLES = r"""
+---
+---
+- name: CVP Image Tests
+  hosts: cv_server
+  gather_facts: no
+  vars:
 
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      arista.cvp.cv_facts:
+        facts:
+          images
+      register: cv_facts
+
+
+    - name: "Print out facts from {{inventory_hostname}}"
+      debug:
+        msg: "{{cv_facts}}"
+
+
+
+    - name: "Get CVP images {{inventory_hostname}}"
+      arista.cvp.cv_image:
+        mode: images
+        cvp_facts: '{{cv_facts.ansible_facts}}'
+
+      register: image_facts
+
+    - name: "Print out images from {{inventory_hostname}}"
+      debug:
+        msg: "{{image_facts}}"
+
+
+
+"""
 
 
 
@@ -86,9 +121,9 @@ def facts_bundles(module):
 
 
 
-def is_image_present(imageName, module):
+def is_image_present(module):
     """
-    Extract Facts of all devices from cv_facts.
+    Checks if a named image is present.
 
     Parameters
     ----------
@@ -97,35 +132,56 @@ def is_image_present(imageName, module):
 
     Returns
     -------
-    dict:
-        Facts of all devices
+    Bool:
+        True if present, False if not
     """
     if "cvp_facts" in module.params:
         if "images" in module.params["cvp_facts"]:
             for entry in module.params["cvp_facts"]["images"]:
-                if entry["imageFileName"] == imageName:
+                if entry["imageFileName"] == os.path.basename(module.params['image']):
                     return True
             
     return False
+
+
+
 
 
 def module_action(module):
     changed = False
     data = dict()
     warnings = list()
-    cvp = module.client.api
+
     
     
     if module.params['mode'] == 'images':
-        
         if module.params['action'] == "get":
             data = facts_images(module)
             return changed, data, warnings
-            
-        pass
+
+        
+        if module.params['action'] == "add":
+            if module.params['image'] and os.path.exists(module.params['image']):
+                if is_image_present(module) is False:
+                    MODULE_LOGGER.debug("Image not present. Trying to add.")
+                    try:
+                        response = module.client.api.add_image(module.params['image'])
+                        MODULE_LOGGER.info(response)
+                        changed = True
+                    except Exception as e:
+                        warnings.append(e)
+
+                else:
+                    warnings.append("Same image name already exists on the system")
     
+            else:
+                warnings.append("Error, image file not set or does not exist")
+
+    # So we are dealing with bundles rather than images
     else:
-        pass
+        if module.params['action'] == "get":
+            data = facts_bundles(module)
+            return changed, data, warnings
     
     
     
@@ -138,7 +194,7 @@ def main():
     """
     argument_spec = dict(
         cvp_facts=dict(type='dict', required=True),
-        image_name=dict(type='str'),
+        image=dict(type='str'),
         mode=dict(default='images', type='str', choices=['images','bundles']),
         action=dict(default='get', type='str', choices=['get','add','remove']),
         filter=dict(type='str') )
