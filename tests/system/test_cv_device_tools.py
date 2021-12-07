@@ -322,6 +322,7 @@ class TestCvDeviceTools():
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test__get_configlet_list_inherited_from_container(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
+        # TODO: The container configlet should be defined at the constats_data.py level
         container_configlet = ['container-configlet-1']
         user_inventory = DeviceInventory(data=[CV_DEVICE])
 

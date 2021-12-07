@@ -329,7 +329,7 @@ class CvDeviceTools(object):
         self.__search_by = search_by
         self.__configlets_and_mappers_cache = None
         self.__check_mode = check_mode
-        # Cache for list of configlets applied to each container - format {<container_name>: {"name_parent": "<>", "configlets": ['', '']}
+        # Cache for list of configlets applied to each container - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
         self.__containers_configlet_list_cache = dict()
 
     # ------------------------------------------ #
@@ -475,7 +475,24 @@ class CvDeviceTools(object):
         # Joining the 2 new list (configlets already present + new configlet in right order)
         return configlets_attached_get_configlet_info + new_configlets_list
 
+    def __build_topology_cache(self, container):
+        """
+        Recursive method. Takes a container in the format of __cv_client.api.filter_topology() cvprac call and
+        store the information in the self.__containers_configlet_list_cache variable with the correct format.
+        Format is:  {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        The function is then called again with the child_containers (if any).
 
+        Parameters
+        ----------
+        container : dict
+            container information. dict_keys(['key', 'name', 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
+            'deviceStatus', 'childTaskCount', 'childContainerList', 'childNetElementList', 'hierarchyNetElementCount', 'tempAction', 'tempEvent'])
+        """
+        MODULE_LOGGER.debug("Adding to cache container: {}".format(container['name']))
+        cache_new_entry = {"name":container['name'], "parentContainerId": container['parentContainerId']}
+        self.__containers_configlet_list_cache[container['key']] = cache_new_entry
+        for child_container in container['childContainerList']:
+            self.__build_topology_cache(child_container)
 
     def __get_configlet_list_inherited_from_container(self, device: DeviceElement):
         """
@@ -492,45 +509,52 @@ class CvDeviceTools(object):
         list
             List of configlet
         """
-        MODULE_LOGGER.debug("Getting list of inherited configlet for device {}".format(device.hostname))
-
-        # List of inherited configlet from all the parent containers
         inherited_configlet_list = list()
+        # If the cache is not empty, we skip the API call
+        if not self.__containers_configlet_list_cache:
+            MODULE_LOGGER.debug("[API call] get info about all the containers: self.__cv_client.api.filter_topology()")
+            topology = self.__cv_client.api.filter_topology()
+            self.__build_topology_cache(topology['topology'])
 
         parent_container_name = device.container
+        # Get parent container id of the device by comparing all containers name in the topology
+        parent_container_id = ''
+        for container_id in self.__containers_configlet_list_cache:
+            if self.__containers_configlet_list_cache[container_id]['name'] == parent_container_name:
+                parent_container_id = container_id
+                break
+        MODULE_LOGGER.debug("parent_container_name is:  {}".format(parent_container_name))
+        MODULE_LOGGER.debug("parent_container_id is:  {}".format(parent_container_id))
 
-        # While loop to retrieve the lists of configlets applied to all the parents container
-        # Loop continue until the parent_container is empty
-        # Cache variable is self.__containers_configlet_list_cache - format {<container_name>: {"name_parent": "<>", "configlets": ['', '']}
-        while parent_container_name != '':
-            name_container = parent_container_name
+        # While loop to retrieve the lists of configlets applied to all the parents containers
+        # Cache variable is self.__containers_configlet_list_cache - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        while parent_container_id is not None:
+            container_id = parent_container_id
             # If the container is in cache
-            if (name_container in self.__containers_configlet_list_cache.keys()):
-                MODULE_LOGGER.debug("Using cache for following container: {}".format(name_container))
-                inherited_configlet_list += self.__containers_configlet_list_cache[name_container]['configlets']
-                parent_container_name = self.__containers_configlet_list_cache[name_container]['name_parent']
+            if (container_id in self.__containers_configlet_list_cache.keys() and 'configlets' in self.__containers_configlet_list_cache[container_id].keys()):
+                MODULE_LOGGER.debug("Using cache for following container: {}".format(container_id))
+                inherited_configlet_list += self.__containers_configlet_list_cache[container_id]['configlets']
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
 
             # If the container is not in cache
             else:
-                # Get list of configlet for current container and add them to the list
-                MODULE_LOGGER.debug("[API call] to get info for new container: {}".format(name_container))
-                current_container = self.get_container_info(name_container)
-                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(current_container['name']))
-                current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(current_container['key'])
+                container_name = self.__containers_configlet_list_cache[container_id]['name']
+                # Get list of configlet for current container
+                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(container_name))
+                current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(container_id)
                 configletList = [x['name'] for x in current_container_configlets_info['configletList']]
                 inherited_configlet_list += configletList
 
-                # Get parent container name
-                MODULE_LOGGER.debug("[API call] to get parent container name {}".format(current_container['name']))
-                parent_container_name = self.__cv_client.api.get_container_by_id(current_container['key'])['parentName']
+                # Get parent container ID
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
 
                 # Adding current container to cache
-                cache_new_entry = {"name_parent": parent_container_name, "configlets": configletList}
-                self.__containers_configlet_list_cache[name_container] = cache_new_entry
-                MODULE_LOGGER.debug("Cache updated: {}".format(self.__containers_configlet_list_cache))
+                self.__containers_configlet_list_cache[container_id]['configlets'] = configletList
+                MODULE_LOGGER.debug("Cache updated: with configlets {} from container {}".format(configletList, container_name))
 
         MODULE_LOGGER.debug("Container inherited configlet list is: {}".format(inherited_configlet_list))
         return inherited_configlet_list
+
     # ------------------------------------------ #
     # Get CV data functions
     # ------------------------------------------ #
@@ -1034,7 +1058,7 @@ class CvDeviceTools(object):
 
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
-                MODULE_LOGGER.debug('Current configlet attached {}'.format(configlets_attached))
+                MODULE_LOGGER.debug('Current configlet attached {}'.format([x.name for x in configlets_attached]))
 
                 # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
