@@ -177,7 +177,7 @@ def module_action(module):
     
             else:
                 MODULE_LOGGER.error("File does not exist")
-                module.fail_json(msg="Specified file ({}) does not exist".format(*module.params['image']) )
+                module.fail_json(msg="Specified file ({}) does not exist".format(module.params['image']) )
 
     # So we are dealing with bundles rather than images
     else:
