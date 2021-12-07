@@ -168,6 +168,7 @@ def module_action(module):
                         response = module.client.api.add_image(module.params['image'])
                         MODULE_LOGGER.info(response)
                         changed = True
+                        data = response
                     except Exception as e:
                         module.fail_json( msg="%s" % str(e))
 
