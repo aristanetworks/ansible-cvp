@@ -61,15 +61,15 @@ def generate_inventory_data(type: str, mode: str = "valid"):
 # -----------------------------
 #   CvConfigletTools specific
 # -----------------------------
-def generate_CvConfigletTools_content(configlet_inputs: list, is_present_state: bool = False ):
+def generate_CvConfigletTools_content(configlet_inputs: list, is_present_state: bool = False):
     configletInventory = []
-    if is_present_state is not None:
+    if not is_present_state:
         temp = {
             configlet_in['name']: configlet_in['config'] for configlet_in in configlet_inputs if configlet_in['is_present_expected'] is False
         }
     else:
         temp = {
-            configlet_in['name']: configlet_in['config'] for configlet_in in configlet_inputs
+            configlet_in['name']: configlet_in['config'] for configlet_in in configlet_inputs if configlet_in['is_present_expected']
         }
     configletInventory.append(temp)
     return configletInventory

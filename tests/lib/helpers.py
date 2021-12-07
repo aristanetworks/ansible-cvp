@@ -21,6 +21,7 @@
 # limitations under the License.
 #
 
+import sys
 import logging
 from datetime import datetime
 from dataclasses import dataclass
@@ -38,7 +39,38 @@ def time_log():
         String: Current date & time in specified format
     """
     now = datetime.now()
-    return now.strftime("%H:%M:%S.%f")
+    return now.strftime("%m/%d/%Y, %H:%M:%S")
+
+
+def setup_custom_logger(name):
+    """
+    setup_custom_logger Format logging to add timestamp for log generated in Pytest
+
+    Format logging to add timestamp for log generated in Pytest.
+    All logging outside of pytest is not updated.
+
+    Parameters
+    ----------
+    name : str
+        Name of the logging APP
+
+    Returns
+    -------
+    logging
+        Logging instance
+    """
+    formatter = logging.Formatter(
+        fmt='%(asctime)s %(levelname)-8s %(message)s',
+        )
+    handler = logging.FileHandler('log.txt', mode='w')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.addHandler(screen_handler)
+    return logger
 
 @dataclass
 class AnsibleModuleMock():

@@ -6,11 +6,6 @@
 # flake8: noqa: W503
 # flake8: noqa: W1202
 # flake8: noqa: R0801
-
-"""
-parametrize.py - Retrieves the mock data from the json_data file
-"""
-
 from __future__ import (absolute_import, division, print_function)
 import sys
 sys.path.append("./")
@@ -19,9 +14,12 @@ sys.path.append("../../")
 from cvprac import cvp_client, cvp_client_errors
 import logging
 from typing import Optional, List, Dict
+from .helpers import time_log
 
 
-
+"""
+provisioner.py - Provides tool for provisioning CV before running Pytest
+"""
 
 
 class CloudvisionProvisioner():
@@ -41,7 +39,7 @@ class CloudvisionProvisioner():
         except cvp_client_errors.CvpLoginError:
             logging.error('Can\'t connect to CV instance')
 
-    def provision_configlets(self, configlets: List):
+    def configlets_provision(self, configlets: List):
         for configlet in configlets:
             if configlet['is_present_expected'] is False:
                 try:
@@ -52,11 +50,32 @@ class CloudvisionProvisioner():
             elif configlet['is_present_expected']:
                 try:
                     res = self.cv.api.add_configlet(name=configlet['name'], config=configlet['config'])
+                    configlet_id = self.cv.api.get_configlet_by_name(name=configlet['name'])['key']
+                    self.cv.api.add_note_to_configlet(key=configlet_id, note='Provisioned by Pytest {}'.format(time_log()))
                 except Exception as error_message:
                     logging.critical(error_message)
                     try:
                         logging.info('Fallback to update process for configlet {}'.format(configlet['name']))
                         configlet_id = self.cv.api.get_configlet_by_name(name=configlet['name'])['key']
                         res = self.cv.api.update_configlet(name=configlet['name'], key=configlet_id, config=configlet['config_expected'])
+                        self.cv.api.add_note_to_configlet(key=configlet_id, note='Provisioned by Pytest {}'.format(time_log()))
                     except Exception as error_message:
                         logging.critical(error_message)
+
+    def configlets_push(self, configlets: List):
+        logging.debug(' Received set of configlets to publish: {}'.format(configlets))
+        for configlet_title, configlet_data in configlets.items():
+            try:
+                res = self.cv.api.add_configlet(
+                    name=configlet_title,
+                    config=configlet_data
+                )
+                configlet_id = self.cv.api.get_configlet_by_name(
+                    name=configlet_title
+                )['key']
+                self.cv.api.add_note_to_configlet(
+                    key=configlet_id,
+                    note='Provisioned by Pytest {}'.format(time_log())
+                )
+            except Exception as error_message:
+                logging.critical(error_message)
