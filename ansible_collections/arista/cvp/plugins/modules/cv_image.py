@@ -229,6 +229,9 @@ def module_action(module):
     
             else:
                 module.fail_json(msg="Specified file ({}) does not exist".format(module.params['image']) )
+                
+        else:
+            module.fail_json(msg="Deletion of images through API is not currently supported")
 
     # So we are dealing with bundles rather than images
     else:
@@ -272,13 +275,20 @@ def module_action(module):
                 # create bundle
                 
                 return changed, data, warnings
-                
             
+        else:
+            warnings.append('Note that deleting the image bundle does not delete the images')
+            if does_bundle_exist(module):
+                key = get_bundle_key(module)
+                try:
+                    response = module.client.api.delete_image_bundle(key,module.params['bundle'] )
+                    changed = True
+                    data = response['data']
+                except Exception as e:
+                        module.fail_json( msg="%s" % str(e) )
+            else:
+                module.fail_json(msg="Unable to delete bundle - not found")
             
-            
-    
-    
-    
     return changed, data, warnings
 
 
