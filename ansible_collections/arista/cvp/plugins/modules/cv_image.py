@@ -144,7 +144,60 @@ def is_image_present(module):
     return False
 
 
+def does_bundle_exist(module):
+    """
+    Checks if a named bundle already exists
 
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    Bool:
+        True if present, False if not
+    """
+    if "cvp_facts" in module.params:
+        if "bundles" in module.params["cvp_facts"]:
+            for entry in module.params["cvp_facts"]["bundles"]:
+                if entry["name"] == module.params['bundle']:
+                    return True
+            
+    return False
+
+
+def get_bundle_key(module):
+    for entry in module.params["cvp_facts"]["bundles"]:
+        if entry["name"] == module.params['bundle']:
+           return entry["key"]
+
+
+def build_image_list(module):
+    image_list = list()
+    image_data = None
+    success = True
+    
+    for entry in module.params['image'].split(','):
+        for image in module.params["cvp_facts"]["images"]:
+            if image["imageFileName"] == entry:
+                image_data = image
+                
+        if image_data is not None:
+            image_list.append(image_data)
+            image_data = None
+        else:
+            module.fail_json(msg="Specified image ({}) does not exist".format(entry) )
+            success = False
+    
+    if success:
+        return image_list
+    else:
+        return None
+    
+    
+        
+    
 
 
 def module_action(module):
@@ -165,19 +218,16 @@ def module_action(module):
                 if is_image_present(module) is False:
                     MODULE_LOGGER.debug("Image not present. Trying to add.")
                     try:
-                        response = module.client.api.add_image(module.params['image'])
-                        MODULE_LOGGER.info(response)
+                        module.params["cvp_facts"]["images"].append(module.client.api.add_image(module.params['image']))
+                        MODULE_LOGGER.debug(data)
                         changed = True
-                        data = response
                     except Exception as e:
                         module.fail_json( msg="%s" % str(e))
 
                 else:
-                    MODULE_LOGGER.error("Same image name already exists on the system")
                     module.fail_json(msg="Same image name already exists on the system")
     
             else:
-                MODULE_LOGGER.error("File does not exist")
                 module.fail_json(msg="Specified file ({}) does not exist".format(module.params['image']) )
 
     # So we are dealing with bundles rather than images
@@ -185,6 +235,33 @@ def module_action(module):
         if module.params['action'] == "get":
             data = facts_bundles(module)
             return changed, data, warnings
+        
+        if module.params['action'] == "add":
+            # There are basically 2 actions - either we are adding a new bundle (save)
+            # or changing an existing bundle (update)
+            warnings.append('Note that when updating a bundle, all the images to be used in the bundle must be listed')
+            if does_bundle_exist(module):
+                key = get_bundle_key(module)
+                images = build_image_list(module)
+                if images is not None:
+                    try:
+                       response = module.client.api.update_image_bundle( key, module.params['bundle'], images )
+                       changed = True
+                       data = response['data']
+                    except Exception as e:
+                        module.fail_json( msg="%s" % str(e) )
+                return changed, data, warnings
+                    
+                        
+           
+           
+            else:
+                # create bundle
+                pass
+                
+            
+            
+            pass
     
     
     
@@ -198,6 +275,7 @@ def main():
     argument_spec = dict(
         cvp_facts=dict(type='dict', required=True),
         image=dict(type='str'),
+        bundle=dict(type='str'),
         mode=dict(default='images', type='str', choices=['images','bundles']),
         action=dict(default='get', type='str', choices=['get','add','remove']),
         filter=dict(type='str') )
