@@ -10,21 +10,37 @@ import sys
 sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
-from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET, validate_cv_inputs
+from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import ConfigletInput
 from lib.parametrize import generate_CvConfigletTools_content
 from lib.cvaas_configlet import SYSTEM_CONFIGLETS_TESTS
+from lib.json_data import mook_data
+from lib.parametrize import generate_flat_data
+from lib.helpers import time_log, to_nice_json, setup_custom_logger
 import logging
 import pytest
 
 
+logger = setup_custom_logger(name='configlet_unit')
+
+
 @pytest.mark.generic
+@pytest.mark.configlet
 # Parametrize to build a ConfigletInput from list of configlet in SYSTEM_CONFIGLETS_TESTS. Only those set with is_present_expected to False
-@pytest.mark.parametrize("configlet_inventory", generate_CvConfigletTools_content(configlet_inputs=SYSTEM_CONFIGLETS_TESTS, is_present_state=None), ids=['configlet-not-already-declared'])
 class Test_ConfigletInput():
 
+    @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
     def test_print_inventory_data(self, configlet_inventory):
-        logging.debug('Inventory has {} configlets'.format(len(configlet_inventory)))
-        logging.debug(configlet_inventory)
+        logger.debug('Inventory has {} configlets'.format(len(configlet_inventory)))
+        logger.debug('Inventory is: {}'.format(to_nice_json(data=configlet_inventory)))
 
-    def test_creation(self, configlet_inventory):
-        pass
+    @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
+    def test_inventory_is_valid(self, configlet_inventory):
+        configletInput = ConfigletInput(user_topology=configlet_inventory)
+        logger.info('Test configlet is valid')
+        assert configletInput.is_valid
+
+    @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='invalid'))
+    def test_inventory_is_invalid(self, configlet_inventory):
+        configletInput = ConfigletInput(user_topology=configlet_inventory)
+        logger.info('Test configlet is invalid')
+        assert not configletInput.is_valid

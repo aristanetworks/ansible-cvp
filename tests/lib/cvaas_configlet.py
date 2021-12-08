@@ -48,24 +48,29 @@ SYSTEM_CONFIGLETS_TESTS = [
         'name': 'system-configlet-tests01',
         'config': CONFIGLET_CONTENT,
         'config_expected': CONFIGLET_CONTENT,
-        'is_present_expected': True
+        'is_present_expected': True,
+        'is_valid_expected': True
     },
     {
         'name': 'system-configlet-tests02',
         'config': 'alias sib show ip interfaces',
         'config_expected': 'alias sib show ip interfaces brief',
-        'is_present_expected': True
+        'is_present_expected': True,
+        'is_valid_expected': True
     },
     {
         'name': 'system-configlet-tests03',
         'config': 'alias sib2 show ip interfaces brief',
         'config_expected': 'alias sib2 show ip interfaces brief',
         'is_present_expected': False,
+        'is_valid_expected': True
     },
     {
         'name': 'system-configlet-tests04',
         'config': CONFIGLET_CONTENT,
         'config_expected': CONFIGLET_CONTENT,
         'is_present_expected': False,
-    },
+        'is_valid_expected': True
+    }
+
 ]

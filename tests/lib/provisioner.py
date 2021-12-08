@@ -39,28 +39,32 @@ class CloudvisionProvisioner():
         except cvp_client_errors.CvpLoginError:
             logging.error('Can\'t connect to CV instance')
 
+    def _get_valid_only(self, entries: List):
+        return [entry for entry in entries if entry['is_valid_expected']]
+
     def configlets_provision(self, configlets: List):
+        configlets = self._get_valid_only(entries=configlets)
         for configlet in configlets:
             if configlet['is_present_expected'] is False:
                 try:
                     configlet_id = self.cv.api.get_configlet_by_name(name=configlet['name'])['key']
                     res = self.cv.api.delete_configlet(name=configlet['name'], key=configlet_id)
                 except Exception as error_message:
-                    logging.critical(error_message)
+                    logging.error(error_message)
             elif configlet['is_present_expected']:
                 try:
                     res = self.cv.api.add_configlet(name=configlet['name'], config=configlet['config'])
                     configlet_id = self.cv.api.get_configlet_by_name(name=configlet['name'])['key']
                     self.cv.api.add_note_to_configlet(key=configlet_id, note='Provisioned by Pytest {}'.format(time_log()))
                 except Exception as error_message:
-                    logging.critical(error_message)
+                    logging.warning('{} - moving to update process'.format(error_message))
                     try:
                         logging.info('Fallback to update process for configlet {}'.format(configlet['name']))
                         configlet_id = self.cv.api.get_configlet_by_name(name=configlet['name'])['key']
                         res = self.cv.api.update_configlet(name=configlet['name'], key=configlet_id, config=configlet['config_expected'])
                         self.cv.api.add_note_to_configlet(key=configlet_id, note='Provisioned by Pytest {}'.format(time_log()))
                     except Exception as error_message:
-                        logging.critical(error_message)
+                        logging.error(error_message)
 
     def configlets_push(self, configlets: List):
         logging.debug(' Received set of configlets to publish: {}'.format(configlets))

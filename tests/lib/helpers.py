@@ -25,6 +25,7 @@ import sys
 import logging
 from datetime import datetime
 from dataclasses import dataclass
+import pprint
 
 
 """
@@ -39,7 +40,7 @@ def time_log():
         String: Current date & time in specified format
     """
     now = datetime.now()
-    return now.strftime("%m/%d/%Y, %H:%M:%S")
+    return now.strftime("%m/%d/%Y, %H:%M:%S.%f")
 
 
 def setup_custom_logger(name):
@@ -71,6 +72,27 @@ def setup_custom_logger(name):
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     return logger
+
+
+def to_nice_json(data, ident: int = 4):
+    """
+    to_nice_json Helper to render JSON in logs
+
+    Leverage pprint to help to render JSON as a nice output
+
+    Parameters
+    ----------
+    data : any
+        Data to nicely render with PPRINT
+    ident : int, optional
+        Number of space to use for indentation, by default 4
+
+    Returns
+    -------
+    str
+        String to print
+    """
+    return pprint.pformat(data, indent=ident)
 
 @dataclass
 class AnsibleModuleMock():
