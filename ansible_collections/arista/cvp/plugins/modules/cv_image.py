@@ -213,7 +213,7 @@ def module_action(module):
             return changed, data, warnings
 
         
-        if module.params['action'] == "add":
+        elif module.params['action'] == "add":
             if module.params['image'] and os.path.exists(module.params['image']):
                 if is_image_present(module) is False:
                     MODULE_LOGGER.debug("Image not present. Trying to add.")
@@ -236,11 +236,11 @@ def module_action(module):
             data = facts_bundles(module)
             return changed, data, warnings
         
-        if module.params['action'] == "add":
+        elif module.params['action'] == "add":
             # There are basically 2 actions - either we are adding a new bundle (save)
             # or changing an existing bundle (update)
-            warnings.append('Note that when updating a bundle, all the images to be used in the bundle must be listed')
             if does_bundle_exist(module):
+                warnings.append('Note that when updating a bundle, all the images to be used in the bundle must be listed')
                 key = get_bundle_key(module)
                 images = build_image_list(module)
                 if images is not None:
@@ -250,18 +250,32 @@ def module_action(module):
                        data = response['data']
                     except Exception as e:
                         module.fail_json( msg="%s" % str(e) )
+                
+                else:
+                    module.fail_json(msg="Unable to update bundle - images not present on server")
+                        
                 return changed, data, warnings
                     
-                        
-           
-           
+
             else:
+                images = build_image_list(module)
+                if images is not None:
+                    try:
+                        response = module.client.api.save_image_bundle( module.params['bundle'], images )
+                        changed = True
+                        data = response['data']
+                    except Exception as e:
+                        module.fail_json( msg="%s" % str(e) )
+
+                else:
+                    module.fail_json(msg="Unable to create bundle - images not present on server")                    
                 # create bundle
-                pass
+                
+                return changed, data, warnings
                 
             
             
-            pass
+            
     
     
     
