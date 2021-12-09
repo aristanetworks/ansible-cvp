@@ -15,6 +15,7 @@ from cvprac import cvp_client, cvp_client_errors
 import logging
 from typing import Optional, List, Dict
 from .helpers import time_log
+from .utils import cvp_login
 
 
 """
@@ -83,3 +84,62 @@ class CloudvisionProvisioner():
                 )
             except Exception as error_message:
                 logging.critical(error_message)
+
+
+# Cleaner class to reset information in CVP
+class CloudvisionCleaner():
+    def __init__(self):
+        self.topology_ordered = list()
+        self.clnt = cvp_login()
+
+    # Execute all the cleanup actions
+    def full_cleanup(self):
+        self.task_cleanup()
+        self.tempaction_cleanup()
+        self.remove_devices()
+        self.remove_all_containers()
+
+    # Cancel all pending tasks
+    def task_cleanup(self):
+        pending_task_list = self.clnt.api.get_tasks_by_status('Pending')
+        logging.info("List of tasks in pending state: {}".format(pending_task_list))
+        for task in pending_task_list:
+            logging.info("Cancelling task: {}".format(task['workOrderId']))
+            result = self.clnt.api.cancel_task(task['workOrderId'])
+            logging.info("Result: {}".format(result))
+
+    # TODO: To confirm that this is working as expected - Delete all temp actions
+    def tempaction_cleanup(self):
+        result_delete_temp_action_list = self.clnt.post('/provisioning/deleteAllTempAction.do')
+        logging.info("Result tempaction cleanup: {}".format(result_delete_temp_action_list))
+
+    # Remove all the devices from provisioning (so they are re-added to the undefinied_container)
+    def remove_devices(self):
+        inventory = self.clnt.api.get_inventory()
+        for device in inventory:
+            logging.info("Removing from provisoning: {}".format(device['fqdn']))
+            self.clnt.api.delete_device(device['systemMacAddress'])
+
+    # Recursive function to get topology in the correct order
+    def __build_container_topology(self, container):
+        logging.info("Adding container [{}]".format(container['name']))
+        new_entry = {"key": container['key'], "name": container['name'], "parentContainerId": container['parentContainerId']}
+        self.topology_ordered.append(new_entry)
+        for child_container in container['childContainerList']:
+            self.__build_container_topology(child_container)
+
+    # Remove all the containers
+    def remove_all_containers(self):
+        topology = self.clnt.api.filter_topology()
+        self.__build_container_topology(topology['topology'])
+        # Reversing the container list so we delete the container without child containers first
+        self.topology_ordered.reverse()
+        logging.info("Topology ordered is: {}".format([x['name'] for x in self.topology_ordered]))
+
+        for container in self.topology_ordered:
+            # Deleting the container if not root container or undefined container
+            if container['key'] != 'root' and container['key'] != 'undefined_container':
+                parentName = [x['name'] for x in self.topology_ordered if x['key'] == container['parentContainerId']][0]
+                logging.info("Deleting the container: {} - parent is {}".format(container['name'], parentName))
+                result = self.clnt.api.delete_container(container['name'], container['key'], parentName, container['parentContainerId'])
+                logging.info("Result: [{}]".format(container['name'], parentName, result))
