@@ -157,6 +157,27 @@ Data are all available in [`lib.json_data.mook_data`](./lib/json_data.py)
   - Add your own entries
   - Automatically added to test with parametrize
 
+```python
+from .static_content import CONFIGLET_CONTENT
+
+#######################################
+# Configlet Examples
+#######################################
+
+mook_data["valid"]["configlet"] = [
+        {"configlet_device01": "alias sib show version"},
+        {"configlet-device01": "alias sib show version"},
+        {"configlet-device_01": CONFIGLET_CONTENT},
+]
+
+mook_data["invalid"]["configlet"] = [
+        {"configlet_device01": 100},
+        {"configlet_device02": True},
+        {"configlet_device02": False},
+        {"configlet-device_01": "alias sib show version", 'version': 1},
+]
+```
+
 Import parametrize in test cases
 
 ```python
