@@ -106,3 +106,6 @@ class AnsibleModuleMock():
 
     def fail_json(self, msg: str):
         logging.error("AnsibleModule.fail_json: {}".format(msg))
+
+def strtobool(input):
+    return input.lower() in ('true', '1', 't')

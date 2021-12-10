@@ -19,7 +19,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import 
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult
 from lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nice_json
 from lib.parametrize import generate_CvConfigletTools_content
-from lib.config import user_token, server
+from lib.config import user_token, provision_cv
 from lib.cvaas_configlet import  SYSTEM_CONFIGLETS_TESTS
 from lib.utils import cvp_login
 from lib.provisioner import CloudvisionProvisioner
@@ -36,10 +36,11 @@ logger = setup_custom_logger('configlet_system')
 
 @pytest.fixture(scope="class")
 def CvContainerTools_Manager(request):
-    logger.info('Provision Cloudvision instance')
-    request.cls.provisioner = CloudvisionProvisioner(server=server, token=user_token)
-    request.cls.provisioner.configlets_provision(configlets=SYSTEM_CONFIGLETS_TESTS)
-    logger.info('Provisioning done !')
+    if provision_cv:
+        logger.info('Provision Cloudvision instance')
+        request.cls.provisioner = CloudvisionProvisioner()
+        request.cls.provisioner.configlets_provision(configlets=SYSTEM_CONFIGLETS_TESTS)
+        logger.info('Provisioning done !')
     logger.info("Execute fixture to create class elements")
     requests.packages.urllib3.disable_warnings()
     request.cls.cvp = cvp_login()

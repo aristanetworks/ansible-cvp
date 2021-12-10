@@ -24,21 +24,11 @@ provisioner.py - Provides tool for provisioning CV before running Pytest
 
 
 class CloudvisionProvisioner():
-    def __init__(self, server: str, token: str, port: int = 443):
-        self.server = server
-        self.port = port
-        self.token = token
-        self.cv = cvp_client.CvpClient()
-        try:
-            self.cv.connect(
-                nodes=[self.server],
-                username="",
-                password="",
-                is_cvaas=True,
-                api_token=self.token
-            )
-        except cvp_client_errors.CvpLoginError:
-            logging.error('Can\'t connect to CV instance')
+    def __init__(self):
+        self.cv = cvp_login()
+        if not isinstance(self.cv, cvp_client.CvpClient):
+            logging.error('Cloudvision instance not ready')
+            sys.exit(1)
 
     def _get_valid_only(self, entries: List):
         return [entry for entry in entries if entry['is_valid_expected']]
