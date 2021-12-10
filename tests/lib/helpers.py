@@ -108,4 +108,17 @@ class AnsibleModuleMock():
         logging.error("AnsibleModule.fail_json: {}".format(msg))
 
 def strtobool(input):
+    """
+    strtobool Convert string to boolean
+
+    Parameters
+    ----------
+    input : str
+        String to convert into boolean
+
+    Returns
+    -------
+    bool
+        Result of the conversion
+    """
     return input.lower() in ('true', '1', 't')

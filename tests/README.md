@@ -3,8 +3,21 @@
 ## Available tests
 
 - __Unit__: test with no CV interaction to test component: `tests/unit`
+  - Tests with no API requirements
+  - Tests objects & function with no abstraction
+  - Unit Testing test each part of the program and shows that the individual parts are correct
+  - Should be run at anytime by developers or CI
+
 - __System__: test to run module backend component and which requires CV connection: `tests/system`
+  - Testing based on Cloudvision API
+  - Validate full integration with module inputs
+  - Close to ansible module execution
+  - Can be run as soon as you have access to test environment.
+
 - __Lib__: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
+  - Provides helpers for unit and system
+  - Store all tests data
+  - Only available for pytest
 
 ### Test requirements
 
@@ -29,7 +42,12 @@ Credentials are loaded from ENV variable from your shell:
 export ARISTA_AVD_CV_TOKEN='your-token-from-your-cv-instance'
 
 # Cloudvision address
+# Note: port is set to tcp/443
 export ARISTA_AVD_CV_SERVER='lab.cv.io'
+
+# Option to provision or not Cloudvision
+# If set to False, fixture will not provision Cloudvision. By default set to True
+export ARISTA_AVD_CV_PROVISION=False
 ```
 
 ## Run tests
@@ -50,6 +68,15 @@ make test TESTS=system/
 
 - `TAG`: Select pytest tag to run. By default, run `api` and `generic`
 
+```bash
+make test TAG='configlet'
+```
+
+- `LOGGING`: Set CLI output verbosity. Can be `DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`. Default is `DEBUG`
+
+```bash
+make test TAG='configlet' LOGGING=info
+```
 
 ## Tests Results
 
@@ -57,3 +84,137 @@ Results are printed to your screen and also saved in reports:
 
 - `report.html`: Pytest result with logging
 - `htmlcov/index.html`: Coverage report
+
+
+## Create test cases
+
+### Generic build
+
+- Add tags to run cases selectively
+
+```python
+@pytest.mark.api
+@pytest.mark.configlet
+```
+
+> Tags must be defined in [pytest.ini](./pytest.ini) file
+
+- Define fixture to configure your test case
+
+```python
+@pytest.mark.usefixtures("CvContainerTools_Manager")
+```
+
+- Add parametrize markers to pass data to tests
+
+```python
+@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=['system-configlet-tests01', 'system-configlet-tests02', 'system-configlet-tests03', 'system-configlet-tests04'])
+@pytest.mark.parametrize("check_mode", [True, False], ids=['check_mode_on', 'check_mode_off'])
+```
+
+- Add conditiion to execute tests (Optional)
+
+```python
+@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+```
+
+- Add log before and after each API call to measure execution time
+
+```python
+logger = setup_custom_logger(name='configlet_unit')
+def test_configlet_data_from_cv(self, test_configlet, check_mode):
+    logger.info('Start to get configlet data from CV {}'.format(time_log()))
+    cv_data = self.cv_configlet.get_configlet_data_cv(configlet_name=test_configlet['name'])
+    logger.info('Got CV result')
+```
+
+### Parametrize options
+
+Parametrize marker provides:
+
+- Generate a list of value to test
+- Can use a constant or a function
+- Each entry from the list is passed to the test
+- List of parametrize available in lib/parametrize.py
+
+```python
+# Using a CONSTANT element
+@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=['system-configlet-tests01', 'system-configlet-tests02', 'system-configlet-tests03', 'system-configlet-tests04'])
+
+# Using a list
+@pytest.mark.parametrize("check_mode", [True, False], ids=['check_mode_on', 'check_mode_off'])
+
+# Using a function
+@pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
+```
+
+### Unit test definition
+
+Data are all available in [`lib.json_data.mook_data`](./lib/json_data.py)
+
+- Dictionary based on `[ mode ][ type ]`.
+- Easy to extend dataset used in tests.
+  - Add your own entries
+  - Automatically added to test with parametrize
+
+Import parametrize in test cases
+
+```python
+# Import parametrize function
+from lib.parametrize import generate_flat_data
+
+class Test_ConfigletInput():
+
+    @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
+    def test_print_inventory_data(self, configlet_inventory):
+        logger.debug('Inventory has {} configlets'.format(len(configlet_inventory)))
+        logger.debug('Inventory is: {}'.format(to_nice_json(data=configlet_inventory)))
+```
+
+### System test definition
+
+Data have to be representative and valid from CV.
+
+- Should be defined under `lib/cvaas_<type>.py`
+- Input data would be representative of ansible user's input.
+- All tests entry should have expected result `_expected` suffix
+- A parametrize function could be used (optional)
+- Easy to extend dataset used in tests.
+- Add your own entries
+- Automatically added to test with parametrize
+
+Example data for configlets:
+
+```python
+SYSTEM_CONFIGLETS_TESTS = [
+    {
+        'name': 'system-configlet-tests01',
+        'config': CONFIGLET_CONTENT,
+        'config_expected': CONFIGLET_CONTENT,
+        'is_present_expected': True,
+        'is_valid_expected': True
+    },
+    {
+        'name': 'system-configlet-tests02',
+        'config': 'alias sib show ip interfaces',
+        'config_expected': 'alias sib show ip interfaces brief',
+        'is_present_expected': True,
+        'is_valid_expected': True
+    },
+    {
+        'name': 'system-configlet-tests03',
+        'config': 'alias sib2 show ip interfaces brief',
+        'config_expected': 'alias sib2 show ip interfaces brief',
+        'is_present_expected': False,
+        'is_valid_expected': True
+    },
+    {
+        'name': 'system-configlet-tests04',
+        'config': CONFIGLET_CONTENT,
+        'config_expected': CONFIGLET_CONTENT,
+        'is_present_expected': False,
+        'is_valid_expected': True
+    }
+
+]
+```
