@@ -22,9 +22,9 @@ sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_PARENT_NAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONFIGLETS
 from lib.helpers import time_log
+from lib.config import user_token
 from constants_data import CHECK_MODE, CONTAINER_DESTINATION
 from lib.utils import cvp_login, get_devices
-
 
 
 # Hack to silent SSL warning
@@ -51,6 +51,9 @@ def CvDeviceTools_Manager(request):
 @pytest.mark.usefixtures("CvDeviceTools_Manager")
 class TestCvDeviceToolsWithFQDN():
 
+    @pytest.mark.api
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cvp_connection(self):
         assert True
         logging.info("Connected to CVP")
@@ -69,6 +72,7 @@ class TestCvDeviceToolsWithFQDN():
 
     # Test if device information is correctly retrieved from Cloudvision
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_facts_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -87,6 +91,7 @@ class TestCvDeviceToolsWithFQDN():
 
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_id_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -102,6 +107,7 @@ class TestCvDeviceToolsWithFQDN():
 
     # Test if device configlets are OK
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_configlets_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -120,6 +126,7 @@ class TestCvDeviceToolsWithFQDN():
 
     # Test if device ID is correctly retrieved from Cloudvision
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -138,6 +145,7 @@ class TestCvDeviceToolsWithFQDN():
     ######################################################################
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_is_present_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -154,6 +162,7 @@ class TestCvDeviceToolsWithFQDN():
 
     # Test if device is in correct container from Cloudvision
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_in_container_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -173,7 +182,9 @@ class TestCvDeviceToolsWithFQDN():
     ### -------------------  CV Actions functions  ------------------- ###
     ######################################################################
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_configlet_apply_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -193,7 +204,9 @@ class TestCvDeviceToolsWithFQDN():
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()

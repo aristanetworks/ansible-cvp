@@ -24,6 +24,7 @@ sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID, FIELD_HOSTNAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME
+from lib.config import user_token
 from lib.helpers import time_log
 from lib.utils import cvp_login, get_devices, get_devices_unknown, get_devices_to_move, get_cvp_devices_after_move
 from constants_data import ANSIBLE_CV_SEARCH_MODE, CHECK_MODE
@@ -47,6 +48,7 @@ def CvDeviceTools_Manager(request):
     request.cls.cvp = cvp_login()
     request.cls.inventory = CvDeviceTools(cv_connection=request.cls.cvp)
 
+
 # ---------------------------------------------------------------------------- #
 #   PYTEST
 # ---------------------------------------------------------------------------- #
@@ -55,6 +57,9 @@ def CvDeviceTools_Manager(request):
 @pytest.mark.usefixtures("CvDeviceTools_Manager")
 class TestCvDeviceTools():
 
+    @pytest.mark.api
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cvp_connection(self):
         """Test cvp connection
         return: None
@@ -78,6 +83,7 @@ class TestCvDeviceTools():
             "Setter & Getter for search_by using {} is valid".format(FIELD_FQDN))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_is_present_by_hostname(self, CV_DEVICE):
         logging.info("Search device {} in Cloudvision".format(
@@ -91,6 +97,7 @@ class TestCvDeviceTools():
             CV_DEVICE[FIELD_HOSTNAME]))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE_UNKNOWN", get_devices_unknown())
     def test_device_is_not_present_by_hostname(self, CV_DEVICE_UNKNOWN):
         requests.packages.urllib3.disable_warnings()
@@ -103,6 +110,7 @@ class TestCvDeviceTools():
             CV_DEVICE_UNKNOWN[FIELD_HOSTNAME]))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_in_container_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -115,6 +123,7 @@ class TestCvDeviceTools():
             CV_DEVICE[FIELD_HOSTNAME], CV_DEVICE[FIELD_PARENT_NAME]))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE_UNKNOWN", get_devices_unknown())
     def test_device_not_in_container_by_hostname(self, CV_DEVICE_UNKNOWN):
         requests.packages.urllib3.disable_warnings()
@@ -125,6 +134,7 @@ class TestCvDeviceTools():
         logging.info("End of CV query at {}".format(time_log()))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_facts_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -139,6 +149,7 @@ class TestCvDeviceTools():
         logging.info("Facts for device {} are correct: {}".format(
             CV_DEVICE[FIELD_HOSTNAME], device_facts))
 
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_id_by_hostname(self, CV_DEVICE):
@@ -154,6 +165,7 @@ class TestCvDeviceTools():
             CV_DEVICE[FIELD_HOSTNAME], device_facts))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_configlets_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -165,6 +177,7 @@ class TestCvDeviceTools():
         assert configlets is not None
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_container_id_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -177,7 +190,9 @@ class TestCvDeviceTools():
         assert result[FIELD_ID] == self.cvp.api.get_container_by_name(
             CV_DEVICE[FIELD_PARENT_NAME])[FIELD_ID]
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -203,7 +218,9 @@ class TestCvDeviceTools():
             pytest.skip("NOT TESTED as device is already in correct container")
         logging.info("End of CV query at {}".format(time_log()))
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_configlet_apply_by_hostname(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -216,7 +233,9 @@ class TestCvDeviceTools():
         assert resp[0].results["changed"]
         assert int(resp[0].count) > 0
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE_MOVE", get_devices_to_move())
     def test_device_deploy(self, CV_DEVICE_MOVE):
         requests.packages.urllib3.disable_warnings()
@@ -231,7 +250,9 @@ class TestCvDeviceTools():
         logging.info(
             'DEPLOYED configlet response is: {}'.format(resp[0].results))
 
+    @pytest.mark.api
     @pytest.mark.create
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_cvp_devices_after_move())
     def test_device_manager(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -243,6 +264,7 @@ class TestCvDeviceTools():
         logging.info("MANAGER response is: {}".format(resp))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_container_name(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -259,6 +281,7 @@ class TestCvDeviceTools():
                 "Collection: {} - CV: {}".format(result, cv_result))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_container_id(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -275,6 +298,7 @@ class TestCvDeviceTools():
                 "Collection: {} - CV: {}".format(result, cv_result))
 
     @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_get_device_by_sysmac(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
@@ -292,3 +316,16 @@ class TestCvDeviceTools():
             else:
                 pytest.skip("Skipped as device {} has no {} field".format(
                     device.fqdn, FIELD_SYSMAC))
+
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.parametrize("CV_DEVICE", get_devices())
+    def test__get_configlet_list_inherited_from_container(self, CV_DEVICE):
+        requests.packages.urllib3.disable_warnings()
+        # TODO: The container configlet should be defined at the constats_data.py level
+        container_configlet = ['container-configlet-1']
+        user_inventory = DeviceInventory(data=[CV_DEVICE])
+
+        for device in user_inventory.devices:
+            logging.info("Testing __get_configlet_list_inherited_from_container for device {}".format(device.fqdn))
+            assert(self.inventory._CvDeviceTools__get_configlet_list_inherited_from_container(device) == container_configlet)

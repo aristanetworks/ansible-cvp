@@ -329,6 +329,8 @@ class CvDeviceTools(object):
         self.__search_by = search_by
         self.__configlets_and_mappers_cache = None
         self.__check_mode = check_mode
+        # Cache for list of configlets applied to each container - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        self.__containers_configlet_list_cache = dict()
 
     # ------------------------------------------ #
     # Getters & Setters
@@ -627,6 +629,85 @@ class CvDeviceTools(object):
                 cv_reset.add_change(change=update)
         response.add_manager(cv_reset)
         return response
+    def __build_topology_cache(self, container):
+        """
+        Recursive method. Takes a container in the format of __cv_client.api.filter_topology() cvprac call and
+        store the information in the self.__containers_configlet_list_cache variable with the correct format.
+        Format is:  {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        The function is then called again with the child_containers (if any).
+
+        Parameters
+        ----------
+        container : dict
+            container information. dict_keys(['key', 'name', 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
+            'deviceStatus', 'childTaskCount', 'childContainerList', 'childNetElementList', 'hierarchyNetElementCount', 'tempAction', 'tempEvent'])
+        """
+        MODULE_LOGGER.debug("Adding to cache container: {}".format(container['name']))
+        cache_new_entry = {"name":container['name'], "parentContainerId": container['parentContainerId']}
+        self.__containers_configlet_list_cache[container['key']] = cache_new_entry
+        for child_container in container['childContainerList']:
+            self.__build_topology_cache(child_container)
+
+    def __get_configlet_list_inherited_from_container(self, device: DeviceElement):
+        """
+        __get_configlet_list_inherited_from_container Provides way to get the full list of configlets applied to the parent containers of the device.
+
+        Will be useful in order to avoid removing the inherited configlets while detaching configlets (for example, when using strict mode).
+
+        Parameters
+        ----------
+        device : DeviceElement
+            device on which we would like to return the full list of configlets
+        Returns
+        -------
+        list
+            List of configlet
+        """
+        inherited_configlet_list = list()
+        # If the cache is not empty, we skip the API call
+        if not self.__containers_configlet_list_cache:
+            MODULE_LOGGER.debug("[API call] get info about all the containers: self.__cv_client.api.filter_topology()")
+            topology = self.__cv_client.api.filter_topology()
+            self.__build_topology_cache(topology['topology'])
+
+        parent_container_name = device.container
+        # Get parent container id of the device by comparing all containers name in the topology
+        parent_container_id = ''
+        for container_id in self.__containers_configlet_list_cache:
+            if self.__containers_configlet_list_cache[container_id]['name'] == parent_container_name:
+                parent_container_id = container_id
+                break
+        MODULE_LOGGER.debug("parent_container_name is:  {}".format(parent_container_name))
+        MODULE_LOGGER.debug("parent_container_id is:  {}".format(parent_container_id))
+
+        # While loop to retrieve the lists of configlets applied to all the parents containers
+        # Cache variable is self.__containers_configlet_list_cache - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        while parent_container_id is not None:
+            container_id = parent_container_id
+            # If the container is in cache
+            if (container_id in self.__containers_configlet_list_cache.keys() and 'configlets' in self.__containers_configlet_list_cache[container_id].keys()):
+                MODULE_LOGGER.debug("Using cache for following container: {}".format(container_id))
+                inherited_configlet_list += self.__containers_configlet_list_cache[container_id]['configlets']
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
+
+            # If the container is not in cache
+            else:
+                container_name = self.__containers_configlet_list_cache[container_id]['name']
+                # Get list of configlet for current container
+                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(container_name))
+                current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(container_id)
+                configletList = [x['name'] for x in current_container_configlets_info['configletList']]
+                inherited_configlet_list += configletList
+
+                # Get parent container ID
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
+
+                # Adding current container to cache
+                self.__containers_configlet_list_cache[container_id]['configlets'] = configletList
+                MODULE_LOGGER.debug("Cache updated: with configlets {} from container {}".format(configletList, container_name))
+
+        MODULE_LOGGER.debug("Container inherited configlet list is: {}".format(inherited_configlet_list))
+        return inherited_configlet_list
 
     # ------------------------------------------ #
     # Get CV data functions
@@ -1073,17 +1154,25 @@ class CvDeviceTools(object):
                 elif self.__search_by == FIELD_SERIAL:
                     device_facts = self.__cv_client.api.get_device_by_serial(
                         device_serial=device.serial_number)
+
+                # List of expected configlet applied to the device, taking into account the configlets inherited from parent containers
+                expected_device_configlet_list = self.__get_configlet_list_inherited_from_container(device) + device.configlets
+
                 configlets_to_remove = list()
+
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
-                # Pour chaque configlet not in the list, add to list of configlets to remove
+                MODULE_LOGGER.debug('Current configlet attached {}'.format([x.name for x in configlets_attached]))
+
+                # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
-                    if configlet.name not in device.configlets:
-                        MODULE_LOGGER.info('Configlet %s is added to detach list', str(configlet.name))
+                    if configlet.name not in expected_device_configlet_list:
+                        MODULE_LOGGER.info('Configlet [%s] is added to detach list', str(configlet.name))
                         result_data.name = result_data.name + ' - ' + configlet.name
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
                 if len(configlets_to_remove) > 0:
+                    MODULE_LOGGER.debug('List of configlet to remove for device {} is {}'.format(device.fqdn, [x['name'] for x in configlets_to_remove]))
                     try:
                         resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
                                                                                   dev=device_facts,
@@ -1179,7 +1268,7 @@ class CvDeviceTools(object):
                 # Move devices when they are not in undefined container
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
-                MODULE_LOGGER.debug('Device {} is currently under {}'.format(
+                MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
                     device.fqdn, current_container_info['name']))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
                 if (current_container_info['name'] == 'Undefined'):
