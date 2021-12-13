@@ -92,7 +92,7 @@ def facts_images(module):
 
     Returns
     -------
-    dict:
+    list:
         Facts of all images
     """
     if "cvp_facts" in module.params:
@@ -111,7 +111,7 @@ def facts_bundles(module):
 
     Returns
     -------
-    dict:
+    list:
         Facts of all image bundles
     """
     if "cvp_facts" in module.params:
@@ -161,24 +161,53 @@ def does_bundle_exist(module):
     if "cvp_facts" in module.params:
         if "bundles" in module.params["cvp_facts"]:
             for entry in module.params["cvp_facts"]["bundles"]:
-                if entry["name"] == module.params['bundle']:
+                if entry["name"] == module.params['bundle_name']:
                     return True
             
     return False
 
 
 def get_bundle_key(module):
+    """
+    Gets the key for a given bundle
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    String:
+        The string value equivelent to the bundle key,
+        or None if not found
+    """
     for entry in module.params["cvp_facts"]["bundles"]:
-        if entry["name"] == module.params['bundle']:
+        if entry["name"] == module.params['bundle_name']:
            return entry["key"]
+
+    return None
 
 
 def build_image_list(module):
+    """
+    Builds a list of the image data structures, for a given list of image names.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    List:
+        Returns a list of images, with complete data or None in the event of failure
+    """
     image_list = list()
     image_data = None
     success = True
     
-    for entry in module.params['image'].split(','):
+    for entry in module.params['image_list']:
         for image in module.params["cvp_facts"]["images"]:
             if image["imageFileName"] == entry:
                 image_data = image
@@ -201,6 +230,19 @@ def build_image_list(module):
 
 
 def module_action(module):
+    """
+    Method to call the other modules.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module.
+
+    Returns
+    -------
+    dict:
+       result with tasks and information.
+    """
     changed = False
     data = dict()
     warnings = list()
@@ -223,15 +265,13 @@ def module_action(module):
                         changed = True
                     except Exception as e:
                         module.fail_json( msg="%s" % str(e))
-
                 else:
                     module.fail_json(msg="Same image name already exists on the system")
-    
             else:
                 module.fail_json(msg="Specified file ({}) does not exist".format(module.params['image']) )
-                
         else:
             module.fail_json(msg="Deletion of images through API is not currently supported")
+
 
     # So we are dealing with bundles rather than images
     else:
@@ -248,7 +288,7 @@ def module_action(module):
                 images = build_image_list(module)
                 if images is not None:
                     try:
-                       response = module.client.api.update_image_bundle( key, module.params['bundle'], images )
+                       response = module.client.api.update_image_bundle( key, module.params['bundle_name'], images )
                        changed = True
                        data = response['data']
                     except Exception as e:
@@ -264,7 +304,7 @@ def module_action(module):
                 images = build_image_list(module)
                 if images is not None:
                     try:
-                        response = module.client.api.save_image_bundle( module.params['bundle'], images )
+                        response = module.client.api.save_image_bundle( module.params['bundle_name'], images )
                         changed = True
                         data = response['data']
                     except Exception as e:
@@ -281,7 +321,7 @@ def module_action(module):
             if does_bundle_exist(module):
                 key = get_bundle_key(module)
                 try:
-                    response = module.client.api.delete_image_bundle(key,module.params['bundle'] )
+                    response = module.client.api.delete_image_bundle(key,module.params['bundle_name'] )
                     changed = True
                     data = response['data']
                 except Exception as e:
@@ -299,7 +339,8 @@ def main():
     argument_spec = dict(
         cvp_facts=dict(type='dict', required=True),
         image=dict(type='str'),
-        bundle=dict(type='str'),
+        image_list=dict(type="list", elements='str'),
+        bundle_name=dict(type='str'),
         mode=dict(default='images', type='str', choices=['images','bundles']),
         action=dict(default='get', type='str', choices=['get','add','remove']),
         filter=dict(type='str') )
