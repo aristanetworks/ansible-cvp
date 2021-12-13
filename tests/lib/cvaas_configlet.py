@@ -71,6 +71,5 @@ SYSTEM_CONFIGLETS_TESTS = [
         'config_expected': CONFIGLET_CONTENT,
         'is_present_expected': False,
         'is_valid_expected': True
-    }
-
+    },
 ]

@@ -79,7 +79,7 @@ class CloudvisionProvisioner():
 # Cleaner class to reset information in CVP
 class CloudvisionCleaner():
     def __init__(self):
-        self.topology_ordered = list()
+        self.topology_ordered = []
         self.clnt = cvp_login()
 
     # Execute all the cleanup actions
@@ -128,7 +128,7 @@ class CloudvisionCleaner():
 
         for container in self.topology_ordered:
             # Deleting the container if not root container or undefined container
-            if container['key'] != 'root' and container['key'] != 'undefined_container':
+            if container['key'] not in ['root', 'undefined_container']:
                 parentName = [x['name'] for x in self.topology_ordered if x['key'] == container['parentContainerId']][0]
                 logging.info("Deleting the container: {} - parent is {}".format(container['name'], parentName))
                 result = self.clnt.api.delete_container(container['name'], container['key'], parentName, container['parentContainerId'])
