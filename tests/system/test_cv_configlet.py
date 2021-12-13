@@ -34,6 +34,26 @@ logger = setup_custom_logger('configlet_system')
 # ---------------------------------------------------------------------------- #
 
 
+def generate_test_ids(val):
+    """
+    generate_test_ids Helper to generate test ID for parametrize
+
+    Only related to SYSTEM_CONFIGLETS_TESTS structure
+
+    Parameters
+    ----------
+    val : dict
+        A configlet test structure
+
+    Returns
+    -------
+    str
+        Name of the configlet
+    """
+    if 'name' in val.keys():
+        # note this wouldn't show any hours/minutes/seconds
+        return val['name']
+
 @pytest.fixture(scope="class")
 def CvContainerTools_Manager(request):
     if provision_cv:
@@ -50,6 +70,7 @@ def CvContainerTools_Manager(request):
     yield
     logging.warning('Killing Cloudvision instance')
 
+
 # ---------------------------------------------------------------------------- #
 #   TESTS Management
 # ---------------------------------------------------------------------------- #
@@ -60,7 +81,7 @@ def CvContainerTools_Manager(request):
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 # Parametrize to build a ConfigletInput from list of configlet in SYSTEM_CONFIGLETS_TESTS. Only those set with is_present_expected to False
-@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=['system-configlet-tests01', 'system-configlet-tests02', 'system-configlet-tests03', 'system-configlet-tests04'])
+@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=generate_test_ids)
 @pytest.mark.parametrize("check_mode", [True, False], ids=['check_mode_on', 'check_mode_off'])
 class Test_CvConfiglet_Unit():
 
