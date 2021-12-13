@@ -57,7 +57,21 @@ EXAMPLES = r"""
       debug:
         msg: "{{image_facts}}"
 
+    - name: "Update an image bundle {{inventory_hostname}}"
+      arista.cvp.cv_image:
+        mode: bundles
+        action: add
+        bundle_name: Test_bundle
+        image_list: 
+           - TerminAttr-1.16.4-1.swix
+           - EOS-4.25.4M.swi
 
+    - name: "Delete an image {{inventory_hostname}}"
+      arista.cvp.cv_image:
+        mode: images
+        action: remove
+        image: TerminAttr-1.16.4-1.swix
+        cvp_facts: '{{cv_facts.ansible_facts}}'
 
 """
 
@@ -159,8 +173,8 @@ def does_bundle_exist(module):
         True if present, False if not
     """
     if "cvp_facts" in module.params:
-        if "bundles" in module.params["cvp_facts"]:
-            for entry in module.params["cvp_facts"]["bundles"]:
+        if "imageBundles" in module.params["cvp_facts"]:
+            for entry in module.params["cvp_facts"]["imageBundles"]:
                 if entry["name"] == module.params['bundle_name']:
                     return True
             
@@ -182,7 +196,7 @@ def get_bundle_key(module):
         The string value equivelent to the bundle key,
         or None if not found
     """
-    for entry in module.params["cvp_facts"]["bundles"]:
+    for entry in module.params["cvp_facts"]["imageBundles"]:
         if entry["name"] == module.params['bundle_name']:
            return entry["key"]
 
