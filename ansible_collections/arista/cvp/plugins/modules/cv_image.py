@@ -66,19 +66,8 @@ EXAMPLES = r"""
            - TerminAttr-1.16.4-1.swix
            - EOS-4.25.4M.swi
 
-    - name: "Delete an image {{inventory_hostname}}"
-      arista.cvp.cv_image:
-        mode: images
-        action: remove
-        image: TerminAttr-1.16.4-1.swix
-        cvp_facts: '{{cv_facts.ansible_facts}}'
 
 """
-
-
-
-
-
 
 
 
