@@ -9,6 +9,14 @@ Collect facts from CloudVision Portal.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Features are now part of every single v3 modules.
+:Alternative:
+
+
 
 Synopsis
 --------

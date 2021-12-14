@@ -1,10 +1,16 @@
-# cv\_container
+# cv_container
 
 Manage Provisioning topology.
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
+
+## DEPRECATED
+
+- In version: `4.0`
+- Why : Updated modules released with increased functionality
+- Alternative: Use `arista.cvp.cv_container_v3` instead.
 
 ## Synopsis
 
@@ -106,4 +112,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

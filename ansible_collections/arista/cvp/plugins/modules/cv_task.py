@@ -30,6 +30,10 @@ author: EMEA AS Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
   - CloudVison Portal Task module
+deprecated:
+  removed_in: '4.0'
+  why: Updated modules released with increased functionality
+  alternative: Use M(arista.cvp.cv_task_v3) instead.
 options:
   tasks:
     description: CVP taskIDs to act on
