@@ -22,6 +22,10 @@
 "module: cv_facts":
   - ansible_collections/arista/cvp/plugins/modules/cv_facts.py
 
+"module: cv_facts_v3":
+  - ansible_collections/arista/cvp/plugins/modules/cv_facts_v3.py
+  - ansible_collections/arista/cvp/plugins/module_utils/facts_tools.py
+
 "module: cv_task":
   - ansible_collections/arista/cvp/plugins/modules/cv_task.py
 
