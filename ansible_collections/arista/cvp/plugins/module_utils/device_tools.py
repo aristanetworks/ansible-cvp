@@ -329,6 +329,8 @@ class CvDeviceTools(object):
         self.__search_by = search_by
         self.__configlets_and_mappers_cache = None
         self.__check_mode = check_mode
+        # Cache for list of configlets applied to each container - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        self.__containers_configlet_list_cache = dict()
 
     # ------------------------------------------ #
     # Getters & Setters
@@ -472,6 +474,240 @@ class CvDeviceTools(object):
         configlets_attached_get_configlet_info = [self.__get_configlet_info(configlet_name=x.name) for x in configlet_applied_to_device_list]
         # Joining the 2 new list (configlets already present + new configlet in right order)
         return configlets_attached_get_configlet_info + new_configlets_list
+
+    def __refresh_user_inventory(self, user_inventory: DeviceInventory):
+        """
+        __refresh_user_inventory Get all data from Cloudvision to populate user_inventory
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+
+        Returns
+        -------
+        DeviceInventory
+            Device inventory with missing data
+        """
+        # Need to collect all missing device systemMacAddress
+        # deploy needs to locate devices by mac-address
+        if self.__search_by == FIELD_FQDN:
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
+
+        elif self.__search_by == FIELD_HOSTNAME:
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
+
+        elif self.__search_by == FIELD_SERIAL:
+            user_inventory = self.refresh_fqdn(user_inventory=user_inventory)
+            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
+
+        return user_inventory
+
+    def __check_devices_exist(self, user_inventory: DeviceInventory):
+        """
+        __check_devices_exist Check devices are all present on Cloudvision
+
+        Check devices are configured on Cloudvision and returns error message
+        if at least one device is missing
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+        """
+        list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=self.__search_by)
+        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
+            error_message = 'Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
+                \nMake sure that the devices are provisioned and defined with the full fqdn name \
+                (including the domain name) if needed.'.format(str(list_non_existing_devices))
+            MODULE_LOGGER.error(error_message)
+            self.__ansible.fail_json(msg=error_message)
+        return True
+
+    def __state_present(self, user_inventory: DeviceInventory, apply_mode: str = 'loose'):
+        """
+        __state_present Execute actions when user configures state=present
+
+        Run following actions:
+            - Provision devices
+            - Move devices
+            - Add configlets to devices
+            - Remove configlets to devices (when in strict mode)
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+        apply_mode : str, optional
+            Method to manage configlets, by default 'loose'
+
+        Returns
+        -------
+        CvAnsibleResponse
+            Ansible Output message
+        """
+        cv_deploy = CvManagerResult(builder_name='devices_deployed')
+        cv_move = CvManagerResult(builder_name='devices_moved')
+        cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
+        cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
+        response = CvAnsibleResponse()
+
+        # Check if all devices are present on CV
+        self.__check_devices_exist(user_inventory=user_inventory)
+
+        # Refresh UserInventory data with data from Cloudvision
+        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+
+        # Deploy device if it is under undefined container
+        action_result = self.deploy_device(user_inventory=user_inventory)
+        if action_result is not None:
+            for update in action_result:
+                cv_deploy.add_change(change=update)
+
+        # Move devices to their destination container
+        action_result = self.move_device(user_inventory=user_inventory)
+        if action_result is not None:
+            for update in action_result:
+                cv_move.add_change(change=update)
+
+        # Apply configlets as set in inventory
+        action_result = self.apply_configlets(user_inventory=user_inventory)
+        if action_result is not None:
+            for update in action_result:
+                cv_configlets_attach.add_change(change=update)
+
+        # Remove configlets configured on CVP and if module runs in strict mode
+        if apply_mode == 'strict':
+            action_result = self.detach_configlets(
+                user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_configlets_detach.add_change(change=update)
+
+        # Generate result output
+        response.add_manager(cv_move)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_move: %s', str(response.content))
+        response.add_manager(cv_deploy)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_deploy: %s', str(response.content))
+        response.add_manager(cv_configlets_attach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_attach: %s', str(response.content))
+        response.add_manager(cv_configlets_detach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
+
+        return response
+
+    def __state_factory_reset(self, user_inventory: DeviceInventory):
+        """
+        __state_factory_reset Execute actions when user configures state=absent
+
+        Run following actions:
+            - Reset device to ztp mode
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+
+        Returns
+        -------
+        CvAnsibleResponse
+            Ansible Output message
+        """
+        response = CvAnsibleResponse()
+        cv_reset = CvManagerResult(builder_name='devices_reset')
+
+        # Check if all user defined devices are present in CV
+        self.__check_devices_exist(user_inventory=user_inventory)
+
+        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+
+        # Execute device reset
+        action_result = self.reset_device(user_inventory=user_inventory)
+        if action_result is not None:
+            MODULE_LOGGER.debug('action_result is: %s', str(action_result))
+            for update in action_result:
+                cv_reset.add_change(change=update)
+        response.add_manager(cv_reset)
+        return response
+    def __build_topology_cache(self, container):
+        """
+        Recursive method. Takes a container in the format of __cv_client.api.filter_topology() cvprac call and
+        store the information in the self.__containers_configlet_list_cache variable with the correct format.
+        Format is:  {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        The function is then called again with the child_containers (if any).
+
+        Parameters
+        ----------
+        container : dict
+            container information. dict_keys(['key', 'name', 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
+            'deviceStatus', 'childTaskCount', 'childContainerList', 'childNetElementList', 'hierarchyNetElementCount', 'tempAction', 'tempEvent'])
+        """
+        MODULE_LOGGER.debug("Adding to cache container: {}".format(container['name']))
+        cache_new_entry = {"name":container['name'], "parentContainerId": container['parentContainerId']}
+        self.__containers_configlet_list_cache[container['key']] = cache_new_entry
+        for child_container in container['childContainerList']:
+            self.__build_topology_cache(child_container)
+
+    def __get_configlet_list_inherited_from_container(self, device: DeviceElement):
+        """
+        __get_configlet_list_inherited_from_container Provides way to get the full list of configlets applied to the parent containers of the device.
+
+        Will be useful in order to avoid removing the inherited configlets while detaching configlets (for example, when using strict mode).
+
+        Parameters
+        ----------
+        device : DeviceElement
+            device on which we would like to return the full list of configlets
+        Returns
+        -------
+        list
+            List of configlet
+        """
+        inherited_configlet_list = list()
+        # If the cache is not empty, we skip the API call
+        if not self.__containers_configlet_list_cache:
+            MODULE_LOGGER.debug("[API call] get info about all the containers: self.__cv_client.api.filter_topology()")
+            topology = self.__cv_client.api.filter_topology()
+            self.__build_topology_cache(topology['topology'])
+
+        parent_container_name = device.container
+        # Get parent container id of the device by comparing all containers name in the topology
+        parent_container_id = ''
+        for container_id in self.__containers_configlet_list_cache:
+            if self.__containers_configlet_list_cache[container_id]['name'] == parent_container_name:
+                parent_container_id = container_id
+                break
+        MODULE_LOGGER.debug("parent_container_name is:  {}".format(parent_container_name))
+        MODULE_LOGGER.debug("parent_container_id is:  {}".format(parent_container_id))
+
+        # While loop to retrieve the lists of configlets applied to all the parents containers
+        # Cache variable is self.__containers_configlet_list_cache - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
+        while parent_container_id is not None:
+            container_id = parent_container_id
+            # If the container is in cache
+            if (container_id in self.__containers_configlet_list_cache.keys() and 'configlets' in self.__containers_configlet_list_cache[container_id].keys()):
+                MODULE_LOGGER.debug("Using cache for following container: {}".format(container_id))
+                inherited_configlet_list += self.__containers_configlet_list_cache[container_id]['configlets']
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
+
+            # If the container is not in cache
+            else:
+                container_name = self.__containers_configlet_list_cache[container_id]['name']
+                # Get list of configlet for current container
+                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(container_name))
+                current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(container_id)
+                configletList = [x['name'] for x in current_container_configlets_info['configletList']]
+                inherited_configlet_list += configletList
+
+                # Get parent container ID
+                parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
+
+                # Adding current container to cache
+                self.__containers_configlet_list_cache[container_id]['configlets'] = configletList
+                MODULE_LOGGER.debug("Cache updated: with configlets {} from container {}".format(configletList, container_name))
+
+        MODULE_LOGGER.debug("Container inherited configlet list is: {}".format(inherited_configlet_list))
+        return inherited_configlet_list
 
     # ------------------------------------------ #
     # Get CV data functions
@@ -722,7 +958,7 @@ class CvDeviceTools(object):
     # Workers function
     # ------------------------------------------ #
 
-    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_HOSTNAME, apply_mode: str = 'loose'):
+    def manager(self, user_inventory: DeviceInventory, search_mode: str = FIELD_HOSTNAME, apply_mode: str = 'loose', state: str = 'present'):
         """
         manager Main entry point to support all device
 
@@ -739,6 +975,8 @@ class CvDeviceTools(object):
             Search method to get device information from Cloudvision, by default FQDN
         apply_mode: str, optional
             Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
+        state: str, optional
+            Define if devices must be provisioned or reset to default configuration.
 
         Returns
         -------
@@ -746,68 +984,16 @@ class CvDeviceTools(object):
             All Ansible output formated using CvAnsibleResponse
         """
         response = CvAnsibleResponse()
-
         self.__search_by = search_mode
+        MODULE_LOGGER.debug('Manager search mode is set to: %s', str(self.__search_by))
 
-        MODULE_LOGGER.debug('Manager search mode is set to: %s', str(search_mode))
-        self.__search_by = search_mode
+        if state == 'present':
+            MODULE_LOGGER.info('Processing data to create/update devices')
+            response = self.__state_present(user_inventory=user_inventory, apply_mode=apply_mode)
 
-        cv_deploy = CvManagerResult(builder_name='devices_deployed')
-        cv_move = CvManagerResult(builder_name='devices_moved')
-        cv_configlets_attach = CvManagerResult(builder_name='configlets_attached')
-        cv_configlets_detach = CvManagerResult(builder_name='configlets_detached')
-
-        # Check if the devices defined exist in CVP
-        list_non_existing_devices = self.check_device_exist(user_inventory=user_inventory, search_mode=search_mode)
-        if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
-            error_message = 'Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
-                \nMake sure that the devices are provisioned and defined with the full fqdn name \
-                (including the domain name) if needed.'.format(str(list_non_existing_devices))
-            MODULE_LOGGER.error(error_message)
-            self.__ansible.fail_json(msg=error_message)
-
-        # Need to collect all missing device systemMacAddress
-        # deploy needs to locate devices by mac-address
-        if self.__search_by == FIELD_FQDN:
-            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
-
-        elif self.__search_by == FIELD_HOSTNAME:
-            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
-
-        elif self.__search_by == FIELD_SERIAL:
-            user_inventory = self.refresh_fqdn(user_inventory=user_inventory)
-            user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
-
-        action_result = self.deploy_device(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_deploy.add_change(change=update)
-
-        action_result = self.move_device(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_move.add_change(change=update)
-
-        action_result = self.apply_configlets(user_inventory=user_inventory)
-        if action_result is not None:
-            for update in action_result:
-                cv_configlets_attach.add_change(change=update)
-
-        if apply_mode == 'strict':
-            action_result = self.detach_configlets(
-                user_inventory=user_inventory)
-            if action_result is not None:
-                for update in action_result:
-                    cv_configlets_detach.add_change(change=update)
-
-        response.add_manager(cv_move)
-        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_move: %s', str(response.content))
-        response.add_manager(cv_deploy)
-        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_deploy: %s', str(response.content))
-        response.add_manager(cv_configlets_attach)
-        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_attach: %s', str(response.content))
-        response.add_manager(cv_configlets_detach)
-        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
+        elif state == 'factory_reset':
+            MODULE_LOGGER.info('Processing data to reset devices')
+            response = self.__state_factory_reset(user_inventory=user_inventory)
 
         return response.content
 
@@ -968,17 +1154,25 @@ class CvDeviceTools(object):
                 elif self.__search_by == FIELD_SERIAL:
                     device_facts = self.__cv_client.api.get_device_by_serial(
                         device_serial=device.serial_number)
+
+                # List of expected configlet applied to the device, taking into account the configlets inherited from parent containers
+                expected_device_configlet_list = self.__get_configlet_list_inherited_from_container(device) + device.configlets
+
                 configlets_to_remove = list()
+
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
-                # Pour chaque configlet not in the list, add to list of configlets to remove
+                MODULE_LOGGER.debug('Current configlet attached {}'.format([x.name for x in configlets_attached]))
+
+                # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
-                    if configlet.name not in device.configlets:
-                        MODULE_LOGGER.info('Configlet %s is added to detach list', str(configlet.name))
+                    if configlet.name not in expected_device_configlet_list:
+                        MODULE_LOGGER.info('Configlet [%s] is added to detach list', str(configlet.name))
                         result_data.name = result_data.name + ' - ' + configlet.name
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
                 if len(configlets_to_remove) > 0:
+                    MODULE_LOGGER.debug('List of configlet to remove for device {} is {}'.format(device.fqdn, [x['name'] for x in configlets_to_remove]))
                     try:
                         resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
                                                                                   dev=device_facts,
@@ -1111,6 +1305,29 @@ class CvDeviceTools(object):
 
                     result_data.add_entry('{0} deployed to {1}'.format(
                         device.info[self.__search_by], device.container))
+            results.append(result_data)
+        return results
+
+    def reset_device(self, user_inventory: DeviceInventory):
+        results = list()
+        for device in user_inventory.devices:
+            MODULE_LOGGER.info('start process resetting device %s', str(device.info))
+            result_data = CvApiResult(action_name=device.info[self.__search_by] + '_reset')
+            try:
+                MODULE_LOGGER.info('send reset request for device %s', str(device.info))
+                resp = self.__cv_client.api.reset_device(app_name='CvDeviceTools.reset_device',
+                                                         device=device.info,
+                                                         create_task=True)
+            except CvpApiError:
+                MODULE_LOGGER.error('Error resetting device')
+                self.__ansible.fail_json(msg='Error resetting device')
+            else:
+                if resp['data']['status'] == 'success':
+                    result_data.changed = True
+                    result_data.success = True
+                    result_data.taskIds = resp['data']['taskIds']
+                    result_data.add_entry('{} resets {}'.format(
+                        device.fqdn, *device.configlets))
             results.append(result_data)
         return results
 
