@@ -125,7 +125,7 @@ def main():
         check_mode=ansible_module.check_mode )
     
     result['changed'], result['data'], warnings = cv_images.module_action( **ansible_module.params )
-    
+    MODULE_LOGGER.warning(warnings)
 
 
     ansible_module.exit_json(**result)
