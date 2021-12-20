@@ -35,7 +35,7 @@ EXAMPLES = r"""
   tasks:
     - name: "Gather CVP image information facts {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
-         mode: images
+         mode: image
          action: get
       register: image_data
 
@@ -46,7 +46,7 @@ EXAMPLES = r"""
 
     - name: "Get CVP image image bundles {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
-        mode: bundles
+        mode: bundle
         action: get
       register: image_bundle_data
 
@@ -57,7 +57,7 @@ EXAMPLES = r"""
 
     - name: "Update an image bundle {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
-        mode: bundles
+        mode: bundle
         action: add
         bundle_name: Test_bundle
         image_list:
@@ -92,7 +92,7 @@ def main():
         image=dict(type='str'),
         image_list=dict(type="list", elements='str'),
         bundle_name=dict(type='str'),
-        mode=dict(default='images', type='str', choices=['images','bundles']),
+        mode=dict(default='images', type='str', choices=['image','bundle']),
         action=dict(default='get', type='str', choices=['get','add','remove']),
         )
 

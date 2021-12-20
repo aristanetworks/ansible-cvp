@@ -49,8 +49,6 @@ class CvImageTools():
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
         self.__check_mode = check_mode
-        self._images = list()
-        self._imageBundles = list()
         self.refresh_cvp_image_data()
  
  
@@ -61,8 +59,9 @@ class CvImageTools():
         images = self.__cv_client.api.get_images()['data']
         MODULE_LOGGER.debug(images)
         if len(images) > 0:
-            return images
-        return None
+            self.cvp_images = images
+            return True
+        return False
 
 
     def __get_image_bundles(self):
@@ -71,25 +70,24 @@ class CvImageTools():
         imageBundles = self.__cv_client.api.get_image_bundles()['data']
         MODULE_LOGGER.debug(imageBundles)
         if len(imageBundles) > 0:
-            return imageBundles
-        return None
+            self.cvp_imageBundles = imageBundles
+            return True
+        return False
 
 
     def refresh_cvp_image_data(self):
-        images = self.__get_images()
-        bundles = self.__get_image_bundles()
+        self.__get_images()
+        self.__get_image_bundles()
 
-        return images, bundles
+        return True
 
 
-    def is_image_present(self, image_list, image):
+    def is_image_present(self, image):
         """
         Checks if a named image is present.
     
         Parameters
         ----------
-        image_list: list
-           Internal list of dicts, of CVP images
         image: str
            The name of the software image
     
@@ -99,20 +97,18 @@ class CvImageTools():
             True if present, False if not
         """
     
-        for entry in image_list:
+        for entry in self.cvp_images:
             if entry["imageFileName"] == os.path.basename(image):
                 return True            
         return False
 
 
-    def does_bundle_exist(self, bundle_list, bundle):
+    def does_bundle_exist(self, bundle):
         """
         Checks if a named bundle already exists
 
         Parameters
         ----------
-        bundle_list: list
-            Internal CVP bundle list
         bundle : str
             Name of software image bundle.
 
@@ -121,20 +117,18 @@ class CvImageTools():
         Bool:
             True if present, False if not
         """
-        for entry in bundle_list:
+        for entry in self.cvp_imageBundles:
             if entry["name"] == bundle:
                 return True
         return False
 
 
-    def get_bundle_key(self, bundle_list, bundle):
+    def get_bundle_key(self, bundle):
         """
         Gets the key for a given bundle
 
         Parameters
         ----------
-        bundle_list: list
-            List of dict with CVP bundle data
         bundle : str
             Ansible module.
 
@@ -144,20 +138,18 @@ class CvImageTools():
             The string value equivelent to the bundle key,
             or None if not found
         """
-        for entry in bundle_list:
+        for entry in self.cvp_imageBundles:
             if entry["name"] == bundle:
                 return entry["key"]
         return None
 
 
-    def build_image_list(self, cvp_images, image_list):
+    def build_image_list(self, image_list):
         """
         Builds a list of the image data structures, for a given list of image names.
 
         Parameters
         ----------
-        cvp_images: list
-            CVP internal image list
         image_list : list
             List of software image names
 
@@ -171,7 +163,7 @@ class CvImageTools():
         success = True
         
         for entry in image_list:
-            for image in cvp_images:
+            for image in self.cvp_images:
                 if image["imageFileName"] == entry:
                     image_data = image
                     
@@ -213,32 +205,30 @@ class CvImageTools():
         data = dict()
         warnings = list()
         
-        
-        cvp_images = list()
-        cvp_image_bundles = list()
 
-        cvp_images, cvp_image_bundles = self.refresh_cvp_image_data()      
+
+        self.refresh_cvp_image_data()      
         
-        if mode == "images":
+        if mode == "image":
             if action == "get":
-                return changed, {'images':cvp_images } , warnings
+                return changed, {'images':self.cvp_images } , warnings
 
             
             elif action == "add" and self.__check_mode == False:
                 MODULE_LOGGER.debug("   -> trying to add an image")
                 if len(image) > 0 and os.path.exists(image):
-                    if self.is_image_present(cvp_images, image) is False:
+                    if self.is_image_present(image) is False:
                         MODULE_LOGGER.debug("Image not present. Trying to add.")
                         try:
                             data = self.__cv_client.api.add_image(image)
-                            cvp_images, cvp_image_bundles = self.refresh_cvp_image_data()
+                            self.refresh_cvp_image_data()
                             MODULE_LOGGER.debug("   -> Returned data follows")
                             MODULE_LOGGER.debug(data)
                             changed = True
                         except Exception as e:
                             self.__ansible.fail_json( msg="%s" % str(e))
                     else:
-                        self.__ansible.fail_json(msg="Same image name already exists on the system")
+                        warnings.append("Unable to add image {}. Image already present on server".format(image))
                 else:
                     self.__ansible.fail_json(msg="Specified file ({}) does not exist".format(image) )
             else:
@@ -249,21 +239,21 @@ class CvImageTools():
         else:
             if action == "get":
 
-                return changed, {'bundles':cvp_image_bundles }, warnings
+                return changed, {'bundles':self.cvp_imageBundles }, warnings
             
             elif action == "add" and self.__check_mode == False:
                 # There are basically 2 actions - either we are adding a new bundle (save)
                 # or changing an existing bundle (update)
-                if self.does_bundle_exist(cvp_image_bundles, bundle_name):
+                if self.does_bundle_exist(bundle_name):
                     MODULE_LOGGER.debug("   -> Updating existing bundle")
                     warnings.append('Note that when updating a bundle, all the images to be used in the bundle must be listed')
-                    cvp_key = self.get_bundle_key(cvp_image_bundles, bundle_name)
-                    images = self.build_image_list( cvp_images, image_list )
+                    cvp_key = self.get_bundle_key(bundle_name)
+                    images = self.build_image_list( image_list )
                     if images is not None:
                         try:
                             data = self.__cv_client.api.update_image_bundle( cvp_key, bundle_name, images )
                             changed = True
-                            cvp_images, cvp_image_bundles = self.refresh_cvp_image_data()
+                            self.refresh_cvp_image_data()
                         except Exception as e:
                             self.__ansible.fail_json( msg="%s" % str(e) )
                     
@@ -274,14 +264,14 @@ class CvImageTools():
                         
 
                 else:
-                    images = self.build_image_list(cvp_images, image_list)
+                    images = self.build_image_list(image_list)
                     MODULE_LOGGER.debug("   -> creating a new bundle")
                     if images is not None:
                         try:
                             MODULE_LOGGER.debug("Bundle name: %s\nImage list: \n%s" %(bundle_name, images) )
                             data = self.__cv_client.api.save_image_bundle( bundle_name, images )
                             changed = True
-                            cvp_images, cvp_image_bundles = self.refresh_cvp_image_data()
+                            self.refresh_cvp_image_data()
                         except Exception as e:
                             self.__ansible.fail_json( msg="%s" % str(e) )
 
@@ -293,12 +283,12 @@ class CvImageTools():
             elif action == "remove" and self.__check_mode == False:
                 MODULE_LOGGER.debug("   -> trying to delete a bundle")
                 warnings.append('Note that deleting the image bundle does not delete the images')
-                if self.does_bundle_exist(cvp_image_bundles, bundle_name):
-                    cvp_key = self.get_bundle_key(cvp_image_bundles, bundle_name)
+                if self.does_bundle_exist( bundle_name):
+                    cvp_key = self.get_bundle_key( bundle_name)
                     try:
                         data = self.__cv_client.api.delete_image_bundle(cvp_key,bundle_name )
                         changed = True
-                        cvp_images, cvp_image_bundles = self.refresh_cvp_image_data()
+                        self.refresh_cvp_image_data()
                     except Exception as e:
                             self.__ansible.fail_json( msg="%s" % str(e) )
                 else:
