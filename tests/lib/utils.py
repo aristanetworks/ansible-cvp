@@ -27,7 +27,7 @@ def cvp_login():
             nodes=[config.server],
             username="",
             password="",
-            is_cvaas=True,
+            is_cvaas=config.cvaas,
             api_token=config.user_token
         )
     except (CvpLoginError, CvpRequestError):
