@@ -144,3 +144,12 @@ USER_TOPOLOGY = [
             'taskIds': []},
         id='create already present topology')
 ]
+
+
+# container_tools.get_container_id() unit tests parameters
+# (name: str, expected_id:str)
+TEST_CONTAINERS = [
+    ('Tenant', 'root'),
+    ('ansible-cvp-tests-1', 'container_274787b2-c45a-4b0c-8b97-eb4011909b02'),
+    ('Simple Fabric', 'container_6ac90bc0-f6d4-436f-bff0-8c064c247f01')
+]

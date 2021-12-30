@@ -29,7 +29,6 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError, CVPRessource
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
     from cvprac.cvp_client_errors import CvpClientError
@@ -205,7 +204,7 @@ class CvContainerTools(object):
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
     """
 
-    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule):
+    def __init__(self, cv_connection, ansible_module: AnsibleModule):
         self.__cvp_client = cv_connection
         self.__ansible = ansible_module
         self.__check_mode = ansible_module.check_mode
@@ -521,7 +520,7 @@ class CvContainerTools(object):
             name=container_name)
         if not container_info:
             raise AnsibleCVPNotFoundError(container_name, CVPRessource.CONTAINER, "Could not get container ID")
-        if not FIELD_KEY in container_info:
+        if FIELD_KEY not in container_info:
             raise AnsibleCVPApiError(self.__cvp_client.api.get_container_by_name, "Could not get container ID")
         return container_info[FIELD_KEY]
 

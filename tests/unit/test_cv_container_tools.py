@@ -5,6 +5,7 @@ import logging
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools
+from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
 from tests.lib import mock
 from tests.unit import data
 
@@ -47,3 +48,23 @@ def test_build_topology(cvp_database, container_tools, present, apply_mode, cvp_
     LOGGER.info('User topology: %s', user_topology)
     response = container_tools.build_topology(user_topology, present=present, apply_mode=apply_mode)
     assert response.content == expected_response
+
+
+# get_container_id()
+@pytest.mark.generic
+@pytest.mark.parametrize("name, expected_id", data.TEST_CONTAINERS)
+def test_get_container_id(container_tools, name, expected_id):
+    container_id = container_tools.get_container_id(container_name=name)
+    assert container_id == expected_id
+
+
+@pytest.mark.generic
+def test_get_container_id_not_found(container_tools):
+    with pytest.raises(AnsibleCVPNotFoundError):
+        container_tools.get_container_id(container_name='NotExist')
+
+
+@pytest.mark.generic
+def test_get_container_id_bad_key(container_tools):
+    with pytest.raises(AnsibleCVPApiError):
+        container_tools.get_container_id(container_name='BadKey')
