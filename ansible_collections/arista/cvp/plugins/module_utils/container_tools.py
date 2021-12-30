@@ -205,10 +205,10 @@ class CvContainerTools(object):
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
     """
 
-    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, check_mode: bool = False):
+    def __init__(self, cv_connection: CvpClient, ansible_module: AnsibleModule):
         self.__cvp_client = cv_connection
         self.__ansible = ansible_module
-        self.__check_mode = ansible_module.check_mode if ansible_module is not None else check_mode
+        self.__check_mode = ansible_module.check_mode
 
     #############################################
     #   Private functions
