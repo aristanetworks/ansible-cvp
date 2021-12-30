@@ -6,11 +6,7 @@
 # flake8: noqa: W1202
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.parametrize import generate_flat_data
+from tests.lib.parametrize import generate_flat_data
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
 import logging
 import pytest

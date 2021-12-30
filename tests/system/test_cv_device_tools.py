@@ -13,23 +13,17 @@ test_cv_device_tools.py - Testcases related to device tools.
 
 
 from __future__ import (absolute_import, division, print_function)
-import sys
 import ssl
 import logging
+import time
 import pytest
 import requests.packages.urllib3
-import time
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID, FIELD_HOSTNAME
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME
-from lib.config import user_token
-from lib.helpers import time_log
-from lib.utils import cvp_login, get_devices, get_devices_unknown, get_devices_to_move, get_cvp_devices_after_move
-from constants_data import ANSIBLE_CV_SEARCH_MODE, CHECK_MODE
-from system.constants_data import CVP_DEVICES
-from constants_data import CHECK_MODE, CONTAINER_DESTINATION
+from tests.lib.config import user_token
+from tests.lib.helpers import time_log
+from tests.lib.utils import cvp_login, get_devices, get_devices_unknown, get_devices_to_move, get_cvp_devices_after_move
+from tests.system.constants_data import ANSIBLE_CV_SEARCH_MODE, CHECK_MODE, CONTAINER_DESTINATION
 
 
 # Hack to silent SSL warning
