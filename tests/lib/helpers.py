@@ -23,6 +23,7 @@
 
 import sys
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from dataclasses import dataclass
 import pprint
@@ -63,7 +64,7 @@ def setup_custom_logger(name):
     formatter = logging.Formatter(
         fmt='%(asctime)s %(levelname)-8s File: %(filename)s  - Function: %(funcName)s - Line: %(lineno)d - %(message)s',
         )
-    handler = logging.FileHandler('pytest.log', mode='w')
+    handler = RotatingFileHandler('pytest.log', maxBytes=2000, backupCount=10)
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
