@@ -71,8 +71,23 @@ jobs:
     needs: file-changes
     if: needs.file-changes.outputs.dhcp_module == 'true' || needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
     steps:
+      # Removed as gh action is marked as deprecated
+      # - uses: pre-commit/action@v2.0.2
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
       - uses: actions/checkout@v2
-      - uses: pre-commit/action@v2.0.2
+        with:
+          fetch-depth: 0
+      - name: Install requirements
+        run: |
+          pip install -r ansible_collections/arista/cvp/requirements-dev.txt
+          pip install -r ansible_collections/arista/cvp/requirements.txt
+      - name: Run pre-commit
+        run: |
+          git branch -a
+          pre-commit run --from-ref origin/devel --to-ref HEAD
 
   pytest:
     name: Validate code V3 with Pytest
