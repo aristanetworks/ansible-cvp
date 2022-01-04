@@ -61,9 +61,9 @@ def setup_custom_logger(name):
         Logging instance
     """
     formatter = logging.Formatter(
-        fmt='%(asctime)s %(levelname)-8s %(message)s',
+        fmt='%(asctime)s %(levelname)-8s File: %(filename)s  - Function: %(funcName)s - Line: %(lineno)d - %(message)s',
         )
-    handler = logging.FileHandler('log.txt', mode='w')
+    handler = logging.FileHandler('pytest.log', mode='w')
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
