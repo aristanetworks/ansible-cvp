@@ -38,6 +38,10 @@ description:
   - If a configlet is in both configlets and cvp_facts it configuration will
   - be compared and updated with the version in configlets
   - if the two are different.
+deprecated:
+  removed_in: '4.0'
+  why: Updated modules released with increased functionality
+  alternative: Use M(arista.cvp.cv_configlet_v3) instead.
 options:
   configlets:
     description: List of configlets to managed on CVP server.
