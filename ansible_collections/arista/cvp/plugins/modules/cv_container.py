@@ -34,6 +34,10 @@ description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
+deprecated:
+  removed_in: '4.0'
+  why: Updated modules released with increased functionality
+  alternative: Use M(arista.cvp.cv_container_v3) instead.
 options:
   topology:
     description: Yaml dictionary to describe intended containers

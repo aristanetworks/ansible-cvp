@@ -92,7 +92,7 @@ build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-communi
 webdoc: ## Build documentation to publish static content
 	( cd $(WEBDOC_BUILD) ; \
 	python ansible2rst.py ; \
-	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
+	find . -name 'cv_*_v3.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
 
 .PHONY: check-cvp-404

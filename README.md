@@ -14,6 +14,7 @@
   - [Collection overview](#collection-overview)
     - [List of available modules](#list-of-available-modules)
     - [List of available roles](#list-of-available-roles)
+  - [Deprecated modules](#deprecated-modules)
   - [Example](#example)
   - [Installation](#installation)
     - [Dependencies](#dependencies)
@@ -61,18 +62,19 @@ __Version 3:__
 - [__arista.cvp.cv_device_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
 
-__Legacy / Version 1:__
+### List of available roles
+
+- [__arista.cvp.dhcp_configuration__](https://cvp.avd.sh/en/latest/roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](https://cvp.avd.sh/en/latest/roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
+
+
+## Deprecated modules
 
 - [__arista.cvp.cv_facts__](https://cvp.avd.sh/en/latest/docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
 - [__arista.cvp.cv_configlet__](https://cvp.avd.sh/en/latest/docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
 - [__arista.cvp.cv_container__](https://cvp.avd.sh/en/latest/docs/modules/cv_container.rst/) -  Manage container topology and attach configlet and devices to containers.
 - [__arista.cvp.cv_device__](https://cvp.avd.sh/en/latest/docs/modules/cv_device.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task__](https://cvp.avd.sh/en/latest/docs/modules/cv_task.rst/) - Run tasks created on CVP.
-
-### List of available roles
-
-- [__arista.cvp.dhcp_configuration__](https://cvp.avd.sh/en/latest/roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
-- [__arista.cvp.configlet_sync__](https://cvp.avd.sh/en/latest/roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
 
 ## Example
 

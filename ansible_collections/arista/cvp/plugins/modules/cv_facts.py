@@ -30,6 +30,9 @@ author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns list of devices, configlets, containers and images
+deprecated:
+  removed_in: '4.0'
+  why: Features are now part of every single v3 modules.
 options:
   gather_subset:
     description:

@@ -35,6 +35,10 @@ description:
   - If a device is in both devices and cvp_facts its configlets and imageBundles will be compared
   - and updated with the version in devices if the two are different.
   - Warning - reset means devices will be erased and will run full ZTP process. Use this function with caution !
+deprecated:
+  removed_in: '4.0'
+  why: Updated modules released with increased functionality
+  alternative: Use M(arista.cvp.cv_device_v3) instead.
 options:
   devices:
     description: Yaml dictionary to describe intended devices
