@@ -28,6 +28,8 @@ from typing import List
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
+from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError, CVPRessource
+import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
     from cvprac.cvp_client_errors import CvpClientError
@@ -507,12 +509,21 @@ class CvContainerTools(object):
         -------
         str
             Container ID sent by CV
+
+        Raises
+        ------
+        AnsibleCVPNotFoundError
+            Raised when container is not found in CVP instance
+        AnsibleCVPApiError
+            Raised when expected API data structure could not be read
         """
         container_info = self.__cvp_client.api.get_container_by_name(
             name=container_name)
-        if FIELD_KEY in container_info:
-            return container_info[FIELD_KEY]
-        return None
+        if not container_info:
+            raise AnsibleCVPNotFoundError(container_name, CVPRessource.CONTAINER, "Could not get container ID")
+        if not FIELD_KEY in container_info:
+            raise AnsibleCVPApiError(self.__cvp_client.api.get_container_by_name, "Could not get container ID")
+        return container_info[FIELD_KEY]
 
     #############################################
     #   Boolean & getters functions
@@ -809,37 +820,42 @@ class CvContainerTools(object):
         cv_configlets_detach = CvManagerResult(
             builder_name='configlets_detached', default_success=True)
 
-        # Create containers topology in Cloudvision
-        if present is True:
-            for user_container in user_topology.ordered_list_containers:
-                MODULE_LOGGER.info('Start creation process for container %s under %s', str(
-                    user_container), str(user_topology.get_parent(container_name=user_container)))
-                resp = self.create_container(
-                    container=user_container, parent=user_topology.get_parent(container_name=user_container))
-                container_add_manager.add_change(resp)
+        try:
 
-                if user_topology.has_configlets(container_name=user_container):
-                    resp = self.configlets_attach(
-                        container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
-                    cv_configlets_attach.add_change(resp)
-                    if apply_mode == 'strict':
-                        attached_configlets = self.get_configlets(container_name=user_container)
-                        configlet_to_remove = list()
-                        for attach_configlet in attached_configlets:
-                            if attach_configlet['name'] not in user_topology.get_configlets(container_name=user_container):
-                                configlet_to_remove.append(attach_configlet)
-                        if len(configlet_to_remove) > 0:
-                            resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
-                            cv_configlets_detach.add_change(resp)
+            # Create containers topology in Cloudvision
+            if present is True:
+                for user_container in user_topology.ordered_list_containers:
+                    MODULE_LOGGER.info('Start creation process for container %s under %s', str(
+                        user_container), str(user_topology.get_parent(container_name=user_container)))
+                    resp = self.create_container(
+                        container=user_container, parent=user_topology.get_parent(container_name=user_container))
+                    container_add_manager.add_change(resp)
 
-        # Remove containers topology from Cloudvision
-        else:
-            for user_container in reversed(user_topology.ordered_list_containers):
-                MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
-                    user_container), str(user_topology.get_parent(container_name=user_container)))
-                resp = self.delete_container(
-                    container=user_container, parent=user_topology.get_parent(container_name=user_container))
-                container_delete_manager.add_change(resp)
+                    if user_topology.has_configlets(container_name=user_container):
+                        resp = self.configlets_attach(
+                            container=user_container, configlets=user_topology.get_configlets(container_name=user_container))
+                        cv_configlets_attach.add_change(resp)
+                        if apply_mode == 'strict':
+                            attached_configlets = self.get_configlets(container_name=user_container)
+                            configlet_to_remove = list()
+                            for attach_configlet in attached_configlets:
+                                if attach_configlet['name'] not in user_topology.get_configlets(container_name=user_container):
+                                    configlet_to_remove.append(attach_configlet)
+                            if len(configlet_to_remove) > 0:
+                                resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
+                                cv_configlets_detach.add_change(resp)
+
+            # Remove containers topology from Cloudvision
+            else:
+                for user_container in reversed(user_topology.ordered_list_containers):
+                    MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
+                        user_container), str(user_topology.get_parent(container_name=user_container)))
+                    resp = self.delete_container(
+                        container=user_container, parent=user_topology.get_parent(container_name=user_container))
+                    container_delete_manager.add_change(resp)
+
+        except (AnsibleCVPApiError, AnsibleCVPNotFoundError) as e:
+            self.__ansible.fail_json(msg=str(e))
 
         # Create ansible message
         response.add_manager(container_add_manager)
