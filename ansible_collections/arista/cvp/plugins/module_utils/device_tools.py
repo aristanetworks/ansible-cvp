@@ -72,14 +72,14 @@ class DeviceElement(object):
 
     def __init__(self, data: dict):
         self.__data = data
-        self.__fqdn = self.__data[FIELD_FQDN] if FIELD_FQDN in self.__data else None
-        self.__sysmac = self.__data[FIELD_SYSMAC] if FIELD_SYSMAC in self.__data else None
-        self.__serial = self.__data[FIELD_SERIAL] if FIELD_SERIAL in self.__data else None
+        self.__fqdn = self.__data.get(FIELD_FQDN)
+        self.__sysmac = self.__data.get(FIELD_SYSMAC)
+        self.__serial = self.__data.get(FIELD_SERIAL)
         self.__container = self.__data[FIELD_PARENT_NAME]
-        self.__image_bundle = []
+        # self.__image_bundle = []  # noqa # pylint: disable=unused-variable
         self.__current_parent_container_id = None
-        if FIELD_IMAGE_BUNDLE in self.__data:
-            self.__image_bundle = data[FIELD_IMAGE_BUNDLE]
+        # if FIELD_IMAGE_BUNDLE in self.__data:
+        #     self.__image_bundle = data[FIELD_IMAGE_BUNDLE]
         if FIELD_SYSMAC in data:
             self.__sysmac = data[FIELD_SYSMAC]
         if FIELD_SERIAL in data:
@@ -687,7 +687,7 @@ class CvDeviceTools(object):
             container_id = parent_container_id
             # If the container is in cache
             if (container_id in self.__containers_configlet_list_cache.keys() and 'configlets' in self.__containers_configlet_list_cache[container_id].keys()):
-                MODULE_LOGGER.debug("Using cache for following container: {}".format(container_id))
+                MODULE_LOGGER.debug("Using cache for following container: {0}".format(container_id))
                 inherited_configlet_list += self.__containers_configlet_list_cache[container_id]['configlets']
                 parent_container_id = self.__containers_configlet_list_cache[container_id]['parentContainerId']
 
@@ -1163,7 +1163,7 @@ class CvDeviceTools(object):
 
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
-                MODULE_LOGGER.debug('Current configlet attached {}'.format([x.name for x in configlets_attached]))
+                MODULE_LOGGER.debug('Current configlet attached {0}'.format([x.name for x in configlets_attached]))
 
                 # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
@@ -1173,7 +1173,7 @@ class CvDeviceTools(object):
                         configlets_to_remove.append(configlet.data)
                 # Detach configlets to device
                 if len(configlets_to_remove) > 0:
-                    MODULE_LOGGER.debug('List of configlet to remove for device {} is {}'.format(device.fqdn, [x['name'] for x in configlets_to_remove]))
+                    MODULE_LOGGER.debug('List of configlet to remove for device {0} is {1}'.format(device.fqdn, [x['name'] for x in configlets_to_remove]))
                     try:
                         resp = self.__cv_client.api.remove_configlets_from_device(app_name='CvDeviceTools.detach_configlets',
                                                                                   dev=device_facts,

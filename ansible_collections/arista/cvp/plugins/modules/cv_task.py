@@ -92,7 +92,7 @@ import time
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
 MODULE_LOGGER.info('Start cv_tasks module execution')
@@ -172,7 +172,8 @@ def task_action(module):
     now = time.time()
     while (now - start) < wait:
         data = update_all_tasks(cvp, data)
-        if all([terminal(get_state(t)) for t in data.values()]):
+        temp_list = [terminal(get_state(t)) for t in data.values()]
+        if all(temp_list):
             break
         now = time.time()
 
