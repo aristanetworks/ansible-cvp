@@ -112,3 +112,4 @@ venv.bak/
 */collections/*
 *.old
 *.DS_Store
+*.log
