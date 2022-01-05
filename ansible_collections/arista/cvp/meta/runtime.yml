@@ -1,24 +1,24 @@
 ---
 requires_ansible: '>=2.11.3'
 plugin_routing:
-    modules:
-        cv_facts:
-            deprecation:
-                removal_version: 4.0.0
-                warning_text: use modules in version 3 instead
-        cv_device:
-            deprecation:
-                removal_version: 4.0.0
-                warning_text: use cv_device_v3 instead.
-        cv_container:
-            deprecation:
-                removal_version: 4.0.0
-                warning_text: use cv_container_v3 instead.
-        cv_configlet:
-            deprecation:
-                removal_version: 4.0.0
-                warning_text: use cv_configlet_v3 instead.
-        cv_task:
-            deprecation:
-                removal_version: 4.0.0
-                warning_text: use cv_task_v3 instead.
+  modules:
+    cv_facts:
+      deprecation:
+        removal_version: '4.0.0'
+        warning_text: use modules in version 3 instead
+    cv_device:
+      deprecation:
+        removal_version: '4.0.0'
+        warning_text: use cv_device_v3 instead.
+    cv_container:
+      deprecation:
+        removal_version: '4.0.0'
+        warning_text: use cv_container_v3 instead.
+    cv_configlet:
+      deprecation:
+        removal_version: '4.0.0'
+        warning_text: use cv_configlet_v3 instead.
+    cv_task:
+      deprecation:
+        removal_version: '4.0.0'
+        warning_text: use cv_task_v3 instead.

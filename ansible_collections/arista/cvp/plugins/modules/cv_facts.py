@@ -31,8 +31,10 @@ short_description: Collect facts from CloudVision Portal.
 description:
   - Returns list of devices, configlets, containers and images
 deprecated:
-  removed_in: '4.0'
+  removed_in: '4.0.0'
   why: Features are now part of every single v3 modules.
+  alternative: Currently no alternative.
+  removed_from_collection: arista.cvp
 options:
   gather_subset:
     description:
@@ -67,6 +69,13 @@ options:
       - containers
       - configlets
       - tasks
+  options:
+    description:
+      - Implements the ability to create a sub-argument_spec, where the sub
+      - options of the top level argument are also validated using
+      - the attributes discussed in this section.
+    required: false
+    type: dict
 '''
 
 EXAMPLES = r'''
@@ -450,6 +459,7 @@ def main():
     main entry point for module execution.
     """
     argument_spec = dict(
+        options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         gather_subset=dict(type='list',
                            elements='str',
                            required=False,

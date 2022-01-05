@@ -31,9 +31,10 @@ short_description: Execute or Cancel CVP Tasks.
 description:
   - CloudVison Portal Task module
 deprecated:
-  removed_in: '4.0'
+  removed_in: '4.0.0'
   why: Updated modules released with increased functionality
   alternative: Use M(arista.cvp.cv_task_v3) instead.
+  removed_from_collection: arista.cvp
 options:
   tasks:
     description: CVP taskIDs to act on
@@ -55,6 +56,13 @@ options:
     choices:
       - executed
       - cancelled
+  options:
+    description:
+      - Implements the ability to create a sub-argument_spec, where the sub
+      - options of the top level argument are also validated using
+      - the attributes discussed in this section.
+    required: false
+    type: dict
 '''
 
 EXAMPLES = '''
@@ -180,6 +188,7 @@ def main():
     """ main entry point for module execution
     """
     argument_spec = dict(
+        options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         tasks=dict(required=True, type='list', elements='dict'),
         wait=dict(default=0, type='int'),
         state=dict(default='executed', choices=['executed', 'cancelled']))
