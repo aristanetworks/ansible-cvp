@@ -258,7 +258,7 @@ class DeviceInventory(object):
     """
 
     def __init__(self, data: list, schema=schema.SCHEMA_CV_DEVICE, search_method: str = FIELD_FQDN):
-        self.__inventory = list()
+        self.__inventory = []
         self.__data = data
         self.__schema = schema
         self.search_method = search_method
@@ -452,7 +452,7 @@ class CvDeviceTools(object):
         list
             List of configlet in the correct order
         """
-        new_configlets_list = list()
+        new_configlets_list = []
         for configlet in configlet_playbook_list:
             new_configlet = self.__get_configlet_info(configlet_name=configlet)
             if new_configlet is None:
@@ -629,6 +629,7 @@ class CvDeviceTools(object):
                 cv_reset.add_change(change=update)
         response.add_manager(cv_reset)
         return response
+
     def __build_topology_cache(self, container):
         """
         Recursive method. Takes a container in the format of __cv_client.api.filter_topology() cvprac call and
@@ -642,8 +643,8 @@ class CvDeviceTools(object):
             container information. dict_keys(['key', 'name', 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
             'deviceStatus', 'childTaskCount', 'childContainerList', 'childNetElementList', 'hierarchyNetElementCount', 'tempAction', 'tempEvent'])
         """
-        MODULE_LOGGER.debug("Adding to cache container: {}".format(container['name']))
-        cache_new_entry = {"name":container['name'], "parentContainerId": container['parentContainerId']}
+        MODULE_LOGGER.debug("Adding to cache container: {0}".format(container['name']))
+        cache_new_entry = {"name": container['name'], "parentContainerId": container['parentContainerId']}
         self.__containers_configlet_list_cache[container['key']] = cache_new_entry
         for child_container in container['childContainerList']:
             self.__build_topology_cache(child_container)
@@ -663,7 +664,7 @@ class CvDeviceTools(object):
         list
             List of configlet
         """
-        inherited_configlet_list = list()
+        inherited_configlet_list = []
         # If the cache is not empty, we skip the API call
         if not self.__containers_configlet_list_cache:
             MODULE_LOGGER.debug("[API call] get info about all the containers: self.__cv_client.api.filter_topology()")
@@ -677,8 +678,8 @@ class CvDeviceTools(object):
             if self.__containers_configlet_list_cache[container_id]['name'] == parent_container_name:
                 parent_container_id = container_id
                 break
-        MODULE_LOGGER.debug("parent_container_name is:  {}".format(parent_container_name))
-        MODULE_LOGGER.debug("parent_container_id is:  {}".format(parent_container_id))
+        MODULE_LOGGER.debug("parent_container_name is:  {0}".format(parent_container_name))
+        MODULE_LOGGER.debug("parent_container_id is:  {0}".format(parent_container_id))
 
         # While loop to retrieve the lists of configlets applied to all the parents containers
         # Cache variable is self.__containers_configlet_list_cache - format {<container_id>: {"name": "<>", "parentContainerId": "<>", "configlets": ['', '']}
@@ -694,7 +695,7 @@ class CvDeviceTools(object):
             else:
                 container_name = self.__containers_configlet_list_cache[container_id]['name']
                 # Get list of configlet for current container
-                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {}".format(container_name))
+                MODULE_LOGGER.debug("[API call] Get configlet associated with container: {0}".format(container_name))
                 current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(container_id)
                 configletList = [x['name'] for x in current_container_configlets_info['configletList']]
                 inherited_configlet_list += configletList
@@ -704,9 +705,9 @@ class CvDeviceTools(object):
 
                 # Adding current container to cache
                 self.__containers_configlet_list_cache[container_id]['configlets'] = configletList
-                MODULE_LOGGER.debug("Cache updated: with configlets {} from container {}".format(configletList, container_name))
+                MODULE_LOGGER.debug("Cache updated: with configlets {0} from container {1}".format(configletList, container_name))
 
-        MODULE_LOGGER.debug("Container inherited configlet list is: {}".format(inherited_configlet_list))
+        MODULE_LOGGER.debug("Container inherited configlet list is: {0}".format(inherited_configlet_list))
         return inherited_configlet_list
 
     # ------------------------------------------ #
@@ -765,7 +766,7 @@ class CvDeviceTools(object):
             List of CvElement with KEY and NAME of every configlet.
         """
         if self.__search_by in [FIELD_FQDN, FIELD_SERIAL, FIELD_HOSTNAME]:
-            configlet_list = list()
+            configlet_list = []
             # get_configlets_by_device_id
             try:
                 device_id = self.get_device_id(device_lookup=device_lookup)
@@ -859,7 +860,7 @@ class CvDeviceTools(object):
             Updated device inventory
         """
         device: DeviceElement = None
-        user_result: list = list()
+        user_result: list = []
         MODULE_LOGGER.info('Inventory to refresh is %s', str(user_inventory.devices))
         for device in user_inventory.devices:
             MODULE_LOGGER.info('Lookup is based on %s field', str(self.__search_by))
@@ -892,7 +893,7 @@ class CvDeviceTools(object):
             Updated device inventory
         """
         device: DeviceElement = None
-        user_result: list = list()
+        user_result: list = []
         MODULE_LOGGER.info('Inventory to refresh is %s', str(user_inventory.devices))
         for device in user_inventory.devices:
             MODULE_LOGGER.debug('Found device %s to refresh data', str(device.info))
@@ -932,7 +933,7 @@ class CvDeviceTools(object):
             List of devices not present in CVP
         """
         MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
-        device_not_present: list = list()
+        device_not_present: list = []
         for device in user_inventory.devices:
             if self.__search_by == FIELD_HOSTNAME or search_mode == FIELD_HOSTNAME:
                 if self.is_device_exist(device.fqdn, search_mode=FIELD_HOSTNAME) is False:
@@ -1014,7 +1015,7 @@ class CvDeviceTools(object):
         list
             List of CvApiResult for all API calls
         """
-        results = list()
+        results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(
                 action_name='{}_to_{}'.format(device.fqdn, *device.container))
@@ -1070,7 +1071,7 @@ class CvDeviceTools(object):
         list
             List of CvApiResult for all API calls
         """
-        results = list()
+        results = []
         MODULE_LOGGER.debug('Apply configlets to following inventory: %s', str([x.info for x in user_inventory.devices]))
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Applying configlet for device: %s", str(device.fqdn))
@@ -1079,7 +1080,7 @@ class CvDeviceTools(object):
             if (device.configlets is None or current_container_info['name'] == UNDEFINED_CONTAINER):
                 continue
             # get configlet information from CV
-            configlets_attached = list()
+            configlets_attached = []
             if self.__search_by == FIELD_SERIAL:
                 configlets_attached = self.get_device_configlets(device_lookup=device.serial_number)
             elif self.__search_by == FIELD_HOSTNAME:
@@ -1128,23 +1129,23 @@ class CvDeviceTools(object):
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = resp['data']['taskIds']
-                        result_data.add_entry('{} adds {}'.format(device.fqdn, *device.configlets))
+                        result_data.add_entry('{0} adds {1}'.format(device.fqdn, *device.configlets))
                         MODULE_LOGGER.debug('CVP response is: %s', str(resp))
                         MODULE_LOGGER.info('Reponse data is: %s', str(result_data.results))
-                result_data.add_entry('{} to {}'.format(device.fqdn, *device.container))
+                result_data.add_entry('{0} to {1}'.format(device.fqdn, *device.container))
             else:
                 result_data.name = result_data.name + ' - nothing attached'
             results.append(result_data)
         return results
 
     def detach_configlets(self, user_inventory: DeviceInventory):
-        results = list()
+        results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(
                 action_name=device.fqdn + '_configlet_removed')
             # FIXME: Should we ignore devices listed with no configlets ?
             if device.configlets is not None:
-                device_facts = dict()
+                device_facts = {}
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=False)
@@ -1158,7 +1159,7 @@ class CvDeviceTools(object):
                 # List of expected configlet applied to the device, taking into account the configlets inherited from parent containers
                 expected_device_configlet_list = self.__get_configlet_list_inherited_from_container(device) + device.configlets
 
-                configlets_to_remove = list()
+                configlets_to_remove = []
 
                 # get list of configured configlets
                 configlets_attached = self.get_device_configlets(device_lookup=device.info[self.__search_by])
@@ -1197,17 +1198,17 @@ class CvDeviceTools(object):
         """
         remove_configlets UNSUPPORTED and NOT TESTED YET
         """
-        results = list()
+        results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.fqdn + '_configlet_removed')
             if device.configlets is not None:
                 # get configlet information from CV
-                configlets_info = list()
-                for configlet in device.configlets:
-                    configlets_info.append(
-                        self.__get_configlet_info(configlet_name=configlet))
+                configlets_info = [
+                    self.__get_configlet_info(configlet_name=configlet)
+                    for configlet in device.configlets
+                ]
                 # get device facts from CV
-                device_facts = dict()
+                device_facts = {}
                 if self.__search_by == FIELD_FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=False)
@@ -1251,11 +1252,11 @@ class CvDeviceTools(object):
         list
             List of CvApiResult for all API calls
         """
-        results = list()
+        results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_deployed')
             if device.system_mac is not None:
-                configlets_info = list()
+                configlets_info = []
                 for configlet in device.configlets:
                     new_configlet = self.__get_configlet_info(configlet_name=configlet)
                     if new_configlet is None:
@@ -1309,7 +1310,7 @@ class CvDeviceTools(object):
         return results
 
     def reset_device(self, user_inventory: DeviceInventory):
-        results = list()
+        results = []
         for device in user_inventory.devices:
             MODULE_LOGGER.info('start process resetting device %s', str(device.info))
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_reset')
@@ -1339,7 +1340,7 @@ class CvDeviceTools(object):
         """
         list_devices_to_move UNSUPPORTED and NOT TESTED YET
         """
-        devices_to_move = list()
+        devices_to_move = []
         for device in inventory.devices:
             if self.__search_by == FIELD_FQDN:
                 if self.is_in_container(device_lookup=device.fqdn,
