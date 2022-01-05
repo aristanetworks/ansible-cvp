@@ -52,31 +52,51 @@ export ARISTA_AVD_CV_PROVISION=False
 
 ## Run tests
 
-A [Makefile](Makefile) is available to provide commands:
+### With initial Pytest CLI
 
 ```bash
-make test
+# Configlet Unit testing
+pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
+	--html=report.html --self-contained-html --cov-report=html --color yes \
+	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+	unit/test_configlet_input.py
+
+# Configlet system testing
+pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
+	--html=report.html --self-contained-html --cov-report=html --color yes \
+	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+	 system/test_cv_configlet.py
+
+# Configlet system testing with only WARNING print in pytest.log
+$ PYTEST_LOG_LEVEL=WARNING pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
+	--html=report.html --self-contained-html --cov-report=html --color yes \
+	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+	 system/test_cv_configlet.py
 ```
 
-It supports some options:
-
-- `TESTS`: select path for tests to run. It can be a folder or a python file. By default runs `unit` and `system` test cases
+### Makefile usage
 
 ```bash
-make test TESTS=system/
+# Configlet Unit testing
+$ make test TESTS=unit/test_configlet_input.py
+
+# Configlet system testing
+$ make test TESTS=system/test_cv_configlet.py
+
+# Run all tests related to configlets with logging in CLI set to INFO
+make test TAG='configlet' CLI_LOGGING=INFO
+
+# Run all tests related to configlets with logging in CLI set to INFO and pytest.log set to WARNING
+make test TAG='configlet' CLI_LOGGING=INFO PYTEST_LOGGING=WARNING
 ```
 
-- `TAG`: Select pytest tag to run. By default, run `api` and `generic`
+### Custom Makefile options
 
-```bash
-make test TAG='configlet'
-```
+- `TESTS`: Which tests to run. (By default `.`)
+- `TAG`: Which tag to run. (By default `generic or api`)
+- `CLI_LOGGING`: Log verbosity print out to your console
+- `PYTEST_LOGGING`: Log level used to report in pytest.log
 
-- `LOGGING`: Set CLI output verbosity. Can be `DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`. Default is `DEBUG`
-
-```bash
-make test TAG='configlet' LOGGING=info
-```
 
 ## Tests Results
 
