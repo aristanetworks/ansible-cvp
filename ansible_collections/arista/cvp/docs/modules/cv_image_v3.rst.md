@@ -87,8 +87,7 @@ The following options may be specified for this module:
 
 ## Examples:
 
-    ---
-- name: CVP Image Tests
+ - name: CVP Image Tests
   hosts: cv_server
   gather_facts: no
   vars:
