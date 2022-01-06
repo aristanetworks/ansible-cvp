@@ -47,7 +47,9 @@ coverage.xml
 .pytest_cache/
 report.html
 assets
-config.py
+*log.txt*
+
+
 
 # Translations
 *.mo
@@ -110,3 +112,4 @@ venv.bak/
 */collections/*
 *.old
 *.DS_Store
+*.log

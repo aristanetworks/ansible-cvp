@@ -35,9 +35,10 @@ description:
     to create and delete containers on CVP side.
   - Returns number of created and/or deleted containers
 deprecated:
-  removed_in: '4.0'
+  removed_in: '4.0.0'
   why: Updated modules released with increased functionality
   alternative: Use M(arista.cvp.cv_container_v3) instead.
+  removed_from_collection: arista.cvp
 options:
   topology:
     description: Yaml dictionary to describe intended containers
@@ -65,6 +66,13 @@ options:
     default: ['none']
     type: list
     elements: str
+  options:
+    description:
+      - Implements the ability to create a sub-argument_spec, where the sub
+      - options of the top level argument are also validated using
+      - the attributes discussed in this section.
+    required: false
+    type: dict
 '''
 
 EXAMPLES = r'''
@@ -100,10 +108,10 @@ EXAMPLES = r'''
 import sys
 import logging
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.tools_tree as tools_tree
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import tools
+from ansible_collections.arista.cvp.plugins.module_utils import tools_tree
+from ansible_collections.arista.cvp.plugins.module_utils import schema_v1 as schema
 from ansible.module_utils.basic import AnsibleModule
 
 # List of Ansible default containers
@@ -816,6 +824,7 @@ def main():
     Main entry point for module execution.
     """
     argument_spec = dict(
+        options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         topology=dict(type='dict', required=True),
         cvp_facts=dict(type='dict', required=True),
         configlet_filter=dict(type='list', default='none', elements='str'),

@@ -248,66 +248,6 @@ class CvContainerTools(object):
                          FIELD_COUNT_DEVICES, FIELD_PARENT_ID]
         return {k: v for k, v in source.items() if k in standard_keys}
 
-    def __get_attached_configlets(self, container_name: str):
-        """
-        __get_attached_configlets Extract configlet information for all attached configlets to a container
-
-        Example
-        -------
-
-        >>> CvContainerTools._get_attached_configlets(container_name='demo')
-        [
-            {
-                'name': 'test',
-                'key': 'container-23243-23234-3423423'
-            }
-        ]
-
-        Parameters
-        ----------
-        container_name : str
-            Name of the container
-
-        Returns
-        -------
-        list
-            List of dict {key:, name:} of attached configlets
-        """
-        list_configlet = list()
-        info = self.__cvp_client.api.get_configlets_by_container_id(
-            c_id=container_name)
-        info = {k.lower(): v for k, v in info.items()}
-        for attached_configlet in info['configletList']:
-            list_configlet.append(
-                self.__standard_output(source=attached_configlet))
-        return list_configlet
-
-    def __get_all_configlets(self):
-        """
-        __get_all_configlets Extract information for all configlets
-
-        Example
-        -------
-        >>> CvContainerTools._get_all_configlets()
-        [
-            {
-                'name': 'test',
-                'key': 'container-23243-23234-3423423'
-            }
-        ]
-
-        Returns
-        -------
-        list
-            List of dict {key:, name:} of attached configlets
-        """
-        result = list()
-        list_configlets = self.__cvp_client.api.get_configlets()
-        list_configlets = {k.lower(): v for k, v in list_configlets.items()}
-        for configlet in list_configlets['data']:
-            result.append(self.__standard_output(source=configlet))
-        return result
-
     def __get_configlet_info(self, configlet_name: str):
         """
         __get_configlet_info Get information of a configlet from CV

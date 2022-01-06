@@ -299,7 +299,10 @@ class CvConfigletTools(object):
                 MODULE_LOGGER.info('[check mode] - Configlet %s updated on cloudvision', str(
                     configlet['name']))
                 change_response.success = True
-                change_response.diff = configlet['diff']
+                if 'diff' in configlet:
+                    change_response.diff = configlet['diff']
+                else:
+                    change_response.diff = 'unset'
             else:
                 try:
                     update_resp = self._cvp_client.api.update_configlet(config=configlet['config'],
