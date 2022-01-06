@@ -9,6 +9,14 @@ Create, Delete, or Update CloudVision Portal Configlets.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Updated modules released with increased functionality
+:Alternative: Use :ref:`arista.cvp.cv_configlet_v3 <arista.cvp.cv_configlet_v3>` instead.
+
+
 
 Synopsis
 --------

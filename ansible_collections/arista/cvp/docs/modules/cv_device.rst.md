@@ -1,21 +1,29 @@
-# cv\_device
+# cv_device
 
 Provision, Reset, or Update CloudVision Portal Devices.
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
+
+## DEPRECATED
+
+## DEPRECATED
+
+- In version: `4.0`
+- Why : Updated modules released with increased functionality
+- Alternative: Use `arista.cvp.cv_device_v3` instead.
 
 ## Synopsis
 
 CloudVison Portal Device compares the list of Devices in devices against
 cvp-facts then adds, resets, or updates them as appropriate. If a device
-is in cvp\_facts but not in devices it will be reset to factory defaults
-in ZTP mode If a device is in devices but not in cvp\_facts it will be
-provisioned If a device is in both devices and cvp\_facts its configlets
+is in cvp_facts but not in devices it will be reset to factory defaults
+in ZTP mode If a device is in devices but not in cvp_facts it will be
+provisioned If a device is in both devices and cvp_facts its configlets
 and imageBundles will be compared and updated with the version in
 devices if the two are different. Warning - reset means devices will be
-erased and will run full ZTP process. Use this function with caution \!
+erased and will run full ZTP process. Use this function with caution !
 
 ## Module-specific Options
 
@@ -143,4 +151,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

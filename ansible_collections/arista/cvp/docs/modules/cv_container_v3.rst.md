@@ -1,10 +1,10 @@
-# cv\_container\_v3
+# cv_container_v3
 
 Manage Provisioning topology.
 
 Module added in version 3.0.0
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
 
@@ -109,4 +109,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

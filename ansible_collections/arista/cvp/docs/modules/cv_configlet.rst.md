@@ -1,19 +1,25 @@
-# cv\_configlet
+# cv_configlet
 
 Create, Delete, or Update CloudVision Portal Configlets.
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
+
+## DEPRECATED
+
+- In version: `4.0`
+- Why : Updated modules released with increased functionality
+- Alternative: Use `arista.cvp.cv_configlet_v3` instead.
 
 ## Synopsis
 
 CloudVison Portal Configlet compares the list of configlets and config
 in configlets against cvp-facts then adds, deletes, or updates them as
-appropriate. If a configlet is in cvp\_facts but not in configlets it
-will be deleted. If a configlet is in configlets but not in cvp\_facts
-it will be created. If a configlet is in both configlets and cvp\_facts
-it configuration will be compared and updated with the version in
+appropriate. If a configlet is in cvp_facts but not in configlets it
+will be deleted. If a configlet is in configlets but not in cvp_facts it
+will be created. If a configlet is in both configlets and cvp_facts it
+configuration will be compared and updated with the version in
 configlets if the two are different.
 
 ## Module-specific Options
@@ -132,4 +138,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

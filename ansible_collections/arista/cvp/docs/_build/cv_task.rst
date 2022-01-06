@@ -9,6 +9,14 @@ Execute or Cancel CVP Tasks.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Updated modules released with increased functionality
+:Alternative: Use :ref:`arista.cvp.cv_task_v3 <arista.cvp.cv_task_v3>` instead.
+
+
 
 Synopsis
 --------

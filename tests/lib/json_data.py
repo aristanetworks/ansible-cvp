@@ -27,6 +27,7 @@ json_data.py - Declares & initializes the variables and mock data used in the te
 
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
+from .static_content import CONFIGLET_CONTENT
 
 # Mapping between data name and its schema
 schemas = dict()
@@ -290,16 +291,16 @@ mook_data["invalid"]["device"] = [
 #######################################
 
 mook_data["valid"]["configlet"] = [
-    {"configlet_device01": "alias sib show version"},
-    {"configlet-device01": "alias sib show version"},
-    {"configlet-device_01": "alias sib show version"},
+        {"configlet_device01": "alias sib show version"},
+        {"configlet-device01": "alias sib show version"},
+        {"configlet-device_01": CONFIGLET_CONTENT},
 ]
 
 mook_data["invalid"]["configlet"] = [
-    [
-        {"configlet_device01": "alias sib show version"},
-        {"configlet_device02": "alias sib show version"}
-    ]
+        {"configlet_device01": 100},
+        {"configlet_device02": True},
+        {"configlet_device02": False},
+        {"configlet-device_01": "alias sib show version", 'version': 1},
 ]
 
 #######################################

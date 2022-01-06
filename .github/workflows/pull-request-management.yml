@@ -192,7 +192,8 @@ jobs:
   ansible_test:
     name: Run ansible-test validation
     runs-on: ubuntu-20.04
-    needs: [ molecule_dhcp, molecule_cv_modules, molecule_dhcp, pytest]
+    needs: [ molecule_dhcp, molecule_cv_modules, pytest]
+    if: always()
     env:
       PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
       ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
@@ -213,8 +214,9 @@ jobs:
       - name: 'Install Python requirements'
         run: make install-requirements
       - name: 'ansible-test linting'
+        # Skip runtime-metadata as test is broken when requires_ansible contains < or > as described in documentation
         run: |
           cd ansible_collections/arista/cvp/
           rm -rf molecule/
-          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
+          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}  --skip-test runtime-metadata
           rm -rf tests/output/
