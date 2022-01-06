@@ -86,47 +86,40 @@ The following options may be specified for this module:
 </br>
 
 ## Examples:
-
+```yaml
  - name: CVP Image Tests
-  hosts: cv_server
-  gather_facts: no
-  vars:
-
-  tasks:
-    - name: "Gather CVP image information facts {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-         mode: image
-         action: get
-      register: image_data
-
-    - name: "Print out facts from {{inventory_hostname}}"
-      debug:
-        msg: "{{image_data}}"
-
-
-    - name: "Get CVP image image bundles {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: bundle
-        action: get
-      register: image_bundle_data
-
-    - name: "Print out images from {{inventory_hostname}}"
-      debug:
-        msg: "{{image_bundle_data}}"
-
-
-    - name: "Update an image bundle {{inventory_hostname}}"
-      vars:
-        ansible_command_timeout: 1200
-        ansible_connect_timeout: 600
-      arista.cvp.cv_image_v3:
-        mode: bundle
-        action: add
-        bundle_name: Test_bundle
-        image_list:
+   hosts: cv_server
+   gather_facts: no
+   vars:
+   tasks:
+       - name: "Gather CVP image information facts {{inventory_hostname}}"
+       arista.cvp.cv_image_v3:
+           mode: image
+           action: get
+       register: image_data
+       - name: "Print out facts from {{inventory_hostname}}"
+       debug:
+           msg: "{{image_data}}"
+       - name: "Get CVP image image bundles {{inventory_hostname}}"
+       arista.cvp.cv_image_v3:
+           mode: bundle
+           action: get
+       register: image_bundle_data
+       - name: "Print out images from {{inventory_hostname}}"
+       debug:
+           msg: "{{image_bundle_data}}"
+       - name: "Update an image bundle {{inventory_hostname}}"
+       vars:
+           ansible_command_timeout: 1200
+           ansible_connect_timeout: 600
+       arista.cvp.cv_image_v3:
+           mode: bundle
+           action: add
+           bundle_name: Test_bundle
+           image_list:
            - TerminAttr-1.16.4-1.swix
            - EOS-4.25.4M.swi
-
+```
 ## Caveats
 
 - If running in bundle-add mode, and the `bundle_name` already exists, then the existing bundle is updated to match the new image list
