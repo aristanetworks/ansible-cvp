@@ -10,13 +10,7 @@ Module added in version 3.0.0
 
 ## Synopsis
 
-CloudVison Portal Configlet compares the list of configlets and config
-in configlets against cvp-facts then adds, deletes, or updates them as
-appropriate. If a configlet is in cvp_facts but not in configlets it
-will be deleted. If a configlet is in configlets but not in cvp_facts it
-will be created. If a configlet is in both configlets and cvp_facts it
-configuration will be compared and updated with the version in
-configlets if the two are different.
+CloudVison Portal Image allows you to upload an EOS, or other software image into CVP, get a list of CVP images or image Bundles. The bundle mode allows for the creation of a named EOS bundle (consisting of one or more images present on the system), update of the bundle, or deletion of the bundle.
 
 ## Module-specific Options
 
