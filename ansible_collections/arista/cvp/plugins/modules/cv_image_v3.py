@@ -56,6 +56,9 @@ EXAMPLES = r"""
 
 
     - name: "Update an image bundle {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
@@ -92,7 +95,7 @@ def main():
         image=dict(type='str'),
         image_list=dict(type="list", elements='str'),
         bundle_name=dict(type='str'),
-        mode=dict(default='images', type='str', choices=['image','bundle']),
+        mode=dict(default='image', type='str', choices=['image','bundle']),
         action=dict(default='get', type='str', choices=['get','add','remove']),
         )
 
