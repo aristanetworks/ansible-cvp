@@ -26,7 +26,7 @@ json_data.py - Declares & initializes the variables and mock data used in the te
 """
 
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC
 from .static_content import CONFIGLET_CONTENT
 
 # Mapping between data name and its schema
@@ -356,39 +356,3 @@ container_topology = [
         }
     }
 ]
-
-##############################################
-# CVP data used to mock cvprac.api.CvpClient #
-##############################################
-
-CVP_DATA_CONTAINERS = {
-    'Tenant': {'name': 'Tenant',
-               'key': 'root',
-               'root': True,
-               'undefined': False,
-               'userId': 'cvp system',
-               'dateTimeInLongFormat': 1639759767913,
-               'mode': 'expand'},
-    'ansible-cvp-tests-1': {'name': 'ansible-cvp-tests-1',
-                            'key': 'container_274787b2-c45a-4b0c-8b97-eb4011909b02',
-                            'root': False,
-                            'undefined': False,
-                            'userId': 'cvpadmin',
-                            'dateTimeInLongFormat': 1640359353713,
-                            'mode': 'expand'},
-    'Simple Fabric': {'name': 'Simple Fabric',
-                      'key': 'container_6ac90bc0-f6d4-436f-bff0-8c064c247f01',
-                      'root': False,
-                      'undefined': False,
-                      'userId': 'cvpadmin',
-                      'dateTimeInLongFormat': 1640019781757,
-                      'mode': 'expand'},
-    'BadKey': {'bad_name': 'BadKey',
-               'bad_key': 'root',
-               'bad_root': True,
-               'bad_undefined': False,
-               'bad_userId': 'cvp system',
-               'bad_dateTimeInLongFormat': 1639759767913,
-               'bad_mode': 'expand'},
-    'NotExists': None
-}
