@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
-# pylint: disable=bare-except
-# pylint: disable=dangerous-default-value
-# flake8: noqa: W503
-# pylint: disable=logging-format-interpolation
-# flake8: noqa: W1202
-# pylint: disable = duplicate-code
-# flake8: noqa: R0801
 #
 # GNU General Public License v3.0+
 #
@@ -33,21 +26,14 @@ import logging
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
-    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpClientError  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpApiError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpClientError
+    from cvprac.cvp_client_errors import CvpApiError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
-# try:
-#     import jsonschema
-#     HAS_JSONSCHEMA = True
-# except ImportError:
-#     HAS_JSONSCHEMA = False
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.container_tools_v3')
