@@ -78,15 +78,6 @@ class ContainerInput(object):
         self.__parent_field: str = FIELD_PARENT_NAME
         self.__root_name = container_root_name
         self.__schema = schema
-        self.__normalize()
-
-    def __normalize(self):
-        """
-        __normalize Parse inventory and add keys that are optional from schema.
-        """
-        for container_name in self.__topology:
-            if FIELD_CONFIGLETS not in self.__topology[container_name]:
-                self.__topology[container_name].update({FIELD_CONFIGLETS: []})
 
     def __get_container_data(self, container_name: str, key_name: str):
         """
@@ -211,9 +202,9 @@ class ContainerInput(object):
         bool
             True if configlets attached, False if not
         """
-        if self.__get_container_data(container_name=container_name, key_name=configlet_key) is None:
-            return False
-        return True
+        if self.__get_container_data(container_name=container_name, key_name=configlet_key):
+            return True
+        return False
 
 
 class CvContainerTools(object):
