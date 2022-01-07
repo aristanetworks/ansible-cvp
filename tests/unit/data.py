@@ -137,7 +137,7 @@ USER_TOPOLOGY = [
              'taskIds': [],
              'diff': {},
              'configlets_detached_count': 0},
-         'success': False,
+         'success': True,
          'changed': False,
          'taskIds': []})
 ]

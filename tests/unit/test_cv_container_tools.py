@@ -17,7 +17,6 @@ LOGGER = logging.getLogger(__name__)
 @pytest.fixture
 def cvp_database():
     database = mock.MockCVPDatabase()
-    LOGGER.info('Initial CVP state: %s', database)
     yield database
     LOGGER.info('Final CVP state: %s', database)
 
@@ -41,5 +40,6 @@ def test_build_topology(cvp_database, container_tools, present, apply_mode, cvp_
     cvp_database.devices.update(cvp_data.get('devices', []))
     cvp_database.containers.update(cvp_data.get('containers', []))
     cvp_database.configlets.update(cvp_data.get('configlets', []))
+    LOGGER.info('Initial CVP state: %s', cvp_database)
     response = container_tools.build_topology(user_topology, present = present, apply_mode = apply_mode)
     assert response.content == expected_response
