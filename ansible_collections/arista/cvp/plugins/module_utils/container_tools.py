@@ -30,9 +30,9 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pyli
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError, CVPRessource
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
+import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 try:
-    from cvprac.cvp_client_errors import CvpClientError
-    from cvprac.cvp_client_errors import CvpApiError
+    from cvprac.cvp_client_errors import CvpClientError, CvpApiError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False

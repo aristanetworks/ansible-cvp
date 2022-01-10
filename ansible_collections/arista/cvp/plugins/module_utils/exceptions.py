@@ -18,8 +18,12 @@
 # limitations under the License.
 #
 
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
 from enum import Enum, auto
 from typing import Callable
+
 
 class CVPRessource(Enum):
     """Enumeration that defines possible ressource in CVP"""
@@ -31,9 +35,11 @@ class CVPRessource(Enum):
     def __str__(self):
         return str(self.name).lower()
 
+
 class AnsibleCVPError(Exception):
     """Base class for exceptions in ansible-cvp collection"""
     pass
+
 
 class AnsibleCVPApiError(Exception):
     """Exception raised when an API-related error occurs"""
@@ -54,6 +60,7 @@ class AnsibleCVPApiError(Exception):
 
     def __str__(self):
         return f'{self.cvprac_method.__name__} -> {self.message}'
+
 
 class AnsibleCVPNotFoundError(Exception):
     """Raised when the ressource is not found in CloudVision instance."""
