@@ -45,6 +45,19 @@ The following options may be specified for this module:
     </tr>
 
     <tr>
+    <td>options<br/><div style="font-size: small;"></div></td>
+    <td>dict</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>Implements the ability to create a sub-argument_spec, where the sub</div>
+        <div>options of the top level argument are also validated using</div>
+        <div>the attributes discussed in this section.</div>
+    </td>
+    </tr>
+
+    <tr>
     <td>state<br/><div style="font-size: small;"></div></td>
     <td>str</td>
     <td>no</td>

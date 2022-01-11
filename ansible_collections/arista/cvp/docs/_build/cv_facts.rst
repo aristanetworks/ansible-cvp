@@ -14,7 +14,7 @@ DEPRECATED
 
 :In: version:
 :Why: Features are now part of every single v3 modules.
-:Alternative:
+:Alternative: Currently no alternative.
 
 
 
