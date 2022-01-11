@@ -41,21 +41,26 @@ options:
     default: ['configlets', 'containers', 'devices', 'images']
     type: list
     elements: str
-    choices:
-      - devices
-      - containers
-      - configlets
-      - images
+    choices: ['configlets', 'containers', 'devices', 'images']
 '''
 
 EXAMPLES = r'''
----
   tasks:
-    - name: '#01 - Collect devices facts from {{inventory_hostname}}'
-      arista.cvp.cv_facts_v3:
-        facts:
-          devices
-      register: FACTS_DEVICES
+  - name: '#01 - Collect devices facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+
+  - name: '#02 - Collect devices facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - configlets
+    register: FACTS_DEVICES
+
+  - name: '#03 - Collect devices facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - devices
+        - containers
+    register: FACTS_DEVICES
 '''
 
 import logging
@@ -64,6 +69,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 # from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import *
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -116,8 +122,16 @@ def main():
         supports_check_mode=True
     )
 
+    # Test all libs are correctly installed
+    check_import(ansible_module=ansible_module)
+
+    # Create CVPRAC client
+    cv_client = tools_cv.cv_connect(ansible_module)
+
     # Instantiate ansible results
-    result = dict(changed=False, data={}, failed=False)
+    facts_collector = CvFactsTools(cv_connection=cv_client)
+    facts = facts_collector.facts(scope=ansible_module.params['facts'])
+    result = dict(changed=False, data=facts, failed=False)
 
     # Implement logic
 

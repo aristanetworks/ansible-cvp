@@ -67,9 +67,8 @@ class CvFactsTools():
     CvFactsTools Object to operate Facts from Cloudvision
     """
 
-    def __init__(self, cv_connection, ansible_module: AnsibleModule = None):
+    def __init__(self, cv_connection):
         self.__cv_client = cv_connection
-        self.__ansible = ansible_module
         self._cache = {'containers': {}}
         self._facts = {FIELD_FACTS_DEVICE: []}
 

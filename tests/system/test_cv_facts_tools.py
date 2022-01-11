@@ -22,7 +22,7 @@ import pytest
 
 
 # Set specific logging syntax
-logger = setup_custom_logger('configlet_system')
+logger = setup_custom_logger('facts_v3_system')
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
