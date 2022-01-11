@@ -30,11 +30,6 @@ author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 description:
   - Returns list of devices, configlets, containers and images
-deprecated:
-  removed_in: '4.0.0'
-  why: Features are now part of every single v3 modules.
-  alternative: Currently no alternative.
-  removed_from_collection: arista.cvp
 options:
   gather_subset:
     description:
@@ -69,13 +64,6 @@ options:
       - containers
       - configlets
       - tasks
-  options:
-    description:
-      - Implements the ability to create a sub-argument_spec, where the sub
-      - options of the top level argument are also validated using
-      - the attributes discussed in this section.
-    required: false
-    type: dict
 '''
 
 EXAMPLES = r'''
@@ -116,8 +104,8 @@ import logging
 import traceback  # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.arista.cvp.plugins.module_utils import tools_inventory
-from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
+import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
+import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
 
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
@@ -425,17 +413,17 @@ def facts_images(module, facts):
     facts['imageBundles'] = []
     images = []
     imageBundles = []
-    
+
     MODULE_LOGGER.debug('  -> Collecting images')
-    images = module.client.api.get_images()['data']
+    images = module.client.api.client.api.get_images()['data']
     for image in images:
         facts['images'].append(image)
-        
-    MODULE_LOGGER.debug('  -> Collecting image bundles')        
-    imageBundles = module.client.api.get_image_bundles()['data']
+
+    MODULE_LOGGER.debug('  -> Collecting image bundles')
+    imageBundles = module.client.api.client.api.get_image_bundles()['data']
     for bundle in imageBundles:
-        facts['imageBundles'].append(bundle)    
-    
+        facts['imageBundles'].append(bundle)
+
     return facts
 
 
@@ -484,7 +472,7 @@ def facts_builder(module):
     # Extract imageBundles information
     if 'all' in module.params['facts'] or 'images' in module.params['facts']:
         MODULE_LOGGER.info('** Collecting images facts ...')
-        facts = facts_images(module=module, facts=facts)
+        facts['imageBundles'] = list()
 
     # End of Facts module
     MODULE_LOGGER.info('** All facts done')
@@ -496,7 +484,6 @@ def main():
     main entry point for module execution.
     """
     argument_spec = dict(
-        options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         gather_subset=dict(type='list',
                            elements='str',
                            required=False,
@@ -513,8 +500,7 @@ def main():
                             'configlets',
                             'containers',
                             'devices',
-                            'tasks',
-                            'images'],
+                            'tasks'],
                    default='all'))
 
     module = AnsibleModule(argument_spec=argument_spec,
