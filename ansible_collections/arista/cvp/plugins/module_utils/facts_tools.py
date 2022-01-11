@@ -55,6 +55,7 @@ MODULE_LOGGER.info('Start fact_tools module execution')
 # CONSTANTS for fields in API data
 FIELD_FACTS_DEVICE = 'cvp_devices'
 FIELD_FACTS_CONTAINER = 'cvp_containers'
+FIELD_FACTS_CONFIGLET = 'cvp_configlets'
 
 
 # ------------------------------------------ #
@@ -72,7 +73,7 @@ class CvFactsTools():
         self._cache = {'containers': {}}
         self._facts = {FIELD_FACTS_DEVICE: []}
 
-    def facts(self, scope: List[str] = ['devices', 'containers']):   # noqa # pylint: disable=dangerous-default-value
+    def facts(self, scope: List[str]):
         """
         facts Public API to collect facts from Cloudvision
 
@@ -109,14 +110,16 @@ class CvFactsTools():
             A dictionary of information with all the data from Cloudvision
         """
         if 'devices' in scope:
-            self._fact_devices()
+            self.__fact_devices()
         if 'containers' in scope:
-            self._fact_containers()
+            self.__fact_containers()
+        if 'configlets' in scope:
+            self.__fact_configlets()
         return self._facts
 
-    def _get_container_name(self, key: str = 'undefined_container'):
+    def __get_container_name(self, key: str = 'undefined_container'):
         """
-        _get_container_name Helper to get container name from its key
+        __get_container_name Helper to get container name from its key
 
         Send a call to CV to get name of a container key
 
@@ -141,9 +144,9 @@ class CvFactsTools():
             self._cache['containers'][key] = result
             return result
 
-    def device_update_info(self, device: dict):
+    def __device_update_info(self, device: dict):
         """
-        device_update_info Helper to add missing information for device facts
+        __device_update_info Helper to add missing information for device facts
 
         Add or update fields from CV response to make output valid with arista.cvp.cv_device_v3 schema
 
@@ -158,14 +161,14 @@ class CvFactsTools():
             Updated information
         """
         if device['status'] != '':
-            device[FIELD_PARENT_NAME] = self._get_container_name(key=device['parentContainerKey'])
+            device[FIELD_PARENT_NAME] = self.__get_container_name(key=device['parentContainerKey'])
         else:
             device[FIELD_PARENT_NAME] = ''
         return device
 
-    def containers_get_configlets(self, container_id):
+    def __containers_get_configlets(self, container_id):
         """
-        containers_get_configlets Build list of configlets attached to a container
+        __containers_get_configlets Build list of configlets attached to a container
 
         Create list of configlets attached to container and using a valid structure against arista.cvp._cv_container_v3 module
 
@@ -184,32 +187,39 @@ class CvFactsTools():
             return []
         return [configlet['name'] for configlet in cv_result['configletList']]
 
-    ### Fact management
+    # Fact management
 
-    def _fact_devices(self):
+    def __fact_devices(self):
         """
-        _fact_devices Collect facts related to device inventory
+        __fact_devices Collect facts related to device inventory
         """
         try:
             cv_devices = self.__cv_client.api.get_inventory()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
         for device in cv_devices:
-            device = self.device_update_info(device=device)
+            device = self.__device_update_info(device=device)
             self._facts[FIELD_FACTS_DEVICE].append(device)
 
-    def _fact_containers(self):
+    def __fact_containers(self):
         """
-        _fact_containers Collect facts related to container structure
+        __fact_containers Collect facts related to container structure
         """
         try:
             cv_containers = self.__cv_client.api.get_containers()
         except CvpApiError as error_msg:
-            MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
+            MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
         self._facts[FIELD_FACTS_CONTAINER] = {
             container['name']: {
                 FIELD_PARENT_NAME: container['parentName'],
-                'configlets': self.containers_get_configlets(container_id=container['key'])
+                'configlets': self.__containers_get_configlets(container_id=container['key'])
             }
             for container in cv_containers['data']
         }
+
+    def __fact_configlets(self):
+        try:
+            cv_configlets = self.__cv_client.api.get_configlets()
+        except CvpApiError as error_msg:
+            MODULE_LOGGER.error('Error when collecting configlets facts: %s', str(error_msg))
+        self._facts[FIELD_FACTS_CONFIGLET] = {configlet['name']: configlet['config'] for configlet in cv_configlets['data']}

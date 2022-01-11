@@ -25,19 +25,45 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = r'''
-To Be done
+module: cv_facts_v3
+version_added: "3.2.0"
+author: EMEA AS Team (@aristanetworks)
+short_description: Collect facts from Cloudvision
+description:
+- Returns list of devices, configlets, containers and images
+options:
+  facts:
+    description:
+      - List of facts to retrieve from CVP.
+      - By default, cv_facts returns facts for devices/configlets/containers/tasks
+      - Using this parameter allows user to limit scope to a subset of information.
+    required: false
+    default: ['configlets', 'containers', 'devices', 'images']
+    type: list
+    elements: str
+    choices:
+      - devices
+      - containers
+      - configlets
+      - images
 '''
 
 EXAMPLES = r'''
-To Be done
+---
+  tasks:
+    - name: '#01 - Collect devices facts from {{inventory_hostname}}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          devices
+      register: FACTS_DEVICES
 '''
 
 import logging
 import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible.module_utils.basic import AnsibleModule  # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv  # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema  # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv  # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
 # from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import *
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -64,17 +90,31 @@ def check_import(ansible_module: AnsibleModule):
         ansible_module.fail_json(
             msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
+
 def main():
     """
     Main entry point for module execution.
     """
     argument_spec = dict(
         # Ansible Argument Spec
+        facts=dict(
+            type='list',
+            elements='str',
+            required=False,
+            choices=[
+                'configlets',
+                'containers',
+                'devices',
+                'images'
+            ],
+            default=['configlets', 'containers', 'devices', 'images'])
     )
 
     # Make module global to use it in all functions when required
-    ansible_module = AnsibleModule(argument_spec=argument_spec,
-                                   supports_check_mode=True)
+    ansible_module = AnsibleModule(
+        argument_spec=argument_spec,
+        supports_check_mode=True
+    )
 
     # Instantiate ansible results
     result = dict(changed=False, data={}, failed=False)
