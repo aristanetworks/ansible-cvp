@@ -106,8 +106,6 @@ EXAMPLES = r'''
 '''
 
 # Required by Ansible and CVP
-import os
-import re
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
@@ -120,8 +118,6 @@ MODULE_LOGGER = logging.getLogger('arista.cvp.cv_image')
 MODULE_LOGGER.info('Start cv_image module execution')
 
 
-
-
 def main():
     """
     main entry point for module execution.
@@ -130,41 +126,43 @@ def main():
         image=dict(type='str'),
         image_list=dict(type="list", elements='str'),
         bundle_name=dict(type='str'),
-        mode=dict(default='image', type='str', choices=['image','bundle']),
-        action=dict(default='get', type='str', choices=['get','add','remove']),
-        )
+        mode=dict(default='image', type='str', choices=['image', 'bundle']),
+        action=dict(default='get', type='str', choices=['get', 'add', 'remove']),
+    )
 
-    ansible_module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=True)
+    ansible_module = AnsibleModule(
+        argument_spec=argument_spec,
+        supports_check_mode=True
+    )
 
     # Instantiate ansible results
     result = dict(changed=False, data={}, failed=False)
-    warnings = list()
-
+    warnings = []
 
     MODULE_LOGGER.info('starting module cv_image_v3')
     if ansible_module.check_mode:
         MODULE_LOGGER.warning('! check_mode is enable')
         # module.exit_json(changed=True)
 
-
     if not tools_cv.HAS_CVPRAC:
         ansible_module.fail_json(
-            msg='cvprac required for this module. Please install using pip install cvprac')
+            msg='cvprac required for this module. Please install using pip install cvprac'
+        )
 
-     # Create CVPRAC client
+    # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
 
-    result = dict( changed=False )
+    result = dict(changed=False)
 
     # Instantiate the image class
-    cv_images = CvImageTools( cv_connection=cv_client,
+    cv_images = CvImageTools(
+        cv_connection=cv_client,
         ansible_module=ansible_module,
-        check_mode=ansible_module.check_mode )
+        check_mode=ansible_module.check_mode
+    )
 
-    result['changed'], result['data'], warnings = cv_images.module_action( **ansible_module.params )
+    result['changed'], result['data'], warnings = cv_images.module_action(**ansible_module.params)
     MODULE_LOGGER.warning(warnings)
-
 
     ansible_module.exit_json(**result)
 
