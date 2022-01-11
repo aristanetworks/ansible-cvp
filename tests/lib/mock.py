@@ -31,9 +31,11 @@ CVP_DATA_CONTAINERS_INIT = {
         'parentContainerId': None}
 }
 
+
 class CvpNotFoundError(Exception):
     """Exception class to be raised when data is not found in mock CVP database"""
     pass
+
 
 class MockCVPDatabase:
     """Class to mock CVP database being modified during tests"""
@@ -87,14 +89,14 @@ class MockCVPDatabase:
         if fmt != FIELD_TOPOLOGY or start != 0 or end != 0:
             raise NotImplementedError('Mock filter_topology() called with unsupported arguments')
         container = self._get_container_by_key(node_id)
-        return { FIELD_TOPOLOGY: {
-                    FIELD_NAME: container[FIELD_NAME],
-                    FIELD_KEY: container[FIELD_KEY],
-                    FIELD_PARENT_ID: container[FIELD_PARENT_ID],
-                    FIELD_COUNT_CONTAINERS: self._count_container_child(container[FIELD_KEY]),
-                    FIELD_COUNT_DEVICES: 0
-                    }
-                }
+        return {FIELD_TOPOLOGY: {
+            FIELD_NAME: container[FIELD_NAME],
+            FIELD_KEY: container[FIELD_KEY],
+            FIELD_PARENT_ID: container[FIELD_PARENT_ID],
+            FIELD_COUNT_CONTAINERS: self._count_container_child(container[FIELD_KEY]),
+            FIELD_COUNT_DEVICES: 0
+        }
+        }
 
     def apply_configlets_to_container(self, app_name, container,
                                       new_configlets, create_task=True):
@@ -112,13 +114,14 @@ class MockCVPDatabase:
 
     def __eq__(self, other):
         return self.devices == other.devices and \
-               self.containers == other.containers and \
-               self.configlets == other.configlets
+            self.containers == other.containers and \
+            self.configlets == other.configlets
 
     def __str__(self):
         return f'\n ### Devices ###\n{pprint.pformat(self.devices)}' + \
                f'\n ### Containers ###\n{pprint.pformat(self.containers)}' + \
                f'\n ### Configlets ###\n{pprint.pformat(self.configlets)}'
+
 
 def get_cvp_client(cvp_database) -> MagicMock:
     """
@@ -138,12 +141,15 @@ def get_cvp_client(cvp_database) -> MagicMock:
     mock_client.api.apply_configlets_to_container.side_effect = cvp_database.apply_configlets_to_container
     return mock_client
 
+
 class AnsibleFailJson(Exception):
     """Exception class to be raised by module.fail_json and caught by the test case"""
     pass
 
+
 def fail_json(msg: str = None):
     raise AnsibleFailJson(msg)
+
 
 def get_ansible_module(check_mode: bool = False):
     """

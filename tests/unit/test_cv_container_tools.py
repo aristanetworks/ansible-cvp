@@ -10,6 +10,7 @@ from tests.unit import data
 
 LOGGER = logging.getLogger(__name__)
 
+
 # ---------------------------------------------------------------------------- #
 #   FIXTURES
 # ---------------------------------------------------------------------------- #
@@ -20,7 +21,8 @@ def cvp_database():
     yield database
     LOGGER.info('Final CVP state: %s', database)
 
-@pytest.fixture(params=[False]) # Fixture parameter is Ansible check_mode
+
+@pytest.fixture(params=[False])  # Fixture parameter is Ansible check_mode
 def container_tools(request, cvp_database):
     cvp_client = mock.get_cvp_client(cvp_database)
     module = mock.get_ansible_module(check_mode=request.param)
@@ -28,12 +30,12 @@ def container_tools(request, cvp_database):
     yield instance
     LOGGER.debug('Mock calls: %s', pprint.pformat(cvp_client.mock_calls))
 
+
 # ---------------------------------------------------------------------------- #
 #   TEST CASES
 # ---------------------------------------------------------------------------- #
 
 # build_topology()
-
 @pytest.mark.generic
 @pytest.mark.parametrize("present, apply_mode, cvp_data, user_topology, expected_response", data.USER_TOPOLOGY)
 def test_build_topology(cvp_database, container_tools, present, apply_mode, cvp_data, user_topology, expected_response):
@@ -41,5 +43,5 @@ def test_build_topology(cvp_database, container_tools, present, apply_mode, cvp_
     cvp_database.containers.update(cvp_data.get('containers', []))
     cvp_database.configlets.update(cvp_data.get('configlets', []))
     LOGGER.info('Initial CVP state: %s', cvp_database)
-    response = container_tools.build_topology(user_topology, present = present, apply_mode = apply_mode)
+    response = container_tools.build_topology(user_topology, present=present, apply_mode=apply_mode)
     assert response.content == expected_response
