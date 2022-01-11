@@ -109,10 +109,8 @@ EXAMPLES = r'''
 import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.tools as tools
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v1 as schema
-from ansible_collections.arista.cvp.plugins.module_utils.image_tools import *
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils.image_tools import CvImageTools
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_image')
 MODULE_LOGGER.info('Start cv_image module execution')
