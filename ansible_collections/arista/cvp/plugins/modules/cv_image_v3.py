@@ -19,19 +19,56 @@
 #
 
 from __future__ import absolute_import, division, print_function
-import os
+
 __metaclass__ = type
 
-
-
-EXAMPLES = r"""
+DOCUMENTATION = r'''
 ---
+module: cv_image_v3
+version_added: 3.3.0
+author: EMEA AS Team (@aristanetworks)
+short_description: EOS Image management with Cloudvision
+description:
+  - CloudVision Portal Image management module
+options:
+  image:
+    description: Name of the image file, including path if needed
+    required: false
+    type: str
+  image_list:
+    description: List of name of the image file, including path if needed
+    required: false
+    type: list
+    elements: str
+  bundle_name:
+    description: Name of the bundle to manage
+    required: false
+    type: str
+  mode:
+    description: What to manage with module
+    required: false
+    type: str
+    choices:
+      - bundle
+      - image
+    default: image
+  action:
+    description: Action to do with module
+    required: false
+    default: get
+    type: str
+    choices:
+      - get
+      - add
+      - remove
+'''
+
+EXAMPLES = r'''
 ---
 - name: CVP Image Tests
   hosts: cv_server
   gather_facts: no
   vars:
-
   tasks:
     - name: "Gather CVP image information facts {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
@@ -66,12 +103,10 @@ EXAMPLES = r"""
         image_list:
            - TerminAttr-1.16.4-1.swix
            - EOS-4.25.4M.swi
-
-"""
-
-
+'''
 
 # Required by Ansible and CVP
+import os
 import re
 import logging
 from ansible.module_utils.basic import AnsibleModule
@@ -101,7 +136,7 @@ def main():
 
     ansible_module = AnsibleModule(argument_spec=argument_spec,
                            supports_check_mode=True)
-    
+
     # Instantiate ansible results
     result = dict(changed=False, data={}, failed=False)
     warnings = list()
@@ -122,11 +157,11 @@ def main():
 
     result = dict( changed=False )
 
-    # Instantiate the image class    
+    # Instantiate the image class
     cv_images = CvImageTools( cv_connection=cv_client,
         ansible_module=ansible_module,
         check_mode=ansible_module.check_mode )
-    
+
     result['changed'], result['data'], warnings = cv_images.module_action( **ansible_module.params )
     MODULE_LOGGER.warning(warnings)
 
