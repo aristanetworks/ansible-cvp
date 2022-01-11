@@ -9,6 +9,14 @@ Manage Provisioning topology.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Updated modules released with increased functionality
+:Alternative: Use :ref:`arista.cvp.cv_container_v3 <arista.cvp.cv_container_v3>` instead.
+
+
 
 Synopsis
 --------

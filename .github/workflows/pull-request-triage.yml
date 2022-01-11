@@ -83,6 +83,7 @@ jobs:
             cv_container
             cv_configlet
             cv_task
+            module_utils
             dhcp_configuration
             mkdoc
             contribution

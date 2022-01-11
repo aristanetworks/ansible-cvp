@@ -64,7 +64,7 @@ import logging
 import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils.task_tools import CvTaskTools
 try:

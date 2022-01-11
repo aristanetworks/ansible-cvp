@@ -47,7 +47,7 @@ class CvTaskTools():
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
-        self.__check_mode = check_mode
+        # self.__check_mode = check_mode
 
     def __get_task_data(self, task_id: str):
         """

@@ -44,7 +44,7 @@ options:
     description: Set if ansible should build or remove devices on CLoudvision
     required: false
     default: 'present'
-    choices: ['present', 'absent']
+    choices: ['present', 'factory_reset']
     type: str
   apply_mode:
     description: Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.
@@ -126,8 +126,8 @@ import logging
 import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import CvDeviceTools, DeviceInventory
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -165,7 +165,7 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'absent']),
+                   choices=['present', 'factory_reset']),
         apply_mode=dict(type='str',
                         required=False,
                         default='loose',
@@ -183,9 +183,6 @@ def main():
     result = dict(changed=False, data={}, failed=False)
     result['data']['taskIds'] = list()
     result['data']['tasks'] = list()
-
-    if ansible_module.params['state'] == 'absent':
-        ansible_module.fail_json(msg='State==absent is not yet supported !')
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
@@ -210,7 +207,8 @@ def main():
     result = cv_topology.manager(
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
-        search_mode=ansible_module.params['search_key'])
+        search_mode=ansible_module.params['search_key'],
+        state=ansible_module.params['state'])
 
     ansible_module.exit_json(**result)
 
