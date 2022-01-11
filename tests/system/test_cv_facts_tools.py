@@ -16,7 +16,8 @@ from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFa
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import validate_cv_inputs, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
 from lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger
 from lib.config import user_token
-from lib.utils import cvp_login
+from lib.utils import cvp_login, generate_test_ids_list
+from lib.parametrize import mook_data
 import logging
 import pytest
 
@@ -38,6 +39,33 @@ def CvFactsTools_Manager(request):
     # ansible_module = AnsibleModuleMock(check_mode=False)
     # request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp, ansible_module=ansible_module)
     request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp)
+
+# ---------------------------------------------------------------------------- #
+#   PARAMETRIZE Management
+# ---------------------------------------------------------------------------- #
+
+# Required as moock_data is one more level for facts
+def generate_flat_data(type: str, mode: str = "valid", fact: str = "device_ids"):
+    """Returns the data based on type and mode
+
+        Args:
+            type (string): type of data. It can be 'device', 'container' or 'configlet'
+            mode (string): mode can be 'valid' or 'invalid'
+            fact (string): Fact type to get data. Can be 'devices'
+
+        Returns:
+            List: data based on mode and type
+        """
+    flat_data = []
+    if (
+        mode in mook_data
+        and type in mook_data[mode]
+        and fact in mook_data[mode][type]
+    ):
+        for fact_type in mook_data[mode][type][fact]:
+            flat_data.append(fact_type)
+    return flat_data
+
 
 
 # ---------------------------------------------------------------------------- #
@@ -61,12 +89,16 @@ class TestCvContainerToolsContainers():
     def test_get_container_name(self):
         result = self.inventory._CvFactsTools__get_container_name(key='undefined_container')
         assert result == 'Undefined'
+        logger.debug('Got response from module: {0}'.format(result))
+
 
     @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_get_container_name_incorrect(self):
         result = self.inventory._CvFactsTools__get_container_name(key='undefined_container2')
         assert result is None
+        logger.debug('Got response from module: {0}'.format(result))
+
 
     @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
@@ -75,7 +107,8 @@ class TestCvContainerToolsContainers():
         assert FIELD_FACTS_CONTAINER in result
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONTAINER], schema=SCHEMA_CV_CONTAINER)
         logger.info('output is valid against collection schema')
-        logger.debug(result)
+        logger.debug('Got response from module: {0}'.format(result))
+
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 class TestCvContainerToolsDevices():
@@ -90,6 +123,24 @@ class TestCvContainerToolsDevices():
 
     @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.parametrize("netid", generate_flat_data(type='facts', mode='valid', fact='device_ids'), ids=generate_test_ids_list)
+    def test_get_device_configlet_correct(self, netid):
+        result = self.inventory._CvFactsTools__device_get_configlets(netid=netid)
+        assert result is not None
+        assert len(result) >= 1
+        logger.debug('Got response from module: {0}'.format(result))
+
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    @pytest.mark.parametrize("netid", generate_flat_data(type='facts', mode='invalid', fact='device_ids'), ids=generate_test_ids_list)
+    def test_get_device_configlet_incorrect(self, netid):
+        result = self.inventory._CvFactsTools__device_get_configlets(netid=netid)
+        assert result is not None
+        assert len(result) == 0
+        logger.debug('Got response from module: {0}'.format(result))
+
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_devices(self):
         result = self.inventory.facts(scope=['devices'])
         assert FIELD_FACTS_DEVICE in result
@@ -97,7 +148,18 @@ class TestCvContainerToolsDevices():
             assert FIELD_PARENT_NAME in dev.keys()
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
-        logger.debug('Device inventory result is: {0}'.format(result))
+        logger.debug('Got response from module: {0}'.format(result))
+
+
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_fake(self):
+        data = {
+            'configlets_mappers': self.cvp.api.get_configlets_and_mappers()['data']
+        }
+
+        logger.debug(data['configlets_mappers']['configletMappers'])
+        # configletIds = [mapper['configletId'] for mapper in self._cache['configlets_mappers']['configletMappers']]
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
@@ -118,7 +180,8 @@ class TestCvContainerToolsConfiglets():
         assert 'cvp_configlets' in result
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
-        logger.debug(result)
+        logger.debug('Got response from module: {0}'.format(result))
+
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
@@ -140,4 +203,4 @@ class TestCvContainerToolsAll():
         assert FIELD_FACTS_CONFIGLET in result
         assert FIELD_FACTS_CONTAINER in result
         assert FIELD_FACTS_DEVICE in result
-        logger.debug(result)
+        logger.debug('Got response from module: {0}'.format(result))

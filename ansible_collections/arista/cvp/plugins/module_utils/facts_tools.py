@@ -24,9 +24,7 @@ __metaclass__ = type
 import traceback
 import logging
 from typing import List
-from ansible.module_utils.basic import AnsibleModule   # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
 try:
@@ -69,7 +67,7 @@ class CvFactsTools():
 
     def __init__(self, cv_connection):
         self.__cv_client = cv_connection
-        self._cache = {'containers': {}}
+        self._cache = {'containers': {}, 'configlets_mappers': {}}
         self._facts = {FIELD_FACTS_DEVICE: []}
 
     def facts(self, scope: List[str]):
@@ -186,6 +184,64 @@ class CvFactsTools():
             return []
         return [configlet['name'] for configlet in cv_result['configletList']]
 
+    # TODO: to be removed during code review
+    # By using this approach for 18 devices we move from 1.78sec to 3.69sec
+    # def __device_get_configlets(self, netid: str):
+    #     try:
+    #         cv_result = self.__cv_client.api.get_configlets_by_netelement_id(d_id=netid)
+    #     except CvpApiError as api_error:
+    #         MODULE_LOGGER.error('Device does not exist: {0}'.format(netid))
+    #         return []
+    #     if cv_result['total'] == 0:
+    #         return []
+    #     return [configlet['name'] for configlet in cv_result['configletList'] if configlet['containerCount'] == 0]
+
+    # By using this approach for 18 devices we stay at 1.78sec
+    def __configletIds_to_configletName(self, configletIds: List[str]):
+        """
+        __configletIds_to_configletName Build a list of configlets name from a list of configlets ID
+
+        Extract list of configlets name from CVP mappers based on a list of configlets ID provided as an input
+
+        Parameters
+        ----------
+        configletIds : List[str]
+            List of configlet IDs
+
+        Returns
+        -------
+        List[str]
+            List of configlets name
+        """
+        if not configletIds:
+            return []
+        configlets = self._cache['configlets_mappers']['configlets']
+        return [configlet['name'] for configlet in configlets if configlet['key'] in configletIds]
+
+    def __device_get_configlets(self, netid: str):
+        """
+        __device_get_configlets Get list of attached configlets to a given device
+
+        Read Configlet Mappers to build a list of configlets name attached to a device identified by is KEY
+
+        Parameters
+        ----------
+        netid : str
+            CVP Key mostly sysMac
+
+        Returns
+        -------
+        List[str]
+            List of configlets name
+        """
+        if 'configletMappers' not in self._cache['configlets_mappers'].keys():
+            self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
+        mappers = self._cache['configlets_mappers']['configletMappers']
+        configletIds = [mapper['configletId'] for mapper in mappers if mapper['objectId'] == netid]
+        MODULE_LOGGER.debug('** NetelementID is %s', str(netid))
+        MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
+        return self.__configletIds_to_configletName(configletIds=configletIds)
+
     # Fact management
 
     def __fact_devices(self):
@@ -198,6 +254,7 @@ class CvFactsTools():
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
         for device in cv_devices:
             device = self.__device_update_info(device=device)
+            device['configlets'] = self.__device_get_configlets(netid=device['key'])
             self._facts[FIELD_FACTS_DEVICE].append(device)
 
     def __fact_containers(self):

@@ -43,6 +43,46 @@ def cvp_login():
         return cvp_client
 
 
+def generate_test_ids_list(val):
+    """
+    generate_test_ids_list Generate Test ID for list parametrize
+
+    Build test IDs based on list in Parametrize
+
+    Parameters
+    ----------
+    val : str
+        Content of the test from the list
+
+    Returns
+    -------
+    str
+        Test ID
+    """
+    return val
+
+
+def generate_test_ids_dict(val):
+    """
+    generate_test_ids Helper to generate test ID for parametrize
+
+    Only related to SYSTEM_CONFIGLETS_TESTS structure
+
+    Parameters
+    ----------
+    val : dict
+        A configlet test structure
+
+    Returns
+    -------
+    str
+        Name of the configlet
+    """
+    if 'name' in val.keys():
+        # note this wouldn't show any hours/minutes/seconds
+        return val['name']
+
+
 def get_devices():
     """Returns the cvp devices
 

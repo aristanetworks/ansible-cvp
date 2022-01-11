@@ -113,3 +113,4 @@ venv.bak/
 *.old
 *.DS_Store
 *.log
+*.log.*
