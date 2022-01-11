@@ -23,6 +23,7 @@ __metaclass__ = type
 
 import traceback
 import logging
+import pprint
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
@@ -135,6 +136,9 @@ class ContainerInput(object):
 
         MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
         return result_list
+
+    def __str__(self):
+        return pprint.pformat(self.__topology)
 
     def get_parent(self, container_name: str, parent_key: str = FIELD_PARENT_NAME):
         """

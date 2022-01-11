@@ -19,7 +19,7 @@
 #
 
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput
-
+import pytest
 
 CVP_DEVICES = [
     {
@@ -49,95 +49,98 @@ CVP_DEVICES = [
 #  user_topology: ContainerInput,
 #  expected_response: CvAnsibleResponse.content)
 USER_TOPOLOGY = [
-    (True,
-     'loose',
-     {},
-     ContainerInput({
-                    'Global': {'parentContainerName': 'Tenant'},
-                    'Site 1': {'parentContainerName': 'Global'},
-                    'Site 1 Leaves': {'parentContainerName': 'Site 1'}
-                    }),
-     {
-         'container_added': {
-             'container_added_list': ['Global', 'Site 1', 'Site 1 Leaves'],
-             'success': True,
-             'changed': True,
-             'taskIds': [0, 1, 2],
-             'diff': {},
-             'container_added_count': 3},
-         'container_deleted': {
-             'container_deleted_list': [],
-             'success': False,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'container_deleted_count': 0},
-         'configlets_attached': {
-             'configlets_attached_list': [],
-             'success': False,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'configlets_attached_count': 0},
-         'configlets_detached': {
-             'configlets_detached_list': [],
-             'success': True,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'configlets_detached_count': 0},
-         'success': True,
-         'changed': True,
-         'taskIds': [0, 1, 2]}),
-    (True,
-     'loose',
-     {'containers': {
-                    'Global': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
-                                'name': 'Global',
-                                'parentContainerId': 'root'},
-                    'Site 2': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
-                                'name': 'Site 2',
-                                'parentContainerId': 'container_1234abcd-1234-abcd-12ab-123456abcdef'},
-                    'Site 2 Leaves': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
-                                    'name': 'Site 2 Leaves',
-                                    'parentContainerId': 'container_1234abcd-1234-abcd-12ab-123456abcdef'}
-                    }
-    },
-     ContainerInput({
-                    'Global': {'parentContainerName': 'Tenant'},
-                    'Site 2': {'parentContainerName': 'Global'},
-                    'Site 2 Leaves': {'parentContainerName': 'Site 2'}
-                    }),
-     {
-         'container_added': {
-             'container_added_list': [],
-             'success': False,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'container_added_count': 0},
-         'container_deleted': {
-             'container_deleted_list': [],
-             'success': False,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'container_deleted_count': 0},
-         'configlets_attached': {
-             'configlets_attached_list': [],
-             'success': False,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'configlets_attached_count': 0},
-         'configlets_detached': {
-             'configlets_detached_list': [],
-             'success': True,
-             'changed': False,
-             'taskIds': [],
-             'diff': {},
-             'configlets_detached_count': 0},
-         'success': True,
-         'changed': False,
-         'taskIds': []})
+    pytest.param(
+        True,
+        'loose',
+        {},
+        ContainerInput({'Global': {'parentContainerName': 'Tenant'},
+                        'Site 1': {'parentContainerName': 'Global'},
+                        'Site 1 Leaves': {'parentContainerName': 'Site 1'}
+                        }),
+        {
+            'container_added': {
+                'container_added_list': ['Global', 'Site 1', 'Site 1 Leaves'],
+                'success': True,
+                'changed': True,
+                'taskIds': [0, 1, 2],
+                'diff': {},
+                'container_added_count': 3},
+            'container_deleted': {
+                'container_deleted_list': [],
+                'success': False,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'container_deleted_count': 0},
+            'configlets_attached': {
+                'configlets_attached_list': [],
+                'success': False,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'configlets_attached_count': 0},
+            'configlets_detached': {
+                'configlets_detached_list': [],
+                'success': True,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'configlets_detached_count': 0},
+            'success': True,
+            'changed': True,
+            'taskIds': [0, 1, 2]},
+        id='create topology'),
+    pytest.param(
+        True,
+        'loose',
+        {
+            'containers': {
+                'Global': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
+                           'name': 'Global',
+                           'parentContainerId': 'root'},
+                'Site 2': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
+                           'name': 'Site 2',
+                           'parentContainerId': 'container_1234abcd-1234-abcd-12ab-123456abcdef'},
+                'Site 2 Leaves': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
+                                  'name': 'Site 2 Leaves',
+                                  'parentContainerId': 'container_1234abcd-1234-abcd-12ab-123456abcdef'}
+            }
+        },
+        ContainerInput({'Global': {'parentContainerName': 'Tenant'},
+                        'Site 2': {'parentContainerName': 'Global'},
+                        'Site 2 Leaves': {'parentContainerName': 'Site 2'}
+                        }),
+        {
+            'container_added': {
+                'container_added_list': [],
+                'success': False,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'container_added_count': 0},
+            'container_deleted': {
+                'container_deleted_list': [],
+                'success': False,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'container_deleted_count': 0},
+            'configlets_attached': {
+                'configlets_attached_list': [],
+                'success': False,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'configlets_attached_count': 0},
+            'configlets_detached': {
+                'configlets_detached_list': [],
+                'success': True,
+                'changed': False,
+                'taskIds': [],
+                'diff': {},
+                'configlets_detached_count': 0},
+            'success': True,
+            'changed': False,
+            'taskIds': []},
+        id='create already present topology')
 ]
