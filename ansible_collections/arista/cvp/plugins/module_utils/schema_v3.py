@@ -237,7 +237,22 @@ SCHEMA_CV_CONTAINER = {
     ],
     "required": True,
     "patternProperties": {
-        "^[A-Za-z0-9\\._%\\+-]+$": {
+        "Tenant": {
+            "type": "object",
+            "required": False,
+            "additionalProperties": True,
+            "properties": {
+                "configlets": {
+                    "id": "configlets",
+                    "type": "array",
+                    "contains": {
+                        "type": "string"
+                    },
+                    "required": False
+                }
+            }
+        },
+        "^[A-Za-z0-9\\._%\\+-]+$!Tenant": {
             "type": "object",
             "required": True,
             "properties": {
