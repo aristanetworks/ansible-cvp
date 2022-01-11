@@ -35,8 +35,9 @@ def CvFactsTools_Manager(request):
     logger.info("Execute fixture to create class elements")
     requests.packages.urllib3.disable_warnings()
     request.cls.cvp = cvp_login()
-    ansible_module = AnsibleModuleMock(check_mode=False)
-    request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp, ansible_module=ansible_module)
+    # ansible_module = AnsibleModuleMock(check_mode=False)
+    # request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp, ansible_module=ansible_module)
+    request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp)
 
 
 # ---------------------------------------------------------------------------- #
