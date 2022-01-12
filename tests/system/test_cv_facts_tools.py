@@ -104,10 +104,11 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_containers(self):
         result = self.inventory.facts(scope=['containers'])
+        logger.debug('Got response from module: {0}'.format(result))
         assert FIELD_FACTS_CONTAINER in result
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONTAINER], schema=SCHEMA_CV_CONTAINER)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
+
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")

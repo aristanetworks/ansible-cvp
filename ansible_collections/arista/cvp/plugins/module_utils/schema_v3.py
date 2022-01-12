@@ -237,24 +237,10 @@ SCHEMA_CV_CONTAINER = {
     ],
     "required": True,
     "patternProperties": {
-        "Tenant": {
-            "type": "object",
-            "required": False,
-            "additionalProperties": True,
-            "properties": {
-                "configlets": {
-                    "id": "configlets",
-                    "type": "array",
-                    "contains": {
-                        "type": "string"
-                    },
-                    "required": False
-                }
-            }
-        },
-        "^[A-Za-z0-9\\._%\\+-]+$!Tenant": {
+        "^[A-Za-z0-9\\._%\\+-]+$": {
             "type": "object",
             "required": True,
+            "additionalProperties": False,
             "properties": {
                 "parentContainerName": {
                     "id": "parentContainerName",
@@ -265,7 +251,7 @@ SCHEMA_CV_CONTAINER = {
                     "id": "configlets",
                     "type": "array",
                     "contains": {
-                        "type": "string"
+                        "type": "string",
                     },
                     "required": False
                 }

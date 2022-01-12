@@ -265,13 +265,14 @@ class CvFactsTools():
             cv_containers = self.__cv_client.api.get_containers()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
-        self._facts[FIELD_FACTS_CONTAINER] = {
-            container['name']: {
-                FIELD_PARENT_NAME: container['parentName'],
-                'configlets': self.__containers_get_configlets(container_id=container['key'])
-            }
-            for container in cv_containers['data']
-        }
+        for container in cv_containers['data']:
+            if container['name'] != 'Tenant':
+                self._facts[FIELD_FACTS_CONTAINER] = {
+                    container['name']: {
+                        FIELD_PARENT_NAME: container['parentName'],
+                        'configlets': self.__containers_get_configlets(container_id=container['key'])
+                    }
+                }
 
     def __fact_configlets(self):
         try:
