@@ -88,8 +88,8 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_get_container_name(self):
         result = self.inventory._CvFactsTools__get_container_name(key='undefined_container')
-        assert result == 'Undefined'
         logger.debug('Got response from module: {0}'.format(result))
+        assert result == 'Undefined'
 
 
     @pytest.mark.api

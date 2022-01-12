@@ -25,7 +25,7 @@ import traceback
 import logging
 from typing import List
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
@@ -67,7 +67,7 @@ class CvFactsTools():
 
     def __init__(self, cv_connection):
         self.__cv_client = cv_connection
-        self._cache = {'containers': {}, 'configlets_mappers': {}}
+        self._cache = {'containers': None, 'configlets_mappers': None}
         self._facts = {FIELD_FACTS_DEVICE: []}
 
     def facts(self, scope: List[str]):
@@ -130,16 +130,18 @@ class CvFactsTools():
         str
             Container name
         """
-        if key in self._cache['containers'].keys():
-            return self._cache['containers'][key]
-        try:
-            result = self.__cv_client.api.get_container_by_id(key=key)['name']
-        except CvpApiError as error:
-            MODULE_LOGGER.error('Can\'t get information from CV: %s', str(error))
-            return None
-        else:
-            self._cache['containers'][key] = result
-            return result
+        if self._cache['containers'] is None:
+            MODULE_LOGGER.warning('Build container cache from Cloudvision')
+            try:
+                self._cache['containers'] = self.__cv_client.api.get_containers()['data']
+            except CvpApiError as error:
+                MODULE_LOGGER.error('Can\'t get information from CV: %s', str(error))
+                return None
+        MODULE_LOGGER.debug('Current cache data is: %s', str(self._cache['containers']))
+        for container in self._cache['containers']:
+            if key == container['key']:
+                return container['name']
+        return None
 
     def __device_update_info(self, device: dict):
         """
@@ -234,7 +236,8 @@ class CvFactsTools():
         List[str]
             List of configlets name
         """
-        if 'configletMappers' not in self._cache['configlets_mappers'].keys():
+        if self._cache['configlets_mappers'] is None:
+            MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
             self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
         mappers = self._cache['configlets_mappers']['configletMappers']
         configletIds = [mapper['configletId'] for mapper in mappers if mapper['objectId'] == netid]
@@ -244,7 +247,7 @@ class CvFactsTools():
 
     # Fact management
 
-    def __fact_devices(self):
+    def __fact_devices(self, verbose: str = 'short'):
         """
         __fact_devices Collect facts related to device inventory
         """
@@ -253,9 +256,15 @@ class CvFactsTools():
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
         for device in cv_devices:
-            device = self.__device_update_info(device=device)
-            device['configlets'] = self.__device_get_configlets(netid=device['key'])
-            self._facts[FIELD_FACTS_DEVICE].append(device)
+            device_out = {}
+            if verbose == 'full':
+                device_out = self.__device_update_info(device=device)
+            else:
+                for key in ['hostname', 'fqdn', 'systemMacAddress']:
+                    device_out[key] = device[key]
+            device_out[FIELD_PARENT_NAME] = device['containerName']
+            device_out[FIELD_CONFIGLETS] = self.__device_get_configlets(netid=device['key'])
+            self._facts[FIELD_FACTS_DEVICE].append(device_out)
 
     def __fact_containers(self):
         """
@@ -270,7 +279,7 @@ class CvFactsTools():
                 self._facts[FIELD_FACTS_CONTAINER] = {
                     container['name']: {
                         FIELD_PARENT_NAME: container['parentName'],
-                        'configlets': self.__containers_get_configlets(container_id=container['key'])
+                        FIELD_CONFIGLETS: self.__containers_get_configlets(container_id=container['key'])
                     }
                 }
 
