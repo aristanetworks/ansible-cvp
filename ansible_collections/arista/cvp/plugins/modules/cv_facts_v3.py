@@ -42,6 +42,11 @@ options:
     type: list
     elements: str
     choices: ['configlets', 'containers', 'devices', 'images']
+  regexp_filter:
+    description: Regular Expression to filter configlets and devices in facts
+    required: false
+    default: '.*'
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -113,7 +118,11 @@ def main():
                 'devices',
                 'images'
             ],
-            default=['configlets', 'containers', 'devices', 'images'])
+            default=['configlets', 'containers', 'devices', 'images']),
+        regexp_filter=dict(
+          type='str',
+          required=False,
+          default='.*',),
     )
 
     # Make module global to use it in all functions when required
@@ -130,7 +139,7 @@ def main():
 
     # Instantiate ansible results
     facts_collector = CvFactsTools(cv_connection=cv_client)
-    facts = facts_collector.facts(scope=ansible_module.params['facts'])
+    facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'])
     result = dict(changed=False, data=facts, failed=False)
 
     # Implement logic

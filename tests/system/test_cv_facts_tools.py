@@ -151,6 +151,18 @@ class TestCvContainerToolsDevices():
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result))
 
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_facts_devices_filter(self):
+        self.inventory._CvFactsTools__init_facts()
+        result = self.inventory.facts(scope=['devices'], regex_filter='.*LEAF2.*')
+        assert FIELD_FACTS_DEVICE in result
+        assert len(result[FIELD_FACTS_DEVICE]) == 2
+        for dev in result[FIELD_FACTS_DEVICE]:
+            assert FIELD_PARENT_NAME in dev.keys()
+        assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
+        logger.info('output is valid against collection schema')
+        logger.debug('Got response from module: {0}'.format(result))
 
     @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
@@ -181,8 +193,18 @@ class TestCvContainerToolsConfiglets():
         assert 'cvp_configlets' in result
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
+        logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
 
+    @pytest.mark.api
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_facts_configlets_filter(self):
+        self.inventory._CvFactsTools__init_facts()
+        result = self.inventory.facts(scope=['configlets'], regex_filter='AVD_EAPI.*(LEAF|RS0)2.*')
+        assert 'cvp_configlets' in result
+        assert len(result['cvp_configlets'].keys()) == 3
+        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
+        logger.info('output is valid against collection schema')
+        logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")

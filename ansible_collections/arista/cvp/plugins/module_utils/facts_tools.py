@@ -23,6 +23,7 @@ __metaclass__ = type
 
 import traceback
 import logging
+import re
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
@@ -71,9 +72,12 @@ class CvFactsTools():
     def __init__(self, cv_connection):
         self.__cv_client = cv_connection
         self._cache = {'containers': None, 'configlets_mappers': None}
-        self._facts = {FIELD_FACTS_DEVICE: []}
+        self.__init_facts()
 
-    def facts(self, scope: List[str]):
+    def __init_facts(self):
+        self._facts = {FIELD_FACTS_DEVICE: [], FIELD_FACTS_CONTAINER: [], FIELD_FACTS_CONFIGLET: []}
+
+    def facts(self, scope: List[str], regex_filter: str = '.*'):
         """
         facts Public API to collect facts from Cloudvision
 
@@ -101,8 +105,11 @@ class CvFactsTools():
 
         Parameters
         ----------
-        scope : List[str], optional
+        scope : List[str]
             List of elements to get from Cloudvision server, by default ['devices', 'containers']
+
+        regex_filter: str
+            Regular expression to filter devices and configlets. Only element with filter in their name will be exported
 
         Returns
         -------
@@ -110,11 +117,11 @@ class CvFactsTools():
             A dictionary of information with all the data from Cloudvision
         """
         if 'devices' in scope:
-            self.__fact_devices()
+            self.__fact_devices(filter=regex_filter)
         if 'containers' in scope:
             self.__fact_containers()
         if 'configlets' in scope:
-            self.__fact_configlets()
+            self.__fact_configlets(filter=regex_filter)
         return self._facts
 
     def __get_container_name(self, key: str = 'undefined_container'):
@@ -168,19 +175,6 @@ class CvFactsTools():
             device[FIELD_PARENT_NAME] = ''
         return device
 
-    # TODO: to be removed during code review
-    # By using this approach for 18 devices we move from 1.78sec to 3.69sec
-    # def __device_get_configlets(self, netid: str):
-    #     try:
-    #         cv_result = self.__cv_client.api.get_configlets_by_netelement_id(d_id=netid)
-    #     except CvpApiError as api_error:
-    #         MODULE_LOGGER.error('Device does not exist: {0}'.format(netid))
-    #         return []
-    #     if cv_result['total'] == 0:
-    #         return []
-    #     return [configlet['name'] for configlet in cv_result['configletList'] if configlet['containerCount'] == 0]
-
-    # By using this approach for 18 devices we stay at 1.78sec
     def __configletIds_to_configletName(self, configletIds: List[str]):
         """
         __configletIds_to_configletName Build a list of configlets name from a list of configlets ID
@@ -257,24 +251,36 @@ class CvFactsTools():
 
     # Fact management
 
-    def __fact_devices(self, verbose: str = 'short'):
+    def __fact_devices(self, filter: str = '.*', verbose: str = 'short'):
         """
         __fact_devices Collect facts related to device inventory
+
+        [extended_summary]
+
+        Parameters
+        ----------
+        filter : str, optional
+            Regular Expression to filter device. Search is done against FQDN to allow domain filtering, by default .*
+        verbose : str, optional
+            Facts verbosity: full get all data from CV where short get only cv_modules data, by default 'short'
         """
         try:
             cv_devices = self.__cv_client.api.get_inventory()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
+        MODULE_LOGGER.info('Extract device data using filter %s', str(filter))
         for device in cv_devices:
-            device_out = {}
-            if verbose == 'full':
-                device_out = self.__device_update_info(device=device)
-            else:
-                for key in ['hostname', 'fqdn', 'systemMacAddress']:
-                    device_out[key] = device[key]
-            device_out[FIELD_PARENT_NAME] = device['containerName']
-            device_out[FIELD_CONFIGLETS] = self.__device_get_configlets(netid=device['key'])
-            self._facts[FIELD_FACTS_DEVICE].append(device_out)
+            if re.match(filter, device['hostname']):
+                MODULE_LOGGER.debug('Filter has been matched: %s - %s', str(filter), str(device['hostname']))
+                device_out = {}
+                if verbose == 'full':
+                    device_out = self.__device_update_info(device=device)
+                else:
+                    for key in ['hostname', 'fqdn', 'systemMacAddress']:
+                        device_out[key] = device[key]
+                device_out[FIELD_PARENT_NAME] = device['containerName']
+                device_out[FIELD_CONFIGLETS] = self.__device_get_configlets(netid=device['key'])
+                self._facts[FIELD_FACTS_DEVICE].append(device_out)
 
     def __fact_containers(self):
         """
@@ -293,7 +299,7 @@ class CvFactsTools():
                     }
                 }
 
-    def __fact_configlets(self, configlets_per_call: int = 10):
+    def __fact_configlets(self, filter: str = '.*', configlets_per_call: int = 10):
         """
         __fact_configlets Collect facts related to configlets structure
 
@@ -301,28 +307,32 @@ class CvFactsTools():
 
         Parameters
         ----------
+        filter : str, optional
+            Regular Expression to filter configlets, by default .*
         configlets_per_call : int, optional
             Number of configlets to retrieve per API call, by default 10
         """
         max_range_calc = self.__cv_client.api.get_configlets(start=0, end=1)['total'] + 1
         futures_list = []
         results = []
-        with ThreadPoolExecutor() as executor:
-            for i in range(0, max_range_calc, 10):
-                worker_size = i + configlets_per_call
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            for i in range(0, max_range_calc, configlets_per_call):
                 futures_list.append(
-                    executor.submit(self.__cv_client.api.get_configlets, start=i, end=worker_size)
+                    executor.submit(self.__cv_client.api.get_configlets, start=i, end=i+configlets_per_call)
                 )
 
             for future in futures_list:
                 try:
                     result = future.result(timeout=60)
-                    results.append(result['data'][0])
-                except Exception:
+                    results.append(result)
+                except Exception as error:
                     results.append(None)
-        configlets_result = {
-            configlet['name']: configlet['config'] for configlet in results
-        }
+                    MODULE_LOGGER.critical('Exception in getting configlet (%s): %s', str(error), str(future.result()))
+        configlets_result = {}
+        for future in results:
+            for configlet in future['data']:
+                if re.match(filter, configlet['name']):
+                    configlets_result[configlet['name']] = configlet['config']
 
-        MODULE_LOGGER.debug('Final results for configlets: %s', str(configlets_result))
+        MODULE_LOGGER.debug('Final results for configlets: %s', str(configlets_result.keys()))
         self._facts[FIELD_FACTS_CONFIGLET] = configlets_result
