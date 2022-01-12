@@ -24,6 +24,7 @@ __metaclass__ = type
 import traceback
 import logging
 from typing import List
+from concurrent.futures import ThreadPoolExecutor
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
@@ -55,10 +56,12 @@ FIELD_FACTS_DEVICE = 'cvp_devices'
 FIELD_FACTS_CONTAINER = 'cvp_containers'
 FIELD_FACTS_CONFIGLET = 'cvp_configlets'
 
+MAX_WORKERS = 40
 
 # ------------------------------------------ #
 # Class
 # ------------------------------------------ #
+
 
 class CvFactsTools():
     """
@@ -290,9 +293,36 @@ class CvFactsTools():
                     }
                 }
 
-    def __fact_configlets(self):
-        try:
-            cv_configlets = self.__cv_client.api.get_configlets()
-        except CvpApiError as error_msg:
-            MODULE_LOGGER.error('Error when collecting configlets facts: %s', str(error_msg))
-        self._facts[FIELD_FACTS_CONFIGLET] = {configlet['name']: configlet['config'] for configlet in cv_configlets['data']}
+    def __fact_configlets(self, configlets_per_call: int = 10):
+        """
+        __fact_configlets Collect facts related to configlets structure
+
+        Execute parallel calls to get a list of all static configlets from CVP
+
+        Parameters
+        ----------
+        configlets_per_call : int, optional
+            Number of configlets to retrieve per API call, by default 10
+        """
+        max_range_calc = self.__cv_client.api.get_configlets(start=0, end=1)['total'] + 1
+        futures_list = []
+        results = []
+        with ThreadPoolExecutor() as executor:
+            for i in range(0, max_range_calc, 10):
+                worker_size = i + configlets_per_call
+                futures_list.append(
+                    executor.submit(self.__cv_client.api.get_configlets, start=i, end=worker_size)
+                )
+
+            for future in futures_list:
+                try:
+                    result = future.result(timeout=60)
+                    results.append(result['data'][0])
+                except Exception:
+                    results.append(None)
+        configlets_result = {
+            configlet['name']: configlet['config'] for configlet in results
+        }
+
+        MODULE_LOGGER.debug('Final results for configlets: %s', str(configlets_result))
+        self._facts[FIELD_FACTS_CONFIGLET] = configlets_result
