@@ -165,27 +165,6 @@ class CvFactsTools():
             device[FIELD_PARENT_NAME] = ''
         return device
 
-    def __containers_get_configlets(self, container_id):
-        """
-        __containers_get_configlets Build list of configlets attached to a container
-
-        Create list of configlets attached to container and using a valid structure against arista.cvp._cv_container_v3 module
-
-        Parameters
-        ----------
-        container_id : str
-            Container key from Cloudvision
-
-        Returns
-        -------
-        list
-            List of configlets name
-        """
-        cv_result = self.__cv_client.api.get_configlets_by_container_id(c_id=container_id)
-        if cv_result['total'] == 0:
-            return []
-        return [configlet['name'] for configlet in cv_result['configletList']]
-
     # TODO: to be removed during code review
     # By using this approach for 18 devices we move from 1.78sec to 3.69sec
     # def __device_get_configlets(self, netid: str):
@@ -221,6 +200,7 @@ class CvFactsTools():
         return [configlet['name'] for configlet in configlets if configlet['key'] in configletIds]
 
     def __device_get_configlets(self, netid: str):
+        # sourcery skip: class-extract-method
         """
         __device_get_configlets Get list of attached configlets to a given device
 
@@ -242,6 +222,18 @@ class CvFactsTools():
         mappers = self._cache['configlets_mappers']['configletMappers']
         configletIds = [mapper['configletId'] for mapper in mappers if mapper['objectId'] == netid]
         MODULE_LOGGER.debug('** NetelementID is %s', str(netid))
+        MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
+        return self.__configletIds_to_configletName(configletIds=configletIds)
+
+    def __containers_get_configlets(self, container_id):
+        if self._cache['configlets_mappers'] is None:
+            MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
+            self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
+        mappers = self._cache['configlets_mappers']['configletMappers']
+        configletIds = [mapper['configletId'] for mapper in mappers if mapper['containerId'] == container_id]
+        # Deduplicate entries as containerID is present for every inherited configlets
+        configletIds = list(dict.fromkeys(configletIds))
+        MODULE_LOGGER.debug('** Container ID is %s', str(container_id))
         MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
         return self.__configletIds_to_configletName(configletIds=configletIds)
 
