@@ -226,6 +226,21 @@ class CvFactsTools():
         return self.__configletIds_to_configletName(configletIds=configletIds)
 
     def __containers_get_configlets(self, container_id):
+        """
+        __containers_get_configlets Get list of attached configlets to a given container
+
+        Read Configlet Mappers to build a list of configlets name attached to a container identified by is KEY
+
+        Parameters
+        ----------
+        container_id : str
+            CVP Key for the container
+
+        Returns
+        -------
+        List[str]
+            List of configlets name
+        """
         if self._cache['configlets_mappers'] is None:
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
             self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
