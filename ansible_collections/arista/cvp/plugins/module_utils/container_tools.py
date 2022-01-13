@@ -26,6 +26,7 @@ import logging
 import pprint
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
