@@ -313,7 +313,7 @@ class CvFactsTools():
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             for i in range(0, max_range_calc, configlets_per_call):
                 futures_list.append(
-                    executor.submit(self.__cv_client.api.get_configlets, start=i, end=i+configlets_per_call)
+                    executor.submit(self.__cv_client.api.get_configlets, start=i, end=i + configlets_per_call)
                 )
 
             for future in futures_list:

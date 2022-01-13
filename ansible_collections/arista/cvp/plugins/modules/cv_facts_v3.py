@@ -120,9 +120,10 @@ def main():
             ],
             default=['configlets', 'containers', 'devices', 'images']),
         regexp_filter=dict(
-          type='str',
-          required=False,
-          default='.*',),
+            type='str',
+            required=False,
+            default='.*'
+        ),
     )
 
     # Make module global to use it in all functions when required
