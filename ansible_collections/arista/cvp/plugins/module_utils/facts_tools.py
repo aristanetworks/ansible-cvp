@@ -3,7 +3,7 @@
 #
 # GNU General Public License v3.0+
 #
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2022 Arista Networks AS-EMEA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import re
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
 try:
@@ -48,14 +49,8 @@ MODULE_LOGGER.info('Start fact_tools module execution')
 
 
 # ------------------------------------------ #
-# Fields name to use in classes
+# CONSTANTS
 # ------------------------------------------ #
-
-
-# CONSTANTS for fields in API data
-FIELD_FACTS_DEVICE = 'cvp_devices'
-FIELD_FACTS_CONTAINER = 'cvp_containers'
-FIELD_FACTS_CONFIGLET = 'cvp_configlets'
 
 MAX_WORKERS = 40
 
@@ -276,7 +271,7 @@ class CvFactsTools():
                 if verbose == 'full':
                     device_out = self.__device_update_info(device=device)
                 else:
-                    for key in ['hostname', 'fqdn', 'systemMacAddress']:
+                    for key in ['hostname', 'fqdn', 'systemMacAddress', 'serialNumber']:
                         device_out[key] = device[key]
                 device_out[FIELD_PARENT_NAME] = device['containerName']
                 device_out[FIELD_CONFIGLETS] = self.__device_get_configlets(netid=device['key'])
