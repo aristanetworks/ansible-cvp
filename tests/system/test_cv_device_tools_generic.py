@@ -14,16 +14,11 @@
 from __future__ import (absolute_import, division, print_function)
 import requests.packages.urllib3
 import ssl
-import sys
-import pytest
 import logging
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_ID, FIELD_PARENT_NAME, FIELD_PARENT_ID
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONTAINER_NAME, FIELD_SERIAL
-from lib.config import user_token
-from lib.utils import cvp_login, get_devices
+import pytest
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, CvDeviceTools
+from tests.lib.config import user_token
+from tests.lib.utils import cvp_login
 
 
 # Hack to silent SSL warning

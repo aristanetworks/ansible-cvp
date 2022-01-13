@@ -26,7 +26,7 @@ json_data.py - Declares & initializes the variables and mock data used in the te
 """
 
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC
 from .static_content import CONFIGLET_CONTENT
 
 # Mapping between data name and its schema

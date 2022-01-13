@@ -12,11 +12,7 @@ parametrize.py - Retrieves the mock data from the json_data file
 """
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.json_data import mook_data, container_topology, schemas, modes, CONTAINER_IDS
+from tests.lib.json_data import mook_data, container_topology, schemas, modes, CONTAINER_IDS
 
 
 # ---------------------------------------------------------------------------- #

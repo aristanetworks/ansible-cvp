@@ -2,19 +2,15 @@
 utility.py - Declaration of utility functions.
 """
 from __future__ import (absolute_import, division, print_function)
-import sys
 import logging
+import sys
 import requests.packages.urllib3
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib import config
 from cvprac.cvp_client import CvpClient, CvpLoginError, CvpRequestError
-from lib.helpers import time_log
-from system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST
-from system.constants_data import CHECK_MODE, CONTAINER_DESTINATION
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME
-from lib.json_data import CONTAINER_IDS
+from tests.lib import config
+from tests.lib.helpers import time_log
+from tests.lib.json_data import CONTAINER_IDS
+from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST, CONTAINER_DESTINATION
 
 
 def cvp_login():

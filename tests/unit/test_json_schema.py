@@ -6,14 +6,10 @@
 # flake8: noqa: W1202
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET, validate_cv_inputs
-from lib.parametrize import generate_inventory_data
 import logging
 import pytest
+from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET, validate_cv_inputs
+from tests.lib.parametrize import generate_inventory_data
 
 
 # --------------------------------------------------------
