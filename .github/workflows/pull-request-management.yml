@@ -224,9 +224,8 @@ jobs:
       - name: 'Install Python requirements'
         run: make install-requirements
       - name: 'ansible-test linting'
-        # Skip runtime-metadata as test is broken when requires_ansible contains < or > as described in documentation
         run: |
           cd ansible_collections/arista/cvp/
           rm -rf molecule/
-          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}  --skip-test runtime-metadata
+          ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
           rm -rf tests/output/
