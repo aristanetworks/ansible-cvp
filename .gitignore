@@ -114,3 +114,4 @@ venv.bak/
 *.DS_Store
 *.log
 *.log.*
+ansible_collections/arista/cvp/tests/*

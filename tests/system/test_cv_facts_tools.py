@@ -1,25 +1,21 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
-# pylint: disable=logging-format-interpolation
-# pylint: disable=dangerous-default-value
-# flake8: noqa: W503
-# flake8: noqa: W1202
-# flake8: noqa: R0801
 
 from __future__ import (absolute_import, division, print_function)
 import requests
 import sys
+import pytest
 sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
-from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools, FIELD_FACTS_DEVICE, FIELD_FACTS_CONTAINER, FIELD_FACTS_CONFIGLET, FIELD_PARENT_NAME
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
+from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
+from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import validate_cv_inputs, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
-from lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger
+from lib.helpers import AnsibleModuleMock, setup_custom_logger
 from lib.config import user_token
-from lib.utils import cvp_login, generate_test_ids_list
-from lib.parametrize import mook_data
-import logging
-import pytest
+from lib.utils import cvp_login, generate_test_ids_dict
+from lib.cvaas_facts import FACTS_CONTAINERS_TEST, FACT_DEVICE_TEST, FACT_FILTER_TEST
 
 
 # Set specific logging syntax
@@ -40,43 +36,41 @@ def CvFactsTools_Manager(request):
     # request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp, ansible_module=ansible_module)
     request.cls.inventory = CvFactsTools(cv_connection=request.cls.cvp)
 
-# ---------------------------------------------------------------------------- #
-#   PARAMETRIZE Management
-# ---------------------------------------------------------------------------- #
-
-# Required as moock_data is one more level for facts
-def generate_flat_data(type: str, mode: str = "valid", fact: str = "device_ids"):
-    """Returns the data based on type and mode
-
-        Args:
-            type (string): type of data. It can be 'device', 'container' or 'configlet'
-            mode (string): mode can be 'valid' or 'invalid'
-            fact (string): Fact type to get data. Can be 'devices'
-
-        Returns:
-            List: data based on mode and type
-        """
-    flat_data = []
-    if (
-        mode in mook_data
-        and type in mook_data[mode]
-        and fact in mook_data[mode][type]
-    ):
-        for fact_type in mook_data[mode][type][fact]:
-            flat_data.append(fact_type)
-    return flat_data
-
-
 
 # ---------------------------------------------------------------------------- #
 #   PYTEST
 # ---------------------------------------------------------------------------- #
 
+# -------------------
+# Test Containers
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.parametrize("test_container", FACTS_CONTAINERS_TEST, ids=generate_test_ids_dict)
+@pytest.mark.api
 class TestCvContainerToolsContainers():
 
-    @pytest.mark.api
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+    def test_cv_connection(self, test_container):
+        requests.packages.urllib3.disable_warnings()
+        logger.debug(str("Class is connected to CV"))
+        assert True
+
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_get_container_name(self, test_container):
+        result = self.inventory._CvFactsTools__get_container_name(key=test_container['container_id'])
+        logger.debug('Got response from module: {0}'.format(result))
+        if test_container['is_present_expected']:
+            assert result == test_container['name_expected']
+        else:
+            assert result is None
+        logger.info('Got correct response from module')
+        logger.debug('Got response from module: {0}'.format(result))
+
+
+@pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.api
+class TestCvContainerToolsContainers():
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
@@ -84,23 +78,6 @@ class TestCvContainerToolsContainers():
         logger.debug(str("Class is connected to CV"))
         assert True
 
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    def test_get_container_name(self):
-        result = self.inventory._CvFactsTools__get_container_name(key='undefined_container')
-        logger.debug('Got response from module: {0}'.format(result))
-        assert result == 'Undefined'
-
-
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    def test_get_container_name_incorrect(self):
-        result = self.inventory._CvFactsTools__get_container_name(key='undefined_container2')
-        assert result is None
-        logger.debug('Got response from module: {0}'.format(result))
-
-
-    @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_containers(self):
         result = self.inventory.facts(scope=['containers'])
@@ -109,12 +86,37 @@ class TestCvContainerToolsContainers():
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONTAINER], schema=SCHEMA_CV_CONTAINER)
         logger.info('output is valid against collection schema')
 
-
+# -------------------
+# Test Devices
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.parametrize("test_device", FACT_DEVICE_TEST, ids=generate_test_ids_dict)
+@pytest.mark.api
 class TestCvContainerToolsDevices():
 
-    @pytest.mark.api
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+    def test_cv_connection(self, test_device):
+        requests.packages.urllib3.disable_warnings()
+        logger.debug(str("Class is connected to CV"))
+        assert True
+
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_get_device_configlet_correct(self, test_device):
+        result = self.inventory._CvFactsTools__device_get_configlets(netid=test_device['sysmac'])
+        if test_device['is_present_expected']:
+            assert len(result) == len(test_device['configlet_expected'])
+        else:
+            assert len(result) == 0
+        assert result is not None
+        logger.info('Got correct response from Cloudvision')
+        logger.debug('Got response from module: {0}'.format(result))
+
+@pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.api
+class TestCvContainerToolsDevicesFacts():
+
+
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
@@ -122,63 +124,57 @@ class TestCvContainerToolsDevices():
         logger.debug(str("Class is connected to CV"))
         assert True
 
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    @pytest.mark.parametrize("netid", generate_flat_data(type='facts', mode='valid', fact='device_ids'), ids=generate_test_ids_list)
-    def test_get_device_configlet_correct(self, netid):
-        result = self.inventory._CvFactsTools__device_get_configlets(netid=netid)
-        assert result is not None
-        assert len(result) >= 1
-        logger.debug('Got response from module: {0}'.format(result))
-
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    @pytest.mark.parametrize("netid", generate_flat_data(type='facts', mode='invalid', fact='device_ids'), ids=generate_test_ids_list)
-    def test_get_device_configlet_incorrect(self, netid):
-        result = self.inventory._CvFactsTools__device_get_configlets(netid=netid)
-        assert result is not None
-        assert len(result) == 0
-        logger.debug('Got response from module: {0}'.format(result))
-
-    @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_devices(self):
         result = self.inventory.facts(scope=['devices'])
+        # Test device section is present
         assert FIELD_FACTS_DEVICE in result
+        assert len(result[FIELD_FACTS_DEVICE]) > 0
+        logger.info('Facts have a correct %s section', str(FIELD_FACTS_DEVICE))
+
+        # Test all devices have a parentContainerName
         for dev in result[FIELD_FACTS_DEVICE]:
             assert FIELD_PARENT_NAME in dev.keys()
+        logger.info('all devices have a %s field', str(FIELD_PARENT_NAME))
+
+        # Validate data with schema
         assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result))
-
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    def test_facts_devices_filter(self):
-        self.inventory._CvFactsTools__init_facts()
-        result = self.inventory.facts(scope=['devices'], regex_filter='.*LEAF2.*')
-        assert FIELD_FACTS_DEVICE in result
-        assert len(result[FIELD_FACTS_DEVICE]) == 2
-        for dev in result[FIELD_FACTS_DEVICE]:
-            assert FIELD_PARENT_NAME in dev.keys()
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
-        logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
-
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    def test_fake(self):
-        data = {
-            'configlets_mappers': self.cvp.api.get_configlets_and_mappers()['data']
-        }
-
-        logger.debug(data['configlets_mappers']['configletMappers'])
-        # configletIds = [mapper['configletId'] for mapper in self._cache['configlets_mappers']['configletMappers']]
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.parametrize("test_filter", FACT_FILTER_TEST, ids=generate_test_ids_dict)
+@pytest.mark.api
+class TestCvContainerToolsDevicesFilter():
+
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+    def test_cv_connection(self, test_filter):
+        requests.packages.urllib3.disable_warnings()
+        logger.debug(str("Class is connected to CV"))
+        assert True
+
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_facts_devices_filter(self, test_filter):
+        self.inventory._CvFactsTools__init_facts()
+        result = self.inventory.facts(scope=['devices'], regex_filter=test_filter['filter'])
+
+        assert len(result[FIELD_FACTS_DEVICE]) == len(test_filter['result_device_expected'])
+        logger.info('filtered output is correct with %s', str(test_filter['filter']))
+
+        assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
+        logger.info('output is valid against collection schema')
+        logger.debug('Got response from module: {0}'.format(result))
+
+
+# -------------------
+# Test Configlets
+
+@pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.api
 class TestCvContainerToolsConfiglets():
 
-    @pytest.mark.api
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
@@ -186,7 +182,7 @@ class TestCvContainerToolsConfiglets():
         logger.debug(str("Class is connected to CV"))
         assert True
 
-    @pytest.mark.api
+
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_configlets(self):
         result = self.inventory.facts(scope=['configlets'])
@@ -195,22 +191,39 @@ class TestCvContainerToolsConfiglets():
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
 
-    @pytest.mark.api
-    @pytest.mark.dependency(depends=["authentication"], scope='class')
-    def test_facts_configlets_filter(self):
-        self.inventory._CvFactsTools__init_facts()
-        result = self.inventory.facts(scope=['configlets'], regex_filter='AVD_EAPI.*(LEAF|RS0)2.*')
-        assert 'cvp_configlets' in result
-        assert len(result['cvp_configlets'].keys()) == 3
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
-        logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
-
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
-class TestCvContainerToolsAll():
+@pytest.mark.api
+@pytest.mark.parametrize("test_filter", FACT_FILTER_TEST, ids=generate_test_ids_dict)
+class TestCvContainerToolsConfiglets():
 
-    @pytest.mark.api
+    @pytest.mark.dependency(name='authentication')
+    @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
+    def test_cv_connection(self, test_filter):
+        requests.packages.urllib3.disable_warnings()
+        logger.debug(str("Class is connected to CV"))
+        assert True
+
+    @pytest.mark.dependency(depends=["authentication"], scope='class')
+    def test_facts_configlets_filter(self, test_filter):
+        self.inventory._CvFactsTools__init_facts()
+        result = self.inventory.facts(scope=['configlets'], regex_filter=test_filter['filter'])
+
+        assert len(result[FIELD_FACTS_CONFIGLET]) == len(test_filter['result_configlet_expected'])
+        logger.info('filtered output is correct with %s', str(test_filter['filter']))
+
+        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
+        logger.info('output is valid against collection schema')
+        logger.debug('Got response from module: {0}'.format(result))
+
+
+# -------------------
+# Test All facts
+
+@pytest.mark.usefixtures("CvFactsTools_Manager")
+@pytest.mark.api
+class TestCvContainerToolsAllFacts():
+
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
     def test_cv_connection(self):
@@ -218,7 +231,6 @@ class TestCvContainerToolsAll():
         logger.debug(str("Class is connected to CV"))
         assert True
 
-    @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_all(self):
         fact_sections = ['containers', 'devices', 'configlets']
