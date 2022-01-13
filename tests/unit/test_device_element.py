@@ -8,17 +8,12 @@
 # flake8: noqa: R0801
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.parametrize import generate_flat_data
-from lib.utils import generate_container_ids
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, FIELD_CONFIGLETS, FIELD_CONTAINER_NAME, FIELD_PARENT_NAME
 import logging
 import pytest
-
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, FIELD_CONFIGLETS, FIELD_CONTAINER_NAME, FIELD_PARENT_NAME
+from tests.lib.parametrize import generate_flat_data
+from tests.lib.utils import generate_container_ids
 
 @pytest.mark.generic
 @pytest.mark.parametrize("DEVICE", generate_flat_data(type="device"))
