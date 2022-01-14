@@ -240,7 +240,7 @@ class CvFactsTools():
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
             self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
         mappers = self._cache['configlets_mappers']['configletMappers']
-        configletIds = [mapper['configletId'] for mapper in mappers if mapper['containerId'] == container_id]
+        configletIds = [mapper['configletId'] for mapper in mappers if (mapper['containerId'] == container_id or mapper['objectId'] == container_id)]
         # Deduplicate entries as containerID is present for every inherited configlets
         configletIds = list(dict.fromkeys(configletIds))
         MODULE_LOGGER.debug('** Container ID is %s', str(container_id))
