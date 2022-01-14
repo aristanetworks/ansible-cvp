@@ -188,6 +188,9 @@ class CvFactsTools():
         """
         if not configletIds:
             return []
+        if self._cache['configlets_mappers'] is None:
+            MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
+            self._cache['configlets_mappers'] = self.__cv_client.api.get_configlets_and_mappers()['data']
         configlets = self._cache['configlets_mappers']['configlets']
         return [configlet['name'] for configlet in configlets if configlet['key'] in configletIds]
 
