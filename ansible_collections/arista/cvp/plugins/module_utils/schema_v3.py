@@ -246,7 +246,7 @@ SCHEMA_CV_CONTAINER = {
                     "id": "configlets",
                     "type": "array",
                     "contains": {
-                        "type": "string",
+                        "type": "string"
                     },
                     "required": False
                 }
