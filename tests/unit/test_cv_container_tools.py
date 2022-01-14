@@ -11,13 +11,20 @@ from tests.unit import data
 LOGGER = logging.getLogger(__name__)
 
 
+CVP_DATA_CONTAINERS_INIT = {
+    'Tenant': {
+        'name': 'Tenant',
+        'key': 'root',
+        'parentContainerId': None}
+}
+
 # ---------------------------------------------------------------------------- #
 #   FIXTURES
 # ---------------------------------------------------------------------------- #
 
 @pytest.fixture
 def cvp_database():
-    database = mock.MockCVPDatabase()
+    database = mock.MockCVPDatabase(containers=CVP_DATA_CONTAINERS_INIT)
     yield database
     LOGGER.info('Final CVP state: %s', database)
 

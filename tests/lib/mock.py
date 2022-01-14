@@ -35,16 +35,16 @@ class MockCVPDatabase:
     CONTAINER_KEY = 'container_1234abcd-1234-abcd-12ab-123456abcdef'
 
     # Data used to initiate the mock database
-    CVP_DATA_DEVICE_INIT = magickmock_data.MOCKDATA_DEVICES
-    CVP_DATA_CONTAINERS_INIT = magickmock_data.MOCKDATA_CONTAINERS
-    CVP_DATA_CONFIGLETS_MAPPERS_INIT = magickmock_data.MOCKDATA_CONFIGLET_MAPPERS
-    CVP_DATA_CONFIGLET_INIT = CVP_DATA_CONFIGLETS_MAPPERS_INIT['data']['configlets']
+    # CVP_DATA_DEVICE_INIT = magickmock_data.MOCKDATA_DEVICES
+    # CVP_DATA_CONTAINERS_INIT = magickmock_data.MOCKDATA_CONTAINERS
+    # CVP_DATA_CONFIGLETS_MAPPERS_INIT = magickmock_data.MOCKDATA_CONFIGLET_MAPPERS
+    # CVP_DATA_CONFIGLET_INIT = magickmock_data.MOCKDATA_CONFIGLETS
 
-    def __init__(self, devices: dict = None, containers: dict = None, configlets: dict = None, configlets_mappers: dict = None):
-        self.devices = devices if devices is not None else MockCVPDatabase.CVP_DATA_DEVICE_INIT.copy()
-        self.containers = containers if containers is not None else MockCVPDatabase.CVP_DATA_CONTAINERS_INIT.copy()
-        self.configlets = configlets if configlets is not None else MockCVPDatabase.CVP_DATA_CONFIGLET_INIT.copy()
-        self.configlets_mappers = configlets_mappers if configlets_mappers is not None else MockCVPDatabase.CVP_DATA_CONFIGLETS_MAPPERS_INIT.copy()
+    def __init__(self, devices: dict = None, containers: list = None, configlets: list = None, configlets_mappers: dict = None):
+        self.devices = devices if devices is not None else {}
+        self.containers = containers if containers is not None else {}
+        self.configlets = configlets if configlets is not None else {}
+        self.configlets_mappers = configlets_mappers if configlets_mappers is not None else {}
         self.taskIdCounter = 0
 
     def _get_container_by_key(self, key: str) -> dict:
@@ -71,6 +71,7 @@ class MockCVPDatabase:
     def get_container_by_name(self, name) -> dict:
         """Mock cvprac.cvp_client.CvpApi.get_container_by_name() method"""
         # get_container_by_name() returns None if the container does not exist
+        LOGGER.warning('Search for container: %s in %s', name, str(self.containers))
         if name not in self.containers:
             return None
         keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
