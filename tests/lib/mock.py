@@ -6,7 +6,7 @@ import pprint
 import logging
 from cvprac.cvp_client import CvpClient, CvpApi
 from ansible.module_utils.basic import AnsibleModule
-from tests.lib import magickmock_data
+from tests.data import facts_unit
 
 LOGGER = logging.getLogger(__name__)
 

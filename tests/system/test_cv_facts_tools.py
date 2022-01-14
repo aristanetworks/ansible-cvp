@@ -12,10 +12,10 @@ from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIE
 from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import validate_cv_inputs, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
-from lib.helpers import AnsibleModuleMock, setup_custom_logger
-from lib.config import user_token
-from lib.utils import cvp_login, generate_test_ids_dict
-from lib.cvaas_facts import FACTS_CONTAINERS_TEST, FACT_DEVICE_TEST, FACT_FILTER_TEST
+from tests.lib.helpers import AnsibleModuleMock, setup_custom_logger
+from tests.lib.config import user_token
+from tests.lib.utils import cvp_login, generate_test_ids_dict
+from tests.data.facts_system_cvaas import FACTS_CONTAINERS_TEST, FACT_DEVICE_TEST, FACT_FILTER_TEST
 
 
 # Set specific logging syntax

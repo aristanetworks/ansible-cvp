@@ -1,6 +1,6 @@
 # Ansible CVP Collection testing
 
-## Available tests
+## Tests structure
 
 - __Unit__: test with no CV interaction to test component: `tests/unit`
   - Tests with no API requirements
@@ -16,6 +16,10 @@
 
 - __Lib__: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
   - Provides helpers for unit and system
+  - Store all tests data
+  - Only available for pytest
+
+- __Data__: to provides a safe place for all tests dataset: `tests/data`
   - Store all tests data
   - Only available for pytest
 
@@ -168,7 +172,67 @@ Parametrize marker provides:
 @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
 ```
 
+2 generic methods are available to generate test IDs from your input Automatically
+
+- `generate_test_ids_list`: Get field `name` from each object of the list and use it as test name.
+- `generate_test_ids_dict`: Get field `name` from each object value in the dictionary and use it as test name.
+
+```python
+@pytest.mark.parametrize("configlet_def", facts_unit.MOCKDATA_CONFIGLET_MAPPERS['data']['configlets'], ids=generate_test_ids_list)
+```
+
 ### Unit test definition
+
+#### Python Mock approach for tests with cvprac
+
+A [MagicMock](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) object is [available](./lib/mock.py) to emulate cvprac functions with coherent data. It takes in argument data extracted from Cloudvision. These data must be instantiate in your fixture:
+
+```python
+from tests.lib import mock
+from tests.data import facts_unit
+
+@pytest.fixture
+def cvp_database():
+    database = mock.MockCVPDatabase(
+        devices=facts_unit.MOCKDATA_DEVICES,
+        configlets=facts_unit.MOCKDATA_CONFIGLETS,
+        containers=facts_unit.MOCKDATA_CONTAINERS,
+        configlets_mappers=facts_unit.MOCKDATA_CONFIGLET_MAPPERS
+    )
+    yield database
+    LOGGER.debug('Final CVP state: %s', database)
+
+
+@pytest.fixture()
+def fact_unit_tools(request, cvp_database):
+    cvp_client = mock.get_cvp_client(cvp_database)
+    instance = CvFactsTools(cv_connection=cvp_client)
+    LOGGER.debug('Initial CVP state: %s', cvp_database)
+    yield instance
+    LOGGER.debug('Mock calls: %s', pprint.pformat(cvp_client.mock_calls))
+```
+
+Example of data is available under [tests/data/](tests/data) folder.
+
+Each time a mock method is implemented, the following changes should be done:
+
+```python
+# Create your function under MockCVPDatabase
+class MockCVPDatabase:
+    def get_configlets_and_mappers(self):
+        """
+        get_configlets_and_mappers Return Mapping for configlets
+        """
+        return self.configlets_mappers
+
+# Update side-effects
+def get_cvp_client(cvp_database) -> MagicMock:
+  [...]
+  mock_client.api.get_configlets_and_mappers.side_effect = cvp_database.get_configlets_and_mappers
+  return mock_client
+```
+
+#### Initial Unit test implementation with no cvprac methods
 
 Data are all available in [`lib.json_data.mook_data`](./lib/json_data.py)
 
@@ -218,7 +282,7 @@ Data have to be representative and valid from CV.
 
 - Should be defined under `lib/cvaas_<type>.py`
 - Input data would be representative of ansible user's input.
-- All tests entry should have expected result `_expected` suffix
+- All tests entry should have expected result `_expected` suffix to support `assert` tests
 - A parametrize function could be used (optional)
 - Easy to extend dataset used in tests.
 - Add your own entries
