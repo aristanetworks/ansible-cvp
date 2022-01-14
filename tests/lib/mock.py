@@ -37,7 +37,13 @@ class MockCVPDatabase:
         'Tenant': {
             'name': 'Tenant',
             'key': 'root',
-            'parentContainerId': None}
+            'parentContainerId': None
+        },
+        'Undefined': {
+            'name': 'Undefined',
+            'key': 'undefined_container',
+            'parentContainerId': 'root'
+        }
     }
 
     def __init__(self, devices: dict = None, containers: dict = None, configlets: dict = None):
@@ -112,6 +118,17 @@ class MockCVPDatabase:
             self.configlets[configlet[MockCVPDatabase.FIELD_NAME]][MockCVPDatabase.FIELD_CONTAINER_ATTACHED].append(container[MockCVPDatabase.FIELD_NAME])
         return self._get_response(True)
 
+    def get_containers(self, start=0, end=0) -> dict:
+        if start or end:
+            raise NotImplementedError('Mock get_containers() called with unsupported arguments')
+        keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
+        return {
+            'data': [
+                {k: v for k, v in self.containers[container].items() if k in keys}
+                for container in self.containers
+            ]
+        }
+
     def __eq__(self, other):
         return self.devices == other.devices and \
             self.containers == other.containers and \
@@ -139,6 +156,7 @@ def get_cvp_client(cvp_database) -> MagicMock:
     mock_client.api.add_container.side_effect = cvp_database.add_container
     mock_client.api.filter_topology.side_effect = cvp_database.filter_topology
     mock_client.api.apply_configlets_to_container.side_effect = cvp_database.apply_configlets_to_container
+    mock_client.api.get_containers.side_effect = cvp_database.get_containers
     return mock_client
 
 
