@@ -30,7 +30,7 @@ version_added: "3.2.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from Cloudvision
 description:
-- Returns list of devices, configlets, containers and images
+- Returns list of devices, configlets, containers and images from CloudVision
 options:
   facts:
     description:
