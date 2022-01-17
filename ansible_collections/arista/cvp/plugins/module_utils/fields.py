@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from dataclasses import dataclass
+# from dataclasses import dataclass
 
 # Section to build FACTS dictionary
 FIELD_FACTS_DEVICE = 'cvp_devices'
@@ -29,7 +29,7 @@ FIELD_FACTS_CONTAINER = 'cvp_containers'
 FIELD_FACTS_CONFIGLET = 'cvp_configlets'
 
 
-@dataclass
+# @dataclass
 class Facts():
     """
     Facts Represent All fields specific to cv_facts_v3 module.
@@ -43,7 +43,7 @@ class Facts():
     CACHE_MAPPERS: str = 'configlets_mappers'
 
 
-@dataclass
+# @dataclass
 class ApiGeneric():
     PARENT_ID: str = 'parentContainerId'
     PARENT_NAME: str = 'parentContainerName'
@@ -52,7 +52,7 @@ class ApiGeneric():
     CONFIGLETS: str = 'configlets'
 
 
-@dataclass
+# @dataclass
 class ApiContainer():
     ID: str = 'containerId'
     COUNT_DEVICE: str = 'childNetElementCount'
@@ -62,7 +62,7 @@ class ApiContainer():
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
 
 
-@dataclass
+# @dataclass
 class ApiDevice():
     FQDN: str = 'fqdn'
     HOSTNAME: str = 'hostname'
@@ -73,17 +73,17 @@ class ApiDevice():
     IMAGE_BUNDLE: str = 'image_bundle'
 
 
-@dataclass
+# @dataclass
 class ApiConfiglet():
     ID: str = 'configletId'
 
 
-@dataclass
+# @dataclass
 class ApiMappers():
     OBJECT_ID: str = 'objectId'
 
 
-@dataclass
+# @dataclass
 class ApiFields():
     generic: ApiGeneric = ApiGeneric
     device: ApiDevice = ApiDevice

@@ -236,7 +236,10 @@ class CvFactsTools():
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
             self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
         mappers = self._cache[Facts.CACHE_MAPPERS]['configletMappers']
-        configletIds = [mapper[ApiFields.configlet.ID] for mapper in mappers if (mapper[ApiFields.container.ID] == container_id or mapper[ApiFields.mappers.OBJECT_ID] == container_id)]
+        configletIds = [mapper[ApiFields.configlet.ID]
+                        for mapper in mappers
+                        if (mapper[ApiFields.container.ID] == container_id or mapper[ApiFields.mappers.OBJECT_ID] == container_id)
+                        ]
         # Deduplicate entries as containerID is present for every inherited configlets
         configletIds = list(dict.fromkeys(configletIds))
         MODULE_LOGGER.debug('** Container ID is %s', str(container_id))
@@ -321,7 +324,11 @@ class CvFactsTools():
                     results.append(result)
                 except Exception as error:
                     results.append(None)
-                    MODULE_LOGGER.critical('Exception in getting configlet (%s): %s', str(error), str(future.result()))
+                    MODULE_LOGGER.critical(
+                        'Exception in getting configlet (%s): %s',
+                        str(error),
+                        str(future.result())
+                    )
         configlets_result = {}
         for future in results:
             for configlet in future['data']:
