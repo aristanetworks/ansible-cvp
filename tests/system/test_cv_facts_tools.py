@@ -3,11 +3,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import requests
-import sys
 import pytest
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
 from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools

@@ -75,7 +75,7 @@ def test_CvFactsTools__configletIds_to_configletName_empty(fact_unit_tools):
     LOGGER.info('** Sending request to get name for configlet ID: None')
     result = fact_unit_tools._CvFactsTools__configletIds_to_configletName(configletIds=[])
     LOGGER.info('** facts_tool response: %s', str(result))
-    assert  result == []
+    assert result == []
     LOGGER.info('Configlet name for id [] is %s', str(result))
 
 # CvFactsTools.__device_get_configlets
