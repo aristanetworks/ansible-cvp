@@ -6,6 +6,7 @@ import pprint
 import logging
 from cvprac.cvp_client import CvpClient, CvpApi
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
 from tests.data import facts_unit
 
 LOGGER = logging.getLogger(__name__)
@@ -20,13 +21,13 @@ class MockCVPDatabase:
     """Class to mock CVP database being modified during tests"""
 
     # Fields in API data
-    FIELD_COUNT_DEVICES = 'childNetElementCount'
-    FIELD_COUNT_CONTAINERS = 'childContainerCount'
-    FIELD_PARENT_ID = 'parentContainerId'
-    FIELD_PARENT_NAME = 'parentContainerName'
-    FIELD_NAME = 'name'
-    FIELD_KEY = 'key'
-    FIELD_TOPOLOGY = 'topology'
+    FIELD_COUNT_DEVICES = ApiFields.container.COUNT_DEVICE
+    FIELD_COUNT_CONTAINERS = ApiFields.container.COUNT_CONTAINER
+    FIELD_PARENT_ID = ApiFields.generic.PARENT_ID
+    FIELD_PARENT_NAME = ApiFields.generic.PARENT_NAME
+    FIELD_NAME = ApiFields.generic.NAME
+    FIELD_KEY = ApiFields.generic.KEY
+    FIELD_TOPOLOGY = ApiFields.container.TOPOLOGY
 
     # Fields in mock database
     FIELD_CONTAINER_ATTACHED = 'containerAttached'
