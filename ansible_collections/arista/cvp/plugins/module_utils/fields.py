@@ -21,8 +21,72 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+from dataclasses import dataclass
 
 # Section to build FACTS dictionary
 FIELD_FACTS_DEVICE = 'cvp_devices'
 FIELD_FACTS_CONTAINER = 'cvp_containers'
 FIELD_FACTS_CONFIGLET = 'cvp_configlets'
+
+
+@dataclass
+class Facts():
+    """
+    Facts Represent All fields specific to cv_facts_v3 module.
+    """
+    # Facts headers
+    DEVICE: str = 'cvp_devices'
+    CONTAINER: str = 'cvp_containers'
+    CONFIGLET: str = 'cvp_configlets'
+    # Cache Headers
+    CACHE_CONTAINERS: str = 'containers'
+    CACHE_MAPPERS: str = 'configlets_mappers'
+
+
+@dataclass
+class ApiGeneric():
+    PARENT_ID: str = 'parentContainerId'
+    PARENT_NAME: str = 'parentContainerName'
+    NAME: str = 'name'
+    KEY: str = 'key'
+    CONFIGLETS: str = 'configlets'
+
+
+@dataclass
+class ApiContainer():
+    ID: str = 'containerId'
+    COUNT_DEVICE: str = 'childNetElementCount'
+    COUNT_CONTAINER: str = 'childContainerCount'
+    PARENT_NAME: str = 'parentContainerKey'
+    TOPOLOGY: str = 'topology'
+    UNDEFINED_CONTAINER_ID: str = 'undefined_container'
+
+
+@dataclass
+class ApiDevice():
+    FQDN: str = 'fqdn'
+    HOSTNAME: str = 'hostname'
+    SYSMAC: str = 'systemMacAddress'
+    SERIAL: str = 'serialNumber'
+    ID: str = 'key'
+    CONTAINER_NAME: str = 'containerName'
+    IMAGE_BUNDLE: str = 'image_bundle'
+
+
+@dataclass
+class ApiConfiglet():
+    ID: str = 'configletId'
+
+
+@dataclass
+class ApiMappers():
+    OBJECT_ID: str = 'objectId'
+
+
+@dataclass
+class ApiFields():
+    generic: ApiGeneric = ApiGeneric
+    device: ApiDevice = ApiDevice
+    container: ApiContainer = ApiContainer
+    configlet: ApiConfiglet = ApiConfiglet
+    mappers: ApiMappers = ApiMappers
