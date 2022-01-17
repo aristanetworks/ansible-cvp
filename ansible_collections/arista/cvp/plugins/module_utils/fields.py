@@ -21,19 +21,13 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+# Will be activated in python 3.8
 # from dataclasses import dataclass
-
-# Section to build FACTS dictionary
-FIELD_FACTS_DEVICE = 'cvp_devices'
-FIELD_FACTS_CONTAINER = 'cvp_containers'
-FIELD_FACTS_CONFIGLET = 'cvp_configlets'
 
 
 # @dataclass
 class Facts():
-    """
-    Facts Represent All fields specific to cv_facts_v3 module.
-    """
+    """Facts Represent All fields specific to cv_facts_v3 module"""
     # Facts headers
     DEVICE: str = 'cvp_devices'
     CONTAINER: str = 'cvp_containers'
@@ -45,6 +39,7 @@ class Facts():
 
 # @dataclass
 class ApiGeneric():
+    """Generic Keys used in all type of resources"""
     PARENT_ID: str = 'parentContainerId'
     PARENT_NAME: str = 'parentContainerName'
     NAME: str = 'name'
@@ -54,6 +49,7 @@ class ApiGeneric():
 
 # @dataclass
 class ApiContainer():
+    """Keys specific to Container resources"""
     ID: str = 'containerId'
     COUNT_DEVICE: str = 'childNetElementCount'
     COUNT_CONTAINER: str = 'childContainerCount'
@@ -67,6 +63,7 @@ class ApiContainer():
 
 # @dataclass
 class ApiDevice():
+    """Keys specific to Device resources"""
     FQDN: str = 'fqdn'
     HOSTNAME: str = 'hostname'
     SYSMAC: str = 'systemMacAddress'
@@ -78,16 +75,19 @@ class ApiDevice():
 
 # @dataclass
 class ApiConfiglet():
+    """Keys specific to Configlet resources"""
     ID: str = 'configletId'
 
 
 # @dataclass
 class ApiMappers():
+    """Keys specific to Configlets_Mappers resources"""
     OBJECT_ID: str = 'objectId'
 
 
 # @dataclass
 class ApiFields():
+    """Central point to use all CV data resource fields"""
     generic: ApiGeneric = ApiGeneric
     device: ApiDevice = ApiDevice
     container: ApiContainer = ApiContainer

@@ -4,8 +4,7 @@
 from __future__ import (absolute_import, division, print_function)
 import requests
 import pytest
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
-from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
+from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields, Facts
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import validate_cv_inputs, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
 from tests.lib.helpers import AnsibleModuleMock, setup_custom_logger
@@ -78,8 +77,8 @@ class TestCvContainerToolsContainers():
     def test_facts_containers(self):
         result = self.inventory.facts(scope=['containers'])
         logger.debug('Got response from module: {0}'.format(result))
-        assert FIELD_FACTS_CONTAINER in result
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONTAINER], schema=SCHEMA_CV_CONTAINER)
+        assert Facts.CONTAINER in result
+        assert validate_cv_inputs(user_json=result[Facts.CONTAINER], schema=SCHEMA_CV_CONTAINER)
         logger.info('output is valid against collection schema')
 
 # -------------------
@@ -124,17 +123,17 @@ class TestCvContainerToolsDevicesFacts():
     def test_facts_devices(self):
         result = self.inventory.facts(scope=['devices'])
         # Test device section is present
-        assert FIELD_FACTS_DEVICE in result
-        assert len(result[FIELD_FACTS_DEVICE]) > 0
-        logger.info('Facts have a correct %s section', str(FIELD_FACTS_DEVICE))
+        assert Facts.DEVICE in result
+        assert len(result[Facts.DEVICE]) > 0
+        logger.info('Facts have a correct %s section', str(Facts.DEVICE))
 
         # Test all devices have a parentContainerName
-        for dev in result[FIELD_FACTS_DEVICE]:
-            assert FIELD_PARENT_NAME in dev.keys()
-        logger.info('all devices have a %s field', str(FIELD_PARENT_NAME))
+        for dev in result[Facts.DEVICE]:
+            assert ApiFields.generic.PARENT_NAME in dev.keys()
+        logger.info('all devices have a %s field', str(ApiFields.generic.PARENT_NAME))
 
         # Validate data with schema
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
+        assert validate_cv_inputs(user_json=result[Facts.DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result))
 
@@ -156,10 +155,10 @@ class TestCvContainerToolsDevicesFilter():
         self.inventory._CvFactsTools__init_facts()
         result = self.inventory.facts(scope=['devices'], regex_filter=test_filter['filter'])
 
-        assert len(result[FIELD_FACTS_DEVICE]) == len(test_filter['result_device_expected'])
+        assert len(result[Facts.DEVICE]) == len(test_filter['result_device_expected'])
         logger.info('filtered output is correct with %s', str(test_filter['filter']))
 
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_DEVICE], schema=SCHEMA_CV_DEVICE)
+        assert validate_cv_inputs(user_json=result[Facts.DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result))
 
@@ -183,7 +182,7 @@ class TestCvContainerToolsConfiglets():
     def test_facts_configlets(self):
         result = self.inventory.facts(scope=['configlets'])
         assert 'cvp_configlets' in result
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
+        assert validate_cv_inputs(user_json=result[Facts.CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
 
@@ -205,10 +204,10 @@ class TestCvContainerToolsConfiglets():
         self.inventory._CvFactsTools__init_facts()
         result = self.inventory.facts(scope=['configlets'], regex_filter=test_filter['filter'])
 
-        assert len(result[FIELD_FACTS_CONFIGLET]) == len(test_filter['result_configlet_expected'])
+        assert len(result[Facts.CONFIGLET]) == len(test_filter['result_configlet_expected'])
         logger.info('filtered output is correct with %s', str(test_filter['filter']))
 
-        assert validate_cv_inputs(user_json=result[FIELD_FACTS_CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
+        assert validate_cv_inputs(user_json=result[Facts.CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
         logger.debug('Got response from module: {0}'.format(result))
 
@@ -231,7 +230,7 @@ class TestCvContainerToolsAllFacts():
     def test_facts_all(self):
         fact_sections = ['containers', 'devices', 'configlets']
         result = self.inventory.facts(scope=fact_sections)
-        assert FIELD_FACTS_CONFIGLET in result
-        assert FIELD_FACTS_CONTAINER in result
-        assert FIELD_FACTS_DEVICE in result
+        assert Facts.CONFIGLET in result
+        assert Facts.CONTAINER in result
+        assert Facts.DEVICE in result
         logger.debug('Got response from module: {0}'.format(result))
