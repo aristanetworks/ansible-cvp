@@ -57,9 +57,12 @@ class ApiContainer():
     ID: str = 'containerId'
     COUNT_DEVICE: str = 'childNetElementCount'
     COUNT_CONTAINER: str = 'childContainerCount'
-    PARENT_NAME: str = 'parentContainerKey'
+    PARENT_CONTAINER_NAME: str = 'parentContainerName'
+    PARENT_KEY: str = 'parentContainerKey'
     TOPOLOGY: str = 'topology'
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
+    PARENT_NAME: str = 'parentName'
+    KEY: str = 'Key'
 
 
 # @dataclass

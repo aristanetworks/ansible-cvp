@@ -29,7 +29,6 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.fields import Facts, ApiFields
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME, FIELD_CONFIGLETS
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
@@ -161,9 +160,9 @@ class CvFactsTools():
             Updated information
         """
         if device['status'] != '':
-            device[FIELD_PARENT_NAME] = self.__get_container_name(key=device[ApiFields.container.PARENT_NAME])
+            device[ApiFields.container.PARENT_CONTAINER_NAME] = self.__get_container_name(key=device[ApiFields.container.PARENT_KEY])
         else:
-            device[FIELD_PARENT_NAME] = ''
+            device[ApiFields.container.PARENT_CONTAINER_NAME] = ''
         return device
 
     def __configletIds_to_configletName(self, configletIds: List[str]):
@@ -289,10 +288,11 @@ class CvFactsTools():
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
         for container in cv_containers['data']:
             if container[ApiFields.generic.NAME] != 'Tenant':
+                MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 self._facts[Facts.CONTAINER] = {
                     container[ApiFields.generic.NAME]: {
-                        FIELD_PARENT_NAME: container[ApiFields.generic.PARENT_NAME],
-                        FIELD_CONFIGLETS: self.__containers_get_configlets(container_id=container[ApiFields.generic.KEY])
+                        ApiFields.generic.PARENT_NAME: container[ApiFields.container.PARENT_NAME],
+                        ApiFields.generic.CONFIGLETS: self.__containers_get_configlets(container_id=container[ApiFields.container.KEY])
                     }
                 }
 
