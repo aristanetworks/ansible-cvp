@@ -79,7 +79,7 @@ __Version 3:__
 - [__arista.cvp.cv_container_v3__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
 - [__arista.cvp.cv_device_v3__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task_v3__](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
-- [__arista.cvp.cv_facts_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_facts_v3.rst/) - Collect information from Cloudvision.
+- [__arista.cvp.cv_facts_v3__](docs/modules/cv_facts_v3.rst/) - Collect information from Cloudvision.
 
 ### List of available roles
 
