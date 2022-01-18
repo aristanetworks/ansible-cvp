@@ -62,7 +62,7 @@ class ContainerInput(object):
 
     def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema=schema.SCHEMA_CV_CONTAINER):
         self.__topology = user_topology
-        self.__parent_field: str = ApiFields.container.PARENT_CONTAINER_NAME
+        self.__parent_field: str = ApiFields.generic.PARENT_CONTAINER_NAME
         self.__root_name = container_root_name
         self.__schema = schema
 
@@ -118,7 +118,7 @@ class ContainerInput(object):
         result_list = []
         MODULE_LOGGER.info("Build list of container to create from %s", str(self.__topology))
 
-        while(len(result_list) < len(self.__topology)):
+        while (len(result_list) < len(self.__topology)):
             container_added = False
             for container in self.__topology:
                 if self.__topology[container][self.__parent_field] == self.__root_name and container not in result_list:
@@ -128,7 +128,7 @@ class ContainerInput(object):
                         and container not in result_list):
                     container_added = True
                     result_list.append(container)
-            if container_added is False:
+            if not container_added:
                 containerWithoutParent = [item for item in self.__topology.keys() if item not in result_list]
                 MODULE_LOGGER.warning(
                     'Breaking the while loop as the following containers dont have a parent present in the topology %s',
@@ -142,7 +142,7 @@ class ContainerInput(object):
     def __str__(self):
         return pprint.pformat(self.__topology)
 
-    def get_parent(self, container_name: str, parent_key: str = ApiFields.container.PARENT_CONTAINER_NAME):
+    def get_parent(self, container_name: str, parent_key: str = ApiFields.generic.PARENT_CONTAINER_NAME):
         """
         get_parent Expose name of parent container for the given container
 
@@ -234,7 +234,7 @@ class CvContainerTools(object):
             [ApiFields.generic.NAME],
             [ApiFields.container.COUNT_CONTAINER],
             [ApiFields.container.COUNT_DEVICE],
-            ApiFields.generic.PARENT_ID
+            ApiFields.generic.PARENT_CONTAINER_ID
         ]
         return {k: v for k, v in source.items() if k in standard_keys}
 
@@ -302,7 +302,7 @@ class CvContainerTools(object):
         container_name = 'Undefined'
         change_response = CvApiResult(action_name=container_name)
 
-        # Protect aginst non-existing container in check_mode
+        # Protect against non-existing container in check_mode
         if container is not None:
             configlet_names = [entry.get(ApiFields.generic.NAME)
                                for entry in configlets if entry.get(ApiFields.generic.NAME)]
