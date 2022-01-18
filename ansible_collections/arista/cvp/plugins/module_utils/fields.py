@@ -24,6 +24,9 @@ __metaclass__ = type
 # Will be activated in python 3.8
 # from dataclasses import dataclass
 
+class ModuleOptionValues():
+    APPLY_MODE_STRICT: str = 'stict'
+
 
 # @dataclass
 class Facts():
@@ -35,6 +38,12 @@ class Facts():
     # Cache Headers
     CACHE_CONTAINERS: str = 'containers'
     CACHE_MAPPERS: str = 'configlets_mappers'
+
+class ContainerResponseFields():
+    CONTAINER_ADDED: str = 'container_added'
+    CONTAINER_DELETED: str = 'container_deleted'
+    CONFIGLETS_ATTACHED: str = 'configlets_attached'
+    CONFIGLETS_DETACHED: str = 'configlets_detached'
 
 
 # @dataclass
@@ -54,10 +63,10 @@ class ApiContainer():
     COUNT_DEVICE: str = 'childNetElementCount'
     COUNT_CONTAINER: str = 'childContainerCount'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
+    PARENT_NAME: str = 'parentName'
     PARENT_KEY: str = 'parentContainerKey'
     TOPOLOGY: str = 'topology'
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
-    PARENT_NAME: str = 'parentName'
     KEY: str = 'Key'
 
 
@@ -84,6 +93,9 @@ class ApiMappers():
     """Keys specific to Configlets_Mappers resources"""
     OBJECT_ID: str = 'objectId'
 
+class ApiTask():
+    """Keys specific to Task resources"""
+    TASK_IDS: str = 'taskIds'
 
 # @dataclass
 class ApiFields():
@@ -93,3 +105,4 @@ class ApiFields():
     container: ApiContainer = ApiContainer
     configlet: ApiConfiglet = ApiConfiglet
     mappers: ApiMappers = ApiMappers
+    task: ApiTask = ApiTask
