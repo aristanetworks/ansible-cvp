@@ -21,8 +21,9 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-# Will be activated in python 3.8
+# TODO: Will be activated in python 3.8
 # from dataclasses import dataclass
+
 
 class ModuleOptionValues():
     APPLY_MODE_STRICT: str = 'stict'
@@ -71,6 +72,7 @@ class ApiGeneric():
     KEY: str = 'key'
     CONFIGLETS: str = 'configlets'
     CONFIG: str = 'config'
+
 
 # @dataclass
 class ApiContainer():
