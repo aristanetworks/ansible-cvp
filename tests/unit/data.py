@@ -45,7 +45,7 @@ CVP_DEVICES = [
 # container_tools.build_topology() unit tests parameters
 # (present: bool,
 #  apply_mode: str,
-#  cvp_data: dict,
+#  cvp_database: dict,
 #  user_topology: ContainerInput,
 #  expected_response: CvAnsibleResponse.content)
 USER_TOPOLOGY = [
@@ -147,9 +147,19 @@ USER_TOPOLOGY = [
 
 
 # container_tools.get_container_id() unit tests parameters
-# (name: str, expected_id:str)
+# (cvp_database: dict,
+#  name: str,
+#  expected_id: str)
 TEST_CONTAINERS = [
-    ('Tenant', 'root'),
-    ('ansible-cvp-tests-1', 'container_274787b2-c45a-4b0c-8b97-eb4011909b02'),
-    ('Simple Fabric', 'container_6ac90bc0-f6d4-436f-bff0-8c064c247f01')
+    pytest.param({}, 'Tenant', 'root', id='root container'),
+    pytest.param({'containers': {
+        'unit-test-1': {'key': 'container_1234abcd-1234-abcd-12ab-123456abcdef',
+                        'name': 'unit-test-1',
+                        'parentContainerId': 'root'}
+    }
+    },
+        'unit-test-1',
+        'container_1234abcd-1234-abcd-12ab-123456abcdef',
+        id='fake container'
+    )
 ]

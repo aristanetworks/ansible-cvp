@@ -31,6 +31,7 @@ class MockCVPDatabase:
 
     # Data used in mock methods
     CONTAINER_KEY = 'container_1234abcd-1234-abcd-12ab-123456abcdef'
+    BAD_KEY = 'badKey'
 
     # Data used to initiate the mock database
     CVP_DATA_CONTAINERS_INIT = {
@@ -72,7 +73,10 @@ class MockCVPDatabase:
         # get_container_by_name() returns None if the container does not exist
         if name not in self.containers:
             return None
-        keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
+        if name == MockCVPDatabase.BAD_KEY:  # Special container name to mimic a wrong API key
+            keys = [MockCVPDatabase.BAD_KEY, MockCVPDatabase.FIELD_NAME]
+        else:
+            keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
         return {k: v for k, v in self.containers[name].items() if k in keys}
 
     def add_container(self, container_name, parent_name, parent_key):
