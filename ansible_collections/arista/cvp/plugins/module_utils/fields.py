@@ -25,7 +25,26 @@ __metaclass__ = type
 # from dataclasses import dataclass
 
 
+# --------------------------------------------------------------------------------------------------------
+# Information:
+#
+# Provides classes to classify CONSTANT in the collection. 3 types of classes are available:
+#   - ModuleOptionValues: expose constants for ansible module option values
+#   - <module>ResponseFields: strings to use in Ansible response for all modules.
+#   - Api<ressource-type>: strings to use to get data from Cloudvision response content.
+#
+# Usage:
+#
+# If a KEY is required for more than 1 type of resource, definition MUST be in ApiGeneric class
+# If a KEY is specific to a resource, its definition SHOULD go to its dedicated class Api<resource-type>
+# If a KEY is required for more than 1 type of resource and one resource has a different syntax, then
+#       Global definition MUST go to ApiGeneric
+#       Specific definition SHALL go to resource class
+# --------------------------------------------------------------------------------------------------------
+
+
 class ModuleOptionValues():
+    """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
     APPLY_MODE_STRICT: str = 'stict'
     STATE_MODE_ABSENT: str = 'factory_reset'
@@ -49,6 +68,7 @@ class ContainerResponseFields():
     CONFIGLETS_DETACHED: str = 'configlets_detached'
     CONTAINER_ADDED: str = 'container_added'
     CONTAINER_DELETED: str = 'container_deleted'
+
 
 # @dataclass
 class DeviceResponseFields():
@@ -80,8 +100,6 @@ class ApiContainer():
     COUNT_DEVICE: str = 'childNetElementCount'
     ID: str = 'containerId'
     KEY: str = 'Key'
-    PARENT_CONTAINER_NAME: str = 'parentContainerName' # TODO: cleanup ?
-    PARENT_KEY: str = 'parentContainerKey' # TODO: cleanup ?
     TOPOLOGY: str = 'topology'
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
     UNDEFINED_CONTAINER_NAME: str = 'Undefined'
