@@ -172,10 +172,9 @@ Parametrize marker provides:
 @pytest.mark.parametrize("configlet_inventory", generate_flat_data(type='configlet', mode='valid'))
 ```
 
-2 generic methods are available to generate test IDs from your input Automatically
+A generic method is available to generate test IDs from your input Automatically:
 
-- `generate_test_ids_list`: Get field `name` from each object of the list and use it as test name.
-- `generate_test_ids_dict`: Get field `name` from each object value in the dictionary and use it as test name.
+- `generate_test_ids_dict`: Get field `name` or `hostname` from each object value in the dictionary and use it as test name.
 
 ```python
 @pytest.mark.parametrize("configlet_def", facts_unit.MOCKDATA_CONFIGLET_MAPPERS['data']['configlets'], ids=generate_test_ids_list)

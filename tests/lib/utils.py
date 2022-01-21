@@ -10,6 +10,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIE
 from tests.lib import config
 from tests.lib.helpers import time_log
 from tests.lib.json_data import CONTAINER_IDS
+from tests.data.container_tools_unit import CVP_DEVICES
 from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST, CONTAINER_DESTINATION
 
 
@@ -39,25 +40,6 @@ def cvp_login():
         return cvp_client
 
 
-def generate_test_ids_list(val):
-    """
-    generate_test_ids_list Generate Test ID for list parametrize
-
-    Build test IDs based on list in Parametrize
-
-    Parameters
-    ----------
-    val : str
-        Content of the test from the list
-
-    Returns
-    -------
-    str
-        Test ID
-    """
-    return val
-
-
 def generate_test_ids_dict(val):
     """
     generate_test_ids Helper to generate test ID for parametrize
@@ -77,6 +59,8 @@ def generate_test_ids_dict(val):
     if 'name' in val.keys():
         # note this wouldn't show any hours/minutes/seconds
         return val['name']
+    elif 'hostname' in val.keys():
+        return val['hostname']
 
 
 def get_devices():

@@ -5,12 +5,11 @@ from __future__ import (absolute_import, division, print_function)
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
-# from ansible_collections.arista.cvp.plugins.module_utils.fields import FIELD_FACTS_DEVICE, FIELD_FACTS_CONFIGLET, FIELD_FACTS_CONTAINER
 from tests.lib import mock
 from tests.data import facts_unit
 from tests.lib.parametrize import generate_list_from_dict
 from tests.lib.helpers import setup_custom_logger
-from tests.lib.utils import generate_test_ids_dict, generate_test_ids_list
+from tests.lib.utils import generate_test_ids_dict
 
 LOGGER = setup_custom_logger(__name__)
 
@@ -60,7 +59,7 @@ def test_CvFactsTools__get_container_name(fact_unit_tools, container_def):
 @pytest.mark.generic
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
-@pytest.mark.parametrize("configlet_def", facts_unit.MOCKDATA_CONFIGLET_MAPPERS['data']['configlets'], ids=generate_test_ids_list)
+@pytest.mark.parametrize("configlet_def", facts_unit.MOCKDATA_CONFIGLET_MAPPERS['data']['configlets'], ids=generate_test_ids_dict)
 def test_CvFactsTools__configletIds_to_configletName(fact_unit_tools, configlet_def):
     LOGGER.info('** Sending request to get name for configlet ID: %s', str(configlet_def[mock.MockCVPDatabase.FIELD_KEY]))
     result = fact_unit_tools._CvFactsTools__configletIds_to_configletName(configletIds=[configlet_def[mock.MockCVPDatabase.FIELD_KEY]])
@@ -83,7 +82,7 @@ def test_CvFactsTools__configletIds_to_configletName_empty(fact_unit_tools):
 @pytest.mark.generic
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
-@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_list)
+@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
 def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, device_def):
     LOGGER.info('** Sending request to get configlets name for device name: %s', str(device_def['hostname']))
     result = fact_unit_tools._CvFactsTools__device_get_configlets(netid=device_def['systemMacAddress'])
@@ -97,7 +96,7 @@ def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, de
 @pytest.mark.generic
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
-@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_list)
+@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
 def test_CvFactsTools__device_get_configlets_no_configlet(fact_unit_tools, device_def):
     LOGGER.info('** Sending request to get configlets name for device name: %s', str(device_def['hostname']))
     result = fact_unit_tools._CvFactsTools__device_get_configlets(netid=device_def['systemMacAddress'])
@@ -144,7 +143,7 @@ def test_CvFactsTools__device_get_configlets_with_no_configlets(fact_unit_tools,
 @pytest.mark.generic
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
-@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_list)
+@pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
 def test_CvFactsTools__device_get_configlets_no_configlet(fact_unit_tools, device_def):
     LOGGER.info('** Sending request to get update device info for: %s', str(device_def['hostname']))
     result = fact_unit_tools._CvFactsTools__device_update_info(device=device_def)

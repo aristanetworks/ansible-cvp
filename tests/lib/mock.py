@@ -71,8 +71,6 @@ class MockCVPDatabase:
 
     def get_container_by_name(self, name) -> dict:
         """Mock cvprac.cvp_client.CvpApi.get_container_by_name() method"""
-        # get_container_by_name() returns None if the container does not exist
-        LOGGER.warning('Search for container: %s in %s', name, str(self.containers))
         if name not in self.containers:
             return None
         keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]

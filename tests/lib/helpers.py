@@ -66,8 +66,6 @@ def setup_custom_logger(name):
         fmt='%(asctime)s %(levelname)-8s File: %(filename)s  - Function: %(funcName)s - Line: %(lineno)d - %(message)s',
         )
     # Handler for logfile
-    # For file rotation
-    # handler = RotatingFileHandler('pytest.log', maxBytes=2000, backupCount=10)
     handler = logging.FileHandler('pytest.log', mode='w')
     handler.setFormatter(formatter)
     # Handler for screen
