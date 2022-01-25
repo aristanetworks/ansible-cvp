@@ -52,6 +52,167 @@ MODULE_LOGGER.info('Start fact_tools module execution')
 # Class
 # ------------------------------------------ #
 
+class CvFactResource():
+    """
+    CvFactResource Helper to render facts based on resource type
+    """
+    def __init__(self, facts_type: str = 'list'):
+        if facts_type == 'list':
+            self._cache = []
+
+    def __shorten_device_facts(self, device_fact: dict):
+        """
+        __shorten_device_facts Filter content to return for device type resource
+
+        Parameters
+        ----------
+        device_fact : dict
+            Dictionary of data provided by Cloudvision
+
+        Returns
+        -------
+        dict
+            Dict with only expected fields to be compliant with resource schema
+        """
+        fact = {
+            key: device_fact[key]
+            for key in [
+                ApiFields.device.HOSTNAME,
+                ApiFields.device.FQDN,
+                ApiFields.device.SERIAL,
+                ApiFields.device.SYSMAC,
+                ApiFields.generic.CONFIGLETS,
+            ]
+        }
+        fact[ApiFields.generic.PARENT_NAME] = device_fact[ApiFields.device.CONTAINER_NAME]
+        return fact
+
+    def _get_configlet(self):
+        """
+        _get_configlets Generate facts for configlets resource type
+
+        EXAMPLE:
+        --------
+        >>> CvFactsResource()._get_configlet()
+        {
+            "TEAM01-alias": "alias a1 show version",
+            "TEAM01-another-configlet": "alias a2 show version"
+        }
+
+        Returns
+        -------
+        dict
+            dictionary of configlets.
+        """
+        if isinstance(self._cache, list):
+            return {configlet[ApiFields.generic.NAME]: configlet['config'] for configlet in self._cache}
+
+    def _get_container(self):
+        """
+        _get_container Generate facts for containers resource type
+
+        EXAMPLE:
+        --------
+        >>> CvFactsResource()._get_container()
+        {
+            "TEAM01": {
+                "parentContainerName": "Tenant"
+            },
+            "TEAM01_DC": {
+                "parentContainerName": "TEAM01"
+            },
+            "TEAM01_LEAFS": {
+                "parentContainerName": "TEAM01_DC",
+                "configlets": [
+                    "GLOBAL-ALIASES"
+                ]
+            }
+        }
+
+        Returns
+        -------
+        dict
+            dictionary of containers
+        """
+        if isinstance(self._cache, list):
+            return {entry[ApiFields.generic.NAME]: {
+                ApiFields.generic.PARENT_NAME: entry[ApiFields.container.PARENT_NAME],
+                ApiFields.generic.CONFIGLETS: entry[ApiFields.generic.CONFIGLETS]}
+                for entry in self._cache if ApiFields.generic.NAME in entry.keys()}
+
+    def _get_device(self, verbose: bool = False):
+        """
+        _get_device Generate facts for devices resource type
+
+        EXAMPLE:
+        --------
+        >>> CvFactsResource()._get_device()
+        [
+            {
+                "fqdn": "CV-ANSIBLE-EOS01",
+                "parentContainerName": "ANSIBLE",
+                "configlets": [
+                    "01TRAINING-01"
+                ],
+                "systemMacAddress": "50:8d:00:e3:78:aa",
+                "serialNumber": "64793E1D3DE2240F547E5964354214A4"
+            }
+        ]
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Trigger to include or not all fields from CV, by default False
+
+        Returns
+        -------
+        list
+            List of devices
+        """
+        if verbose:
+            return self._cache
+        else:
+            return [self.__shorten_device_facts(
+                device_fact=device) for device in self._cache]
+
+    def add(self, data):
+        """
+        add Add an entry in the list of facts
+
+        Parameters
+        ----------
+        data : Any
+            Data to add as a new entry in the fact list. Should be a dict
+        """
+        if isinstance(self._cache, list):
+            self._cache.append(data)
+
+    def get(self, resource_model: str, verbose: bool = False):
+        """
+        get Public method to get structured fact for a given resource
+
+        This method transform list of data available in its cache to be exposed using CV module schema.
+        Resource_type input will apply correct data transformation to be compatible with cv modules.
+
+        Parameters
+        ----------
+        resource_model : str
+            Name of the resource to apply correct transformation. Can be ['device', 'container', 'configlet']
+        verbose : bool, optional
+            Trigger to include or not all fields from CV, by default False
+
+        Returns
+        -------
+        Any
+            Facts based on resource_type data model.
+        """
+        if resource_model == 'configlet':
+            return self._get_configlet()
+        elif resource_model == 'container':
+            return self._get_container()
+        elif resource_model == 'device':
+            return self._get_device(verbose=verbose)
+
 
 class CvFactsTools():
     """
@@ -247,7 +408,7 @@ class CvFactsTools():
 
     # Fact management
 
-    def __fact_devices(self, filter: str = '.*', verbose: str = 'short'):
+    def __fact_devices(self, filter: str = '.*', verbose: bool = False):
         """
         __fact_devices Collect facts related to device inventory
 
@@ -265,18 +426,16 @@ class CvFactsTools():
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
         MODULE_LOGGER.info('Extract device data using filter %s', str(filter))
+        facts_builder = CvFactResource()
         for device in cv_devices:
             if re.match(filter, device[ApiFields.device.HOSTNAME]):
                 MODULE_LOGGER.debug('Filter has been matched: %s - %s', str(filter), str(device[ApiFields.device.HOSTNAME]))
-                device_out = {}
-                if verbose == 'full':
-                    device_out = self.__device_update_info(device=device)
+                if verbose:
+                    facts_builder.add(self.__device_update_info(device=device))
                 else:
-                    for key in [ApiFields.device.HOSTNAME, ApiFields.device.FQDN, ApiFields.device.SERIAL, ApiFields.device.SYSMAC]:
-                        device_out[key] = device[key]
-                device_out[ApiFields.generic.PARENT_NAME] = device[ApiFields.device.CONTAINER_NAME]
-                device_out[ApiFields.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[ApiFields.generic.KEY])
-                self._facts[Facts.DEVICE].append(device_out)
+                    device[ApiFields.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[ApiFields.generic.KEY])
+                    facts_builder.add(device)
+        self._facts[Facts.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
     def __fact_containers(self):
         """
@@ -286,15 +445,13 @@ class CvFactsTools():
             cv_containers = self.__cv_client.api.get_containers()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
+        facts_builder = CvFactResource()
         for container in cv_containers['data']:
             if container[ApiFields.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
-                self._facts[Facts.CONTAINER] = {
-                    container[ApiFields.generic.NAME]: {
-                        ApiFields.generic.PARENT_NAME: container[ApiFields.container.PARENT_NAME],
-                        ApiFields.generic.CONFIGLETS: self.__containers_get_configlets(container_id=container[ApiFields.container.KEY])
-                    }
-                }
+                container[ApiFields.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[ApiFields.container.KEY])
+                facts_builder.add(container)
+        self._facts[Facts.CONTAINER] = facts_builder.get(resource_model='container')
 
     def __fact_configlets(self, filter: str = '.*', configlets_per_call: int = 10):
         """
@@ -329,11 +486,15 @@ class CvFactsTools():
                         str(error),
                         str(future.result())
                     )
-        configlets_result = {}
+        facts_builder = CvFactResource()
         for future in results:
             for configlet in future['data']:
                 if re.match(filter, configlet[ApiFields.generic.NAME]):
-                    configlets_result[configlet[ApiFields.generic.NAME]] = configlet['config']
+                    MODULE_LOGGER.debug('Adding configlet %s', str(configlet['name']))
+                    facts_builder.add(configlet)
 
-        MODULE_LOGGER.debug('Final results for configlets: %s', str(configlets_result.keys()))
-        self._facts[Facts.CONFIGLET] = configlets_result
+        MODULE_LOGGER.debug(
+            'Final results for configlets: %s',
+            str(facts_builder.get(resource_model='configlet').keys())
+        )
+        self._facts[Facts.CONFIGLET] = facts_builder.get(resource_model='configlet')
