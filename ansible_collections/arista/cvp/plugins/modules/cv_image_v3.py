@@ -29,7 +29,10 @@ version_added: 3.3.0
 author: EMEA AS Team (@aristanetworks)
 short_description: EOS Image management with Cloudvision
 description:
-  - CloudVision Portal Image management module
+  - CloudVision Portal Image management module.
+  - ''
+  - Due to a current limitation in Cloudvision API,
+  - authentication with token is not supported for this module only.
 options:
   image:
     description: Name of the image file, including path if needed

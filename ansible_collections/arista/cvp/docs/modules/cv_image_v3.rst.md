@@ -10,7 +10,10 @@ Module added in version 3.3.0
 
 ## Synopsis
 
-CloudVision Portal Image management module
+CloudVision Portal Image management module.
+
+Due to a current limitation in Cloudvision API, authentication with
+token is not supported for this module only.
 
 ## Module-specific Options
 
