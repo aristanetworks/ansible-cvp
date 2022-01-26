@@ -78,6 +78,7 @@ jobs:
             cv_configlet_v3
             cv_task_v3
             cv_image_v3
+            cv_facts_v3
             cv_facts
             cv_device
             cv_container

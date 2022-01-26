@@ -17,7 +17,7 @@ jobs:
 
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          sed -i 's/version: null/version: '"$(git describe --abbrev=0 --tags | sed 's/v//')"'/' ansible_collections/arista/cvp/galaxy.yml
+          sed -i 's/version: 0\.0\.0/version: '"$(git describe --abbrev=0 --tags | sed 's/v//')"'/' ansible_collections/arista/cvp/galaxy.yml
           make collection-build
 
       # - name: Release on Github

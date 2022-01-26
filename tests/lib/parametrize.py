@@ -12,16 +12,38 @@ parametrize.py - Retrieves the mock data from the json_data file
 """
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.json_data import mook_data, container_topology, schemas, modes, CONTAINER_IDS
+from tests.lib.json_data import mook_data, container_topology, schemas, modes, CONTAINER_IDS
 
 
 # ---------------------------------------------------------------------------- #
 #   PARAMETRIZE Management
 # ---------------------------------------------------------------------------- #
+
+def generate_list_from_dict(data):
+    """
+    generate_flat_data Generate a flat list of dict
+
+    Example
+    -------
+    >>> CUSTOMER_CVP_CONTAINER_TOPOLOGY = {"Tenant":{"name":"Tenant","key":"root","parentContainerId":"None"},"Undefined":{"name":"Undefined","key":"undefined_container","parentContainerId":"root"}}
+
+    >>> result = generate_flat_data(CUSTOMER_CVP_CONTAINER_TOPOLOGY)
+
+    >>> print(result)
+    [{"name":"Tenant","key":"root","parentContainerId":"None"},{"name":"Undefined","key":"undefined_container","parentContainerId":"root"}]
+
+    Parameters
+    ----------
+    data : dict
+        Data to transform
+
+    Returns
+    -------
+    list
+        List extracted from the dict
+    """
+    return [dict(data[d].items()) for d in data]
+
 
 def generate_flat_data(type: str, mode: str = "valid"):
     """Returns the data based on type and mode

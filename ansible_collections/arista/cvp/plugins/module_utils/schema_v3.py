@@ -78,8 +78,8 @@ SCHEMA_CV_DEVICE = {
             }
         ]
     ],
-    "additionalItems": True,
     "items": {
+        "additionalItems": True,
         "$id": "#/items",
         "anyOf": [
             {
@@ -115,6 +115,7 @@ SCHEMA_CV_DEVICE = {
                         ],
                     }
                 ],
+                "additionalProperties": True,
                 "properties": {
                     "fqdn": {
                         "$id": "#/items/anyOf/0/properties/fqdn",
@@ -162,17 +163,13 @@ SCHEMA_CV_DEVICE = {
                         "title": "The configlets schema",
                         "description": "An explanation about the purpose of this instance.",
                         "default": [],
-                        "contains": {
-                            "type": "string"
-                        },
-                        "minItems": 1,
+                        "minItems": 0,
                         "examples": [
                             [
                                 "01TRAINING-01",
                                 "CV-EOS-ANSIBLE01"
                             ]
                         ],
-                        "additionalItems": True,
                         "items": {
                             "$id": "#/items/anyOf/0/properties/configlets/items",
                             "anyOf": [
@@ -199,13 +196,11 @@ SCHEMA_CV_DEVICE = {
                         "examples": [
                             []
                         ],
-                        "additionalItems": True,
                         "items": {
                             "$id": "#/items/anyOf/0/properties/imageBundle/items"
                         }
                     }
                 },
-                "additionalProperties": True
             }
         ]
     }
@@ -240,6 +235,7 @@ SCHEMA_CV_CONTAINER = {
         "^[A-Za-z0-9\\._%\\+-]+$": {
             "type": "object",
             "required": True,
+            "additionalProperties": False,
             "properties": {
                 "parentContainerName": {
                     "id": "parentContainerName",

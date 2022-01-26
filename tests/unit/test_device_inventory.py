@@ -8,15 +8,11 @@
 # flake8: noqa: R0801
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.parametrize import generate_inventory_data
-import pytest
 import logging
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, DeviceInventory   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC   # noqa # pylint: disable=unused-import
+import pytest
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC
+from tests.lib.parametrize import generate_inventory_data
 
 
 @pytest.mark.generic

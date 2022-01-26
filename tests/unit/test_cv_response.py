@@ -6,14 +6,10 @@
 # flake8: noqa: W1202
 
 from __future__ import (absolute_import, division, print_function)
-import sys
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-from lib.parametrize import generate_cv_response_api_action_name, generate_cv_response_ansible_name, generate_cv_response_result_manager_name
-import pytest
 import logging
-from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse   # noqa # pylint: disable=unused-import
+import pytest
+from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
+from tests.lib.parametrize import generate_cv_response_api_action_name, generate_cv_response_result_manager_name
 
 
 # ---------------------------------------------------------------------------- #

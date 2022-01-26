@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
-# pylint: disable=bare-except
-# pylint: disable=dangerous-default-value
-# flake8: noqa: W503
-# pylint: disable=logging-format-interpolation
-# flake8: noqa: W1202
-# pylint: disable = duplicate-code
-# flake8: noqa: R0801
 #
 # GNU General Public License v3.0+
 #
@@ -30,24 +23,19 @@ __metaclass__ = type
 
 import traceback
 import logging
+import pprint
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
+import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_CONFIGLETS
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 try:
-    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpClientError  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpApiError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpClientError
+    from cvprac.cvp_client_errors import CvpApiError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
-# try:
-#     import jsonschema
-#     HAS_JSONSCHEMA = True
-# except ImportError:
-#     HAS_JSONSCHEMA = False
 import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.container_tools_v3')
@@ -78,15 +66,6 @@ class ContainerInput(object):
         self.__parent_field: str = FIELD_PARENT_NAME
         self.__root_name = container_root_name
         self.__schema = schema
-        self.__normalize()
-
-    def __normalize(self):
-        """
-        __normalize Parse inventory and add keys that are optional from schema.
-        """
-        for container_name in self.__topology:
-            if FIELD_CONFIGLETS not in self.__topology[container_name]:
-                self.__topology[container_name].update({FIELD_CONFIGLETS: []})
 
     def __get_container_data(self, container_name: str, key_name: str):
         """
@@ -159,6 +138,9 @@ class ContainerInput(object):
         MODULE_LOGGER.info('List of containers to apply on CV: %s', str(result_list))
         return result_list
 
+    def __str__(self):
+        return pprint.pformat(self.__topology)
+
     def get_parent(self, container_name: str, parent_key: str = FIELD_PARENT_NAME):
         """
         get_parent Expose name of parent container for the given container
@@ -211,9 +193,9 @@ class ContainerInput(object):
         bool
             True if configlets attached, False if not
         """
-        if self.__get_container_data(container_name=container_name, key_name=configlet_key) is None:
-            return False
-        return True
+        if self.__get_container_data(container_name=container_name, key_name=configlet_key):
+            return True
+        return False
 
 
 class CvContainerTools(object):
