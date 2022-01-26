@@ -1,8 +1,6 @@
-![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![collection version](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp)
+![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![[collection version](https://github.com/aristanetworks/ansible-cvp/tags)](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp) [![Collection code testing](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml/badge.svg)](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml)
 
 # Ansible Modules for Arista CloudVision Platform
-
-> All the CV communication are now managed by [__cvprac library__](https://github.com/aristanetworks/cvprac). So a new [requirements](#dependencies) __MUST__ be installed first before any code execution.
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
@@ -61,6 +59,7 @@ __Version 3:__
 - [__arista.cvp.cv_container_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
 - [__arista.cvp.cv_device_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
+- [__arista.cvp.cv_facts_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_facts_v3.rst/) - Collect information from Cloudvision.
 
 ### List of available roles
 

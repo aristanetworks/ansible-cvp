@@ -21,7 +21,7 @@ from lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nic
 from lib.parametrize import generate_CvConfigletTools_content
 from lib.config import user_token, provision_cv
 from lib.cvaas_configlet import  SYSTEM_CONFIGLETS_TESTS
-from lib.utils import cvp_login
+from lib.utils import cvp_login, generate_test_ids_dict
 from lib.provisioner import CloudvisionProvisioner
 
 
@@ -32,27 +32,6 @@ logger = setup_custom_logger('configlet_system')
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #
-
-
-def generate_test_ids(val):
-    """
-    generate_test_ids Helper to generate test ID for parametrize
-
-    Only related to SYSTEM_CONFIGLETS_TESTS structure
-
-    Parameters
-    ----------
-    val : dict
-        A configlet test structure
-
-    Returns
-    -------
-    str
-        Name of the configlet
-    """
-    if 'name' in val.keys():
-        # note this wouldn't show any hours/minutes/seconds
-        return val['name']
 
 @pytest.fixture(scope="class")
 def CvContainerTools_Manager(request):
@@ -81,7 +60,7 @@ def CvContainerTools_Manager(request):
 @pytest.mark.usefixtures("CvContainerTools_Manager")
 @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 # Parametrize to build a ConfigletInput from list of configlet in SYSTEM_CONFIGLETS_TESTS. Only those set with is_present_expected to False
-@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=generate_test_ids)
+@pytest.mark.parametrize("test_configlet", SYSTEM_CONFIGLETS_TESTS, ids=generate_test_ids_dict)
 @pytest.mark.parametrize("check_mode", [True, False], ids=['check_mode_on', 'check_mode_off'])
 class Test_CvConfiglet_Unit():
 
