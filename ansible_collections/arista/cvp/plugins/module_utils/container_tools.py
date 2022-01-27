@@ -27,9 +27,11 @@ import pprint
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields, ModuleOptionValues, ContainerResponseFields
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import ModuleOptionValues, ContainerResponseFields
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
     from cvprac.cvp_client_errors import CvpClientError
     from cvprac.cvp_client_errors import CvpApiError
@@ -62,7 +64,7 @@ class ContainerInput(object):
 
     def __init__(self, user_topology: dict, container_root_name: str = 'Tenant', schema=schema.SCHEMA_CV_CONTAINER):
         self.__topology = user_topology
-        self.__parent_field: str = ApiFields.generic.PARENT_CONTAINER_NAME
+        self.__parent_field: str = Api.generic.PARENT_CONTAINER_NAME
         self.__root_name = container_root_name
         self.__schema = schema
 
@@ -99,7 +101,7 @@ class ContainerInput(object):
         check_schemas Validate schemas for user's input
         """
         MODULE_LOGGER.info('start json schema validation')
-        if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
+        if not validate_json_schema(user_json=self.__topology, schema=self.__schema):
             MODULE_LOGGER.error(
                 "Invalid configlet input : \n%s\n\n%s", str(self.__topology), self.__schema)
             return False
@@ -142,7 +144,7 @@ class ContainerInput(object):
     def __str__(self):
         return pprint.pformat(self.__topology)
 
-    def get_parent(self, container_name: str, parent_key: str = ApiFields.generic.PARENT_CONTAINER_NAME):
+    def get_parent(self, container_name: str, parent_key: str = Api.generic.PARENT_CONTAINER_NAME):
         """
         get_parent Expose name of parent container for the given container
 
@@ -160,7 +162,7 @@ class ContainerInput(object):
         """
         return self.__get_container_data(container_name=container_name, key_name=parent_key)
 
-    def get_configlets(self, container_name: str, configlet_key: str = ApiFields.generic.CONFIGLETS):
+    def get_configlets(self, container_name: str, configlet_key: str = Api.generic.CONFIGLETS):
         """
         get_configlets Read and extract list of configlet names for a container
 
@@ -178,7 +180,7 @@ class ContainerInput(object):
         """
         return self.__get_container_data(container_name=container_name, key_name=configlet_key)
 
-    def has_configlets(self, container_name: str, configlet_key: str = ApiFields.generic.CONFIGLETS):
+    def has_configlets(self, container_name: str, configlet_key: str = Api.generic.CONFIGLETS):
         """
         has_configlets Test if container has configlets configured in inventory
 
@@ -230,11 +232,11 @@ class CvContainerTools(object):
             Standardized dict.
         """
         standard_keys = [
-            [ApiFields.generic.KEY],
-            [ApiFields.generic.NAME],
-            [ApiFields.container.COUNT_CONTAINER],
-            [ApiFields.container.COUNT_DEVICE],
-            ApiFields.generic.PARENT_CONTAINER_ID
+            [Api.generic.KEY],
+            [Api.generic.NAME],
+            [Api.container.COUNT_CONTAINER],
+            [Api.container.COUNT_DEVICE],
+            Api.generic.PARENT_CONTAINER_ID
         ]
         return {k: v for k, v in source.items() if k in standard_keys}
 
@@ -304,16 +306,16 @@ class CvContainerTools(object):
 
         # Protect against non-existing container in check_mode
         if container is not None:
-            configlet_names = [entry.get(ApiFields.generic.NAME)
-                               for entry in configlets if entry.get(ApiFields.generic.NAME)]
-            change_response.name = container[ApiFields.generic.NAME] + ':' + ':'.join(configlet_names)
+            configlet_names = [entry.get(Api.generic.NAME)
+                               for entry in configlets if entry.get(Api.generic.NAME)]
+            change_response.name = container[Api.generic.NAME] + ':' + ':'.join(configlet_names)
             if self.__check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
                 change_response.add_entry(
-                    container[ApiFields.generic.NAME] + ':' + ':'.join(configlet_names))
+                    container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
                 MODULE_LOGGER.warning(
-                    '[check_mode] - Fake container creation of %s', str(container[ApiFields.generic.NAME]))
+                    '[check_mode] - Fake container creation of %s', str(container[Api.generic.NAME]))
             else:
                 try:
                     resp = self.__cvp_client.api.apply_configlets_to_container(
@@ -330,7 +332,7 @@ class CvContainerTools(object):
                     if 'data' in resp and resp['data']['status'] == 'success':
                         # We assume there is a change as API does not provide information
                         # resp = {'data': {'taskIds': [], 'status': 'success'}}
-                        change_response.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                        change_response.taskIds = resp['data'][Api.task.TASK_IDS]
                         change_response.success = True
                         change_response.changed = True
 
@@ -369,14 +371,14 @@ class CvContainerTools(object):
             API call result
         """
         configlet_names = []
-        configlet_names = [entry.get(ApiFields.generic.NAME)
-                           for entry in configlets if entry.get(ApiFields.generic.NAME)]
-        change_response = CvApiResult(action_name=container[ApiFields.generic.NAME] + ':' + ':'.join(configlet_names))
+        configlet_names = [entry.get(Api.generic.NAME)
+                           for entry in configlets if entry.get(Api.generic.NAME)]
+        change_response = CvApiResult(action_name=container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
         if self.__check_mode:
             change_response.success = True
             change_response.taskIds = ['check_mode']
             change_response.add_entry(
-                container[ApiFields.generic.NAME] + ':' + ':'.join(configlet_names))
+                container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
         else:
             try:
                 resp = self.__cvp_client.api.remove_configlets_from_container(
@@ -391,7 +393,7 @@ class CvContainerTools(object):
                 self.__ansible.fail_json(msg=message)
             else:
                 if 'data' in resp and resp['data']['status'] == 'success':
-                    change_response.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                    change_response.taskIds = resp['data'][Api.task.TASK_IDS]
                     # We assume there is a change as API does not provide information
                     # resp = {'data': {'taskIds': [], 'status': 'success'}}
                     change_response.success = True
@@ -434,10 +436,10 @@ class CvContainerTools(object):
         cv_response = self.__cvp_client.api.get_container_by_name(
             name=container_name)
         MODULE_LOGGER.debug('Get container ID (%s) response from cv for container %s', str(cv_response), str(container_name))
-        if cv_response is not None and [ApiFields.generic.KEY] in cv_response:
-            container_id = cv_response[[ApiFields.generic.KEY]]
+        if cv_response is not None and [Api.generic.KEY] in cv_response:
+            container_id = cv_response[[Api.generic.KEY]]
             container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[
-                [ApiFields.container.TOPOLOGY]]
+                [Api.container.TOPOLOGY]]
             MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
@@ -484,18 +486,18 @@ class CvContainerTools(object):
         """
         container_id = self.get_container_id(container_name=container_name)
         configlets_and_mappers = self.__cvp_client.api.get_configlets_and_mappers()
-        configlets_list = configlets_and_mappers['data'][ApiFields.generic.CONFIGLETS]
+        configlets_list = configlets_and_mappers['data'][Api.generic.CONFIGLETS]
         mappers = configlets_and_mappers['data']['configletMappers']
         configlets_configured = []
         MODULE_LOGGER.info('container %s has id %s', str(container_name), str(container_id))
         for mapper in mappers:
-            if mapper[ApiFields.mappers.OBJECT_ID] == container_id:
+            if mapper[Api.mappers.OBJECT_ID] == container_id:
                 MODULE_LOGGER.info(
                     'Found 1 mappers for container %s : %s', str(container_name), str(mapper))
                 configlets_configured.append(
-                    next((x for x in configlets_list if x[ApiFields.generic.KEY] == mapper[ApiFields.configlet.ID])))
+                    next((x for x in configlets_list if x[Api.generic.KEY] == mapper[Api.configlet.ID])))
         MODULE_LOGGER.debug('List of configlets from CV is: %s', str(
-            [x[ApiFields.generic.NAME] for x in configlets_configured]))
+            [x[Api.generic.NAME] for x in configlets_configured]))
         return configlets_configured
 
     def get_container_id(self, container_name: str):
@@ -518,8 +520,8 @@ class CvContainerTools(object):
         """
         container_info = self.__cvp_client.api.get_container_by_name(
             name=container_name)
-        if [ApiFields.generic.KEY] in container_info:
-            return container_info[[ApiFields.generic.KEY]]
+        if [Api.generic.KEY] in container_info:
+            return container_info[[Api.generic.KEY]]
         return None
 
     #############################################
@@ -547,10 +549,10 @@ class CvContainerTools(object):
         """
         container = self.get_container_info(container_name=container_name)
         if (
-            [ApiFields.container.COUNT_CONTAINER] in container
-            and [ApiFields.container.COUNT_DEVICE] in container
-            and container[[ApiFields.container.COUNT_CONTAINER]] == 0
-            and container[[ApiFields.container.COUNT_DEVICE]] == 0
+            [Api.container.COUNT_CONTAINER] in container
+            and [Api.container.COUNT_DEVICE] in container
+            and container[[Api.container.COUNT_CONTAINER]] == 0
+            and container[[Api.container.COUNT_DEVICE]] == 0
         ):
             return True
         return False
@@ -621,13 +623,13 @@ class CvContainerTools(object):
         change_result = CvApiResult(action_name=container)
         MODULE_LOGGER.debug('parent container is set to: %s', str(parent))
         if self.is_container_exists(container_name=parent):
-            parent_id = self.__cvp_client.api.get_container_by_name(name=parent)[ApiFields.generic.KEY]
+            parent_id = self.__cvp_client.api.get_container_by_name(name=parent)[Api.generic.KEY]
             MODULE_LOGGER.debug('Parent container (%s) for container %s exists', str(parent), str(container))
             if self.is_container_exists(container_name=container) is False:
                 if self.__check_mode:
                     change_result.success = True
                     change_result.changed = True
-                    change_result.add_entry(container[ApiFields.generic.NAME])
+                    change_result.add_entry(container[Api.generic.NAME])
                 else:
                     try:
                         resp = self.__cvp_client.api.add_container(
@@ -639,7 +641,7 @@ class CvContainerTools(object):
                         self.__ansible.fail_json(msg=message)
                     else:
                         if resp['data']['status'] == "success":
-                            change_result.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                            change_result.taskIds = resp['data'][Api.task.TASK_IDS]
                             change_result.success = True
                             change_result.changed = True
                             change_result.count += 1
@@ -698,7 +700,7 @@ class CvContainerTools(object):
             # ----------------------------------------------------------------#
             if self.__check_mode:
                 change_result.success = True
-                change_result.add_entry(container[ApiFields.generic.NAME])
+                change_result.add_entry(container[Api.generic.NAME])
 
             else:
                 try:
@@ -711,7 +713,7 @@ class CvContainerTools(object):
                     self.__ansible.fail_json(msg=message)
                 else:
                     if resp['data']['status'] == "success":
-                        change_result.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                        change_result.taskIds = resp['data'][Api.task.TASK_IDS]
                         change_result.success = True
                         change_result.changed = True
                         change_result.count += 1
@@ -783,7 +785,7 @@ class CvContainerTools(object):
         container_info = self.get_container_info(container_name=container)
         detach_configlets = []
         for configlet in configlets:
-            data = self.__get_configlet_info(configlet_name=configlet[ApiFields.generic.NAME])
+            data = self.__get_configlet_info(configlet_name=configlet[Api.generic.NAME])
             if data is not None:
                 detach_configlets.append(data)
         MODULE_LOGGER.info('Sending data to self.__configlet_del: %s', str(detach_configlets))
@@ -842,7 +844,7 @@ class CvContainerTools(object):
                         configlet_to_remove = [
                             attach_configlet
                             for attach_configlet in attached_configlets
-                            if attach_configlet[ApiFields.generic.NAME]
+                            if attach_configlet[Api.generic.NAME]
                             not in user_topology.get_configlets(
                                 container_name=user_container
                             )

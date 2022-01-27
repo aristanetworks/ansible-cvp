@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 import logging
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory
-from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.parametrize import generate_inventory_data
 
 
@@ -21,7 +21,7 @@ class TestDeviceInventory():
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_create_object(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
-        fqdn_list = {data[ApiFields.device.FQDN] for data in DEVICE_INVENTORY}
+        fqdn_list = {data[Api.device.FQDN] for data in DEVICE_INVENTORY}
         for dev in inventory.devices:
             assert dev.fqdn in fqdn_list
 
@@ -53,57 +53,57 @@ class TestDeviceInventory():
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
         for dev_data in DEVICE_INVENTORY:
             dev_inventory = inventory.get_device(
-                device_string=dev_data[ApiFields.device.FQDN])
+                device_string=dev_data[Api.device.FQDN])
             assert dev_inventory is not None
-            assert dev_data[ApiFields.device.FQDN] == dev_inventory.fqdn
+            assert dev_data[Api.device.FQDN] == dev_inventory.fqdn
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_get_by_fqdn(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
         for dev_data in DEVICE_INVENTORY:
             dev_inventory = inventory.get_device(
-                device_string=dev_data[ApiFields.device.FQDN], search_method=ApiFields.device.FQDN)
-            assert dev_data[ApiFields.device.FQDN] == dev_inventory.fqdn
+                device_string=dev_data[Api.device.FQDN], search_method=Api.device.FQDN)
+            assert dev_data[Api.device.FQDN] == dev_inventory.fqdn
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_get_by_fqdn_default(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(
-            data=DEVICE_INVENTORY, search_method=ApiFields.device.FQDN)
+            data=DEVICE_INVENTORY, search_method=Api.device.FQDN)
         for dev_data in DEVICE_INVENTORY:
             dev_inventory = inventory.get_device(
-                device_string=dev_data[ApiFields.device.FQDN])
-            assert dev_data[ApiFields.device.FQDN] == dev_inventory.fqdn
+                device_string=dev_data[Api.device.FQDN])
+            assert dev_data[Api.device.FQDN] == dev_inventory.fqdn
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_get_by_system_mac(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
         for dev_data in DEVICE_INVENTORY:
-            if ApiFields.device.SYSMAC in dev_data:
+            if Api.device.SYSMAC in dev_data:
                 dev_inventory = inventory.get_device(
-                    device_string=dev_data[ApiFields.device.SYSMAC], search_method=ApiFields.device.SYSMAC)
-                assert dev_data[ApiFields.device.SYSMAC] == dev_inventory.system_mac
+                    device_string=dev_data[Api.device.SYSMAC], search_method=Api.device.SYSMAC)
+                assert dev_data[Api.device.SYSMAC] == dev_inventory.system_mac
             else:
                 pytest.skip("Skipped because {} is not in {}".format(
-                    ApiFields.device.SYSMAC, dev_data))
+                    Api.device.SYSMAC, dev_data))
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_get_by_system_mac_default(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(
-            data=DEVICE_INVENTORY, search_method=ApiFields.device.SYSMAC)
+            data=DEVICE_INVENTORY, search_method=Api.device.SYSMAC)
         for dev_data in DEVICE_INVENTORY:
-            if ApiFields.device.SYSMAC in dev_data:
+            if Api.device.SYSMAC in dev_data:
                 dev_inventory = inventory.get_device(
-                    device_string=dev_data[ApiFields.device.SYSMAC])
-                assert dev_data[ApiFields.device.SYSMAC] == dev_inventory.system_mac
+                    device_string=dev_data[Api.device.SYSMAC])
+                assert dev_data[Api.device.SYSMAC] == dev_inventory.system_mac
             else:
                 pytest.skip("Skipped because {} is not in {}".format(
-                    ApiFields.device.SYSMAC, dev_data))
+                    Api.device.SYSMAC, dev_data))
 
     @pytest.mark.parametrize("DEVICE_INVENTORY", generate_inventory_data(type="device"))
     def test_get_unknown_device(self, DEVICE_INVENTORY):
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
         dev_inventory = inventory.get_device(
-            device_string="dev_data[ApiFields.device.SYSMAC]")
+            device_string="dev_data[Api.device.SYSMAC]")
         assert dev_inventory is None
         logging.info("Unknown device returns None")
 
@@ -112,6 +112,6 @@ class TestDeviceInventory():
         inventory = DeviceInventory(data=DEVICE_INVENTORY)
         for dev_data in DEVICE_INVENTORY:
             dev_inventory = inventory.get_device(
-                device_string=dev_data[ApiFields.device.FQDN],
+                device_string=dev_data[Api.device.FQDN],
                 search_method="test")
-            assert dev_data[ApiFields.device.FQDN] == dev_inventory.fqdn
+            assert dev_data[Api.device.FQDN] == dev_inventory.fqdn

@@ -24,15 +24,6 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-import logging
-try:
-    import jsonschema
-    HAS_JSONSCHEMA = True
-except ImportError:
-    HAS_JSONSCHEMA = False
-
-
-LOGGER = logging.getLogger('arista.cvp.json_schema')
 
 # JSON Schema to represent CV_CONFIGLET inputs.
 SCHEMA_CV_CONFIGLET = {
@@ -254,29 +245,3 @@ SCHEMA_CV_CONTAINER = {
         }
     }
 }
-
-
-def validate_cv_inputs(user_json: dict, schema):
-    """
-    validate_cv_inputs JSON SCHEMA Validation.
-
-    Run a JSON validation against a muser's defined JSONSCHEMA.
-
-    Parameters
-    ----------
-    user_json : dict
-        JSON to validate
-    schema : jsonschema
-        JSON Schema to use to validate JSON
-
-    Returns
-    -------
-    boolean
-        True if valid, False if not.
-    """
-    try:
-        jsonschema.validate(instance=user_json, schema=schema)
-    except jsonschema.ValidationError as error_message:
-        LOGGER.error("Invalid inputs %s", str(error_message))
-        return False
-    return True

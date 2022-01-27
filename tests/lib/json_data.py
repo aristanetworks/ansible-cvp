@@ -25,8 +25,8 @@
 json_data.py - Declares & initializes the variables and mock data used in the testcases.
 """
 
-from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
-from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from .static_content import CONFIGLET_CONTENT
 
 # Mapping between data name and its schema
@@ -58,7 +58,7 @@ schemas["configlet"] = SCHEMA_CV_CONFIGLET
 # Search methods allowed in cv_device_v3
 #########################################
 
-search_methods = [ApiFields.device.FQDN, ApiFields.device.SYSMAC]
+search_methods = [Api.device.FQDN, Api.device.SYSMAC]
 
 #######################################
 # Container Examples

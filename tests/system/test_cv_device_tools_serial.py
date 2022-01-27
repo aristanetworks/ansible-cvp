@@ -17,7 +17,7 @@ import logging
 import pytest
 import requests.packages.urllib3
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
-from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login, get_devices
 from tests.system.constants_data import CHECK_MODE, CONTAINER_DESTINATION
@@ -59,10 +59,10 @@ class TestCvDeviceToolsWithSerial():
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_search_by_getter_setter(self, CV_DEVICE):
-        self.inventory.search_by = ApiFields.device.SERIAL
-        assert self.inventory.search_by == ApiFields.device.SERIAL
+        self.inventory.search_by = Api.device.SERIAL
+        assert self.inventory.search_by == Api.device.SERIAL
         logging.info(
-            "Setter & Getter for search_by using {} is valid".format(ApiFields.device.FQDN))
+            "Setter & Getter for search_by using {} is valid".format(Api.device.FQDN))
 
     ######################################################################
     ### --------------------  Get data functions  -------------------- ###
@@ -76,10 +76,10 @@ class TestCvDeviceToolsWithSerial():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
             assert self.inventory.get_device_facts(
-                device_lookup=CV_DEVICE[ApiFields.device.SERIAL])
+                device_lookup=CV_DEVICE[Api.device.SERIAL])
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
@@ -92,10 +92,10 @@ class TestCvDeviceToolsWithSerial():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
             assert self.inventory.get_device_id(
-                device_lookup=CV_DEVICE[ApiFields.device.SERIAL]) == CV_DEVICE[ApiFields.device.SYSMAC]
+                device_lookup=CV_DEVICE[Api.device.SERIAL]) == CV_DEVICE[Api.device.SYSMAC]
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
@@ -108,11 +108,11 @@ class TestCvDeviceToolsWithSerial():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
             cv_data = self.inventory.get_device_configlets(
-                device_lookup=CV_DEVICE[ApiFields.device.SERIAL])
-            inventory_data = CV_DEVICE[ApiFields.generic.CONFIGLETS]
+                device_lookup=CV_DEVICE[Api.device.SERIAL])
+            inventory_data = CV_DEVICE[Api.generic.CONFIGLETS]
             comparison = list(set(cv_data).intersection(set(inventory_data)))
             assert len(comparison) == 0
         else:
@@ -127,10 +127,10 @@ class TestCvDeviceToolsWithSerial():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
-            assert self.inventory.get_device_container(device_lookup=CV_DEVICE[ApiFields.device.SERIAL])[
-                ApiFields.generic.PARENT_CONTAINER_NAME] == CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME]
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
+            assert self.inventory.get_device_container(device_lookup=CV_DEVICE[Api.device.SERIAL])[
+                Api.generic.PARENT_CONTAINER_NAME] == CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
@@ -145,12 +145,12 @@ class TestCvDeviceToolsWithSerial():
     def test_device_is_present__by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
-        if ApiFields.device.SERIAL in CV_DEVICE:
+        if Api.device.SERIAL in CV_DEVICE:
             assert self.inventory.is_device_exist(
-                device_lookup=CV_DEVICE[ApiFields.device.SERIAL], search_mode=ApiFields.device.SERIAL) is True
+                device_lookup=CV_DEVICE[Api.device.SERIAL], search_mode=Api.device.SERIAL) is True
             logging.info("End of CV query at {}".format(time_log()))
             logging.info("Device {} is not present on Cloudvision".format(
-                CV_DEVICE[ApiFields.device.SERIAL]))
+                CV_DEVICE[Api.device.SERIAL]))
         else:
             logging.info(
                 "Device has no serial set in inventory: {}".format(CV_DEVICE))
@@ -163,12 +163,12 @@ class TestCvDeviceToolsWithSerial():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
             assert self.inventory.is_in_container(
-                device_lookup=CV_DEVICE[ApiFields.device.SERIAL], container_name=CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME])
+                device_lookup=CV_DEVICE[Api.device.SERIAL], container_name=CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME])
             logging.info("Device {} is correctly configured under {}".format(
-                CV_DEVICE[ApiFields.device.SERIAL], CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME]))
+                CV_DEVICE[Api.device.SERIAL], CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]))
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))
@@ -184,9 +184,9 @@ class TestCvDeviceToolsWithSerial():
     def test_configlet_apply_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         CV_DEVICE_LOCAL = CV_DEVICE
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            self.inventory.search_by = ApiFields.device.SERIAL
-            CV_DEVICE_LOCAL[ApiFields.generic.CONFIGLETS].append("cvaas-unit-test-01")
+        if Api.device.SERIAL in CV_DEVICE:
+            self.inventory.search_by = Api.device.SERIAL
+            CV_DEVICE_LOCAL[Api.generic.CONFIGLETS].append("cvaas-unit-test-01")
             self.inventory.check_mode = CHECK_MODE
             user_inventory = DeviceInventory(data=[CV_DEVICE_LOCAL])
             logging.info("Start CV query at {}".format(time_log()))
@@ -205,12 +205,12 @@ class TestCvDeviceToolsWithSerial():
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_serial_number(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
-        if ApiFields.device.SERIAL in CV_DEVICE:
-            parent_container = CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME]
-            CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME] = CONTAINER_DESTINATION
+        if Api.device.SERIAL in CV_DEVICE:
+            parent_container = CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]
+            CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME] = CONTAINER_DESTINATION
             logging.info("Send update to CV with {}".format(CV_DEVICE))
             self.inventory.check_mode = CHECK_MODE
-            self.inventory.search_by = ApiFields.device.SERIAL
+            self.inventory.search_by = Api.device.SERIAL
             user_inventory = DeviceInventory(data=[CV_DEVICE])
             logging.info("Start CV query at {}".format(time_log()))
             resp = self.inventory.move_device(user_inventory=user_inventory)
@@ -219,7 +219,7 @@ class TestCvDeviceToolsWithSerial():
             assert len(resp[0].results) > 0
             assert resp[0].results["success"]
             assert resp[0].results["changed"]
-            CV_DEVICE[ApiFields.generic.PARENT_CONTAINER_NAME] = parent_container
+            CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME] = parent_container
         else:
             logging.info("Device not based on serial number")
         logging.info("End of CV query at {}".format(time_log()))

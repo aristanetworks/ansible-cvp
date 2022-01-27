@@ -28,9 +28,11 @@ import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
-from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields, DeviceResponseFields, ModuleOptionValues
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import ModuleOptionValues, DeviceResponseFields
 from ansible_collections.arista.cvp.plugins.module_utils.generic_tools import CvElement
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -74,22 +76,22 @@ class DeviceElement(object):
 
     def __init__(self, data: dict):
         self.__data = data
-        self.__fqdn = self.__data.get(ApiFields.device.FQDN)
-        self.__sysmac = self.__data.get(ApiFields.device.SYSMAC)
-        self.__serial = self.__data.get(ApiFields.device.SERIAL)
-        self.__container = self.__data[ApiFields.generic.PARENT_CONTAINER_NAME]
+        self.__fqdn = self.__data.get(Api.device.FQDN)
+        self.__sysmac = self.__data.get(Api.device.SYSMAC)
+        self.__serial = self.__data.get(Api.device.SERIAL)
+        self.__container = self.__data[Api.generic.PARENT_CONTAINER_NAME]
         # self.__image_bundle = []  # noqa # pylint: disable=unused-variable
         self.__current_parent_container_id = None
-        # if ApiFields.device.IMAGE_BUNDLE in self.__data:
-        #     self.__image_bundle = data[ApiFields.device.IMAGE_BUNDLE]
-        if ApiFields.device.SYSMAC in data:
-            self.__sysmac = data[ApiFields.device.SYSMAC]
-        if ApiFields.device.SERIAL in data:
-            self.__serial = data[ApiFields.device.SERIAL]
-        if ApiFields.device.HOSTNAME in data:
-            self.__hostname = data[ApiFields.device.HOSTNAME]
-        elif ApiFields.device.FQDN in data:
-            self.__hostname = data[ApiFields.device.FQDN].split('.')[0]
+        # if Api.device.IMAGE_BUNDLE in self.__data:
+        #     self.__image_bundle = data[Api.device.IMAGE_BUNDLE]
+        if Api.device.SYSMAC in data:
+            self.__sysmac = data[Api.device.SYSMAC]
+        if Api.device.SERIAL in data:
+            self.__serial = data[Api.device.SERIAL]
+        if Api.device.HOSTNAME in data:
+            self.__hostname = data[Api.device.HOSTNAME]
+        elif Api.device.FQDN in data:
+            self.__hostname = data[Api.device.FQDN].split('.')[0]
         else:
             self.__hostname = None
 
@@ -199,8 +201,8 @@ class DeviceElement(object):
         list
             List of configlets name
         """
-        if ApiFields.generic.CONFIGLETS in self.__data:
-            return self.__data[ApiFields.generic.CONFIGLETS]
+        if Api.generic.CONFIGLETS in self.__data:
+            return self.__data[Api.generic.CONFIGLETS]
         return []
 
     @property
@@ -238,21 +240,21 @@ class DeviceElement(object):
             All information related to device.
         """
         res = {
-            ApiFields.device.FQDN: self.__fqdn,
-            ApiFields.device.HOSTNAME: self.__hostname,
+            Api.device.FQDN: self.__fqdn,
+            Api.device.HOSTNAME: self.__hostname,
         }
 
         if self.__serial is not None:
-            res[ApiFields.device.SERIAL] = self.__serial
+            res[Api.device.SERIAL] = self.__serial
         if self.__sysmac is not None:
-            res[ApiFields.device.SYSMAC] = self.__sysmac
-            res[ApiFields.generic.KEY] = self.__sysmac
-        res[ApiFields.generic.PARENT_CONTAINER_NAME] = self.__container
-        if ApiFields.generic.CONFIGLETS in self.__data:
-            res[ApiFields.generic.CONFIGLETS] = self.__data[ApiFields.generic.CONFIGLETS]
+            res[Api.device.SYSMAC] = self.__sysmac
+            res[Api.generic.KEY] = self.__sysmac
+        res[Api.generic.PARENT_CONTAINER_NAME] = self.__container
+        if Api.generic.CONFIGLETS in self.__data:
+            res[Api.generic.CONFIGLETS] = self.__data[Api.generic.CONFIGLETS]
         else:
-            res[ApiFields.generic.CONFIGLETS] = []
-        # res[ApiFields.generic.PARENT_CONTAINER_ID] = self.__current_parent_container_id
+            res[Api.generic.CONFIGLETS] = []
+        # res[Api.generic.PARENT_CONTAINER_ID] = self.__current_parent_container_id
         return res
 
 
@@ -261,13 +263,13 @@ class DeviceInventory(object):
     DeviceInventory Local User defined inventory
     """
 
-    def __init__(self, data: list, schema=schema.SCHEMA_CV_DEVICE, search_method: str = ApiFields.device.FQDN):
+    def __init__(self, data: list, schema=schema.SCHEMA_CV_DEVICE, search_method: str = Api.device.FQDN):
         self.__inventory = []
         self.__data = data
         self.__schema = schema
         self.search_method = search_method
         for entry in data:
-            # if ApiFields.device.FQDN in entry:
+            # if Api.device.FQDN in entry:
             self.__inventory.append(DeviceElement(data=entry))
 
     @property
@@ -275,7 +277,7 @@ class DeviceInventory(object):
         """
         check_schemas Validate schemas for user's input
         """
-        if not schema.validate_cv_inputs(user_json=self.__data, schema=self.__schema):
+        if not validate_json_schema(user_json=self.__data, schema=self.__schema):
             MODULE_LOGGER.error(
                 "Invalid configlet input : \n%s", str(self.__data))
             return False
@@ -293,7 +295,7 @@ class DeviceInventory(object):
         """
         return self.__inventory
 
-    def get_device(self, device_string: str, search_method: str = ApiFields.device.FQDN):
+    def get_device(self, device_string: str, search_method: str = Api.device.FQDN):
         """
         get_device Extract device from inventory
 
@@ -311,7 +313,7 @@ class DeviceInventory(object):
         """
         # Lookup using systemMacAddress
         for device in self.__inventory:
-            if self.search_method is ApiFields.device.SYSMAC or search_method is ApiFields.device.SYSMAC:
+            if self.search_method is Api.device.SYSMAC or search_method is Api.device.SYSMAC:
                 if device.system_mac == device_string:
                     return device
             elif device.fqdn == device_string:
@@ -324,7 +326,7 @@ class CvDeviceTools(object):
     CvDeviceTools Object to operate Device operation on Cloudvision
     """
     # Updated as per issue #365 to set default search with hostname field
-    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = ApiFields.device.HOSTNAME, check_mode: bool = False):
+    def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = Api.device.HOSTNAME, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
         self.__search_by = search_by
@@ -382,7 +384,7 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
 
     # Updated as per issue #365 to set default search with hostname field
-    def __get_device(self, search_value: str, search_by: str = ApiFields.device.HOSTNAME):
+    def __get_device(self, search_value: str, search_by: str = Api.device.HOSTNAME):
         """
         __get_device Method to get data from Cloudvision
 
@@ -402,13 +404,13 @@ class CvDeviceTools(object):
         """
         cv_data: dict = {}
         MODULE_LOGGER.debug('Looking for device using %s as search_by', str(search_by))
-        if search_by == ApiFields.device.FQDN:
+        if search_by == Api.device.FQDN:
             cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=False)
-        elif search_by == ApiFields.device.HOSTNAME:
+        elif search_by == Api.device.HOSTNAME:
             cv_data = self.__cv_client.api.get_device_by_name(fqdn=search_value, search_by_hostname=True)
-        elif search_by == ApiFields.device.SYSMAC:
+        elif search_by == Api.device.SYSMAC:
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
-        elif search_by == ApiFields.device.SERIAL:
+        elif search_by == Api.device.SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
@@ -431,8 +433,8 @@ class CvDeviceTools(object):
         """
         if self.__configlets_and_mappers_cache is None:
             self.__configlets_and_mappers_cache = self.__cv_client.api.get_configlets_and_mappers()
-        for configlet in self.__configlets_and_mappers_cache['data'][ApiFields.generic.CONFIGLETS]:
-            if configlet_name == configlet[ApiFields.generic.NAME]:
+        for configlet in self.__configlets_and_mappers_cache['data'][Api.generic.CONFIGLETS]:
+            if configlet_name == configlet[Api.generic.NAME]:
                 return configlet
         return None
 
@@ -492,10 +494,10 @@ class CvDeviceTools(object):
         """
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
-        if self.__search_by in [ApiFields.device.FQDN, ApiFields.device.HOSTNAME]:
+        if self.__search_by in [Api.device.FQDN, Api.device.HOSTNAME]:
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
-        elif self.__search_by == ApiFields.device.SERIAL:
+        elif self.__search_by == Api.device.SERIAL:
             user_inventory = self.refresh_fqdn(user_inventory=user_inventory)
             user_inventory = self.refresh_systemMacAddress(user_inventory=user_inventory)
 
@@ -638,16 +640,16 @@ class CvDeviceTools(object):
         Parameters
         ----------
         container : dict
-            container information. dict_keys(['key', ApiFields.generic.NAME, 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
+            container information. dict_keys(['key', Api.generic.NAME, 'type', 'childContainerCount', 'childNetElementCount', 'parentContainerId', 'mode',
             'deviceStatus', 'childTaskCount', 'childContainerList', 'childNetElementList', 'hierarchyNetElementCount', 'tempAction', 'tempEvent'])
         """
-        MODULE_LOGGER.debug("Adding to cache container: {0}".format(container[ApiFields.generic.NAME]))
+        MODULE_LOGGER.debug("Adding to cache container: {0}".format(container[Api.generic.NAME]))
         cache_new_entry = {
-            ApiFields.generic.NAME: container[ApiFields.generic.NAME],
-            ApiFields.generic.PARENT_CONTAINER_ID: container[ApiFields.generic.PARENT_CONTAINER_ID]
+            Api.generic.NAME: container[Api.generic.NAME],
+            Api.generic.PARENT_CONTAINER_ID: container[Api.generic.PARENT_CONTAINER_ID]
         }
-        self.__containers_configlet_list_cache[container[ApiFields.generic.KEY]] = cache_new_entry
-        for child_container in container[ApiFields.container.CHILDREN_LIST]:
+        self.__containers_configlet_list_cache[container[Api.generic.KEY]] = cache_new_entry
+        for child_container in container[Api.container.CHILDREN_LIST]:
             self.__build_topology_cache(child_container)
 
     def __get_configlet_list_inherited_from_container(self, device: DeviceElement):
@@ -670,13 +672,13 @@ class CvDeviceTools(object):
         if not self.__containers_configlet_list_cache:
             MODULE_LOGGER.debug("[API call] get info about all the containers: self.__cv_client.api.filter_topology()")
             topology = self.__cv_client.api.filter_topology()
-            self.__build_topology_cache(topology[ApiFields.container.TOPOLOGY])
+            self.__build_topology_cache(topology[Api.container.TOPOLOGY])
 
         parent_container_name = device.container
         # Get parent container id of the device by comparing all containers name in the topology
         parent_container_id = ''
         for container_id in self.__containers_configlet_list_cache:
-            if self.__containers_configlet_list_cache[container_id][ApiFields.generic.NAME] == parent_container_name:
+            if self.__containers_configlet_list_cache[container_id][Api.generic.NAME] == parent_container_name:
                 parent_container_id = container_id
                 break
         MODULE_LOGGER.debug("parent_container_name is:  {0}".format(parent_container_name))
@@ -690,26 +692,26 @@ class CvDeviceTools(object):
             # If the container is in cache
             if (
                 container_id in self.__containers_configlet_list_cache.keys()
-                and ApiFields.generic.CONFIGLETS in self.__containers_configlet_list_cache[container_id].keys()
+                and Api.generic.CONFIGLETS in self.__containers_configlet_list_cache[container_id].keys()
             ):
                 MODULE_LOGGER.debug("Using cache for following container: {0}".format(container_id))
-                inherited_configlet_list += self.__containers_configlet_list_cache[container_id][ApiFields.generic.CONFIGLETS]
-                parent_container_id = self.__containers_configlet_list_cache[container_id][ApiFields.generic.PARENT_CONTAINER_ID]
+                inherited_configlet_list += self.__containers_configlet_list_cache[container_id][Api.generic.CONFIGLETS]
+                parent_container_id = self.__containers_configlet_list_cache[container_id][Api.generic.PARENT_CONTAINER_ID]
 
             # If the container is not in cache
             else:
-                container_name = self.__containers_configlet_list_cache[container_id][ApiFields.generic.NAME]
+                container_name = self.__containers_configlet_list_cache[container_id][Api.generic.NAME]
                 # Get list of configlet for current container
                 MODULE_LOGGER.debug("[API call] Get configlet associated with container: {0}".format(container_name))
                 current_container_configlets_info = self.__cv_client.api.get_configlets_by_container_id(container_id)
-                configletList = [x[ApiFields.generic.NAME] for x in current_container_configlets_info[ApiFields.container.CONFIGLETS_LIST]]
+                configletList = [x[Api.generic.NAME] for x in current_container_configlets_info[Api.container.CONFIGLETS_LIST]]
                 inherited_configlet_list += configletList
 
                 # Get parent container ID
-                parent_container_id = self.__containers_configlet_list_cache[container_id][ApiFields.generic.PARENT_CONTAINER_ID]
+                parent_container_id = self.__containers_configlet_list_cache[container_id][Api.generic.PARENT_CONTAINER_ID]
 
                 # Adding current container to cache
-                self.__containers_configlet_list_cache[container_id][ApiFields.generic.CONFIGLETS] = configletList
+                self.__containers_configlet_list_cache[container_id][Api.generic.CONFIGLETS] = configletList
                 MODULE_LOGGER.debug("Cache updated: with configlets {0} from container {1}".format(configletList, container_name))
 
         MODULE_LOGGER.debug("Container inherited configlet list is: {0}".format(inherited_configlet_list))
@@ -752,7 +754,7 @@ class CvDeviceTools(object):
         """
         data = self.get_device_facts(device_lookup=device_lookup)
         if data is not None:
-            return data[ApiFields.device.SYSMAC]
+            return data[Api.device.SYSMAC]
         return None
 
     def get_device_configlets(self, device_lookup: str):
@@ -769,7 +771,7 @@ class CvDeviceTools(object):
         list
             List of CvElement with KEY and NAME of every configlet.
         """
-        if self.__search_by in [ApiFields.device.FQDN, ApiFields.device.SERIAL, ApiFields.device.HOSTNAME]:
+        if self.__search_by in [Api.device.FQDN, Api.device.SERIAL, Api.device.HOSTNAME]:
             configlet_list = []
             # get_configlets_by_device_id
             try:
@@ -803,8 +805,8 @@ class CvDeviceTools(object):
         cv_data = self.get_device_facts(device_lookup=device_lookup)
         if cv_data is not None:
             return {
-                ApiFields.generic.PARENT_CONTAINER_ID: cv_data[ApiFields.generic.PARENT_CONTAINER_ID],
-                ApiFields.generic.PARENT_CONTAINER_NAME: cv_data[ApiFields.device.CONTAINER_NAME]
+                Api.generic.PARENT_CONTAINER_ID: cv_data[Api.generic.PARENT_CONTAINER_ID],
+                Api.generic.PARENT_CONTAINER_NAME: cv_data[Api.device.CONTAINER_NAME]
             }
         return None
 
@@ -847,10 +849,10 @@ class CvDeviceTools(object):
         """
         MODULE_LOGGER.debug("Get container for device %s", str(device_mac))
         container_id = self.__cv_client.api.get_device_by_mac(device_mac=device_mac)
-        if ApiFields.generic.PARENT_CONTAINER_ID in container_id:
+        if Api.generic.PARENT_CONTAINER_ID in container_id:
             return {
-                ApiFields.generic.NAME: container_id[ApiFields.device.CONTAINER_NAME],
-                ApiFields.generic.KEY: container_id[ApiFields.generic.PARENT_CONTAINER_ID]
+                Api.generic.NAME: container_id[Api.device.CONTAINER_NAME],
+                Api.generic.KEY: container_id[Api.generic.PARENT_CONTAINER_ID]
             }
         else:
             return None
@@ -878,7 +880,7 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug('Found device %s to refresh data', str(device.info))
             if device.system_mac is None:
                 system_mac = self.get_device_facts(
-                    device_lookup=device.info[self.__search_by])[ApiFields.device.SYSMAC]
+                    device_lookup=device.info[self.__search_by])[Api.device.SYSMAC]
                 MODULE_LOGGER.debug(
                     'Get sysmac %s for device %s', str(device.fqdn), str(system_mac))
                 device.system_mac = system_mac
@@ -908,16 +910,16 @@ class CvDeviceTools(object):
         MODULE_LOGGER.info('Inventory to refresh is %s', str(user_inventory.devices))
         for device in user_inventory.devices:
             MODULE_LOGGER.debug('Found device %s to refresh data', str(device.info))
-            if device.system_mac is not None and self.__search_by == ApiFields.device.SYSMAC:
+            if device.system_mac is not None and self.__search_by == Api.device.SYSMAC:
                 fqdn = self.get_device_facts(
-                    device_lookup=device.system_mac)[ApiFields.device.FQDN]
+                    device_lookup=device.system_mac)[Api.device.FQDN]
                 MODULE_LOGGER.debug(
                     'Get fqdn %s for device %s', str(fqdn), str(device.system_mac))
                 device.fqdn = fqdn
                 user_result.append(device.info)
-            elif device.serial_number is not None and self.__search_by == ApiFields.device.SERIAL:
+            elif device.serial_number is not None and self.__search_by == Api.device.SERIAL:
                 fqdn = self.get_device_facts(
-                    device_lookup=device.serial_number)[ApiFields.device.FQDN]
+                    device_lookup=device.serial_number)[Api.device.FQDN]
                 MODULE_LOGGER.debug(
                     'Get fqdn %s for device %s', str(fqdn), str(device.serial_number))
                 device.fqdn = fqdn
@@ -928,7 +930,7 @@ class CvDeviceTools(object):
         MODULE_LOGGER.warning('Update list is: %s', str(user_result))
         return DeviceInventory(data=user_result)
 
-    def check_device_exist(self, user_inventory: DeviceInventory, search_mode: str = ApiFields.device.FQDN):
+    def check_device_exist(self, user_inventory: DeviceInventory, search_mode: str = Api.device.FQDN):
         """
         check_device_exist Check if the devices specified in the user_inventory exist in CVP.
 
@@ -946,22 +948,22 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('Check if all the devices specified exist in CVP')
         device_not_present: list = []
         for device in user_inventory.devices:
-            if self.__search_by == ApiFields.device.HOSTNAME or search_mode == ApiFields.device.HOSTNAME:
-                if self.is_device_exist(device.fqdn, search_mode=ApiFields.device.HOSTNAME) is False:
+            if self.__search_by == Api.device.HOSTNAME or search_mode == Api.device.HOSTNAME:
+                if self.is_device_exist(device.fqdn, search_mode=Api.device.HOSTNAME) is False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
-            elif self.__search_by == ApiFields.device.FQDN or search_mode == ApiFields.device.FQDN:
-                if self.is_device_exist(device.fqdn, search_mode=ApiFields.device.FQDN) is False:
+            elif self.__search_by == Api.device.FQDN or search_mode == Api.device.FQDN:
+                if self.is_device_exist(device.fqdn, search_mode=Api.device.FQDN) is False:
                     device_not_present.append(device.fqdn)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.fqdn)
 
-            elif self.__search_by == ApiFields.device.SYSMAC:
+            elif self.__search_by == Api.device.SYSMAC:
                 if self.is_device_exist(device.system_mac) is False:
-                    device_not_present.append(device.system_mac, search_mode=ApiFields.device.SYSMAC)
+                    device_not_present.append(device.system_mac, search_mode=Api.device.SYSMAC)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.system_mac)
-            elif search_mode == ApiFields.device.SERIAL:
-                if self.is_device_exist(device.serial_number, search_mode=ApiFields.device.SERIAL) is False:
+            elif search_mode == Api.device.SERIAL:
+                if self.is_device_exist(device.serial_number, search_mode=Api.device.SERIAL) is False:
                     device_not_present.append(device.serial_number)
                     MODULE_LOGGER.error('Device not present in CVP but in the user_inventory: %s', device.serial_number)
         return device_not_present
@@ -972,7 +974,7 @@ class CvDeviceTools(object):
 
     def manager(
         self, user_inventory: DeviceInventory,
-        search_mode: str = ApiFields.device.HOSTNAME,
+        search_mode: str = Api.device.HOSTNAME,
         apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
         state: str = ModuleOptionValues.STATE_MODE_PRESENT
     ):
@@ -1044,8 +1046,8 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(device_mac=device.system_mac)
                 # Move devices when they are not in undefined container
                 if (current_container_info is not None
-                    and current_container_info[ApiFields.generic.NAME] != ApiFields.container.UNDEFINED_CONTAINER_ID
-                        and current_container_info[ApiFields.generic.NAME] != device.container):
+                    and current_container_info[Api.generic.NAME] != Api.container.UNDEFINED_CONTAINER_ID
+                        and current_container_info[Api.generic.NAME] != device.container):
                     if self.__check_mode:
                         result_data.changed = True
                         result_data.success = True
@@ -1066,7 +1068,7 @@ class CvDeviceTools(object):
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
                                 result_data.success = True
-                                result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
 
                     result_data.add_entry('{}-{}'.format(device.fqdn, *device.container))
             results.append(result_data)
@@ -1095,13 +1097,13 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug("Applying configlet for device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_configlet_attached')
             current_container_info = self.get_container_current(device_mac=device.system_mac)
-            if (device.configlets is None or current_container_info[ApiFields.generic.NAME] == ApiFields.container.UNDEFINED_CONTAINER_ID):
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
                 continue
             # get configlet information from CV
             configlets_attached = []
-            if self.__search_by == ApiFields.device.SERIAL:
+            if self.__search_by == Api.device.SERIAL:
                 configlets_attached = self.get_device_configlets(device_lookup=device.serial_number)
-            elif self.__search_by == ApiFields.device.HOSTNAME:
+            elif self.__search_by == Api.device.HOSTNAME:
                 configlets_attached = self.get_device_configlets(device_lookup=device.hostname)
             else:
                 configlets_attached = self.get_device_configlets(device_lookup=device.fqdn)
@@ -1111,24 +1113,24 @@ class CvDeviceTools(object):
 
             # Check if changes have been made
             MODULE_LOGGER.debug("[%s] - Old configlet list: %s", str(device.fqdn), str(configlets_attached_before_changes))
-            MODULE_LOGGER.debug("[%s] - New configlet list: %s", str(device.fqdn), str([x[ApiFields.generic.NAME] for x in configlets_reordered_list]))
-            if str(configlets_attached_before_changes) == str([x[ApiFields.generic.NAME] for x in configlets_reordered_list]):
+            MODULE_LOGGER.debug("[%s] - New configlet list: %s", str(device.fqdn), str([x[Api.generic.NAME] for x in configlets_reordered_list]))
+            if str(configlets_attached_before_changes) == str([x[Api.generic.NAME] for x in configlets_reordered_list]):
                 MODULE_LOGGER.info("[%s] - There was no changes detected in the configlets list, skipping task creation for the device.", str(device.fqdn))
                 continue
 
             MODULE_LOGGER.info(
                 "Creating task for device [%s] configlet list is: %s",
-                str(device.fqdn), str([x[ApiFields.generic.NAME] for x in configlets_reordered_list])
+                str(device.fqdn), str([x[Api.generic.NAME] for x in configlets_reordered_list])
             )
             # get device facts from CV
             device_facts = {}
-            if self.__search_by == ApiFields.device.FQDN:
+            if self.__search_by == Api.device.FQDN:
                 device_facts = self.__cv_client.api.get_device_by_name(
                     fqdn=device.fqdn, search_by_hostname=False)
-            elif self.__search_by == ApiFields.device.HOSTNAME:
+            elif self.__search_by == Api.device.HOSTNAME:
                 device_facts = self.__cv_client.api.get_device_by_name(
                     fqdn=device.fqdn, search_by_hostname=True)
-            elif self.__search_by == ApiFields.device.SERIAL:
+            elif self.__search_by == Api.device.SERIAL:
                 device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
             # Attach configlets to device
             if len(configlets_reordered_list) > 0:
@@ -1151,7 +1153,7 @@ class CvDeviceTools(object):
                     if resp['data']['status'] == 'success':
                         result_data.changed = True
                         result_data.success = True
-                        result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                        result_data.taskIds = resp['data'][Api.task.TASK_IDS]
                         result_data.add_entry('{0} adds {1}'.format(device.fqdn, *device.configlets))
                         MODULE_LOGGER.debug('CVP response is: %s', str(resp))
                         MODULE_LOGGER.info('Reponse data is: %s', str(result_data.results))
@@ -1169,13 +1171,13 @@ class CvDeviceTools(object):
             # FIXME: Should we ignore devices listed with no configlets ?
             if device.configlets is not None:
                 device_facts = {}
-                if self.__search_by == ApiFields.device.FQDN:
+                if self.__search_by == Api.device.FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=False)
-                elif self.__search_by == ApiFields.device.HOSTNAME:
+                elif self.__search_by == Api.device.HOSTNAME:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=True)
-                elif self.__search_by == ApiFields.device.SERIAL:
+                elif self.__search_by == Api.device.SERIAL:
                     device_facts = self.__cv_client.api.get_device_by_serial(
                         device_serial=device.serial_number)
 
@@ -1198,7 +1200,7 @@ class CvDeviceTools(object):
                 if configlets_to_remove:
                     MODULE_LOGGER.debug(
                         'List of configlet to remove for device {0} is {1}'.format(
-                            device.fqdn, [x[ApiFields.generic.NAME] for x in configlets_to_remove]
+                            device.fqdn, [x[Api.generic.NAME] for x in configlets_to_remove]
                         )
                     )
                     try:
@@ -1215,7 +1217,7 @@ class CvDeviceTools(object):
                         if resp['data']['status'] == 'success':
                             result_data.changed = True
                             result_data.success = True
-                            result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
                             result_data.add_entry('{} removes {}'.format(
                                 device.fqdn, *device.configlets))
                 else:
@@ -1238,10 +1240,10 @@ class CvDeviceTools(object):
                 ]
                 # get device facts from CV
                 device_facts = {}
-                if self.__search_by == ApiFields.device.FQDN:
+                if self.__search_by == Api.device.FQDN:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=False)
-                elif self.__search_by == ApiFields.device.HOSTNAME:
+                elif self.__search_by == Api.device.HOSTNAME:
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=True)
                 # Attach configlets to device
@@ -1259,7 +1261,7 @@ class CvDeviceTools(object):
                     if resp['data']['status'] == 'success':
                         result_data.changed = True
                         result_data.success = True
-                        result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                        result_data.taskIds = resp['data'][Api.task.TASK_IDS]
                         result_data.add_entry('{} removes {}'.format(
                             device.fqdn, *device.configlets))
             results.append(result_data)
@@ -1301,9 +1303,9 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
-                    device.fqdn, current_container_info[ApiFields.generic.NAME]))
+                    device.fqdn, current_container_info[Api.generic.NAME]))
                 device_info = self.get_device_facts(device_lookup=device.fqdn)
-                if (current_container_info[ApiFields.generic.NAME] == ApiFields.container.UNDEFINED_CONTAINER_NAME):
+                if (current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_NAME):
                     if self.__check_mode:
                         result_data.changed = True
                         result_data.success = True
@@ -1335,7 +1337,7 @@ class CvDeviceTools(object):
                             if resp['data']['status'] == 'success':
                                 result_data.changed = True
                                 result_data.success = True
-                                result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
 
                     result_data.add_entry('{0} deployed to {1}'.format(
                         device.info[self.__search_by], device.container))
@@ -1361,7 +1363,7 @@ class CvDeviceTools(object):
                 if resp['data']['status'] == 'success':
                     result_data.changed = True
                     result_data.success = True
-                    result_data.taskIds = resp['data'][ApiFields.task.TASK_IDS]
+                    result_data.taskIds = resp['data'][Api.task.TASK_IDS]
                     result_data.add_entry('{} resets {}'.format(
                         device.fqdn, *device.configlets))
             results.append(result_data)
@@ -1377,15 +1379,15 @@ class CvDeviceTools(object):
         """
         devices_to_move = []
         for device in inventory.devices:
-            if self.__search_by == ApiFields.device.FQDN:
+            if self.__search_by == Api.device.FQDN:
                 if self.is_in_container(device_lookup=device.fqdn,
                                         container_name=device.container) is False:
                     devices_to_move.append(device)
-            elif self.__search_by == ApiFields.device.SYSMAC:
+            elif self.__search_by == Api.device.SYSMAC:
                 if self.is_in_container(device_lookup=device.system_mac,
                                         container_name=device.container) is False:
                     devices_to_move.append(device)
-            elif self.__search_by == ApiFields.device.SERIAL:
+            elif self.__search_by == Api.device.SERIAL:
                 if self.is_in_container(device_lookup=device.serial_number,
                                         container_name=device.container) is False:
                     devices_to_move.append(device)
@@ -1412,16 +1414,16 @@ class CvDeviceTools(object):
             True if in container False in other situations
         """
         data = self.__get_device(search_value=device_lookup, search_by=self.__search_by)
-        if data is not None and ApiFields.generic.PARENT_CONTAINER_ID in data:
+        if data is not None and Api.generic.PARENT_CONTAINER_ID in data:
             container_data = self.get_container_info(container_name=container_name)
             if (
                 container_data is not None
-                and container_data[ApiFields.generic.KEY] == data[ApiFields.generic.PARENT_CONTAINER_ID]
+                and container_data[Api.generic.KEY] == data[Api.generic.PARENT_CONTAINER_ID]
             ):
                 return True
         return False
 
-    def is_device_exist(self, device_lookup: str, search_mode: str = ApiFields.device.HOSTNAME):
+    def is_device_exist(self, device_lookup: str, search_mode: str = Api.device.HOSTNAME):
         """
         is_device_exist Test if a device exists in Cloudvision
 
