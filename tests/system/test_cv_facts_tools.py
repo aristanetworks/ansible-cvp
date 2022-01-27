@@ -7,7 +7,8 @@ import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import FactsResponseFields
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
-from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
 from tests.lib.helpers import AnsibleModuleMock, setup_custom_logger
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login, generate_test_ids_dict
