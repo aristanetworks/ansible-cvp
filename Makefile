@@ -48,7 +48,7 @@ sanity-info: ## Show information about ansible-test
 .PHONY: sanity-lint
 sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --skip-test yamllint --python $(ANSIBLE_TEST_PYTHON) ; \
+	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --skip-test yamllint --python $(ANSIBLE_TEST_PYTHON); \
 	rm -rf tests/output/
 
 .PHONY: sanity-import

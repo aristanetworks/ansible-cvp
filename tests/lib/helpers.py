@@ -64,14 +64,17 @@ def setup_custom_logger(name):
     formatter = logging.Formatter(
         fmt='%(asctime)s %(levelname)-8s File: %(filename)s  - Function: %(funcName)s - Line: %(lineno)d - %(message)s',
         )
-    # For file rotation
-    # handler = RotatingFileHandler('pytest.log', maxBytes=2000, backupCount=10)
+    # Handler for logfile
     handler = logging.FileHandler('pytest.log', mode='w')
     handler.setFormatter(formatter)
+    # Handler for screen
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
+    # Log level
     log_level = logging.getLevelName(os.environ.get('PYTEST_LOG_LEVEL', 'DEBUG'))
+
+    # Create logger
+    logger = logging.getLogger(name)
     logger.setLevel(log_level)
     logger.addHandler(handler)
     logger.addHandler(screen_handler)

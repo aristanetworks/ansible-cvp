@@ -10,6 +10,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
 from tests.lib import config
 from tests.lib.helpers import time_log
 from tests.lib.json_data import CONTAINER_IDS
+from tests.data.container_tools_unit import CVP_DEVICES
 from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST, CONTAINER_DESTINATION
 
 
@@ -37,6 +38,29 @@ def cvp_login():
         logging.info("End of CV login process at {}".format(time_log()))
         logging.info("Connected to CVP")
         return cvp_client
+
+
+def generate_test_ids_dict(val):
+    """
+    generate_test_ids Helper to generate test ID for parametrize
+
+    Only related to SYSTEM_CONFIGLETS_TESTS structure
+
+    Parameters
+    ----------
+    val : dict
+        A configlet test structure
+
+    Returns
+    -------
+    str
+        Name of the configlet
+    """
+    if 'name' in val.keys():
+        # note this wouldn't show any hours/minutes/seconds
+        return val['name']
+    elif 'hostname' in val.keys():
+        return val['hostname']
 
 
 def get_devices():

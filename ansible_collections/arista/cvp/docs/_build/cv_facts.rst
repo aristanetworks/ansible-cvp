@@ -14,7 +14,7 @@ DEPRECATED
 
 :In: version:
 :Why: Features are now part of every single v3 modules.
-:Alternative:
+:Alternative: Currently no alternative.
 
 
 
@@ -70,6 +70,19 @@ The following options may be specified for this module:
         <div>values to include a larger subset.  Values can also be used</div>
         <div>with an initial <code><a class="reference internal" href="#!"><span class="std std-ref">!</span></a></code> to specify that a specific subset should</div>
         <div>not be collected.</div>
+    </td>
+    </tr>
+
+    <tr>
+    <td>options<br/><div style="font-size: small;"></div></td>
+    <td>dict</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>Implements the ability to create a sub-argument_spec, where the sub</div>
+        <div>options of the top level argument are also validated using</div>
+        <div>the attributes discussed in this section.</div>
     </td>
     </tr>
 

@@ -356,3 +356,10 @@ container_topology = [
         }
     }
 ]
+
+mook_data['valid']['facts']= {
+    'device_ids': ['50:01:00:1e:cf:92']
+}
+mook_data['invalid']['facts']= {
+    'device_ids': ['00:00:00:00:00:00']
+}

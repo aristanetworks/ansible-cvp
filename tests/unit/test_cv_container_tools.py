@@ -6,10 +6,17 @@ import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools
 from tests.lib import mock
-from tests.unit import data
+from tests.data import container_tools_unit
 
 LOGGER = logging.getLogger(__name__)
 
+
+CVP_DATA_CONTAINERS_INIT = {
+    'Tenant': {
+        'name': 'Tenant',
+        'key': 'root',
+        'parentContainerId': None}
+}
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES
@@ -17,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 @pytest.fixture
 def cvp_database():
-    database = mock.MockCVPDatabase()
+    database = mock.MockCVPDatabase(containers=CVP_DATA_CONTAINERS_INIT)
     yield database
     LOGGER.info('Final CVP state: %s', database)
 
@@ -38,7 +45,7 @@ def container_tools(request, cvp_database):
 
 # build_topology()
 @pytest.mark.generic
-@pytest.mark.parametrize("present, apply_mode, cvp_data, user_topology, expected_response", data.USER_TOPOLOGY)
+@pytest.mark.parametrize("present, apply_mode, cvp_data, user_topology, expected_response", container_tools_unit.USER_TOPOLOGY)
 def test_build_topology(cvp_database, container_tools, present, apply_mode, cvp_data, user_topology, expected_response):
     cvp_database.devices.update(cvp_data.get('devices', []))
     cvp_database.containers.update(cvp_data.get('containers', []))
