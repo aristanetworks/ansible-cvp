@@ -20,8 +20,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-from dataclasses import dataclass
-
+# from dataclasses import dataclass
 
 # --------------------------------------------------------------------------------------------------------
 # Information:
@@ -41,7 +40,7 @@ from dataclasses import dataclass
 # --------------------------------------------------------------------------------------------------------
 
 
-@dataclass
+# @dataclass
 class ApiGeneric():
     """Generic Keys used in all type of resources"""
     CONFIG: str = 'config'
@@ -52,7 +51,7 @@ class ApiGeneric():
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
 
 
-@dataclass
+# @dataclass
 class ApiContainer():
     """Keys specific to Container resources"""
     CHILDREN_LIST: str = 'childContainerList'
@@ -67,7 +66,7 @@ class ApiContainer():
     PARENT_NAME: str = 'parentName'
 
 
-@dataclass
+# @dataclass
 class ApiDevice():
     """Keys specific to Device resources"""
     CONTAINER_NAME: str = 'containerName'
@@ -80,25 +79,25 @@ class ApiDevice():
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
 
 
-@dataclass
+# @dataclass
 class ApiConfiglet():
     """Keys specific to Configlet resources"""
     ID: str = 'configletId'
 
 
-@dataclass
+# @dataclass
 class ApiMappers():
     """Keys specific to Configlets_Mappers resources"""
     OBJECT_ID: str = 'objectId'
 
 
-@dataclass
+# @dataclass
 class ApiTask():
     """Keys specific to Task resources"""
     TASK_IDS: str = 'taskIds'
 
 
-@dataclass
+# @dataclass
 class Api():
     """Central point to use all CV data resource fields"""
     configlet: ApiConfiglet = ApiConfiglet

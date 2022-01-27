@@ -20,10 +20,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
+# from dataclasses import dataclass
 
-from dataclasses import dataclass
 
-@dataclass
+# @dataclass
 class ModuleOptionValues():
     """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
@@ -32,7 +32,7 @@ class ModuleOptionValues():
     STATE_MODE_PRESENT: str = 'present'
 
 
-@dataclass
+# @dataclass
 class FactsResponseFields():
     """Facts Represent All fields specific to cv_facts_v3 module"""
     CACHE_CONTAINERS: str = 'containers'
@@ -42,7 +42,7 @@ class FactsResponseFields():
     DEVICE: str = 'cvp_devices'
 
 
-@dataclass
+# @dataclass
 class ContainerResponseFields():
     """Fields to build output of cv_container_v3 module"""
     CONFIGLETS_ATTACHED: str = 'configlets_attached'
@@ -51,7 +51,7 @@ class ContainerResponseFields():
     CONTAINER_DELETED: str = 'container_deleted'
 
 
-@dataclass
+# @dataclass
 class DeviceResponseFields():
     """Fields to build output of cv_device_v3 module"""
     CONFIGLET_ATTACHED: str = 'configlets_attached'
