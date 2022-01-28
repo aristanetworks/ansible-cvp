@@ -20,7 +20,7 @@ Repository provides 2 different Execution environment definition:
 
 ### Build your runner for stable version
 
-By default, `ansible-builder` use podman to build image, if you want to use docker instead, add `--container-runtime docker` to your CLI
+By default, `ansible-builder` uses podman to build image, if you want to use docker instead, add `--container-runtime docker` to your CLI
 
 ```bash
 # clone repository
@@ -36,7 +36,11 @@ Running command:
 Complete! The build context can be found at: /Users/tgrimonet/Projects/avd-stack/ansible-cvp/context
 
 # Validate collection is installed
-podman container run -it --rm inetsix/ansible-ee-avd:devel ansible-galaxy collection list
+## PODMAN method
+podman container run -it --rm inetsix/ansible-ee-avd:pr ansible-galaxy collection list
+
+## Docker method
+docker run -it --rm inetsix/ansible-ee-avd:pr ansible-galaxy collection list
 
 # /usr/share/ansible/collections/ansible_collections
 Collection        Version
@@ -57,7 +61,10 @@ arista.cvp 3.2.0
 
 This image is based on the [latest ansible image version](https://quay.io/repository/ansible/ansible-runner?tag=latest&tab=tags). You can change it to use a specific version with: `--build-arg EE_BASE_IMAGE=quay.io/ansible/ansible-runner:latest`
 
-### Build image for testing PR
+!!! info
+    You can use this image with AWX to execute code using Ansible Execution Environment
+
+### Build image for testing a PR
 
 By default, `ansible-builder` use podman to build image, if you want to use docker instead, add `--container-runtime docker` to your CLI
 
@@ -69,13 +76,17 @@ git clone https://github.com/aristanetworks/ansible-cvp.git
 cd ansible-cvp
 
 # Build image
-$ ansible-builder build --tag <your-image-tag> -f execution-environment.yml
+$ ansible-builder build --tag <your-image-tag> -f execution-environment.yml -c .
 Running command:
   podman build -f context/Containerfile -t inetsix/ansible-ee-avd:devel context
 Complete! The build context can be found at: /Users/tgrimonet/Projects/avd-stack/ansible-cvp/context
 
 # Validate collection is installed
+## PODMAN method
 podman container run -it --rm inetsix/ansible-ee-avd:pr ansible-galaxy collection list
+
+## Docker method
+docker run -it --rm inetsix/ansible-ee-avd:pr ansible-galaxy collection list
 
 # /usr/share/ansible/collections/ansible_collections
 Collection        Version
