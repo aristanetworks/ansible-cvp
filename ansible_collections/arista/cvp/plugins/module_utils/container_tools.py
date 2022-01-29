@@ -834,7 +834,6 @@ class CvContainerTools(object):
                 # If no configlets are set, remove all configlets if apply_mode is set to strict
                 elif apply_mode == 'strict':
                     configlet_to_remove = self.get_configlets(container_name=user_container)
-                    MODULE_LOGGER.debug("DEBUG: configlet to be removed is {}".format(str(configlet_to_remove)))
                     if len(configlet_to_remove) > 0:
                         resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                         cv_configlets_detach.add_change(resp)
