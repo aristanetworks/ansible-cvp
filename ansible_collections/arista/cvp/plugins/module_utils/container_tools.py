@@ -822,7 +822,7 @@ class CvContainerTools(object):
         try:
 
             # Create containers topology in Cloudvision
-            if present is True:
+            if present:
                 for user_container in user_topology.ordered_list_containers:
                     MODULE_LOGGER.info('Start creation process for container %s under %s', str(
                         user_container), str(user_topology.get_parent(container_name=user_container)))
@@ -836,15 +836,25 @@ class CvContainerTools(object):
                         cv_configlets_attach.add_change(resp)
                         if apply_mode == 'strict':
                             attached_configlets = self.get_configlets(container_name=user_container)
-                            configlet_to_remove = list()
-                            for attach_configlet in attached_configlets:
-                                if attach_configlet['name'] not in user_topology.get_configlets(container_name=user_container):
-                                    configlet_to_remove.append(attach_configlet)
-                            if len(configlet_to_remove) > 0:
+                            configlet_to_remove = [
+                                attach_configlet
+                                for attach_configlet in attached_configlets
+                                if attach_configlet['name']
+                                not in user_topology.get_configlets(
+                                    container_name=user_container
+                                )
+                            ]
+
+                            if configlet_to_remove:
                                 resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                                 cv_configlets_detach.add_change(resp)
+                    # If no configlets are set, remove all configlets if apply_mode is set to strict
+                    elif apply_mode == 'strict':
+                        configlet_to_remove = self.get_configlets(container_name=user_container)
+                        if len(configlet_to_remove) > 0:
+                            resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
+                            cv_configlets_detach.add_change(resp)
 
-            # Remove containers topology from Cloudvision
             else:
                 for user_container in reversed(user_topology.ordered_list_containers):
                     MODULE_LOGGER.info('Start deletion process for container %s under %s', str(
