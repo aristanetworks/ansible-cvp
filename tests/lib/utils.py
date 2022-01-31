@@ -13,6 +13,7 @@ from tests.lib.json_data import CONTAINER_IDS
 from tests.data.container_tools_unit import CVP_DEVICES
 from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST, CONTAINER_DESTINATION
 
+MODULE_LOGGER = logging.getLogger(__name__)
 
 def cvp_login():
     """Login cvp devices
@@ -21,22 +22,22 @@ def cvp_login():
         Object: cvp client
     """
     requests.packages.urllib3.disable_warnings()
-    cvp_client = CvpClient()
-    logging.info("Start CV login process at {}".format(time_log()))
+    cvp_client = CvpClient(log_level=logging.getLevelName(MODULE_LOGGER.getEffectiveLevel()))
+    MODULE_LOGGER.info("Start CV login process at {}".format(time_log()))
     try:
         cvp_client.connect(
             nodes=[config.server],
             username="",
             password="",
-            is_cvaas=True,
+            is_cvaas=config.cvaas,
             api_token=config.user_token
         )
     except (CvpLoginError, CvpRequestError):
-        logging.error('Can\'t connect to CV instance')
+        MODULE_LOGGER.error('Can\'t connect to CV instance')
         sys.exit(1)
     else:
-        logging.info("End of CV login process at {}".format(time_log()))
-        logging.info("Connected to CVP")
+        MODULE_LOGGER.info("End of CV login process at {}".format(time_log()))
+        MODULE_LOGGER.info("Connected to CVP")
         return cvp_client
 
 
