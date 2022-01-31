@@ -7,10 +7,17 @@ import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools
 from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
 from tests.lib import mock
-from tests.unit import data
+from tests.data import container_tools_unit as data
 
 LOGGER = logging.getLogger(__name__)
 
+
+CVP_DATA_CONTAINERS_INIT = {
+    'Tenant': {
+        'name': 'Tenant',
+        'key': 'root',
+        'parentContainerId': None}
+}
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES

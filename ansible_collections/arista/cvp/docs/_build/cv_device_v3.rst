@@ -78,7 +78,7 @@ The following options may be specified for this module:
     <td>str</td>
     <td>no</td>
     <td>present</td>
-    <td><ul><li>present</li><li>absent</li></ul></td>
+    <td><ul><li>present</li><li>factory_reset</li></ul></td>
     <td>
         <div>Set if ansible should build or remove devices on CLoudvision</div>
     </td>

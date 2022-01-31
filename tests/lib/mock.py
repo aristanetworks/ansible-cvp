@@ -6,6 +6,8 @@ import pprint
 import logging
 from cvprac.cvp_client import CvpClient, CvpApi
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.arista.cvp.plugins.module_utils.fields import ApiFields
+from tests.data import facts_unit
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,12 +21,13 @@ class MockCVPDatabase:
     """Class to mock CVP database being modified during tests"""
 
     # Fields in API data
-    FIELD_COUNT_DEVICES = 'childNetElementCount'
-    FIELD_COUNT_CONTAINERS = 'childContainerCount'
-    FIELD_PARENT_ID = 'parentContainerId'
-    FIELD_NAME = 'name'
-    FIELD_KEY = 'key'
-    FIELD_TOPOLOGY = 'topology'
+    FIELD_COUNT_DEVICES = ApiFields.container.COUNT_DEVICE
+    FIELD_COUNT_CONTAINERS = ApiFields.container.COUNT_CONTAINER
+    FIELD_PARENT_ID = ApiFields.generic.PARENT_ID
+    FIELD_PARENT_NAME = ApiFields.generic.PARENT_NAME
+    FIELD_NAME = ApiFields.generic.NAME
+    FIELD_KEY = ApiFields.generic.KEY
+    FIELD_TOPOLOGY = ApiFields.container.TOPOLOGY
 
     # Fields in mock database
     FIELD_CONTAINER_ATTACHED = 'containerAttached'
@@ -33,7 +36,6 @@ class MockCVPDatabase:
     CONTAINER_KEY = 'container_1234abcd-1234-abcd-12ab-123456abcdef'
     BAD_KEY = 'badKey'
 
-    # Data used to initiate the mock database
     CVP_DATA_CONTAINERS_INIT = {
         'Tenant': {
             'name': 'Tenant',
@@ -41,10 +43,18 @@ class MockCVPDatabase:
             'parentContainerId': None}
     }
 
-    def __init__(self, devices: dict = None, containers: dict = None, configlets: dict = None):
+    # Data used to initiate the mock database
+    # CVP_DATA_DEVICE_INIT = magickmock_data.MOCKDATA_DEVICES
+    # CVP_DATA_CONTAINERS_INIT = magickmock_data.MOCKDATA_CONTAINERS
+    # CVP_DATA_CONFIGLETS_MAPPERS_INIT = magickmock_data.MOCKDATA_CONFIGLET_MAPPERS
+    # CVP_DATA_CONFIGLET_INIT = magickmock_data.MOCKDATA_CONFIGLETS
+
+    def __init__(self, devices: dict = None, containers: list = None, configlets: list = None, configlets_mappers: dict = None):
         self.devices = devices if devices is not None else {}
+        # self.containers = containers if containers is not None else {}
         self.containers = containers if containers is not None else MockCVPDatabase.CVP_DATA_CONTAINERS_INIT.copy()
         self.configlets = configlets if configlets is not None else {}
+        self.configlets_mappers = configlets_mappers if configlets_mappers is not None else {}
         self.taskIdCounter = 0
 
     def _get_container_by_key(self, key: str) -> dict:
@@ -70,7 +80,6 @@ class MockCVPDatabase:
 
     def get_container_by_name(self, name) -> dict:
         """Mock cvprac.cvp_client.CvpApi.get_container_by_name() method"""
-        # get_container_by_name() returns None if the container does not exist
         if name not in self.containers:
             return None
         if name == MockCVPDatabase.BAD_KEY:  # Special container name to mimic a wrong API key
@@ -116,6 +125,23 @@ class MockCVPDatabase:
             self.configlets[configlet[MockCVPDatabase.FIELD_NAME]][MockCVPDatabase.FIELD_CONTAINER_ATTACHED].append(container[MockCVPDatabase.FIELD_NAME])
         return self._get_response(True)
 
+    def get_containers(self, start=0, end=0) -> dict:
+        if start or end:
+            raise NotImplementedError('Mock get_containers() called with unsupported arguments')
+        keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
+        return {
+            'data': [
+                {k: v for k, v in self.containers[container].items() if k in keys}
+                for container in self.containers
+            ]
+        }
+
+    def get_configlets_and_mappers(self):
+        """
+        get_configlets_and_mappers Return Mapping for configlets
+        """
+        return self.configlets_mappers
+
     def __eq__(self, other):
         return self.devices == other.devices and \
             self.containers == other.containers and \
@@ -143,6 +169,8 @@ def get_cvp_client(cvp_database) -> MagicMock:
     mock_client.api.add_container.side_effect = cvp_database.add_container
     mock_client.api.filter_topology.side_effect = cvp_database.filter_topology
     mock_client.api.apply_configlets_to_container.side_effect = cvp_database.apply_configlets_to_container
+    mock_client.api.get_containers.side_effect = cvp_database.get_containers
+    mock_client.api.get_configlets_and_mappers.side_effect = cvp_database.get_configlets_and_mappers
     return mock_client
 
 
