@@ -20,7 +20,7 @@ __cv_image_v3__ manage devices on CloudVision:
 
 ## Specific settings
 
-As module is in charge of uploading large file to remote Cloudvision, it is highly recommended to change default value for [`ansible_command_timeout` and `ansible_connect_timeout`](https://docs.ansible.com/ansible/latest/network/getting_started/network_connection_options.html) to allow ansible enough time to upload content.
+As this module is in charge of uploading large files to Cloudvision, it is highly recommended to change the default value for [ansible_command_timeoutandansible_connect_timeout](https://docs.ansible.com/ansible/latest/network/getting_started/network_connection_options.html) to allow ansible enough time to upload the files.
 
 As it is dependant of execution environment, these values must be defined by user and it can be updated only for a specific task:
 
@@ -28,7 +28,6 @@ As it is dependant of execution environment, these values must be defined by use
 - name: Update Image bundle
     hosts: cv_server
     gather_facts: no
-    vars:
     tasks:
         - name: "Update an image bundle {{inventory_hostname}}"
           vars:
