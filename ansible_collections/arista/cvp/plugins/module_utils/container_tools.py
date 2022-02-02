@@ -44,18 +44,6 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
-# FIXME: To be removed after code is validated by field tests
-# CONSTANTS for fields in API data
-# FIELD_COUNT_DEVICES = 'childNetElementCount'
-# FIELD_COUNT_CONTAINERS = 'childContainerCount'
-# FIELD_PARENT_ID = 'parentContainerId'
-# FIELD_PARENT_NAME = 'parentContainerName'
-# FIELD_NAME = 'name'
-# FIELD_KEY = 'key'
-# FIELD_TOPOLOGY = 'topology'
-# FIELD_CONFIGLETS = 'configlets'
-# FIELD_CONTAINER_ID = 'containerId'
-
 
 class ContainerInput(object):
     """

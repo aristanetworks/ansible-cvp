@@ -50,25 +50,6 @@ MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start device_tools module execution')
 
 
-# ------------------------------------------ #
-# Fields name to use in classes
-# ------------------------------------------ #
-
-# FIXME: To be removed after field tests
-# FIELD_FQDN = 'fqdn'
-# FIELD_HOSTNAME = 'hostname'
-# FIELD_SYSMAC = 'systemMacAddress'
-# FIELD_SERIAL = 'serialNumber'
-# FIELD_CONFIGLETS = 'configlets'
-# FIELD_ID = 'key'
-# FIELD_CONTAINER_NAME = 'containerName'
-# FIELD_PARENT_NAME = 'parentContainerName'
-# FIELD_PARENT_ID = 'parentContainerId'
-# # Not yet implemented
-# FIELD_IMAGE_BUNDLE = 'image_bundle'
-# UNDEFINED_CONTAINER = 'undefined_container'
-
-
 class DeviceElement(object):
     """
     DeviceElement Object to represent Device Element from user inventory
