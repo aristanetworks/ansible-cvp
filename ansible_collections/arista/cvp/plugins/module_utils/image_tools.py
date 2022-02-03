@@ -191,7 +191,7 @@ class CvImageTools():
         Returns
         -------
         dict:
-        result with tasks and information.
+            result with tasks and information.
         """
         changed = False
         data = dict()

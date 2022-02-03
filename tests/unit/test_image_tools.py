@@ -97,6 +97,18 @@ def test_CvImageTools_does_bundle_exist(image_unit_tool, cvp_database):
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_does_bundle_exist_with_invalid(image_unit_tool, cvp_database):
+    if 'data' not in cvp_database.image_bundles or len(cvp_database.image_bundles['data']) == 0:
+        pytest.skip('Not concerned by this test as no image bundle is in DB')
+    for bundle in cvp_database.image_bundles['data']:
+        is_bundle_found = image_unit_tool.does_bundle_exist('FAKE_BUNDLE')
+        assert is_bundle_found is False
+        LOGGER.info('Filename (FAKE_BUNDLE) does not exists on CVP')
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
 def test_CvImageTools_get_bundle_key(image_unit_tool, cvp_database):
     if 'data' not in cvp_database.image_bundles or len(cvp_database.image_bundles['data']) == 0:
         pytest.skip('Not concerned by this test as no image bundle is in DB')
@@ -126,8 +138,22 @@ def test_CvImageTools_build_image_list(image_unit_tool, cvp_database):
         pytest.skip('Not concerned by this test as no image bundle is in DB')
     images_to_bundle = [image['imageFileName'] for image in cvp_database.images['data']]
     built_image_list = image_unit_tool.build_image_list(images_to_bundle)
-    LOGGER.warning('xxx %s', str(images_to_bundle))
-    LOGGER.warning('yyy %s', str(built_image_list))
+    LOGGER.info('Image to bundle %s', str(images_to_bundle))
+    LOGGER.info('Bundle data %s', str(built_image_list))
     for image in cvp_database.images['data']:
         assert image == next((entry for entry in built_image_list if entry['name'] == image['name']), None)
     LOGGER.info('List of images to attach to bundle is valid')
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_build_image_list_with_some_fakes(image_unit_tool, cvp_database):
+    if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
+        pytest.skip('Not concerned by this test as no image is in DB')
+    images_to_bundle = [image['imageFileName'] for image in cvp_database.images['data']]
+    images_to_bundle.append('FAKE_IMAGE')
+    built_image_list = image_unit_tool.build_image_list(images_to_bundle)
+    LOGGER.info('Image to bundle %s', str(images_to_bundle))
+    LOGGER.info('Bundle data %s', str(built_image_list))
+    assert built_image_list is None
