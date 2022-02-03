@@ -2,7 +2,7 @@
 
 Collect facts from Cloudvision
 
-Module added in version 3.2.0
+Module added in version 3.3.0
 
 <div class="contents" local="" depth="2">
 
