@@ -49,12 +49,14 @@ class MockCVPDatabase:
     # CVP_DATA_CONFIGLETS_MAPPERS_INIT = magickmock_data.MOCKDATA_CONFIGLET_MAPPERS
     # CVP_DATA_CONFIGLET_INIT = magickmock_data.MOCKDATA_CONFIGLETS
 
-    def __init__(self, devices: dict = None, containers: list = None, configlets: list = None, configlets_mappers: dict = None):
+    def __init__(self, devices: dict = None, containers: list = None, configlets: list = None, configlets_mappers: dict = None, images: dict = None, image_bundles: dict = None):
         self.devices = devices if devices is not None else {}
         # self.containers = containers if containers is not None else {}
         self.containers = containers if containers is not None else MockCVPDatabase.CVP_DATA_CONTAINERS_INIT.copy()
         self.configlets = configlets if configlets is not None else {}
         self.configlets_mappers = configlets_mappers if configlets_mappers is not None else {}
+        self.images = images if images is not None else {}
+        self.image_bundles = image_bundles if image_bundles is not None else {}
         self.taskIdCounter = 0
 
     def _get_container_by_key(self, key: str) -> dict:
@@ -136,6 +138,12 @@ class MockCVPDatabase:
             ]
         }
 
+    def get_images(self):
+        return self.images
+
+    def get_image_bundles(self):
+        return self.image_bundles
+
     def get_configlets_and_mappers(self):
         """
         get_configlets_and_mappers Return Mapping for configlets
@@ -150,7 +158,9 @@ class MockCVPDatabase:
     def __str__(self):
         return f'\n ### Devices ###\n{pprint.pformat(self.devices)}' + \
                f'\n ### Containers ###\n{pprint.pformat(self.containers)}' + \
-               f'\n ### Configlets ###\n{pprint.pformat(self.configlets)}'
+               f'\n ### Configlets ###\n{pprint.pformat(self.configlets)}' +\
+               f'\n ### Images ###\n{pprint.pformat(self.images)}' +\
+               f'\n ### Image Bundles ###\n{pprint.pformat(self.image_bundles)}'
 
 
 def get_cvp_client(cvp_database) -> MagicMock:
@@ -171,6 +181,8 @@ def get_cvp_client(cvp_database) -> MagicMock:
     mock_client.api.apply_configlets_to_container.side_effect = cvp_database.apply_configlets_to_container
     mock_client.api.get_containers.side_effect = cvp_database.get_containers
     mock_client.api.get_configlets_and_mappers.side_effect = cvp_database.get_configlets_and_mappers
+    mock_client.api.get_images.side_effect = cvp_database.get_images
+    mock_client.api.get_image_bundles.side_effect = cvp_database.get_image_bundles
     return mock_client
 
 

@@ -52,11 +52,12 @@ class CvImageTools():
         self.__check_mode = check_mode
         self.refresh_cvp_image_data()
 
-    def __get_images(self):
+    def __get_images(self):  # sourcery skip: class-extract-method
         images = []
 
         MODULE_LOGGER.debug('  -> Collecting images')
-        images = self.__cv_client.api.get_images()['data']
+        response = self.__cv_client.api.get_images()
+        images = response['data'] if 'data' in response else []
         MODULE_LOGGER.debug(images)
         if len(images) > 0:
             self.cvp_images = images
@@ -66,7 +67,8 @@ class CvImageTools():
     def __get_image_bundles(self):
         imageBundles = []
         MODULE_LOGGER.debug('  -> Collecting image bundles')
-        imageBundles = self.__cv_client.api.get_image_bundles()['data']
+        response = self.__cv_client.api.get_image_bundles()
+        imageBundles = response['data'] if 'data' in response else []
         MODULE_LOGGER.debug(imageBundles)
         if len(imageBundles) > 0:
             self.cvp_imageBundles = imageBundles
@@ -93,11 +95,10 @@ class CvImageTools():
         Bool:
             True if present, False if not
         """
-
-        for entry in self.cvp_images:
-            if entry["imageFileName"] == os.path.basename(image):
-                return True
-        return False
+        return any(
+            entry["imageFileName"] == os.path.basename(image)
+            for entry in self.cvp_images
+        )
 
     def does_bundle_exist(self, bundle):
         """
@@ -113,10 +114,7 @@ class CvImageTools():
         Bool:
             True if present, False if not
         """
-        for entry in self.cvp_imageBundles:
-            if entry["name"] == bundle:
-                return True
-        return False
+        return any(entry["name"] == bundle for entry in self.cvp_imageBundles)
 
     def get_bundle_key(self, bundle):
         """
@@ -152,7 +150,7 @@ class CvImageTools():
         List:
             Returns a list of images, with complete data or None in the event of failure
         """
-        internal_image_list = list()
+        internal_image_list = []
         image_data = None
         success = True
 
