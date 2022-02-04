@@ -199,6 +199,8 @@ class CvImageTools():
 
         self.refresh_cvp_image_data()
 
+        # FIXME: Is it expected this key is not the default set in method ?
+        # We could change to mode in ['image', 'images'] same for bundle and not having a default else ?
         if mode == "image":
             if action == "get":
                 return changed, {'images': self.cvp_images}, warnings
@@ -220,6 +222,7 @@ class CvImageTools():
                         warnings.append("Unable to add image {0}. Image already present on server".format(image))
                 else:
                     self.__ansible.fail_json(msg="Specified file ({0}) does not exist".format(image))
+            # FIXME: Should we have a trigger for explicitely del and one for default errror message ?
             else:
                 self.__ansible.fail_json(msg="Deletion of images through API is not currently supported")
 
