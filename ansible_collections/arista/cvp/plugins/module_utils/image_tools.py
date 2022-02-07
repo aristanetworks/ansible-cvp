@@ -165,10 +165,7 @@ class CvImageTools():
             else:
                 success = False
 
-        if success:
-            return internal_image_list
-        else:
-            return None
+        return internal_image_list if success else None
 
     def module_action(self, image: str, image_list: List[str], bundle_name: str, mode: str = "images", action: str = "get"):
         # sourcery no-metrics
@@ -194,20 +191,18 @@ class CvImageTools():
             result with tasks and information.
         """
         changed = False
-        data = dict()
-        warnings = list()
+        data = {}
+        warnings = []
 
         self.refresh_cvp_image_data()
 
-        # FIXME: Is it expected this key is not the default set in method ?
-        # We could change to mode in ['image', 'images'] same for bundle and not having a default else ?
-        if mode == "image":
+        if mode in {"image", "images"}:
             if action == "get":
                 return changed, {'images': self.cvp_images}, warnings
 
             elif action == "add" and self.__check_mode is False:
                 MODULE_LOGGER.debug("   -> trying to add an image")
-                if len(image) > 0 and os.path.exists(image):
+                if image != '' and os.path.exists(image):
                     if self.is_image_present(image) is False:
                         MODULE_LOGGER.debug("Image not present. Trying to add.")
                         try:
@@ -219,15 +214,13 @@ class CvImageTools():
                         except Exception as e:
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
-                        warnings.append("Unable to add image {0}. Image already present on server".format(image))
+                        self.__ansible.fail_json(msg="Unable to add image {0}. Image already present on server".format(image))
                 else:
                     self.__ansible.fail_json(msg="Specified file ({0}) does not exist".format(image))
-            # FIXME: Should we have a trigger for explicitely del and one for default errror message ?
             else:
                 self.__ansible.fail_json(msg="Deletion of images through API is not currently supported")
 
-        # So we are dealing with bundles rather than images
-        else:
+        elif mode in {"bundle", "bundles"}:
             if action == "get":
                 return changed, {'bundles': self.cvp_imageBundles}, warnings
 
@@ -248,8 +241,6 @@ class CvImageTools():
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
                         self.__ansible.fail_json(msg="Unable to update bundle - images not present on server")
-                    return changed, data, warnings
-
                 else:
                     images = self.build_image_list(image_list)
                     MODULE_LOGGER.debug("   -> creating a new bundle")
@@ -263,7 +254,7 @@ class CvImageTools():
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
                         self.__ansible.fail_json(msg="Unable to create bundle - images not present on server")
-                    return changed, data, warnings
+                return changed, data, warnings
 
             elif action == "remove" and self.__check_mode is False:
                 MODULE_LOGGER.debug("   -> trying to delete a bundle")
@@ -282,5 +273,8 @@ class CvImageTools():
             else:
                 # You have reached a logically impossible state
                 warnings.append("You have reached a logically impossible state")
+
+        else:
+            self.__ansible.fail_json(msg="Unsupported mode {0}".format(mode))
 
         return changed, data, warnings
