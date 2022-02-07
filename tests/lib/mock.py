@@ -34,6 +34,14 @@ class MockCVPDatabase:
 
     # Data used in mock methods
     CONTAINER_KEY = 'container_1234abcd-1234-abcd-12ab-123456abcdef'
+    BAD_KEY = 'badKey'
+
+    CVP_DATA_CONTAINERS_INIT = {
+        'Tenant': {
+            'name': 'Tenant',
+            'key': 'root',
+            'parentContainerId': None}
+    }
 
     # Data used to initiate the mock database
     # CVP_DATA_DEVICE_INIT = magickmock_data.MOCKDATA_DEVICES
@@ -43,7 +51,8 @@ class MockCVPDatabase:
 
     def __init__(self, devices: dict = None, containers: list = None, configlets: list = None, configlets_mappers: dict = None):
         self.devices = devices if devices is not None else {}
-        self.containers = containers if containers is not None else {}
+        # self.containers = containers if containers is not None else {}
+        self.containers = containers if containers is not None else MockCVPDatabase.CVP_DATA_CONTAINERS_INIT.copy()
         self.configlets = configlets if configlets is not None else {}
         self.configlets_mappers = configlets_mappers if configlets_mappers is not None else {}
         self.taskIdCounter = 0
@@ -73,7 +82,10 @@ class MockCVPDatabase:
         """Mock cvprac.cvp_client.CvpApi.get_container_by_name() method"""
         if name not in self.containers:
             return None
-        keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
+        if name == MockCVPDatabase.BAD_KEY:  # Special container name to mimic a wrong API key
+            keys = [MockCVPDatabase.BAD_KEY, MockCVPDatabase.FIELD_NAME]
+        else:
+            keys = [MockCVPDatabase.FIELD_KEY, MockCVPDatabase.FIELD_NAME]
         return {k: v for k, v in self.containers[name].items() if k in keys}
 
     def add_container(self, container_name, parent_name, parent_key):
