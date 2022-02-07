@@ -2,6 +2,8 @@
 # coding: utf-8 -*-
 
 import logging
+import os, tempfile
+from pathlib import Path
 from ansible_collections.arista.cvp.plugins.module_utils.image_tools import CvImageTools
 import pytest
 import pprint
@@ -168,6 +170,64 @@ def test_CvImageTools_build_image_list_with_some_fakes(image_unit_tool, cvp_data
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_module_action_get_mode_unsupported(image_unit_tool, cvp_database):
+    # Test conditions
+    if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
+        pytest.skip('Not concerned by this test as no image bundle is in DB')
+
+    try:
+        image_unit_tool.module_action(mode='FAKE', image='', image_list=[], bundle_name=[])
+    except mock_ansible.AnsibleFailJson as expected_error:
+            LOGGER.info('received exception: %s', str(expected_error))
+            assert 'Unsupported mode' in str(expected_error)
+
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_module_action_get_mode_image(image_unit_tool, cvp_database):
+    # Test conditions
+    if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
+        pytest.skip('Not concerned by this test as no image bundle is in DB')
+    changed_result, result_data, result_warning = image_unit_tool.module_action(mode='image', image='', image_list=[], bundle_name=[])
+
+    LOGGER.info('module_action response: %s', str(result_data))
+
+    if 'images' in result_data and  len(result_data['images']) > 0:
+        LOGGER.info('Size of DB is: %s', str(len(result_data['images'])))
+        assert 'images' in result_data.keys()
+        assert len(result_data['images']) == len(cvp_database.image_bundles['data'])
+
+    assert changed_result is False
+    assert result_warning == []
+
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_module_action_get_mode_images(image_unit_tool, cvp_database):
+    # Test conditions
+    if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
+        pytest.skip('Not concerned by this test as no image bundle is in DB')
+    changed_result, result_data, result_warning = image_unit_tool.module_action(mode='images', image='', image_list=[], bundle_name=[])
+
+    LOGGER.info('module_action response: %s', str(result_data))
+
+    if 'images' in result_data and  len(result_data['images']) > 0:
+        LOGGER.info('Size of DB is: %s', str(len(result_data['images'])))
+        assert 'images' in result_data.keys()
+        assert len(result_data['images']) == len(cvp_database.image_bundles['data'])
+
+    assert changed_result is False
+    assert result_warning == []
+
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
 def test_CvImageTools_module_action_get_mode_bundle(image_unit_tool, cvp_database):
     # Test conditions
     if 'data' not in cvp_database.image_bundles or len(cvp_database.image_bundles['data']) == 0:
@@ -277,3 +337,33 @@ def test_CvImageTools_module_action_get_mode_image_action_delete_not_supported(i
         LOGGER.info('module_action warning: %s', str(result_warning))
         LOGGER.info('module_action change: %s', str(changed_result))
         assert False
+
+@pytest.mark.generic
+@pytest.mark.usefixtures("cvp_database")
+@pytest.mark.usefixtures("image_unit_tool")
+@pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
+def test_CvImageTools_module_action_get_mode_image_action_add_already_exist(image_unit_tool, cvp_database):
+    # Test conditions
+    if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
+        pytest.skip('Not concerned by this test as no image is in DB')
+    for image in cvp_database.images['data']:
+        fake_folder = tempfile.mkdtemp()
+        fake_image_path = os.path.join(fake_folder, image['imageFileName'])
+        Path(fake_image_path).touch(exist_ok=True)
+        LOGGER.info('Test Path is %s', str(fake_image_path))
+        try:
+            changed_result, result_data, result_warning = image_unit_tool.module_action(
+                action='add',
+                mode='image',
+                image=fake_image_path,
+                image_list=[],
+                bundle_name=[]
+            )
+        except mock_ansible.AnsibleFailJson as expected_error:
+            LOGGER.info('received exception: %s', str(expected_error))
+            assert 'Image already present on server' in str(expected_error)
+        else:
+            LOGGER.info('module_action response: %s', str(result_data))
+            LOGGER.info('module_action warning: %s', str(result_warning))
+            LOGGER.info('module_action change: %s', str(changed_result))
+            assert False
