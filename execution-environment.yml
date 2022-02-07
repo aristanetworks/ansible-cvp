@@ -6,8 +6,8 @@ build_arg_defaults:
   EE_BASE_IMAGE: 'quay.io/ansible/ansible-runner:latest'
 
 dependencies:
-  galaxy: ../collections.yml
-  python: ../requirements.txt
+  galaxy: ansible_collections/arista/cvp/collections.yml
+  python: ansible_collections/arista/cvp/requirements.txt
 
 additional_build_steps:
   prepend: |
@@ -21,4 +21,5 @@ additional_build_steps:
         vim \
         sshpass
   append:
-    - RUN ansible-galaxy collection install arista.cvp
+    - COPY ansible_collections/arista/cvp/ /usr/share/ansible/collections/ansible_collections/arista/cvp
+    - RUN ls -la /usr/share/ansible/collections/ansible_collections/arista
