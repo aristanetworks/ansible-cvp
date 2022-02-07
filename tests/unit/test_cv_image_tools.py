@@ -43,6 +43,7 @@ def image_unit_tool(request, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -57,6 +58,7 @@ def test_CvImageTools__get_images(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -71,6 +73,7 @@ def test_CvImageTools__get_image_bundles(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -85,6 +88,7 @@ def test_CvImageTools_is_image_present(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -97,6 +101,7 @@ def test_CvImageTools_does_bundle_exist(image_unit_tool, cvp_database):
         LOGGER.info('Filename (%s) exists on CVP', str(bundle['name']))
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -110,6 +115,7 @@ def test_CvImageTools_does_bundle_exist_with_invalid(image_unit_tool, cvp_databa
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -123,6 +129,7 @@ def test_CvImageTools_get_bundle_key(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -136,6 +143,7 @@ def test_CvImageTools_get_bundle_key(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -152,6 +160,7 @@ def test_CvImageTools_build_image_list(image_unit_tool, cvp_database):
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -167,6 +176,7 @@ def test_CvImageTools_build_image_list_with_some_fakes(image_unit_tool, cvp_data
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -183,6 +193,7 @@ def test_CvImageTools_module_action_get_mode_unsupported(image_unit_tool, cvp_da
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -204,6 +215,7 @@ def test_CvImageTools_module_action_get_mode_image(image_unit_tool, cvp_database
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -225,6 +237,7 @@ def test_CvImageTools_module_action_get_mode_images(image_unit_tool, cvp_databas
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -246,6 +259,7 @@ def test_CvImageTools_module_action_get_mode_bundle(image_unit_tool, cvp_databas
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -277,6 +291,7 @@ def test_CvImageTools_module_action_get_image_in_bundle_mode_bundle(image_unit_t
         LOGGER.info('Tested image is correctly returned by ')
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -293,6 +308,7 @@ def test_CvImageTools_module_action_get_mode_bundle_action_unknown(image_unit_to
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -317,6 +333,7 @@ def test_CvImageTools_module_action_get_mode_image_action_add_not_existing_singl
 
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
@@ -339,6 +356,7 @@ def test_CvImageTools_module_action_get_mode_image_action_delete_not_supported(i
         assert False
 
 @pytest.mark.generic
+@pytest.mark.image
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.usefixtures("image_unit_tool")
 @pytest.mark.parametrize("cvp_database", data.CV_IMAGES_PAYLOADS, indirect=["cvp_database"], ids=generate_test_ids_dict)
