@@ -49,6 +49,10 @@ report.html
 assets
 *log.txt*
 
+# Ansible builder
+*context/
+*_build/
+Containerfile
 
 
 # Translations

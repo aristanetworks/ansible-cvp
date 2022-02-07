@@ -122,6 +122,7 @@ nav:
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md
+    - Ansible Execution Environment: docs/faq/containers.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
