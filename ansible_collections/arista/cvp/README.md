@@ -2,11 +2,13 @@
 
 ## About
 
-[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks.
+[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This collection includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, building topology with containers and devices, running tasks.
 
 <p align="center">
   <img src='medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
+
+Even if __`arista.cvp`__ collection is integrated with `arista.avd` collection to [automate configuration deployment](https://avd.sh/en/latest/roles/eos_config_deploy_cvp/index.html), this collection can also be used outside of AVD tasks to populate your Cloudvision server with your own workflows.
 
 ## Requirements
 
@@ -19,8 +21,8 @@ Current active branch:
 !!! info
     Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
 
-| ansible-cvp | 1.0.0 | 1.1.0 | 2.0.0 & higher |
-| ----------- | ----- | ----- | -------------- |
+| ansible-cvp | 1.0.0 | 1.1.0 | >= 2.0.0 |
+| ----------- | ----- | ----- | -------- |
 | 2018.2 | ✅ | ✅ | ✅ |
 | 2019.x | ✅ | ✅ | ✅ |
 | 2020.1 | | ✅ | ✅ |
@@ -28,7 +30,9 @@ Current active branch:
 
 ### Python
 
-- Python >=3.8
+- Python `>=3.8`
+
+Please check the minimum version supported by your ansible installation on [ansible website](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)
 
 ### Additional Python Libraries required
 
@@ -43,7 +47,7 @@ __3rd party Python libraries:__
 - jsonschema
 - treelib (for modules in version 1)
 
-```
+```shell
 --8<-- "requirements.txt"
 ```
 
