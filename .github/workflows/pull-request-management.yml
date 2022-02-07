@@ -90,12 +90,20 @@ jobs:
     container: avdteam/base:3.8-v2.0
     needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.code_v3 == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: [ 3.8 ]
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
       - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
       - name: Install requirements
         run: |
           pip install -r ansible_collections/arista/cvp/requirements-dev.txt
@@ -219,7 +227,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.6 ]
+        python_version: [ 3.8, 3.9 ]
     steps:
       - name: 'set environment variables'
         run: |
