@@ -6,7 +6,7 @@ import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools
 from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
-from tests.lib import mock
+from tests.lib import mock, mock_ansible
 from tests.data import container_tools_unit as data
 
 LOGGER = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def cvp_database(request):
 @pytest.fixture(params=[False], ids=['check mode off'])
 def container_tools(request, cvp_database):
     cvp_client = mock.get_cvp_client(cvp_database)
-    module = mock.get_ansible_module(check_mode=request.param)
+    module = mock_ansible.get_ansible_module(check_mode=request.param)
     instance = CvContainerTools(cv_connection=cvp_client, ansible_module=module)
     yield instance
     LOGGER.debug('Mock calls: %s', pprint.pformat(cvp_client.mock_calls))

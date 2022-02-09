@@ -12,7 +12,7 @@ import logging
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from tests.system.constants_data import STATIC_CONFIGLET_NAME_DETACH, STATIC_CONFIGLET_NAME_ATTACH
-from tests.lib import mock
+from tests.lib import mock, mock_ansible
 from tests.lib.helpers import time_log
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login, get_container_name_id, get_unit_container, get_topology_user_input
@@ -32,7 +32,7 @@ def CvContainerTools_Manager(request):
     logging.info("Execute fixture to create class elements")
     requests.packages.urllib3.disable_warnings()
     request.cls.cvp = cvp_login()
-    request.cls.inventory = CvContainerTools(cv_connection=request.cls.cvp, ansible_module=mock.get_ansible_module())
+    request.cls.inventory = CvContainerTools(cv_connection=request.cls.cvp, ansible_module=mock_ansible.get_ansible_module())
 
 # ---------------------------------------------------------------------------- #
 #   PYTEST

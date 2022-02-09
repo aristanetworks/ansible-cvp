@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
-from tests.lib import mock
+from tests.lib import mock, mock_ansible
 from tests.data import facts_unit
 from tests.lib.parametrize import generate_list_from_dict
 from tests.lib.helpers import setup_custom_logger
@@ -45,6 +45,7 @@ def fact_unit_tools(request, cvp_database):
 # CvFactsTools.__get_container_name
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("container_def", generate_list_from_dict(facts_unit.MOCKDATA_CONTAINERS), ids=generate_test_ids_dict)
@@ -57,6 +58,7 @@ def test_CvFactsTools__get_container_name(fact_unit_tools, container_def):
 # CvFactsTools.__configletIds_to_configletName
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("configlet_def", facts_unit.MOCKDATA_CONFIGLET_MAPPERS['data']['configlets'], ids=generate_test_ids_dict)
@@ -68,6 +70,7 @@ def test_CvFactsTools__configletIds_to_configletName(fact_unit_tools, configlet_
     LOGGER.info('Configlet name for id %s is %s', str(configlet_def[mock.MockCVPDatabase.FIELD_KEY]), str(result))
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 def test_CvFactsTools__configletIds_to_configletName_empty(fact_unit_tools):
@@ -80,6 +83,7 @@ def test_CvFactsTools__configletIds_to_configletName_empty(fact_unit_tools):
 # CvFactsTools.__device_get_configlets
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
@@ -94,6 +98,7 @@ def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, de
         pytest.skip("skipping DEVICES with no configlet")
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
@@ -110,6 +115,7 @@ def test_CvFactsTools__device_get_configlets_no_configlet(fact_unit_tools, devic
 # CvFactsTools.__device_get_configlets
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("container_def", generate_list_from_dict(facts_unit.MOCKDATA_CONTAINERS), ids=generate_test_ids_dict)
@@ -124,6 +130,7 @@ def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, co
         pytest.skip("skipping CONTAINER with no configlet")
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("container_def", generate_list_from_dict(facts_unit.MOCKDATA_CONTAINERS), ids=generate_test_ids_dict)
@@ -141,6 +148,7 @@ def test_CvFactsTools__device_get_configlets_with_no_configlets(fact_unit_tools,
 # CvFactsTools.__device_update_info
 
 @pytest.mark.generic
+@pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
 @pytest.mark.usefixtures("cvp_database")
 @pytest.mark.parametrize("device_def", facts_unit.MOCKDATA_DEVICES, ids=generate_test_ids_dict)
