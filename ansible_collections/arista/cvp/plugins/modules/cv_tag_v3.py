@@ -51,28 +51,29 @@ def main():
     """
     argument_spec = dict(
         # Topology to configure on CV side.
-        tags=dict(type='list', required=True, elements='dict')
+        tags=dict(type='list', required=True, elements='dict'),
+        state=dict(type='str',
+                   required=False,
+                   default='present',
+                   choices=['present', 'absent'])
     )
 
     # Make module global to use it in all functions when required
     ansible_module = AnsibleModule(argument_spec=argument_spec,
-        supports_check_mode=True)
-    # Instantiate ansible results
-    result = dict(changed=False, data={}, failed=False)
-    result['data']['taskIds'] = list()
-    result['data']['tasks'] = list()
+                                   supports_check_mode=True)
 
+    # boolean for state flag
+    remove = bool(ansible_module.params['state'] == 'absent')
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
-
     tag_manager = CvTagTools(cv_connection=cv_client, ansible_module=ansible_module)
-    ansible_response: CvAnsibleResponse = tag_manager.tasker(tags=ansible_module.params['tags'])
+    ansible_response: CvAnsibleResponse = tag_manager.tasker(tags=ansible_module.params['tags'],
+                                                             remove=remove)
 
     result = ansible_response.content
-
     ansible_module.exit_json(**result)
 
 
