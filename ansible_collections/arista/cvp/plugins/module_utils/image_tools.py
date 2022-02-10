@@ -52,11 +52,12 @@ class CvImageTools():
         self.__check_mode = check_mode
         self.refresh_cvp_image_data()
 
-    def __get_images(self):
+    def __get_images(self):  # sourcery skip: class-extract-method
         images = []
 
         MODULE_LOGGER.debug('  -> Collecting images')
-        images = self.__cv_client.api.get_images()['data']
+        response = self.__cv_client.api.get_images()
+        images = response['data'] if 'data' in response else []
         MODULE_LOGGER.debug(images)
         if len(images) > 0:
             self.cvp_images = images
@@ -66,7 +67,8 @@ class CvImageTools():
     def __get_image_bundles(self):
         imageBundles = []
         MODULE_LOGGER.debug('  -> Collecting image bundles')
-        imageBundles = self.__cv_client.api.get_image_bundles()['data']
+        response = self.__cv_client.api.get_image_bundles()
+        imageBundles = response['data'] if 'data' in response else []
         MODULE_LOGGER.debug(imageBundles)
         if len(imageBundles) > 0:
             self.cvp_imageBundles = imageBundles
@@ -93,11 +95,10 @@ class CvImageTools():
         Bool:
             True if present, False if not
         """
-
-        for entry in self.cvp_images:
-            if entry["imageFileName"] == os.path.basename(image):
-                return True
-        return False
+        return any(
+            entry["imageFileName"] == os.path.basename(image)
+            for entry in self.cvp_images
+        )
 
     def does_bundle_exist(self, bundle):
         """
@@ -113,10 +114,7 @@ class CvImageTools():
         Bool:
             True if present, False if not
         """
-        for entry in self.cvp_imageBundles:
-            if entry["name"] == bundle:
-                return True
-        return False
+        return any(entry["name"] == bundle for entry in self.cvp_imageBundles)
 
     def get_bundle_key(self, bundle):
         """
@@ -152,7 +150,7 @@ class CvImageTools():
         List:
             Returns a list of images, with complete data or None in the event of failure
         """
-        internal_image_list = list()
+        internal_image_list = []
         image_data = None
         success = True
 
@@ -167,10 +165,7 @@ class CvImageTools():
             else:
                 success = False
 
-        if success:
-            return internal_image_list
-        else:
-            return None
+        return internal_image_list if success else None
 
     def module_action(self, image: str, image_list: List[str], bundle_name: str, mode: str = "images", action: str = "get"):
         # sourcery no-metrics
@@ -193,21 +188,21 @@ class CvImageTools():
         Returns
         -------
         dict:
-        result with tasks and information.
+            result with tasks and information.
         """
         changed = False
-        data = dict()
-        warnings = list()
+        data = {}
+        warnings = []
 
         self.refresh_cvp_image_data()
 
-        if mode == "image":
+        if mode in {"image", "images"}:
             if action == "get":
                 return changed, {'images': self.cvp_images}, warnings
 
             elif action == "add" and self.__check_mode is False:
                 MODULE_LOGGER.debug("   -> trying to add an image")
-                if len(image) > 0 and os.path.exists(image):
+                if image != '' and os.path.exists(image):
                     if self.is_image_present(image) is False:
                         MODULE_LOGGER.debug("Image not present. Trying to add.")
                         try:
@@ -219,14 +214,13 @@ class CvImageTools():
                         except Exception as e:
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
-                        warnings.append("Unable to add image {0}. Image already present on server".format(image))
+                        self.__ansible.fail_json(msg="Unable to add image {0}. Image already present on server".format(image))
                 else:
                     self.__ansible.fail_json(msg="Specified file ({0}) does not exist".format(image))
             else:
                 self.__ansible.fail_json(msg="Deletion of images through API is not currently supported")
 
-        # So we are dealing with bundles rather than images
-        else:
+        elif mode in {"bundle", "bundles"}:
             if action == "get":
                 return changed, {'bundles': self.cvp_imageBundles}, warnings
 
@@ -247,8 +241,6 @@ class CvImageTools():
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
                         self.__ansible.fail_json(msg="Unable to update bundle - images not present on server")
-                    return changed, data, warnings
-
                 else:
                     images = self.build_image_list(image_list)
                     MODULE_LOGGER.debug("   -> creating a new bundle")
@@ -262,7 +254,7 @@ class CvImageTools():
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
                         self.__ansible.fail_json(msg="Unable to create bundle - images not present on server")
-                    return changed, data, warnings
+                return changed, data, warnings
 
             elif action == "remove" and self.__check_mode is False:
                 MODULE_LOGGER.debug("   -> trying to delete a bundle")
@@ -281,5 +273,8 @@ class CvImageTools():
             else:
                 # You have reached a logically impossible state
                 warnings.append("You have reached a logically impossible state")
+
+        else:
+            self.__ansible.fail_json(msg="Unsupported mode {0}".format(mode))
 
         return changed, data, warnings

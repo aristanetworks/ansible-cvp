@@ -187,7 +187,7 @@ A generic method is available to generate test IDs from your input Automatically
 A [MagicMock](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) object is [available](./lib/mock.py) to emulate cvprac functions with coherent data. It takes in argument data extracted from Cloudvision. These data must be instantiate in your fixture:
 
 ```python
-from tests.lib import mock
+from tests.lib import mock, mock_ansible
 from tests.data import facts_unit
 
 @pytest.fixture

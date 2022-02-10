@@ -116,12 +116,14 @@ nav:
       - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
       - Manage containers: docs/how-to/v3/cv_container_v3.md
       - Manage devices: docs/how-to/v3/cv_device_v3.md
+      - Manage images & bundles: docs/how-to/v3/cv_image_v3.md
       - Manage tasks: docs/how-to/v3/cv_task_v3.md
       - Get facts from Cloudvision: docs/how-to/v3/cv_facts_v3.md
     - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md
+    - Ansible Execution Environment: docs/faq/containers.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
@@ -138,6 +140,7 @@ nav:
       - Module cv_device_v3: docs/modules/cv_device_v3.rst.md
       - Module cv_task_v3: docs/modules/cv_task_v3.rst.md
       - Module cv_facts_v3: docs/modules/cv_facts_v3.rst.md
+      - Module cv_image_v3: docs/modules/cv_image_v3.rst.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

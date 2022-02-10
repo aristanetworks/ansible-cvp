@@ -41,6 +41,7 @@ def CvFactsTools_Manager(request):
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.parametrize("test_container", FACTS_CONTAINERS_TEST, ids=generate_test_ids_dict)
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsContainers():
 
     @pytest.mark.dependency(name='authentication')
@@ -64,6 +65,7 @@ class TestCvContainerToolsContainers():
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsContainers():
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
@@ -86,6 +88,7 @@ class TestCvContainerToolsContainers():
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.parametrize("test_device", FACT_DEVICE_TEST, ids=generate_test_ids_dict)
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsDevices():
 
     @pytest.mark.dependency(name='authentication')
@@ -108,6 +111,7 @@ class TestCvContainerToolsDevices():
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsDevicesFacts():
 
 
@@ -140,6 +144,7 @@ class TestCvContainerToolsDevicesFacts():
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.parametrize("test_filter", FACT_FILTER_TEST, ids=generate_test_ids_dict)
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsDevicesFilter():
 
     @pytest.mark.dependency(name='authentication')
@@ -167,6 +172,7 @@ class TestCvContainerToolsDevicesFilter():
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsConfiglets():
 
     @pytest.mark.dependency(name='authentication')
@@ -188,6 +194,7 @@ class TestCvContainerToolsConfiglets():
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
+@pytest.mark.facts
 @pytest.mark.parametrize("test_filter", FACT_FILTER_TEST, ids=generate_test_ids_dict)
 class TestCvContainerToolsConfiglets():
 
@@ -216,6 +223,7 @@ class TestCvContainerToolsConfiglets():
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
+@pytest.mark.facts
 class TestCvContainerToolsAllFacts():
 
     @pytest.mark.dependency(name='authentication')

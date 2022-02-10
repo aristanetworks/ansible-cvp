@@ -133,7 +133,7 @@ def main():
 
     ansible_module = AnsibleModule(
         argument_spec=argument_spec,
-        supports_check_mode=True
+        supports_check_mode=False
     )
 
     # Instantiate ansible results
