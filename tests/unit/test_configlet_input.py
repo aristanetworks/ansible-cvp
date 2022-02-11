@@ -20,7 +20,7 @@ import logging
 import pytest
 
 
-logger = setup_custom_logger(__name__)
+logger = setup_custom_logger(name='configlet_unit')
 
 
 @pytest.mark.generic

@@ -7,8 +7,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from tests.lib.parametrize import generate_flat_data
-from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput
-from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
 import logging
 import pytest
 
@@ -47,7 +46,7 @@ class TestContainerInput():
     def test_get_parent_root(self, CVP_CONTAINER):
         for cnt_name, cnt in CVP_CONTAINER.items():
             parent_name = self.inventory.get_parent(container_name=cnt_name)
-            assert parent_name == cnt[Api.generic.PARENT_CONTAINER_NAME]
+            assert parent_name == cnt[FIELD_PARENT_NAME]
             logging.info(
                 "Get correct parent name for sub-root container: {} under {}".format(cnt_name, parent_name))
 

@@ -25,24 +25,24 @@
 json_data.py - Declares & initializes the variables and mock data used in the testcases.
 """
 
-from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
-from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.schema_v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC
 from .static_content import CONFIGLET_CONTENT
 
 # Mapping between data name and its schema
-schemas = {}
+schemas = dict()
 
 # Mook data to use in validation
-mook_data = {}
+mook_data = dict()
 # Mapping between data name and valid examples
-mook_data["valid"] = {}
+mook_data["valid"] = dict()
 # Mapping between data name and invalid examples
-mook_data["invalid"] = {}
+mook_data["invalid"] = dict()
 
 # Methods allowed to search devices
-search_methods = {}
+search_methods = dict()
 # Fake container topology
-container_topology = []
+container_topology = list()
 
 modes = ["valid", "invalid"]
 
@@ -58,7 +58,7 @@ schemas["configlet"] = SCHEMA_CV_CONFIGLET
 # Search methods allowed in cv_device_v3
 #########################################
 
-search_methods = [Api.device.FQDN, Api.device.SYSMAC]
+search_methods = [FIELD_FQDN, FIELD_SYSMAC]
 
 #######################################
 # Container Examples
