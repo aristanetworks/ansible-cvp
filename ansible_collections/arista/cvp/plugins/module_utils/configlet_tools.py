@@ -27,6 +27,9 @@ import re
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
@@ -35,12 +38,6 @@ try:
 except ImportError:
     HAS_CVPRAC = False
     CVPRAC_IMP_ERR = traceback.format_exc()
-# try:
-#     import jsonschema
-#     HAS_JSONSCHEMA = True
-# except ImportError:
-#     HAS_JSONSCHEMA = False
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
 try:
     import difflib
     HAS_DIFFLIB = True
@@ -52,7 +49,7 @@ try:
 except ImportError:
     HAS_HASHLIB = False
 
-MODULE_LOGGER = logging.getLogger('arista.cvp.configlet_tools_v3')
+MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
 
@@ -67,7 +64,7 @@ class ConfigletInput(object):
         """
         check_schemas Validate schemas for user's input
         """
-        if not schema.validate_cv_inputs(user_json=self.__topology, schema=self.__schema):
+        if not validate_json_schema(user_json=self.__topology, schema=self.__schema):
             MODULE_LOGGER.error("Invalid configlet input : \n%s", str(self.__topology))
             return False
         return True
@@ -193,17 +190,17 @@ class CvConfigletTools(object):
         dict
             Cloudvision responses
         """
-        to_create = list()
-        to_update = list()
-        to_delete = list()
-        if present:
-            for configlet in configlet_list:
-                cv_data = self.get_configlet_data_cv(
-                    configlet_name=configlet['name'])
-                if self.is_present(configlet_name=configlet['name']):
-                    configlet['key'] = cv_data['key']
+        to_create = []
+        to_update = []
+        to_delete = []
+        for configlet in configlet_list:
+            cv_data = self.get_configlet_data_cv(
+                configlet_name=configlet[Api.generic.NAME])
+            if present:
+                if self.is_present(configlet_name=configlet[Api.generic.NAME]):
+                    configlet[Api.generic.KEY] = cv_data[Api.generic.KEY]
                     configlet['diff'] = self._compare(
-                        fromText=cv_data['config'], toText=configlet['config'], fromName='CVP', toName='Ansible')
+                        fromText=cv_data[Api.generic.CONFIG], toText=configlet[Api.generic.CONFIG], fromName='CVP', toName='Ansible')
                     configlet['notediff'] = self._compare(
                         fromText=cv_data['note'], toText=note, fromName='CVP', toName='Ansible')
                     MODULE_LOGGER.debug("configlet note diff: %s", str(configlet['notediff']))
@@ -212,36 +209,32 @@ class CvConfigletTools(object):
 
                 else:
                     to_create.append(configlet)
-        elif present is False:
-            for configlet in configlet_list:
-                cv_data = self.get_configlet_data_cv(
-                    configlet_name=configlet['name'])
-                if self.is_present(configlet_name=configlet['name']):
-                    configlet['key'] = cv_data['key']
-                    configlet['diff'] = self._compare(
-                        fromText=cv_data['config'], toText=configlet['config'], fromName='CVP', toName='Ansible')
-                    to_delete.append(configlet)
+            elif self.is_present(configlet_name=configlet[Api.generic.NAME]):
+                configlet[Api.generic.KEY] = cv_data[Api.generic.KEY]
+                configlet['diff'] = self._compare(
+                    fromText=cv_data[Api.generic.CONFIG], toText=configlet[Api.generic.CONFIG], fromName='CVP', toName='Ansible')
+                to_delete.append(configlet)
         ###
         # Structure Ansible Message output
         ###
         updated_configlets = CvManagerResult(builder_name='configlets_updated')
         created_configlets = CvManagerResult(builder_name='configlets_created')
         deleted_configlets = CvManagerResult(builder_name='configlets_deleted')
-        update = dict()
-        delete = dict()
-        if present and len(to_create) > 0:
+        update = {}
+        delete = {}
+        if present and to_create:
             creation = self.create(to_create=to_create, note=note)
             for entry in creation:
                 MODULE_LOGGER.debug(
                     'configlet created: %s', str(entry.results))
                 created_configlets.add_change(entry)
-        if present and len(to_update) > 0:
+        if present and to_update:
             update = self.update(to_update=to_update, note=note)
             for entry in update:
                 MODULE_LOGGER.debug(
                     'configlet updated: %s', str(entry.results))
                 updated_configlets.add_change(entry)
-        if not present and len(to_delete) > 0:
+        if not present and to_delete:
             delete = self.delete(to_delete=to_delete)
             for entry in delete:
                 MODULE_LOGGER.debug(
@@ -293,11 +286,11 @@ class CvConfigletTools(object):
         response_data = list()
         configlets_notes = note
         for configlet in to_update:
-            change_response = CvApiResult(action_name=configlet['name'])
+            change_response = CvApiResult(action_name=configlet[Api.generic.NAME])
             if self._ansible.check_mode:
                 change_response.add_entry('[check mode] to be updated')
                 MODULE_LOGGER.info('[check mode] - Configlet %s updated on cloudvision', str(
-                    configlet['name']))
+                    configlet[Api.generic.NAME]))
                 change_response.success = True
                 if 'diff' in configlet:
                     change_response.diff = configlet['diff']
@@ -305,33 +298,33 @@ class CvConfigletTools(object):
                     change_response.diff = 'unset'
             else:
                 try:
-                    update_resp = self._cvp_client.api.update_configlet(config=configlet['config'],
-                                                                        key=configlet['key'],
-                                                                        name=configlet['name'],
+                    update_resp = self._cvp_client.api.update_configlet(config=configlet[Api.generic.CONFIG],
+                                                                        key=configlet[Api.generic.KEY],
+                                                                        name=configlet[Api.generic.NAME],
                                                                         wait_task_ids=True)
                 except Exception as error:
                     # Mark module execution with error
                     # Build error message to report in ansible output
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be updated - %s" % (
-                        configlet['name'], errorMessage)
+                        configlet[Api.generic.NAME], errorMessage)
                     # Add logging to ansible response.
                     change_response.add_entry(message)
                     # Generate logging error message
                     MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                        configlet['name']), str(error))
+                        configlet[Api.generic.NAME]), str(error))
                     self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(update_resp):
                         # Mark module execution with error
                         # Build error message to report in ansible output
                         message = "Configlet %s cannot be updated - %s" % (
-                            configlet['name'], update_resp['errorMessage'])
+                            configlet[Api.generic.NAME], update_resp['errorMessage'])
                         # Add logging to ansible response.
                         change_response.add_entry(message)
                         # Generate logging error message
                         MODULE_LOGGER.error('Error updating configlet %s: %s', str(
-                            configlet['name']), str(update_resp['errorMessage']))
+                            configlet[Api.generic.NAME]), str(update_resp['errorMessage']))
                         self._ansible.fail_json(msg=message)
                     else:
                         # Inform module a changed has been done
@@ -339,7 +332,7 @@ class CvConfigletTools(object):
                         change_response.success = True
                         # Add note to configlet to mark as managed by Ansible
                         self._cvp_client.api.add_note_to_configlet(
-                            configlet['key'], configlets_notes)
+                            configlet[Api.generic.KEY], configlets_notes)
                         # Save configlet diff
                         change_response.add_entry('configlet updated')
                         if 'diff' in configlet:
@@ -348,18 +341,18 @@ class CvConfigletTools(object):
                                 change_response.diff = configlet['diff']
                                 change_response.changed = True
                                 MODULE_LOGGER.info(
-                                    'Found diff in configlet %s.', str(configlet['name']))
+                                    'Found diff in configlet %s.', str(configlet[Api.generic.NAME]))
                         if 'notediff' in configlet:
                             if configlet['notediff'] is not None and configlet['notediff'][0] is True:
                                 change_response.diff = configlet['notediff']
                                 change_response.changed = True
                                 MODULE_LOGGER.info(
-                                    'Found diff in configlet note of configlet %s.', str(configlet['name']))
+                                    'Found diff in configlet note of configlet %s.', str(configlet[Api.generic.NAME]))
                         # Collect generated tasks
                         if 'taskIds' in update_resp and len(update_resp['taskIds']) > 0:
                             change_response.taskIds = update_resp['taskIds']
                         MODULE_LOGGER.info(
-                            'Configlet %s updated on cloudvision', str(configlet['name']))
+                            'Configlet %s updated on cloudvision', str(configlet[Api.generic.NAME]))
             response_data.append(change_response)
         return response_data
 
@@ -403,26 +396,26 @@ class CvConfigletTools(object):
 
         for configlet in to_create:
             # Run section to guess changes when module runs with --check flag
-            change_response = CvApiResult(action_name=configlet['name'])
+            change_response = CvApiResult(action_name=configlet[Api.generic.NAME])
             if self._ansible.check_mode:
                 change_response.add_entry('[check mode] to be created')
                 MODULE_LOGGER.info('[check mode] - Configlet %s created on cloudvision', str(
-                    configlet['name']))
+                    configlet[Api.generic.NAME]))
                 change_response.success = True
             else:
                 try:
-                    new_resp = self._cvp_client.api.add_configlet(name=configlet['name'], config=configlet['config'])
+                    new_resp = self._cvp_client.api.add_configlet(name=configlet[Api.generic.NAME], config=configlet[Api.generic.CONFIG])
                 except Exception as error:
                     # Mark module execution with error
                     # Build error message to report in ansible output
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be created - %s" % (
-                        configlet['name'], errorMessage)
+                        configlet[Api.generic.NAME], errorMessage)
                     # Add logging to ansible response.
                     change_response.add_entry(message)
                     # Generate logging error message
                     MODULE_LOGGER.error('Error creating configlet %s: %s', str(
-                        configlet['name']), str(error))
+                        configlet[Api.generic.NAME]), str(error))
                     self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(new_resp):
@@ -430,19 +423,19 @@ class CvConfigletTools(object):
                         change_response.success = False
                         # Build error message to report in ansible output
                         message = "Configlet %s cannot be created - %s" % (
-                            configlet['name'], new_resp['errorMessage'])
+                            configlet[Api.generic.NAME], new_resp['errorMessage'])
                         # Add logging to ansible response.
                         change_response.add_entry(message)
                         # Generate logging error message
                         MODULE_LOGGER.error(
-                            'Error creating configlet %s: %s', str(configlet['name']), str(new_resp))
+                            'Error creating configlet %s: %s', str(configlet[Api.generic.NAME]), str(new_resp))
                         self._ansible.fail_json(msg=message)
                     else:
                         self._cvp_client.api.add_note_to_configlet(new_resp, configlets_notes)
                         change_response.add_entry('configlet created')
                         change_response.changed = True
                         change_response.success = True
-                        MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet['name']))
+                        MODULE_LOGGER.info('Configlet %s created on cloudvision', str(configlet[Api.generic.NAME]))
             response_data.append(change_response)
         return response_data
 
@@ -479,46 +472,46 @@ class CvConfigletTools(object):
         list
             List of CvApiResult instances
         """
-        response_data = list()
+        response_data = []
         for configlet in to_delete:
-            change_response = CvApiResult(action_name=configlet['name'])
+            change_response = CvApiResult(action_name=configlet[Api.generic.NAME])
             # Run section to guess changes when module runs with --check flag
             if self._ansible.check_mode:
                 change_response.add_entry('[check mode] to be deleted')
                 MODULE_LOGGER.info('[check mode] - Configlet %s created on cloudvision', str(
-                    configlet['name']))
+                    configlet[Api.generic.NAME]))
             else:
                 try:
                     delete_resp = self._cvp_client.api.delete_configlet(
-                        name=configlet['name'], key=configlet['key'])
+                        name=configlet[Api.generic.NAME], key=configlet[Api.generic.KEY])
                 except Exception as error:
                     # Mark module execution with error
                     # Build error message to report in ansible output
                     errorMessage = re.split(':', str(error))[-1]
                     message = "Configlet %s cannot be deleted - %s" % (
-                        configlet['name'], errorMessage)
+                        configlet[Api.generic.NAME], errorMessage)
                     # Add logging to ansible response.
                     change_response.add_entry(message)
                     # Generate logging error message
                     MODULE_LOGGER.error('Error deleting configlet %s: %s', str(
-                        configlet['name']), str(error))
+                        configlet[Api.generic.NAME]), str(error))
                     self._ansible.fail_json(msg=message)
                 else:
                     if "errorMessage" in str(delete_resp):
                         # Mark module execution with error
                         # Build error message to report in ansible output
                         message = "Configlet %s cannot be deleted - %s" % (
-                            configlet['name'], delete_resp['errorMessage'])
+                            configlet[Api.generic.NAME], delete_resp['errorMessage'])
                         # Add logging to ansible response.
                         change_response.add_entry(message)
                         # Generate logging error message
                         MODULE_LOGGER.error(
-                            'Error deleting configlet %s: %s', str(configlet['name']), str(delete_resp))
+                            'Error deleting configlet %s: %s', str(configlet[Api.generic.NAME]), str(delete_resp))
                         self._ansible.fail_json(msg=message)
                     else:
                         change_response.add_entry('configlet deleted')
                         change_response.changed = True
                         change_response.success = True  # noqa # pylint: disable=unused-variable
-                        MODULE_LOGGER.info('Configlet %s deleted on cloudvision', str(configlet['name']))
+                        MODULE_LOGGER.info('Configlet %s deleted on cloudvision', str(configlet[Api.generic.NAME]))
             response_data.append(change_response)
         return response_data

@@ -5,7 +5,7 @@ import logging
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools
-from ansible_collections.arista.cvp.plugins.module_utils.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
+from ansible_collections.arista.cvp.plugins.module_utils.resources.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
 from tests.lib import mock, mock_ansible
 from tests.data import container_tools_unit as data
 

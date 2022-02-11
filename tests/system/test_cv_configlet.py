@@ -8,21 +8,17 @@
 
 from __future__ import (absolute_import, division, print_function)
 import requests
-import sys
 import logging
 import pytest
 from datetime import datetime
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import CvConfigletTools, ConfigletInput
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult
-from lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nice_json
-from lib.parametrize import generate_CvConfigletTools_content
-from lib.config import user_token, provision_cv
-from lib.cvaas_configlet import  SYSTEM_CONFIGLETS_TESTS
-from lib.utils import cvp_login, generate_test_ids_dict
-from lib.provisioner import CloudvisionProvisioner
+from tests.lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nice_json
+from tests.lib.parametrize import generate_CvConfigletTools_content
+from tests.lib.config import user_token, provision_cv
+from tests.lib.cvaas_configlet import  SYSTEM_CONFIGLETS_TESTS
+from tests.lib.utils import cvp_login, generate_test_ids_dict
+from tests.lib.provisioner import CloudvisionProvisioner
 
 
 # Set specific logging syntax

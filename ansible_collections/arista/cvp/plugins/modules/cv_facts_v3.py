@@ -73,7 +73,7 @@ import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv  # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils import tools_schema as schema
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 # from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import *
 try:

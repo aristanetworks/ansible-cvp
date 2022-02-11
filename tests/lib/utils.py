@@ -6,7 +6,7 @@ import logging
 import sys
 import requests.packages.urllib3
 from cvprac.cvp_client import CvpClient, CvpLoginError, CvpRequestError
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_PARENT_NAME
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib import config
 from tests.lib.helpers import time_log
 from tests.lib.json_data import CONTAINER_IDS
@@ -138,8 +138,8 @@ def get_devices_to_move():
     """
     to_move = []
     for entry in CVP_DEVICES_1:
-        if FIELD_PARENT_NAME in entry:
-            entry[FIELD_PARENT_NAME] = CONTAINER_DESTINATION
+        if Api.generic.PARENT_CONTAINER_NAME in entry:
+            entry[Api.generic.PARENT_CONTAINER_NAME] = CONTAINER_DESTINATION
         to_move.append(entry)
     return to_move
 

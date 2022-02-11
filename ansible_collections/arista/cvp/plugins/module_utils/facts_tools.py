@@ -28,8 +28,9 @@ import os
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
-from ansible_collections.arista.cvp.plugins.module_utils.fields import Facts, ApiFields
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema   # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
+from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import FactsResponseFields
+import ansible_collections.arista.cvp.plugins.module_utils.tools_schema as schema   # noqa # pylint: disable=unused-import
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -77,14 +78,14 @@ class CvFactResource():
         fact = {
             key: device_fact[key]
             for key in [
-                ApiFields.device.HOSTNAME,
-                ApiFields.device.FQDN,
-                ApiFields.device.SERIAL,
-                ApiFields.device.SYSMAC,
-                ApiFields.generic.CONFIGLETS,
+                Api.device.HOSTNAME,
+                Api.device.FQDN,
+                Api.device.SERIAL,
+                Api.device.SYSMAC,
+                Api.generic.CONFIGLETS,
             ]
         }
-        fact[ApiFields.generic.PARENT_NAME] = device_fact[ApiFields.device.CONTAINER_NAME]
+        fact[Api.generic.PARENT_CONTAINER_NAME] = device_fact[Api.device.CONTAINER_NAME]
         return fact
 
     def _get_configlet(self):
@@ -105,7 +106,7 @@ class CvFactResource():
             dictionary of configlets.
         """
         if isinstance(self._cache, list):
-            return {configlet[ApiFields.generic.NAME]: configlet['config'] for configlet in self._cache}
+            return {configlet[Api.generic.NAME]: configlet[Api.generic.CONFIG] for configlet in self._cache}
 
     def _get_container(self):
         """
@@ -135,10 +136,10 @@ class CvFactResource():
             dictionary of containers
         """
         if isinstance(self._cache, list):
-            return {entry[ApiFields.generic.NAME]: {
-                ApiFields.generic.PARENT_NAME: entry[ApiFields.container.PARENT_NAME],
-                ApiFields.generic.CONFIGLETS: entry[ApiFields.generic.CONFIGLETS]}
-                for entry in self._cache if ApiFields.generic.NAME in entry.keys()}
+            return {entry[Api.generic.NAME]: {
+                Api.generic.PARENT_CONTAINER_NAME: entry[Api.container.PARENT_NAME],
+                Api.generic.CONFIGLETS: entry[Api.generic.CONFIGLETS]}
+                for entry in self._cache if Api.generic.NAME in entry.keys()}
 
     def _get_device(self, verbose: bool = False):
         """
@@ -221,12 +222,12 @@ class CvFactsTools():
 
     def __init__(self, cv_connection):
         self.__cv_client = cv_connection
-        self._cache = {Facts.CACHE_CONTAINERS: None, Facts.CACHE_MAPPERS: None}
+        self._cache = {FactsResponseFields.CACHE_CONTAINERS: None, FactsResponseFields.CACHE_MAPPERS: None}
         self._max_worker = min(32, (os.cpu_count() or 1) + 4)
         self.__init_facts()
 
     def __init_facts(self):
-        self._facts = {Facts.DEVICE: [], Facts.CONFIGLET: [], Facts.CONTAINER: []}
+        self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [], FactsResponseFields.CONTAINER: []}
 
     def facts(self, scope: List[str], regex_filter: str = '.*'):
         """
@@ -275,7 +276,7 @@ class CvFactsTools():
             self.__fact_configlets(filter=regex_filter)
         return self._facts
 
-    def __get_container_name(self, key: str = 'undefined_container'):
+    def __get_container_name(self, key: str = Api.container.UNDEFINED_CONTAINER_ID):
         """
         __get_container_name Helper to get container name from its key
 
@@ -291,17 +292,17 @@ class CvFactsTools():
         str
             Container name
         """
-        if self._cache[Facts.CACHE_CONTAINERS] is None:
+        if self._cache[FactsResponseFields.CACHE_CONTAINERS] is None:
             MODULE_LOGGER.warning('Build container cache from Cloudvision')
             try:
-                self._cache[Facts.CACHE_CONTAINERS] = self.__cv_client.api.get_containers()['data']
+                self._cache[FactsResponseFields.CACHE_CONTAINERS] = self.__cv_client.api.get_containers()['data']
             except CvpApiError as error:
                 MODULE_LOGGER.error('Can\'t get information from CV: %s', str(error))
                 return None
-        MODULE_LOGGER.debug('Current cache data is: %s', str(self._cache[Facts.CACHE_CONTAINERS]))
-        for container in self._cache[Facts.CACHE_CONTAINERS]:
-            if key == container[ApiFields.generic.KEY]:
-                return container[ApiFields.generic.NAME]
+        MODULE_LOGGER.debug('Current cache data is: %s', str(self._cache[FactsResponseFields.CACHE_CONTAINERS]))
+        for container in self._cache[FactsResponseFields.CACHE_CONTAINERS]:
+            if key == container[Api.generic.KEY]:
+                return container[Api.generic.NAME]
         return None
 
     def __device_update_info(self, device: dict):
@@ -321,9 +322,9 @@ class CvFactsTools():
             Updated information
         """
         if device['status'] != '':
-            device[ApiFields.container.PARENT_CONTAINER_NAME] = self.__get_container_name(key=device[ApiFields.container.PARENT_KEY])
+            device[Api.generic.PARENT_CONTAINER_NAME] = self.__get_container_name(key=device[Api.device.PARENT_CONTAINER_KEY])
         else:
-            device[ApiFields.container.PARENT_CONTAINER_NAME] = ''
+            device[Api.generic.PARENT_CONTAINER_NAME] = ''
         return device
 
     def __configletIds_to_configletName(self, configletIds: List[str]):
@@ -344,11 +345,11 @@ class CvFactsTools():
         """
         if not configletIds:
             return []
-        if self._cache[Facts.CACHE_MAPPERS] is None:
+        if self._cache[FactsResponseFields.CACHE_MAPPERS] is None:
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        configlets = self._cache[Facts.CACHE_MAPPERS]['configlets']
-        return [configlet[ApiFields.generic.NAME] for configlet in configlets if configlet[ApiFields.generic.KEY] in configletIds]
+            self._cache[FactsResponseFields.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
+        configlets = self._cache[FactsResponseFields.CACHE_MAPPERS][Api.generic.CONFIGLETS]
+        return [configlet[Api.generic.NAME] for configlet in configlets if configlet[Api.generic.KEY] in configletIds]
 
     def __device_get_configlets(self, netid: str):
         # sourcery skip: class-extract-method
@@ -367,11 +368,11 @@ class CvFactsTools():
         List[str]
             List of configlets name
         """
-        if self._cache[Facts.CACHE_MAPPERS] is None:
+        if self._cache[FactsResponseFields.CACHE_MAPPERS] is None:
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        mappers = self._cache[Facts.CACHE_MAPPERS]['configletMappers']
-        configletIds = [mapper[ApiFields.configlet.ID] for mapper in mappers if mapper[ApiFields.mappers.OBJECT_ID] == netid]
+            self._cache[FactsResponseFields.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
+        mappers = self._cache[FactsResponseFields.CACHE_MAPPERS]['configletMappers']
+        configletIds = [mapper[Api.configlet.ID] for mapper in mappers if mapper[Api.mappers.OBJECT_ID] == netid]
         MODULE_LOGGER.debug('** NetelementID is %s', str(netid))
         MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
         return self.__configletIds_to_configletName(configletIds=configletIds)
@@ -392,13 +393,13 @@ class CvFactsTools():
         List[str]
             List of configlets name
         """
-        if self._cache[Facts.CACHE_MAPPERS] is None:
+        if self._cache[FactsResponseFields.CACHE_MAPPERS] is None:
             MODULE_LOGGER.warning('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        mappers = self._cache[Facts.CACHE_MAPPERS]['configletMappers']
-        configletIds = [mapper[ApiFields.configlet.ID]
+            self._cache[FactsResponseFields.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
+        mappers = self._cache[FactsResponseFields.CACHE_MAPPERS]['configletMappers']
+        configletIds = [mapper[Api.configlet.ID]
                         for mapper in mappers
-                        if (mapper[ApiFields.container.ID] == container_id or mapper[ApiFields.mappers.OBJECT_ID] == container_id)
+                        if (mapper[Api.container.ID] == container_id or mapper[Api.mappers.OBJECT_ID] == container_id)
                         ]
         # Deduplicate entries as containerID is present for every inherited configlets
         configletIds = list(dict.fromkeys(configletIds))
@@ -428,14 +429,14 @@ class CvFactsTools():
         MODULE_LOGGER.info('Extract device data using filter %s', str(filter))
         facts_builder = CvFactResource()
         for device in cv_devices:
-            if re.match(filter, device[ApiFields.device.HOSTNAME]):
-                MODULE_LOGGER.debug('Filter has been matched: %s - %s', str(filter), str(device[ApiFields.device.HOSTNAME]))
+            if re.match(filter, device[Api.device.HOSTNAME]):
+                MODULE_LOGGER.debug('Filter has been matched: %s - %s', str(filter), str(device[Api.device.HOSTNAME]))
                 if verbose:
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
-                    device[ApiFields.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[ApiFields.generic.KEY])
+                    device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
                     facts_builder.add(device)
-        self._facts[Facts.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
+        self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
     def __fact_containers(self):
         """
@@ -447,11 +448,11 @@ class CvFactsTools():
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
         facts_builder = CvFactResource()
         for container in cv_containers['data']:
-            if container[ApiFields.generic.NAME] != 'Tenant':
+            if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
-                container[ApiFields.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[ApiFields.container.KEY])
+                container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
                 facts_builder.add(container)
-        self._facts[Facts.CONTAINER] = facts_builder.get(resource_model='container')
+        self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
     def __fact_configlets(self, filter: str = '.*', configlets_per_call: int = 10):
         """
@@ -489,12 +490,12 @@ class CvFactsTools():
         facts_builder = CvFactResource()
         for future in results:
             for configlet in future['data']:
-                if re.match(filter, configlet[ApiFields.generic.NAME]):
-                    MODULE_LOGGER.debug('Adding configlet %s', str(configlet['name']))
+                if re.match(filter, configlet[Api.generic.NAME]):
+                    MODULE_LOGGER.debug('Adding configlet %s', str(configlet[Api.generic.NAME]))
                     facts_builder.add(configlet)
 
         MODULE_LOGGER.debug(
             'Final results for configlets: %s',
             str(facts_builder.get(resource_model='configlet').keys())
         )
-        self._facts[Facts.CONFIGLET] = facts_builder.get(resource_model='configlet')
+        self._facts[FactsResponseFields.CONFIGLET] = facts_builder.get(resource_model='configlet')
