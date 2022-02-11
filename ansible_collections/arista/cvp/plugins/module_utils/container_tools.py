@@ -220,10 +220,10 @@ class CvContainerTools(object):
             Standardized dict.
         """
         standard_keys = [
-            [Api.generic.KEY],
-            [Api.generic.NAME],
-            [Api.container.COUNT_CONTAINER],
-            [Api.container.COUNT_DEVICE],
+            Api.generic.KEY,
+            Api.generic.NAME,
+            Api.container.COUNT_CONTAINER,
+            Api.container.COUNT_DEVICE,
             Api.generic.PARENT_CONTAINER_ID
         ]
         return {k: v for k, v in source.items() if k in standard_keys}
@@ -257,6 +257,7 @@ class CvContainerTools(object):
         return None
 
     def __configlet_add(self, container: dict, configlets: list, save_topology: bool = True):
+        # sourcery skip: class-extract-method
         """
         __configlet_add Add a list of configlets to a container on CV
 
@@ -294,14 +295,16 @@ class CvContainerTools(object):
 
         # Protect against non-existing container in check_mode
         if container is not None:
-            configlet_names = [entry.get(Api.generic.NAME)
-                               for entry in configlets if entry.get(Api.generic.NAME)]
-            change_response.name = container[Api.generic.NAME] + ':' + ':'.join(configlet_names)
+            configlet_names = [entry.get(Api.generic.NAME) for entry in configlets if entry.get(Api.generic.NAME)]
+            change_response.name = f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names)
+
             if self.__check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
                 change_response.add_entry(
-                    container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
+                    f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names)
+                )
+
                 MODULE_LOGGER.warning(
                     '[check_mode] - Fake container creation of %s', str(container[Api.generic.NAME]))
             else:
@@ -323,7 +326,6 @@ class CvContainerTools(object):
                         change_response.taskIds = resp['data'][Api.task.TASK_IDS]
                         change_response.success = True
                         change_response.changed = True
-
         return change_response
 
     def __configlet_del(self, container: dict, configlets: list, save_topology: bool = True):
@@ -361,12 +363,18 @@ class CvContainerTools(object):
         configlet_names = []
         configlet_names = [entry.get(Api.generic.NAME)
                            for entry in configlets if entry.get(Api.generic.NAME)]
-        change_response = CvApiResult(action_name=container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
+        change_response = CvApiResult(
+            action_name=f'{container[Api.generic.NAME]}:'
+            + ':'.join(configlet_names)
+        )
+
         if self.__check_mode:
             change_response.success = True
             change_response.taskIds = ['check_mode']
             change_response.add_entry(
-                container[Api.generic.NAME] + ':' + ':'.join(configlet_names))
+                f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names)
+            )
+
         else:
             try:
                 resp = self.__cvp_client.api.remove_configlets_from_container(
@@ -424,10 +432,9 @@ class CvContainerTools(object):
         cv_response = self.__cvp_client.api.get_container_by_name(
             name=container_name)
         MODULE_LOGGER.debug('Get container ID (%s) response from cv for container %s', str(cv_response), str(container_name))
-        if cv_response is not None and [Api.generic.KEY] in cv_response:
-            container_id = cv_response[[Api.generic.KEY]]
-            container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[
-                [Api.container.TOPOLOGY]]
+        if cv_response is not None and Api.generic.KEY in cv_response:
+            container_id = cv_response[Api.generic.KEY]
+            container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[Api.container.TOPOLOGY]
             MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
@@ -842,19 +849,16 @@ class CvContainerTools(object):
                         cv_configlets_attach.add_change(resp)
                         if apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
                             attached_configlets = self.get_configlets(container_name=user_container)
-                            configlet_to_remove = [
+                            if configlet_to_remove := [
                                 attach_configlet
                                 for attach_configlet in attached_configlets
                                 if attach_configlet[Api.generic.NAME]
                                 not in user_topology.get_configlets(
                                     container_name=user_container
                                 )
-                            ]
-
-                            if configlet_to_remove:
+                            ]:
                                 resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                                 cv_configlets_detach.add_change(resp)
-                    # If no configlets are set, remove all configlets if apply_mode is set to strict
                     elif apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
                         configlet_to_remove = self.get_configlets(container_name=user_container)
                         if len(configlet_to_remove) > 0:
@@ -871,7 +875,6 @@ class CvContainerTools(object):
 
         except (AnsibleCVPApiError, AnsibleCVPNotFoundError) as e:
             self.__ansible.fail_json(msg=str(e))
-
         # Create ansible message
         response.add_manager(container_add_manager)
         response.add_manager(container_delete_manager)
