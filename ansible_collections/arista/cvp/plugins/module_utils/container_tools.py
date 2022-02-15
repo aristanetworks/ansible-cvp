@@ -556,10 +556,10 @@ class CvContainerTools(object):
         """
         container = self.get_container_info(container_name=container_name)
         if (
-            [Api.container.COUNT_CONTAINER] in container
-            and [Api.container.COUNT_DEVICE] in container
-            and container[[Api.container.COUNT_CONTAINER]] == 0
-            and container[[Api.container.COUNT_DEVICE]] == 0
+            Api.container.COUNT_CONTAINER in container
+            and Api.container.COUNT_DEVICE in container
+            and container[Api.container.COUNT_CONTAINER] == 0
+            and container[Api.container.COUNT_DEVICE] == 0
         ):
             return True
         return False
