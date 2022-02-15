@@ -84,11 +84,37 @@ jobs:
         run: |
           pre-commit run --color always --from-ref origin/devel --to-ref HEAD
 
+  python_version_support:
+    name: Validate code compatibility
+    runs-on: ubuntu-20.04
+    container: avdteam/base:3.8-v2.0
+    needs: [file-changes, pre_commit]
+    if: needs.file-changes.outputs.code_v3 == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: [ 3.7, 3.8, 3.9 ]
+    steps:
+      - name: 'set environment variables'
+        run: |
+          echo "PY_COLORS=1" >> $GITHUB_ENV
+          echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Test code compatibility
+        run: |
+          cd ansible_collections/arista/cvp/plugins
+          python3 -m compileall -q module_utils
+          python3 -m compileall -q modules
+
   pytest:
     name: Validate code V3 with Pytest
     runs-on: ubuntu-20.04
     container: avdteam/base:3.8-v2.0
-    needs: [file-changes, pre_commit]
+    needs: [python_version_support]
     if: needs.file-changes.outputs.code_v3 == 'true'
     strategy:
       fail-fast: true
