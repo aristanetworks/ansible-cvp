@@ -10,8 +10,8 @@
 from __future__ import (absolute_import, division, print_function)
 import logging
 import pytest
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SERIAL, FIELD_SYSMAC
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement, FIELD_CONFIGLETS, FIELD_CONTAINER_NAME, FIELD_PARENT_NAME
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceElement
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.parametrize import generate_flat_data
 from tests.lib.utils import generate_container_ids
 
@@ -21,22 +21,22 @@ class TestDeviceElement():
 
     def test_get_fqdn(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        assert device.fqdn == DEVICE[FIELD_FQDN]
+        assert device.fqdn == DEVICE[Api.device.FQDN]
         logging.info("Data from device: {}".format(device.info))
 
     def test_get_system_mac(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        if FIELD_SYSMAC in DEVICE:
-            assert device.system_mac == DEVICE[FIELD_SYSMAC]
+        if Api.device.SYSMAC in DEVICE:
+            assert device.system_mac == DEVICE[Api.device.SYSMAC]
             logging.info("Data from device: {}".format(device.info))
         else:
             pytest.skip(
-                "Skipped as device has no {} configured".format(FIELD_SYSMAC))
+                "Skipped as device has no {} configured".format(Api.device.SYSMAC))
 
     def test_get_serial_number(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        if FIELD_SERIAL in DEVICE:
-            assert device.serial_number == DEVICE[FIELD_SERIAL]
+        if Api.device.SERIAL in DEVICE:
+            assert device.serial_number == DEVICE[Api.device.SERIAL]
             logging.info("Data from device: {}".format(device.info))
         else:
             logging.warning(
@@ -44,8 +44,8 @@ class TestDeviceElement():
 
     def test_get_configlets(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        if FIELD_CONFIGLETS in DEVICE:
-            assert device.configlets == DEVICE[FIELD_CONFIGLETS]
+        if Api.generic.CONFIGLETS in DEVICE:
+            assert device.configlets == DEVICE[Api.generic.CONFIGLETS]
             logging.info("Data from device: {}".format(device.info))
         else:
             logging.warning(
@@ -60,7 +60,7 @@ class TestDeviceElement():
 
     def test_get_container(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        assert device.container == DEVICE[FIELD_PARENT_NAME]
+        assert device.container == DEVICE[Api.generic.PARENT_CONTAINER_NAME]
         logging.info(
             "Device {} got correct container information from DeviceElement".format(device.fqdn))
 
@@ -73,8 +73,8 @@ class TestDeviceElement():
 
     def test_get_configlets(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        if FIELD_CONFIGLETS in DEVICE:
-            assert device.configlets == DEVICE[FIELD_CONFIGLETS]
+        if Api.generic.CONFIGLETS in DEVICE:
+            assert device.configlets == DEVICE[Api.generic.CONFIGLETS]
             logging.info(
                 "DeviceElement returns correct configlets for {}".format(device.fqdn))
         else:
@@ -84,11 +84,11 @@ class TestDeviceElement():
 
     def test_display_info(self, DEVICE):
         device = DeviceElement(data=DEVICE)
-        assert device.info[FIELD_FQDN] == DEVICE[FIELD_FQDN]
-        if FIELD_SERIAL in DEVICE:
-            assert device.info[FIELD_SERIAL] == DEVICE[FIELD_SERIAL]
-        if FIELD_SYSMAC in DEVICE:
-            assert device.info[FIELD_SYSMAC] == DEVICE[FIELD_SYSMAC]
-        if FIELD_CONTAINER_NAME in DEVICE:
-            assert device.info[FIELD_PARENT_NAME] == DEVICE[FIELD_PARENT_NAME]
+        assert device.info[Api.device.FQDN] == DEVICE[Api.device.FQDN]
+        if Api.device.SERIAL in DEVICE:
+            assert device.info[Api.device.SERIAL] == DEVICE[Api.device.SERIAL]
+        if Api.device.SYSMAC in DEVICE:
+            assert device.info[Api.device.SYSMAC] == DEVICE[Api.device.SYSMAC]
+        if Api.device.CONTAINER_NAME in DEVICE:
+            assert device.info[Api.generic.PARENT_CONTAINER_NAME] == DEVICE[Api.generic.PARENT_CONTAINER_NAME]
         logging.info("Device information: {}".format(device.info))

@@ -16,7 +16,8 @@ import requests.packages.urllib3
 import ssl
 import logging
 import pytest
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, CvDeviceTools
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import CvDeviceTools
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login
 
@@ -53,14 +54,14 @@ class TestCvDeviceToolsGeneric():
 
     @pytest.mark.api
     def test_search_by_getter_setter(self):
-        self.inventory.search_by = FIELD_SYSMAC
-        assert self.inventory.search_by == FIELD_SYSMAC
+        self.inventory.search_by = Api.device.SYSMAC
+        assert self.inventory.search_by == Api.device.SYSMAC
         logging.info(
-            "Setter & Getter for search_by using {} is valid".format(FIELD_SYSMAC))
-        self.inventory.search_by = FIELD_FQDN
-        assert self.inventory.search_by == FIELD_FQDN
+            "Setter & Getter for search_by using {} is valid".format(Api.device.SYSMAC))
+        self.inventory.search_by = Api.device.FQDN
+        assert self.inventory.search_by == Api.device.FQDN
         logging.info(
-            "Setter & Getter for search_by using {} is valid".format(FIELD_FQDN))
+            "Setter & Getter for search_by using {} is valid".format(Api.device.FQDN))
 
     @pytest.mark.api
     @pytest.mark.dependency(depends=["authentication"], scope='class')
@@ -68,7 +69,7 @@ class TestCvDeviceToolsGeneric():
         self.inventory.check_mode = True
         assert self.inventory.check_mode is True
         logging.info(
-            "Setter & Getter for search_by using {} is valid".format(FIELD_SYSMAC))
+            "Setter & Getter for search_by using {} is valid".format(Api.device.SYSMAC))
         self.inventory.check_mode = False
         assert self.inventory.check_mode is False
         logging.info(

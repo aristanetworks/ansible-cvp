@@ -127,7 +127,7 @@ import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
-from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils import tools_schema
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import CvDeviceTools, DeviceInventory
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -150,7 +150,7 @@ def check_import(ansible_module: AnsibleModule):
         ansible_module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
-    if not schema.HAS_JSONSCHEMA:
+    if not tools_schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(
             msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 

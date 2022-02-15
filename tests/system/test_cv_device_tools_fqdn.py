@@ -15,8 +15,8 @@ import ssl
 import logging
 import pytest
 import requests.packages.urllib3
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import FIELD_FQDN, FIELD_SYSMAC, FIELD_PARENT_NAME
-from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools, FIELD_CONFIGLETS
+from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
+from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.helpers import time_log
 from tests.lib.config import user_token
 from tests.system.constants_data import CHECK_MODE, CONTAINER_DESTINATION
@@ -57,10 +57,10 @@ class TestCvDeviceToolsWithFQDN():
     @pytest.mark.api
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_search_by_getter_setter(self, CV_DEVICE):
-        self.inventory.search_by = FIELD_FQDN
-        assert self.inventory.search_by == FIELD_FQDN
+        self.inventory.search_by = Api.device.FQDN
+        assert self.inventory.search_by == Api.device.FQDN
         logging.info(
-            "Setter & Getter for search_by using {} is valid".format(FIELD_FQDN))
+            "Setter & Getter for search_by using {} is valid".format(Api.device.FQDN))
 
     ######################################################################
     ### --------------------  Get data functions  -------------------- ###
@@ -74,13 +74,13 @@ class TestCvDeviceToolsWithFQDN():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if FIELD_FQDN in CV_DEVICE:
-            self.inventory.search_by = FIELD_FQDN
+        if Api.device.FQDN in CV_DEVICE:
+            self.inventory.search_by = Api.device.FQDN
             device_facts = self.inventory.get_device_facts(
-                device_lookup=CV_DEVICE[FIELD_FQDN])
+                device_lookup=CV_DEVICE[Api.device.FQDN])
             assert device_facts is not None
-            assert FIELD_FQDN in device_facts
-            assert device_facts[FIELD_FQDN] == CV_DEVICE[FIELD_FQDN]
+            assert Api.device.FQDN in device_facts
+            assert device_facts[Api.device.FQDN] == CV_DEVICE[Api.device.FQDN]
         else:
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
@@ -93,10 +93,10 @@ class TestCvDeviceToolsWithFQDN():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if FIELD_FQDN in CV_DEVICE:
-            self.inventory.search_by = FIELD_FQDN
+        if Api.device.FQDN in CV_DEVICE:
+            self.inventory.search_by = Api.device.FQDN
             assert self.inventory.get_device_id(
-                device_lookup=CV_DEVICE[FIELD_FQDN]) == CV_DEVICE[FIELD_SYSMAC]
+                device_lookup=CV_DEVICE[Api.device.FQDN]) == CV_DEVICE[Api.device.SYSMAC]
         else:
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
@@ -109,11 +109,11 @@ class TestCvDeviceToolsWithFQDN():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if FIELD_FQDN in CV_DEVICE:
-            self.inventory.search_by = FIELD_FQDN
+        if Api.device.FQDN in CV_DEVICE:
+            self.inventory.search_by = Api.device.FQDN
             cv_data = self.inventory.get_device_configlets(
-                device_lookup=CV_DEVICE[FIELD_FQDN])
-            inventory_data = CV_DEVICE[FIELD_CONFIGLETS]
+                device_lookup=CV_DEVICE[Api.device.FQDN])
+            inventory_data = CV_DEVICE[Api.generic.CONFIGLETS]
             comparison = list(set(cv_data).intersection(set(inventory_data)))
             assert len(comparison) == 0
         else:
@@ -128,10 +128,10 @@ class TestCvDeviceToolsWithFQDN():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if FIELD_FQDN in CV_DEVICE:
-            self.inventory.search_by = FIELD_FQDN
-            assert self.inventory.get_device_container(device_lookup=CV_DEVICE[FIELD_FQDN])[
-                FIELD_PARENT_NAME] == CV_DEVICE[FIELD_PARENT_NAME]
+        if Api.device.FQDN in CV_DEVICE:
+            self.inventory.search_by = Api.device.FQDN
+            assert self.inventory.get_device_container(device_lookup=CV_DEVICE[Api.device.FQDN])[
+                Api.generic.PARENT_CONTAINER_NAME] == CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]
         else:
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
@@ -146,12 +146,12 @@ class TestCvDeviceToolsWithFQDN():
     def test_device_is_present_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
-        if FIELD_FQDN in CV_DEVICE:
+        if Api.device.FQDN in CV_DEVICE:
             assert self.inventory.is_device_exist(
-                device_lookup=CV_DEVICE[FIELD_FQDN], search_mode=FIELD_FQDN) is True
+                device_lookup=CV_DEVICE[Api.device.FQDN], search_mode=Api.device.FQDN) is True
             logging.info("End of CV query at {}".format(time_log()))
             logging.info("Device {} is not present on Cloudvision".format(
-                CV_DEVICE[FIELD_FQDN]))
+                CV_DEVICE[Api.device.FQDN]))
         else:
             logging.info(
                 "Device has no fqdn in inventory: {}".format(CV_DEVICE))
@@ -164,12 +164,12 @@ class TestCvDeviceToolsWithFQDN():
         requests.packages.urllib3.disable_warnings()
         logging.info("Start CV query at {}".format(time_log()))
         logging.debug("CV_DEVICE data is: %s", str(CV_DEVICE))
-        if FIELD_FQDN in CV_DEVICE:
-            self.inventory.search_by = FIELD_FQDN
+        if Api.device.FQDN in CV_DEVICE:
+            self.inventory.search_by = Api.device.FQDN
             assert self.inventory.is_in_container(
-                device_lookup=CV_DEVICE[FIELD_FQDN], container_name=CV_DEVICE[FIELD_PARENT_NAME])
+                device_lookup=CV_DEVICE[Api.device.FQDN], container_name=CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME])
             logging.info("Device {} is correctly configured under {}".format(
-                CV_DEVICE[FIELD_FQDN], CV_DEVICE[FIELD_PARENT_NAME]))
+                CV_DEVICE[Api.device.FQDN], CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]))
         else:
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
@@ -185,10 +185,10 @@ class TestCvDeviceToolsWithFQDN():
     def test_configlet_apply_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
         CV_DEVICE_LOCAL = CV_DEVICE
-        if FIELD_FQDN in CV_DEVICE:
-            CV_DEVICE_LOCAL[FIELD_CONFIGLETS].append("leaf-2-unit-test")
+        if Api.device.FQDN in CV_DEVICE:
+            CV_DEVICE_LOCAL[Api.generic.CONFIGLETS].append("leaf-2-unit-test")
             self.inventory.check_mode = CHECK_MODE
-            self.inventory.search_by = FIELD_FQDN
+            self.inventory.search_by = Api.device.FQDN
             user_inventory = DeviceInventory(data=[CV_DEVICE_LOCAL])
             logging.info("Start CV query at {}".format(time_log()))
             resp = self.inventory.apply_configlets(
@@ -206,11 +206,11 @@ class TestCvDeviceToolsWithFQDN():
     @pytest.mark.parametrize("CV_DEVICE", get_devices())
     def test_device_move_by_fqdn(self, CV_DEVICE):
         requests.packages.urllib3.disable_warnings()
-        if FIELD_FQDN in CV_DEVICE:
-            parent_container = CV_DEVICE[FIELD_PARENT_NAME]
-            CV_DEVICE[FIELD_PARENT_NAME] = CONTAINER_DESTINATION
+        if Api.device.FQDN in CV_DEVICE:
+            parent_container = CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME]
+            CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME] = CONTAINER_DESTINATION
             logging.info("Send update to CV with {}".format(CV_DEVICE))
-            self.inventory.search_by = FIELD_FQDN
+            self.inventory.search_by = Api.device.FQDN
             self.inventory.check_mode = CHECK_MODE
             user_inventory = DeviceInventory(data=[CV_DEVICE])
             logging.info("Start CV query at {}".format(time_log()))
@@ -220,7 +220,7 @@ class TestCvDeviceToolsWithFQDN():
             assert len(resp[0].results) > 0
             assert resp[0].results["success"]
             assert resp[0].results["changed"]
-            CV_DEVICE[FIELD_PARENT_NAME] = parent_container
+            CV_DEVICE[Api.generic.PARENT_CONTAINER_NAME] = parent_container
         else:
             logging.info("Device not based on fqdn")
         logging.info("End of CV query at {}".format(time_log()))
