@@ -849,14 +849,15 @@ class CvContainerTools(object):
                         cv_configlets_attach.add_change(resp)
                         if apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
                             attached_configlets = self.get_configlets(container_name=user_container)
-                            if configlet_to_remove := [
+                            configlet_to_remove = [
                                 attach_configlet
                                 for attach_configlet in attached_configlets
-                                if attach_configlet[Api.generic.NAME]
+                                if attach_configlet['name']
                                 not in user_topology.get_configlets(
                                     container_name=user_container
                                 )
-                            ]:
+                            ]
+                            if configlet_to_remove:
                                 resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                                 cv_configlets_detach.add_change(resp)
                     elif apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
