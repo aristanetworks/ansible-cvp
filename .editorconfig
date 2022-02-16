@@ -1,0 +1,23 @@
+# EditorConfig: http://EditorConfig.org
+# Uses editorconfig to maintain consistent coding styles
+# VScode integration:
+# https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
+
+# top-most EditorConfig file
+root = true
+
+# Defaults for all editor files
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+end_of_line = lf
+insert_final_newline = true
+
+# Files with a smaller indent
+[*.yml]
+indent_size = 2
+
+[**/Makefile*]
+indent_style = tab
