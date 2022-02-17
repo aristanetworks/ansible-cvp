@@ -26,7 +26,6 @@ import asyncio
 import time
 import functools
 from typing import Callable, List
-from cvprac.cvp_client import CvpClient
 from concurrent.futures import ThreadPoolExecutor
 
 LOGGER = logging.getLogger(__name__)
@@ -131,23 +130,23 @@ async def call_batch(func: Callable[[int, int], dict], item_per_call: int = 2) -
     return {'total': total, 'data': data}
 
 
-def get_configlets_by_name(client: CvpClient, names: List[str]) -> List[dict]:
+def get_configlets_by_name(client, names: List[str]) -> List[dict]:
     return asyncio.run(call(client.api.get_configlet_by_name, [{'name': i} for i in names]))
 
 
-def get_configlets(client: CvpClient, **item_per_call) -> dict:
+def get_configlets(client, **item_per_call) -> dict:
     return asyncio.run(call_batch(client.api.get_configlets, **item_per_call))
 
 
-def get_images(client: CvpClient, **item_per_call) -> dict:
+def get_images(client, **item_per_call) -> dict:
     return asyncio.run(call_batch(client.api.get_images, **item_per_call))
 
 
-def get_containers(client: CvpClient, **item_per_call) -> dict:
+def get_containers(client, **item_per_call) -> dict:
     return asyncio.run(call_batch(client.api.get_containers, **item_per_call))
 
 
-def update_configlets(client: CvpClient, configs: List[dict]) -> dict:
+def update_configlets(client, configs: List[dict]) -> dict:
     """
     config example:
        {'name': 'my-configlet',
@@ -159,7 +158,7 @@ def update_configlets(client: CvpClient, configs: List[dict]) -> dict:
     return asyncio.run(call(client.api.update_configlet, configs))
 
 
-def add_notes_to_configlets(client: CvpClient, configs: List[dict]) -> dict:
+def add_notes_to_configlets(client, configs: List[dict]) -> dict:
     """
     note example:
        {'key': 'configlet_123456',
@@ -168,7 +167,7 @@ def add_notes_to_configlets(client: CvpClient, configs: List[dict]) -> dict:
     return asyncio.run(call(client.api.add_note_to_configlet, configs))
 
 
-def get_images_and_configlets(client: CvpClient, **item_per_call) -> dict:
+def get_images_and_configlets(client, **item_per_call) -> dict:
     async def run():
         r = await asyncio.gather(call_batch(client.api.get_configlets, **item_per_call),
                                  call_batch(client.api.get_images, **item_per_call))
