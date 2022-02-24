@@ -28,6 +28,17 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
 
+Alternatively __user token__ can be used just as with CVaaS.
+
+```yaml
+# Default Ansible variables for authentication
+ansible_host: < IP address or hostname to target >
+ansible_user: svc_account # Set this username to user api_token in cvprac
+ansible_password: < User token to use to connect to CVP instance >
+ansible_connection: httpapi
+ansible_network_os: eos
+```
+
 ## Cloudvision as a Service authentication
 
 This authentication method leverage a __user token__ to first get from your CVaaS instance. Then, instruct ansible to use token instead of username and password authentication
@@ -36,7 +47,7 @@ This authentication method leverage a __user token__ to first get from your CVaa
 # Default Ansible variables for authentication
 ansible_host: < IP address or hostname to target >
 ansible_user: cvaas # Shall not be changed. ansible will switch to cvaas mode
-ansible_ssh_pass: < User token to use to connect to CVP instance >
+ansible_password: < User token to use to connect to CVP instance >
 ansible_connection: httpapi
 ansible_network_os: eos
 
