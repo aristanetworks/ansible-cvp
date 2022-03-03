@@ -85,9 +85,6 @@ class CvTagTools():
         ]
         """
 
-        # XXX: REMOVE THIS!!
-        # import epdb; epdb.serve(port=8888)
-
         """
         create WS
         for each device:
@@ -237,3 +234,4 @@ class CvTagTools():
         tag_manager.add_change(api_result)
         ansible_response.add_manager(tag_manager)
         return ansible_response
+
