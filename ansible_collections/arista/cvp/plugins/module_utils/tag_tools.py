@@ -8,7 +8,7 @@ import string
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
-from ansible.module_utils.connection import Connection
+# from ansible.module_utils.connection import Connection
 
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
@@ -39,7 +39,7 @@ class CvTagTools():
         return " "
 
 
-    def tasker(self, tags: list, remove: bool = True):
+    def tasker(self, tags: list, mode: string, state: string, auto_create: bool = True):
         """
         tasker Generic entry point to manage tag related tasks
         """
@@ -103,6 +103,10 @@ class CvTagTools():
             exit if timeout reached
         submit WS
         check status again??
+        ----
+        create/delete
+        assign/unassign
+
         """
 
         # create workspace
@@ -115,28 +119,49 @@ class CvTagTools():
         self.__cv_client.api.workspace_config(workspace_id, workspace_name)
 
         # create tags and assign tags
-        # XXX: DELETE tags?
         for per_device in tags:
             device_name = per_device['device']
-            # XXX: get serial number for this device
             device_id = self.get_serial_num(device_name)
             tag_type = per_device.keys()
             if 'device_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_DEVICE"
-                interface_id = ""
                 for dev_tags in per_device['device_tags']:
                     tag_name = dev_tags['name']
                     tag_val = dev_tags['value']
-                    self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                    tag_name, tag_val,
-                                                    remove=remove)
-                    self.__cv_client.api.tag_assignment_config(element_type,
-                                                               workspace_id,
-                                                               tag_name,
-                                                               tag_val,
-                                                               device_id,
-                                                               interface_id,
-                                                               remove=remove)
+                    # XXX: auto-create
+                    if mode == 'create':
+                        self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                        tag_name, tag_val)
+                    if state == 'assign':
+                        self.__cv_client.api.tag_assignment_config(element_type,
+                                                                   workspace_id,
+                                                                   tag_name,
+                                                                   tag_val,
+                                                                   device_id,
+                                                                   "")
+                    if state == 'unassign':
+                        # unassign before deleting
+                        self.__cv_client.api.tag_assignment_config(element_type,
+                                                                   workspace_id,
+                                                                   tag_name,
+                                                                   tag_val,
+                                                                   device_id, "",
+                                                                   remove=True)
+                    if mode == 'delete':
+                        # XXX: what happens when you delete assigned tags?
+                        # is there a state before this mode?
+                        if state == '':
+                            # unassign first
+                            self.__cv_client.api.tag_assignment_config(element_type,
+                                                                   workspace_id,
+                                                                   tag_name,
+                                                                   tag_val,
+                                                                   device_id, "",
+                                                                   remove=True)
+                        self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                        tag_name, tag_val,
+                                                        remove=True)
+
             if 'interface_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_INTERFACE"
                 for intf_tags in per_device['interface_tags']:
@@ -144,15 +169,29 @@ class CvTagTools():
                     for tag in intf_tags['tags']:
                         tag_name = tag['name']
                         tag_val = tag['value']
-                        self.__cv_client.api.tag_config(element_type,
-                                                        workspace_id,
-                                                        tag_name, tag_val,
-                                                        remove=remove)
-                        self.__cv_client.api.tag_assignment_config(element_type,
-                                                                   workspace_id,
-                                                                   tag_name, tag_val,
-                                                                   device_id, interface_id,
-                                                                   remove=remove)
+                        if mode == 'create':
+                            self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                            tag_name, tag_val)
+                        if state == 'assign':
+                            self.__cv_client.api.tag_assignment_config(element_type,
+                                                                       workspace_id,
+                                                                       tag_name,
+                                                                       tag_val,
+                                                                       device_id,
+                                                                       interface_id)
+                        if state == 'unassign':
+                            self.__cv_client.api.tag_assignment_config(element_type,
+                                                                       workspace_id,
+                                                                       tag_name,
+                                                                       tag_val,
+                                                                       device_id,
+                                                                       interface_id,
+                                                                       remove=True)
+                        if mode == 'delete':
+                            # XXX: what happens when you delete assigned tags?
+                            self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                            tag_name, tag_val,
+                                                            remove=True)
 
         ### Start build
         request = 'REQUEST_START_BUILD'
@@ -183,7 +222,10 @@ class CvTagTools():
         api_result.success = True
 
         ### Submit workspace
-        # XXX: timeout=2-3sec!! send status back to user to check status on cvp side
+        # XXX: call back options:
+        # Have a Flag to choose if the user wants to wait for cvp 200OK or just launch job and exit
+        # 1. timeout=2-3sec!! send status back to user to check status on cvp side
+        # 2. wait till the task is done on the CVP side, show progress bar
         request = 'REQUEST_SUBMIT'
         request_id = 's1'
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,

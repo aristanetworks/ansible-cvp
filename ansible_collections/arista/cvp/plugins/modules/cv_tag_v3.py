@@ -52,26 +52,39 @@ def main():
     argument_spec = dict(
         # Topology to configure on CV side.
         tags=dict(type='list', required=True, elements='dict'),
+        mode=dict(type='str',
+                   required=False,
+                   choices=['create', 'delete']),
         state=dict(type='str',
                    required=False,
-                   default='present',
-                   choices=['present', 'absent'])
+                   # default='assign',
+                   choices=['assign', 'unassign']),
+        auto_create=dict(type='bool',
+                         required=False,
+                         default=True)
     )
 
     # Make module global to use it in all functions when required
     ansible_module = AnsibleModule(argument_spec=argument_spec,
                                    supports_check_mode=True)
 
-    # boolean for state flag
-    remove = bool(ansible_module.params['state'] == 'absent')
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
+
+    if ansible_module.params['mode'] == 'delete' and ansible_module.params['state'] == 'assign':
+        ansible_module.fail_json(
+            msg='Error, state cannot be \'assign\' when in \'delete\' mode')
+    if ansible_module.params['mode'] == 'create' and ansible_module.params['state'] == 'unassign':
+        ansible_module.fail_json(
+            msg='Error, state cannot be \'unassign\' when in \'create\' mode')
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
     tag_manager = CvTagTools(cv_connection=cv_client, ansible_module=ansible_module)
     ansible_response: CvAnsibleResponse = tag_manager.tasker(tags=ansible_module.params['tags'],
-                                                             remove=remove)
+                                                             mode=ansible_module.params['mode'],
+                                                             state=ansible_module.params['state'],
+                                                             auto_create=ansible_module.params['auto_create'])
 
     result = ansible_response.content
     ansible_module.exit_json(**result)
