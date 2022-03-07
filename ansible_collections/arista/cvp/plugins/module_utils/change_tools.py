@@ -579,7 +579,7 @@ class CvChangeControlTools():
         change: dict
             A dict describing the request change control
         """
-        MODULE_LOGGER.debug('Collecting change control: %s' % cc_id)
+        MODULE_LOGGER.debug('Collecting change control: %s', cc_id)
         if self.apiversion < 3.0:
             MODULE_LOGGER.debug('Using legacy API call')
             change = self.__cv_client.api.get_change_control_info(cc_id)
@@ -611,13 +611,13 @@ class CvChangeControlTools():
                 cc_list = []
                 if change_id is not None:
                     for change in change_id:
-                        MODULE_LOGGER.debug('Looking up change: ID: %s' % change)
+                        MODULE_LOGGER.debug('Looking up change: ID: %s', change)
                         cc_list.append(self.get_change_control(change))
 
                 else:
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
-                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0], change[1]))
+                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s', change[0], change[1])
                         cc_list.append(self.get_change_control(change[1]))
 
                 return changed, {'change_controls:': cc_list}, warnings
@@ -631,7 +631,7 @@ class CvChangeControlTools():
                     warnings.append("Deleting CC IDs takes precedence over deleting named CCs. Only the provided CCids will be deleted")
                 try:
                     changes = self.__cv_client.api.delete_change_controls(change_id)
-                    MODULE_LOGGER.debug("Response to delete request was: %s" % changes)
+                    MODULE_LOGGER.debug("Response to delete request was: %s", changes)
                     if len(changes) > 0:
                         changed = True
                     else:
