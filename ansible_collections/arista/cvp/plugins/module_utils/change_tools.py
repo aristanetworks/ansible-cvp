@@ -631,12 +631,12 @@ class CvChangeControlTools():
                     warnings.append("Deleting CC IDs takes precedence over deleting named CCs. Only the provided CCids will be deleted")
                 try:
                     changes = self.__cv_client.api.delete_change_controls(change_id)
-                    MODULE_LOGGER.debug("Response to delete request was: %s", changes)
+                    MODULE_LOGGER.debug("Successfully deleted: %s", change_id)
                     changed = True
                 except Exception as e:
                     self.__ansible.fail_json(msg="{0}".format(e))
 
-                return changed, {'remove': changes}, warnings
+                return changed, {'remove': []}, warnings
 
             elif name is not None:
                 cc_list = self._find_id_by_name(name)
