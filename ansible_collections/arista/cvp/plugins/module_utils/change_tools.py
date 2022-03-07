@@ -144,8 +144,8 @@ class CvpChangeControlBuilder:
 
         Returns
         -------
-        Str:
-            A random string, of length __keySize, guaranteed to be unique within the class instance.
+        Dict:
+            The Change control.
         """
         data = self._validate_input(data, name)
         self._create_cc_struct(data['name'], notes=data['notes'])
@@ -246,6 +246,8 @@ class CvpChangeControlBuilder:
         # if the key is provided, we are updating an existing CC
         if 'key' in data:
             self.__changeKey = data['key']
+        else:
+            self.__changeKey = None
 
         return data
 
@@ -352,9 +354,11 @@ class CvpChangeControlBuilder:
         change['stages']['values'][change['rootStageId']]['rows'] = {}
         change['stages']['values'][change['rootStageId']]['rows']['values'] = []
 
-        # We could in theory have a collision here, as the key is basically the Change Control ID
-        # and since we don't know all the CC IDs, there is a non-0 possibility of this occurring
-        changeControl['key'] = {'id': str(self.__genID__())}
+        if self.__changeKey is None:
+            changeControl['key'] = {'id': str(self.__genID__())}
+        else:
+            changeControl['key'] = {'id': self.__changeKey}
+            
         changeControl['change'] = change
 
         self.__stageMode[change['rootStageId']] = mode
@@ -665,8 +669,9 @@ class CvChangeControlTools():
             cc_structure = changeControl.build_cc(change, name)
 
             try:
-                data = self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
+                self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
                 changed = True
+                data = cc_structure['key']
 
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
