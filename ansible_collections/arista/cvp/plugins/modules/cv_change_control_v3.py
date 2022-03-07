@@ -25,7 +25,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_change_control_v3
-version_added: TBD
+version_added: 3.3.4
 author: EMEA AS Team (@aristanetworks)
 short_description: Change Control management with Cloudvision
 description:
@@ -43,8 +43,8 @@ options:
   state:
     description: Set if we should get, set/update, or remove the change control
     required: false
-    default: get
-    choices: ['get','set','remove']
+    default: 'show'
+    choices: ['show','set','remove']
     type: str
   change_id:
     description: List of change IDs to get/remove
@@ -91,7 +91,7 @@ EXAMPLES = r'''
   tasks:
     - name: "Gather CVP change controls {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
-        state: get
+        state: show
       register: cv_facts
 
 
@@ -112,7 +112,7 @@ EXAMPLES = r'''
 
     - name: "Get the created change control {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
-        state: get
+        state: show
         name: change.name
       register: cv_facts
 
@@ -151,7 +151,7 @@ def main():
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),
-        state=dict(default='get', type='str', choices=['get', 'set', 'remove']),
+        state=dict(default='show', type='str', choices=['get', 'show', 'remove']),
         change_id=dict(type='list', elements='str')
     )
 

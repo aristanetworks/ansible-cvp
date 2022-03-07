@@ -594,7 +594,7 @@ class CvChangeControlTools():
 
 
 
-    def module_action(self, change: dict, name: str = None, state: str = "get", change_id: List[str] = None):
+    def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None):
 
         changed = False
         data = dict()
@@ -603,7 +603,7 @@ class CvChangeControlTools():
         MODULE_LOGGER.debug('Collecting all change controls')
         self.get_all_change_controls()
 
-        if state == "get":
+        if state == "show":
 
             if name is None and change_id is None:
                 return changed, {'change_controls': self.change_controls}, warnings
@@ -632,10 +632,7 @@ class CvChangeControlTools():
                 try:
                     changes = self.__cv_client.api.delete_change_controls(change_id)
                     MODULE_LOGGER.debug("Response to delete request was: %s", changes)
-                    if len(changes) > 0:
-                        changed = True
-                    else:
-                        warnings.append('No changes made in delete request')
+                    changed = True
                 except Exception as e:
                     self.__ansible.fail_json(msg="{0}".format(e))
 
@@ -655,10 +652,7 @@ class CvChangeControlTools():
                 else:
                     try:
                         changes = self.__cv_client.api.delete_change_controls(change_id)
-                        if len(changes) > 0:
-                            changed = True
-                        else:
-                            warnings.append('No changes made in delete request')
+                        changed = True
                     except Exception as e:
                         self.__ansible.fail_json(msg="{0}".format(e))
             else:
