@@ -637,7 +637,7 @@ class CvChangeControlTools():
                 if name is not None:
                     warnings.append("Deleting CC IDs takes precedence over deleting named CCs. Only the provided CCids will be deleted")
                 try:
-                    changes = self.__cv_client.api.delete_change_controls(change_id)
+                    self.__cv_client.api.delete_change_controls(change_id)
                     MODULE_LOGGER.debug("Successfully deleted: %s", change_id)
                     changed = True
                 except Exception as e:
