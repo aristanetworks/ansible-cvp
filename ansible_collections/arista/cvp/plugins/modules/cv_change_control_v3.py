@@ -38,7 +38,7 @@ options:
     type: str
   change:
     description: A dict containuing the change control to be created/modified
-    required: true (if state == set)
+    required: false
     type: dict
   state:
     description: Set if we should get, set/update, or remove the change control
@@ -49,7 +49,8 @@ options:
   change_id:
     description: List of change IDs to get/remove
     required: false
-    type: list(str)
+    type: list
+    elements: str
 '''
 
 EXAMPLES = r'''
@@ -123,7 +124,7 @@ EXAMPLES = r'''
     - name: "Delete the CC from {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: remove
-        name: change.name
+        name: "{{change.name}}"
       register: cv_deleted
 
     - name: "Show deleted CCs"
