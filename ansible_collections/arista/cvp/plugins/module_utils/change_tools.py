@@ -611,7 +611,7 @@ class CvChangeControlTools():
                 cc_list = []
                 if change_id is not None:
                     for change in change_id:
-                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % change )
+                        MODULE_LOGGER.debug('Looking up change: ID: %s' % change )
                         cc_list.append( self.get_change_control(change ) )
 
                 else:
