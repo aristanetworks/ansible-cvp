@@ -529,7 +529,10 @@ class CvChangeControlTools():
             A list of matching change control IDs
         """
         cc_id = []
-        cc_id = list(filter(lambda x: name in x, self.__cc_index))
+        #cc_id = list(filter(lambda x: name in x, self.__cc_index))
+        for k,v in self.__cc_index:
+            if name in k:
+                cc_id.append(v)
         MODULE_LOGGER.debug('%d changes found', len(cc_id))
         return cc_id
 
@@ -622,7 +625,7 @@ class CvChangeControlTools():
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
                         MODULE_LOGGER.debug('Looking up change: %s with ID: %s', change[0], change[1])
-                        cc_list.append(self.get_change_control(change[1]))
+                        cc_list.append(self.get_change_control(change))
 
                 return changed, {'change_controls:': cc_list}, warnings
 
