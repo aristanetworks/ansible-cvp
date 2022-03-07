@@ -655,7 +655,8 @@ class CvChangeControlTools():
                     return changed, {'matches': cc_list}, warnings
                 else:
                     try:
-                        changes = self.__cv_client.api.delete_change_controls(change_id)
+                        MODULE_LOGGER.debug("Trying to delete: %s", cc_list)
+                        data = self.__cv_client.api.delete_change_controls(cc_list)
                         changed = True
                     except Exception as e:
                         self.__ansible.fail_json(msg="{0}".format(e))
