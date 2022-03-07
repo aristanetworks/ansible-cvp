@@ -446,18 +446,19 @@ class CvpChangeControlBuilder:
         Parameters
         ----------
         name: Str
-            The name of the action - by default this is "task"
-        taskID: Str
-            The task/workorderID of the task to be executed
+            Not used - name associated with the action
+        action: Str
+            The name of the action - the is the internal action name 
         stage: Str
             The name of the stage that this task is to be assigned to
-        timeout: Int
-            The timeout value for task completion in X units
+        deviceId: Str
+            The name of the device to which the action is to be done
+
 
         Returns
         -------
         None:
-            The Class ChangeControl is updated to include the new task
+            The Class ChangeControl is updated to include the new action
         """
 
         task = {}

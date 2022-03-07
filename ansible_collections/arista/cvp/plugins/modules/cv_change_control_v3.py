@@ -70,7 +70,6 @@ EXAMPLES = r'''
           device: DC1-Leaf1a
           stage: Pre-Checks
         - action: "Switch Healthcheck"
-          name: Switch1b_healthcheck
           device: DC1-Leaf1b
           stage: Pre-Checks
         - task_id: "20"
