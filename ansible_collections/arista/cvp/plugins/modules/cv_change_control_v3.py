@@ -40,14 +40,16 @@ options:
     description: A dict containuing the change control to be created/modified
     required: true (if state == set)
     type: dict
-    elements: dict
   state:
     description: Set if we should get, set/update, or remove the change control
     required: false
     default: get
     choices: ['get','set','remove']
     type: str
-
+  change_id:
+    description: List of change IDs to get/remove
+    required: false
+    type: list(str)
 '''
 
 EXAMPLES = r'''
@@ -147,9 +149,9 @@ def main():
     """
     argument_spec = dict(
         name=dict(type='str'),
-        change=dict(type="dict"),
+        change=dict(type='dict'),
         state=dict(default='get', type='str', choices=['get', 'set', 'remove']),
-        change_id=dict(type='list')
+        change_id=dict(type='list', elements='str')
     )
 
     ansible_module = AnsibleModule(
