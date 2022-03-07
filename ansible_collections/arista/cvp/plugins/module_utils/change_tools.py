@@ -358,7 +358,7 @@ class CvpChangeControlBuilder:
             changeControl['key'] = {'id': str(self.__genID__())}
         else:
             changeControl['key'] = {'id': self.__changeKey}
-            
+
         changeControl['change'] = change
 
         self.__stageMode[change['rootStageId']] = mode
@@ -530,7 +530,7 @@ class CvChangeControlTools():
         """
         cc_id = []
         #cc_id = list(filter(lambda x: name in x, self.__cc_index))
-        for k,v in self.__cc_index:
+        for k, v in self.__cc_index:
             if name in k:
                 cc_id.append(v)
         MODULE_LOGGER.debug('%d changes found', len(cc_id))
@@ -624,7 +624,7 @@ class CvChangeControlTools():
                 else:
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
-                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s', change[0], change[1])
+                        MODULE_LOGGER.debug('Found change for search: %s with ID: %s', name, change)
                         cc_list.append(self.get_change_control(change))
 
                 return changed, {'change_controls:': cc_list}, warnings
