@@ -56,7 +56,7 @@ class CvpChangeControlBuilder:
     add_known_uuid(list(str))
         Provide a list of UUIDs already in use to the class, to prevent collisions.
     """
-    def __init__( self ):
+    def __init__(self):
         # Guarantee that the generated IDs are unique, for this session
         self.__keySize = 12
         self.__keyStore = []
@@ -152,9 +152,9 @@ class CvpChangeControlBuilder:
         
         for stage in data['stages']:
             if 'parent' in stage.keys():
-                self._create_stage(stage['name'],mode=stage['mode'],parent=stage['parent'])
+                self._create_stage(stage['name'], mode=stage['mode'], parent=stage['parent'])
             else:
-                self._create_stage(stage['name'],mode=stage['mode'])
+                self._create_stage(stage['name'], mode=stage['mode'])
 
 
         for action in data['activities']:
@@ -186,7 +186,7 @@ class CvpChangeControlBuilder:
 
         return None
 
-    def _validate_input(self, data, name = None):
+    def _validate_input(self, data, name=None):
         """
         Sanitize the incoming data structure
 
@@ -300,12 +300,12 @@ class CvpChangeControlBuilder:
         # Depending on if it's a series or parallel stage, we need to populate the structure differently e.g. list of dicts vs list of strings
         if self.__stageMode[parentId] == 'parallel':
             if len(self.ChangeControl['change']['stages']['values'][parentId]['rows']['values']) == 0:
-                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append( {'values':[ ownId ]})
+                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values':[ownId]})
             else:
                 self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'][0]['values'].append(ownId)
 
         else:
-            self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ ownId ]})
+            self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
         
         return None
             
@@ -387,7 +387,7 @@ class CvpChangeControlBuilder:
         stageId = self.__genID__()
         self.__stageMode[stageId] = mode
         self.__stageMapping[name] = stageId
-        self.__attachThing(stageId,parent)
+        self.__attachThing(stageId, parent)
         stage = {}
         stage['name'] = name
         stage['rows'] = {}
@@ -506,7 +506,7 @@ class CvChangeControlTools():
         self.__cc_index.clear()
         
         for entry in self.change_controls['data']:
-            self.__cc_index.append( (entry['result']['value']['change']['name'], entry['result']['value']['key']['id']) )
+            self.__cc_index.append((entry['result']['value']['change']['name'], entry['result']['value']['key']['id']))
 
         return None
             
@@ -525,7 +525,7 @@ class CvChangeControlTools():
             A list of matching change control IDs
         """
         cc_id = []
-        cc_id = list( filter(lambda x:name in x, self.__cc_index) )
+        cc_id = list(filter(lambda x: name in x, self.__cc_index))
         MODULE_LOGGER.debug('%d changes found' % len(cc_id))
         return cc_id
     
@@ -594,7 +594,7 @@ class CvChangeControlTools():
         
     
     
-    def module_action(self, change:dict, name:str = None, state:str = "get", change_id:List[str] = None):
+    def module_action(self, change: dict, name: str = None, state: str = "get", change_id: List[str] = None):
         
         changed = False
         data = dict()
@@ -611,16 +611,16 @@ class CvChangeControlTools():
                 cc_list = []
                 if change_id is not None:
                     for change in change_id:
-                        MODULE_LOGGER.debug('Looking up change: ID: %s' % change )
-                        cc_list.append( self.get_change_control(change ) )
+                        MODULE_LOGGER.debug('Looking up change: ID: %s' % change)
+                        cc_list.append(self.get_change_control(change))
 
                 else:
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
-                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]) )
-                        cc_list.append(self.get_change_control(change[1]) )
+                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]))
+                        cc_list.append(self.get_change_control(change[1]))
 
-                return changed, {'change_controls:': cc_list  }, warnings
+                return changed, {'change_controls:': cc_list}, warnings
 
             
             
@@ -639,7 +639,7 @@ class CvChangeControlTools():
                 except Exception as e:
                     self.__ansible.fail_json(msg="{0}".format(e))
                     
-                return changed,{'remove':changes}, warnings
+                return changed,{'remove': changes}, warnings
             
             elif name is not None:
                 cc_list = self._find_id_by_name(name)
@@ -647,7 +647,7 @@ class CvChangeControlTools():
                     warnings.append("No matching change controls found for %s" % name)
                     return changed, {'search': name}, warnings
                 elif len(cc_list) > 1:
-                    warnings.append("Multiple changes (%d) found matching name: %s" % (len(cc_list),name ) )
+                    warnings.append("Multiple changes (%d) found matching name: %s" % (len(cc_list), name))
                     # Should we hard fail here?
                     e = "Deleting multiple CCs by name is not supported at this time"
                     self.__ansible.fail_json(msg="{0}".format(e))
@@ -667,11 +667,11 @@ class CvChangeControlTools():
                     
         elif state == "set":
             changeControl = CvpChangeControlBuilder()
-            changeControl.add_known_uuid( [ v[1] for v in self.__cc_index ] )
+            changeControl.add_known_uuid([v[1] for v in self.__cc_index])
             cc_structure = changeControl.build_cc(change, name)
             
             try:
-                data = self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig',data=cc_structure )
+                data = self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
                 changed = True
                 
             except Exception as e:
