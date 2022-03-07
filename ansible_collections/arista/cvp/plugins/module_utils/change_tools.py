@@ -617,7 +617,7 @@ class CvChangeControlTools():
                 else:
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
-                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]))
+                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0], change[1]))
                         cc_list.append(self.get_change_control(change[1]))
 
                 return changed, {'change_controls:': cc_list}, warnings
@@ -639,7 +639,7 @@ class CvChangeControlTools():
                 except Exception as e:
                     self.__ansible.fail_json(msg="{0}".format(e))
                     
-                return changed,{'remove': changes}, warnings
+                return changed, {'remove': changes}, warnings
             
             elif name is not None:
                 cc_list = self._find_id_by_name(name)
