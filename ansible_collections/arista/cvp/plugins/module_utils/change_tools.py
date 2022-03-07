@@ -69,7 +69,7 @@ class CvpChangeControlBuilder:
         
 
         
-    def build_cc(self, data, name = None):
+    def build_cc(self, data, name=None):
         """
         Build the change control data structure
 
@@ -148,7 +148,7 @@ class CvpChangeControlBuilder:
             A random string, of length __keySize, guaranteed to be unique within the class instance.
         """        
         data = self._validate_input(data, name)
-        self._create_cc_struct( data['name'], notes=data['notes'] )
+        self._create_cc_struct(data['name'], notes=data['notes'])
         
         for stage in data['stages']:
             if 'parent' in stage.keys():
@@ -186,7 +186,7 @@ class CvpChangeControlBuilder:
 
         return None
 
-    def _validate_input( self, data, name = None ):
+    def _validate_input(self, data, name = None):
         """
         Sanitize the incoming data structure
 
@@ -249,7 +249,7 @@ class CvpChangeControlBuilder:
         
         return data            
         
-    def __genID__( self ):
+    def __genID__(self):
         """
         Generates a UUID to identify each task/action and stage, and the assignment of the 
         former to the latter. The UUID should be unique within the Change control.
@@ -265,7 +265,7 @@ class CvpChangeControlBuilder:
             A random string, of length __keySize, guaranteed to be unique within the class instance.
         """
         while True:
-            id = ''.join( random.choices( string.ascii_letters, k=self.__keySize ) )
+            id = ''.join(random.choices(string.ascii_letters, k=self.__keySize))
             if id not in self.__keyStore:
                 self.__keyStore.append(id)
                 return(id)
@@ -274,7 +274,7 @@ class CvpChangeControlBuilder:
                 pass
             
         
-    def __attachThing( self, ownId, parent=None ):
+    def __attachThing(self, ownId, parent=None):
         """
         Assign a task/action to a stage within the Change Control
 
@@ -300,12 +300,12 @@ class CvpChangeControlBuilder:
         # Depending on if it's a series or parallel stage, we need to populate the structure differently e.g. list of dicts vs list of strings
         if self.__stageMode[parentId] == 'parallel':
             if len(self.ChangeControl['change']['stages']['values'][parentId]['rows']['values']) == 0:
-                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append( {'values': [ ownId ] } )
+                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append( {'values':[ ownId ]})
             else:
                 self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'][0]['values'].append(ownId)
 
         else:
-            self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append( {'values': [ ownId ] } )
+            self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ ownId ]})
         
         return None
             
@@ -347,17 +347,17 @@ class CvpChangeControlBuilder:
         change['rootStageId'] = self.__genID__()
         self.__stageMapping[name] = change['rootStageId']
         
-        change['stages']['values'][ change['rootStageId'] ] = {}
-        change['stages']['values'][ change['rootStageId'] ]['name'] = " ".join([name, "root stage"])
-        change['stages']['values'][ change['rootStageId'] ]['rows'] = {}
-        change['stages']['values'][ change['rootStageId'] ]['rows']['values'] = []
+        change['stages']['values'][change['rootStageId']] = {}
+        change['stages']['values'][change['rootStageId']]['name'] = " ".join([name, "root stage"])
+        change['stages']['values'][change['rootStageId']]['rows'] = {}
+        change['stages']['values'][change['rootStageId']]['rows']['values'] = []
         
         # We could in theory have a collision here, as the key is basically the Change Control ID
         # and since we don't know all the CC IDs, there is a non-0 possibility of this occurring
-        changeControl['key'] = { 'id': str(self.__genID__()) }
+        changeControl['key'] = {'id': str(self.__genID__())}
         changeControl['change'] = change
         
-        self.__stageMode[ change['rootStageId'] ] = mode
+        self.__stageMode[change['rootStageId']] = mode
        
         self.ChangeControl = changeControl
         
@@ -594,7 +594,7 @@ class CvChangeControlTools():
         
     
     
-    def module_action(self, change:dict, name:str = None, state:str = "get", change_id:List[str] = None ):
+    def module_action(self, change:dict, name:str = None, state:str = "get", change_id:List[str] = None):
         
         changed = False
         data = dict()
