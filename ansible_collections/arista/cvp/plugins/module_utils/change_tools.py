@@ -48,7 +48,7 @@ MODULE_LOGGER.info('Start change_tools module execution')
 class CvpChangeControlBuilder:
     """
     CvpChangeControlBuilder Class to the generation of a CVP Change control.
-    
+
     Methods
     -------
     build_cc(data)
@@ -66,9 +66,9 @@ class CvpChangeControlBuilder:
         self.__stageMapping = {}
         # The final change control
         self.ChangeControl = {}
-        
 
-        
+
+
     def build_cc(self, data, name=None):
         """
         Build the change control data structure
@@ -86,13 +86,13 @@ class CvpChangeControlBuilder:
                     task_id: str
                         The Task / Work Order Id for the task to be executed
                     timeout: int
-                        The timeout value to be used for task completion 
+                        The timeout value to be used for task completion
                     name: str
                         A name for the card/action - not required or used outside of datastructures
                     device: str
                         Name of the device that this action is to be performed on
                     stage: str
-                        The name of the stage to assign the action to 
+                        The name of the stage to assign the action to
             stages: list
                A list of stages, with their name, mode and parent stage defined;
                     name: str
@@ -102,12 +102,12 @@ class CvpChangeControlBuilder:
                         Series is the default
                     parent: str
                         The name of the parent stage to assign this stage to
-                        
+
         Example data
         ------------
         Sample data passed to method::
           - name: TestCC123
-            notes: Test change 
+            notes: Test change
             activities:
               - task_id: "1234"
                 name: "task"
@@ -117,12 +117,12 @@ class CvpChangeControlBuilder:
                 name: "Switch1_health"
                 device: DC1-Leaf1a
                 stage: Stage0
-    
+
               - action: "Switch Healthcheck"
                 name: "Switch1_health"
                 device: switch1
                 stage: Stage1b
-    
+
               - action: "Switch Healthcheck"
                 name: "Spine 1 Health Check"
                 device: DC1-SPINE1
@@ -130,26 +130,26 @@ class CvpChangeControlBuilder:
             stages:
               - name: Stage0
                 mode: parallel
-    
+
               - name: Stage1
                 mode: parallel
-    
+
               - name: Stage1b
                 mode: parallel
                 parent: Stage1
-    
+
               - name: Stage2
-                mode: series  
-        
+                mode: series
+
 
         Returns
         -------
         Str:
             A random string, of length __keySize, guaranteed to be unique within the class instance.
-        """        
+        """
         data = self._validate_input(data, name)
         self._create_cc_struct(data['name'], notes=data['notes'])
-        
+
         for stage in data['stages']:
             if 'parent' in stage.keys():
                 self._create_stage(stage['name'], mode=stage['mode'], parent=stage['parent'])
@@ -203,7 +203,7 @@ class CvpChangeControlBuilder:
             Sanitized version of the input
         """
         defined_stages = []
-        
+
         if 'name' not in data and name is None:
             name = "Change "
             timestamp = datetime.now()
@@ -211,17 +211,17 @@ class CvpChangeControlBuilder:
             data['name'] = name
         elif name is not None and len(name) > 0:
             data['name'] = name
-        
-        
+
+
         if 'notes' not in data:
             data['notes'] = None
-            
+
         if 'stages' not in data:
             data['stages'] = []
-        
+
         if 'activities' not in data:
             data['activities'] = []
-        
+
         # Build a list of all the user defined stages
         for stage in data['stages']:
             if 'name' in stage:
@@ -246,12 +246,12 @@ class CvpChangeControlBuilder:
         # if the key is provided, we are updating an existing CC
         if 'key' in data:
             self.__changeKey = data['key']
-        
-        return data            
-        
+
+        return data
+
     def __genID__(self):
         """
-        Generates a UUID to identify each task/action and stage, and the assignment of the 
+        Generates a UUID to identify each task/action and stage, and the assignment of the
         former to the latter. The UUID should be unique within the Change control.
 
         Parameters
@@ -272,8 +272,8 @@ class CvpChangeControlBuilder:
             else:
                 # Keep looping until we get a unique ID
                 pass
-            
-        
+
+
     def __attachThing(self, ownId, parent=None):
         """
         Assign a task/action to a stage within the Change Control
@@ -296,7 +296,7 @@ class CvpChangeControlBuilder:
             parentId = self.ChangeControl['change']['rootStageId']
         else:
             parentId = self.__stageMapping[parent]
-        
+
         # Depending on if it's a series or parallel stage, we need to populate the structure differently e.g. list of dicts vs list of strings
         if self.__stageMode[parentId] == 'parallel':
             if len(self.ChangeControl['change']['stages']['values'][parentId]['rows']['values']) == 0:
@@ -306,9 +306,9 @@ class CvpChangeControlBuilder:
 
         else:
             self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
-        
+
         return None
-            
+
 
 
     def _create_cc_struct(self, name, mode='series', notes=None):
@@ -318,14 +318,14 @@ class CvpChangeControlBuilder:
         Parameters
         ----------
         Name: Str
-            The name of the CC 
+            The name of the CC
         mode: Str: series/parallel
             For now, the mode of the root stage is always series - the API does not let a CC to be created
             with the root stage as parallel, even when it has multiple stages/tasks/actions assigned to it.
-            
+
             The GUI allows the root stage to be changed to parallel, but only after it's created.
-            
-            Our workaround is to always have a "hidden" root stage, always series, and we assign the 
+
+            Our workaround is to always have a "hidden" root stage, always series, and we assign the
             defined root/Stage 0 to that - the child stages can be series or parallel on creation.
         notes: Str
             Any notes to be added to the CC, default is "Created by Ansible-CVP".
@@ -346,21 +346,21 @@ class CvpChangeControlBuilder:
         change['stages']['values'] = {}
         change['rootStageId'] = self.__genID__()
         self.__stageMapping[name] = change['rootStageId']
-        
+
         change['stages']['values'][change['rootStageId']] = {}
         change['stages']['values'][change['rootStageId']]['name'] = " ".join([name, "root stage"])
         change['stages']['values'][change['rootStageId']]['rows'] = {}
         change['stages']['values'][change['rootStageId']]['rows']['values'] = []
-        
+
         # We could in theory have a collision here, as the key is basically the Change Control ID
         # and since we don't know all the CC IDs, there is a non-0 possibility of this occurring
         changeControl['key'] = {'id': str(self.__genID__())}
         changeControl['change'] = change
-        
+
         self.__stageMode[change['rootStageId']] = mode
-       
+
         self.ChangeControl = changeControl
-        
+
         return None
 
 
@@ -392,13 +392,13 @@ class CvpChangeControlBuilder:
         stage['name'] = name
         stage['rows'] = {}
         stage['rows']['values'] = []
-        
+
         self.ChangeControl['change']['stages']['values'][stageId] = stage
-        
+
         return None
-        
- 
-        
+
+
+
     def _create_task(self, name, taskID, stage=None, timeout=3000):
         """
         Create a task within the Change Control
@@ -407,7 +407,7 @@ class CvpChangeControlBuilder:
         ----------
         name: Str
             The name of the task - by default this is "task"
-        taskID: Str 
+        taskID: Str
             The task/workorderID of the task to be executed
         stage: Str
             The name of the stage that this task is to be assigned to
@@ -427,13 +427,13 @@ class CvpChangeControlBuilder:
         task['action']['args']['values']['TaskID'] = taskID
         task['action']['timeout'] = timeout
         task['name'] = name
-        
+
         cardID = self.__genID__()
         self.ChangeControl['change']['stages']['values'][cardID] = task
         self.__attachThing(cardID, stage)
-        
+
         return None
-        
+
 
     def _create_action(self, name, action, stage, deviceID):
         """
@@ -443,7 +443,7 @@ class CvpChangeControlBuilder:
         ----------
         name: Str
             The name of the action - by default this is "task"
-        taskID: Str 
+        taskID: Str
             The task/workorderID of the task to be executed
         stage: Str
             The name of the stage that this task is to be assigned to
@@ -455,7 +455,7 @@ class CvpChangeControlBuilder:
         None:
             The Class ChangeControl is updated to include the new task
         """
-        
+
         task = {}
         task['action'] = {}
         task['action']['name'] = action
@@ -463,11 +463,11 @@ class CvpChangeControlBuilder:
         task['action']['args']['values'] = {}
         task['action']['args']['values']['DeviceID'] = deviceID
         task['name'] = name
-        
+
         cardID = self.__genID__()
         self.ChangeControl['change']['stages']['values'][cardID] = task
         self.__attachThing(cardID, stage)
-        
+
         return None
 
 
@@ -486,7 +486,7 @@ class CvChangeControlTools():
         self.__cc_index = []
         self.cvp_version = self.__cv_client.api.get_cvp_info()['version']
         self.apiversion = self.__cv_client.apiversion
-        
+
     def __index_cc__(self):
         """
         Index the known Change Controls, creating an internal list of tuples
@@ -494,22 +494,22 @@ class CvChangeControlTools():
 
         Parameters
         ----------
-        None: 
+        None:
             Provided data structure defining the Change
-            
+
         Returns
         -------
-        None: 
-            
+        None:
+
         """
         MODULE_LOGGER.debug('Indexing Change Controls')
         self.__cc_index.clear()
-        
+
         for entry in self.change_controls['data']:
             self.__cc_index.append((entry['result']['value']['change']['name'], entry['result']['value']['key']['id']))
 
         return None
-            
+
     def _find_id_by_name(self, name):
         """
         Find the ID of a change control, by name
@@ -528,10 +528,10 @@ class CvChangeControlTools():
         cc_id = list(filter(lambda x: name in x, self.__cc_index))
         MODULE_LOGGER.debug('%d changes found', len(cc_id))
         return cc_id
-    
-     
-            
-        
+
+
+
+
     def get_all_change_controls(self):
         """
         Get all change controls on CVP
@@ -547,11 +547,11 @@ class CvChangeControlTools():
         """
         cc_list = []
         MODULE_LOGGER.debug('Collecting Change controls')
-        
+
         if self.apiversion < 3.0:
             MODULE_LOGGER.debug('Trying legacy API call')
             cc_list = self.__cv_client.api.get_change_controls()
-        
+
         else:
             # Rewrite on cvprac > 1.0.7
             MODULE_LOGGER.debug('Using resource API call')
@@ -564,7 +564,7 @@ class CvChangeControlTools():
 
         return None
 
-    
+
     def get_change_control(self, cc_id):
         """
         Get a specific change control
@@ -588,21 +588,21 @@ class CvChangeControlTools():
             params = 'key.id={}'.format(cc_id)
             cc_url = '/api/resources/changecontrol/v1/ChangeControl?' + params
             change = self.__cv_client.get(cc_url)
-            
+
         return change
-    
-        
-    
-    
+
+
+
+
     def module_action(self, change: dict, name: str = None, state: str = "get", change_id: List[str] = None):
-        
+
         changed = False
         data = dict()
         warnings = list()
-        
+
         MODULE_LOGGER.debug('Collecting all change controls')
         self.get_all_change_controls()
-        
+
         if state == "get":
 
             if name is None and change_id is None:
@@ -622,8 +622,8 @@ class CvChangeControlTools():
 
                 return changed, {'change_controls:': cc_list}, warnings
 
-            
-            
+
+
         elif state == "remove":
             MODULE_LOGGER.debug("Deleting change control")
             if change_id is not None:
@@ -638,9 +638,9 @@ class CvChangeControlTools():
                         warnings.append('No changes made in delete request')
                 except Exception as e:
                     self.__ansible.fail_json(msg="{0}".format(e))
-                    
+
                 return changed, {'remove': changes}, warnings
-            
+
             elif name is not None:
                 cc_list = self._find_id_by_name(name)
                 if len(cc_list) == 0:
@@ -664,18 +664,18 @@ class CvChangeControlTools():
             else:
                 e = "Unable to delete change control. Change name or change_id(s) must be specified"
                 self.__ansible.fail_json(msg="{0}".format(e))
-                    
+
         elif state == "set":
             changeControl = CvpChangeControlBuilder()
             changeControl.add_known_uuid([v[1] for v in self.__cc_index])
             cc_structure = changeControl.build_cc(change, name)
-            
+
             try:
                 data = self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
                 changed = True
-                
+
             except Exception as e:
-                self.__ansible.fail_json(msg="{0}".format(e))            
-            
-        
+                self.__ansible.fail_json(msg="{0}".format(e))
+
+
         return changed, data, warnings
