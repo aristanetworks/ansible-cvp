@@ -149,6 +149,7 @@ def main():
         name=dict(type='str'),
         change=dict(type="dict"),
         state=dict(default='get', type='str', choices=['get', 'set', 'remove']),
+        change_id=dict(type='list')
     )
 
     ansible_module = AnsibleModule(

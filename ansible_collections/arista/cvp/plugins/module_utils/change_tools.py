@@ -83,7 +83,7 @@ class CvpChangeControlBuilder:
                A list of tasks or actions to be executed. Each entry is a dict consisting of;
                     action (if performing a Change Control action): str
                         The name of the Change Control Action e.g. what you select from the drop down menu in the GUI
-                    task_id: int
+                    task_id: str
                         The Task / Work Order Id for the task to be executed
                     timeout: int
                         The timeout value to be used for task completion 
@@ -109,7 +109,7 @@ class CvpChangeControlBuilder:
           - name: TestCC123
             notes: Test change 
             activities:
-              - task_id: 1234
+              - task_id: "1234"
                 name: "task"
                 timeout: 12000
                 stage: Stage2
