@@ -605,16 +605,21 @@ class CvChangeControlTools():
         
         if state == "get":
 
-            if name is None:
+            if name is None and change_id is None:
                 return changed, {'change_controls': self.change_controls}, warnings
             else:
                 cc_list = []
-                cc_id_list = self._find_id_by_name(name)
-                for change in cc_id_list:
-                    MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]) )
-                    cc_list.append(self.get_change_control(change[1]) )
+                if change_id is not None:
+                    for change in change_id:
+                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]) )
+                        cc_list.append(self.get_change_control(change[1]) )
 
-                # Revisit this - should be the full CC I guess
+                else:
+                    cc_id_list = self._find_id_by_name(name)
+                    for change in cc_id_list:
+                        MODULE_LOGGER.debug('Looking up change: %s with ID: %s' % (change[0],change[1]) )
+                        cc_list.append(self.get_change_control(change[1]) )
+
                 return changed, {'change_controls:': cc_list  }, warnings
 
             
