@@ -446,9 +446,9 @@ class CvpChangeControlBuilder:
         Parameters
         ----------
         name: Str
-            Not used - name associated with the action
+           Only used internally - name associated with the action, not really required
         action: Str
-            The name of the action - the is the internal action name 
+            The name of the action - the is the internal action name
         stage: Str
             The name of the stage that this task is to be assigned to
         deviceId: Str
