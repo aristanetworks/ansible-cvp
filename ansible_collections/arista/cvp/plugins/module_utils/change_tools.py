@@ -237,6 +237,11 @@ class CvpChangeControlBuilder:
                     task['stage'] = None
             if 'task_id' in task and 'name' not in task:
                 task['name'] = "task"
+            if 'task_id' not in task and 'name' not in task:
+                task['name'] = "action_"
+                task['name'] += task['action']
+                task['name'] += "_"
+                task['name'] += task['device']
 
         # if the key is provided, we are updating an existing CC
         if 'key' in data:
