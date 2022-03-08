@@ -1,10 +1,16 @@
-# cv\_facts
+# cv_facts
 
 Collect facts from CloudVision Portal.
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
+
+## DEPRECATED
+
+- In version: `4.0`
+- Why : Updated modules released with increased functionality
+- Alternative: All v3 modules are now independents and cv_facts is not required anymore.
 
 ## Synopsis
 
@@ -93,4 +99,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

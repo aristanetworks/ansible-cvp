@@ -34,12 +34,12 @@ theme:
     - media: "(prefers-color-scheme: light)"
       scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/weather-sunny
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       toggle:
-        icon: material/toggle-switch
+        icon: material/weather-night
         name: Switch to light mode
 
 extra_css:
@@ -103,11 +103,8 @@ nav:
     - Versions 2.x: docs/release-notes/v2.x.md
     - Versions 3.x: docs/release-notes/v3.x.md
   - Installation:
+    - Collection Installation: docs/installation/collection-installation.md
     - Requirements: docs/installation/requirements.md
-    - Configure your local environment: docs/installation/setup-environement.md
-    - Installation using git: docs/installation/setup-git.md
-    - Installation using ansible-galaxy: docs/installation/setup-galaxy.md
-    - Docker & Development: docs/installation/setup-docker.md
   - How-To:
     - CV Authentication: docs/how-to/cvp-authentication.md
     - CV Modules v1:
@@ -119,11 +116,14 @@ nav:
       - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
       - Manage containers: docs/how-to/v3/cv_container_v3.md
       - Manage devices: docs/how-to/v3/cv_device_v3.md
+      - Manage images & bundles: docs/how-to/v3/cv_image_v3.md
       - Manage tasks: docs/how-to/v3/cv_task_v3.md
-    - Development tips & tricks: docs/installation/development.md
+      - Get facts from Cloudvision: docs/how-to/v3/cv_facts_v3.md
+    - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md
+    - Ansible Execution Environment: docs/faq/containers.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
     - Cloudvision Configlet Sync: roles/configlets_sync/README.md
@@ -139,6 +139,8 @@ nav:
       - Module cv_container_v3: docs/modules/cv_container_v3.rst.md
       - Module cv_device_v3: docs/modules/cv_device_v3.rst.md
       - Module cv_task_v3: docs/modules/cv_task_v3.rst.md
+      - Module cv_facts_v3: docs/modules/cv_facts_v3.rst.md
+      - Module cv_image_v3: docs/modules/cv_image_v3.rst.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

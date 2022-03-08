@@ -1,0 +1,9 @@
+
+#<type>[optional scope]: <description>
+
+# Optional description
+
+# BREAKING CHANHE: < description >
+#
+# Types: Feat / Fix / Cut / Doc / CI / Start / Stop / Bump / Test / Make / Refactor / Reformat / Optimize / License / Revert
+# Scopes: cv_device_v3 cv_container_v3 cv_configlet_v3 cv_task_v3 module_utils dhcp_configuration mkdoc contribution how-to actions molecule ansible github requirements pytest

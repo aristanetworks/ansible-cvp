@@ -9,6 +9,14 @@ Create, Delete, or Update CloudVision Portal Configlets.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Updated modules released with increased functionality
+:Alternative: Use :ref:`arista.cvp.cv_configlet_v3 <arista.cvp.cv_configlet_v3>` instead.
+
+
 
 Synopsis
 --------
@@ -96,6 +104,19 @@ The following options may be specified for this module:
     <td>
         <div>If loose, a match is when a configlet matches a substring of a configlet defined in the filter</div>
         <div>If strict, a match is when a configlet exactly matches a configlet defined in the filter</div>
+    </td>
+    </tr>
+
+    <tr>
+    <td>options<br/><div style="font-size: small;"></div></td>
+    <td>dict</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>Implements the ability to create a sub-argument_spec, where the sub</div>
+        <div>options of the top level argument are also validated using</div>
+        <div>the attributes discussed in this section.</div>
     </td>
     </tr>
 

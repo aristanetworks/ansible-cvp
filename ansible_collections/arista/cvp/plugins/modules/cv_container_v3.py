@@ -101,19 +101,12 @@ EXAMPLES = r'''
 
 
 import logging
-import traceback
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
-from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools, ContainerInput
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv, container_tools
+from ansible_collections.arista.cvp.plugins.module_utils import tools_schema
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
-try:
-    from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
-    HAS_CVPRAC = True
-except ImportError:
-    HAS_CVPRAC = False
-    CVPRAC_IMP_ERR = traceback.format_exc()
+from ansible_collections.arista.cvp.plugins.module_utils.container_tools import CvContainerTools, ContainerInput
 
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
@@ -124,11 +117,11 @@ def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
     """
-    if HAS_CVPRAC is False:
+    if container_tools.HAS_CVPRAC is False:
         ansible_module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
 
-    if not schema.HAS_JSONSCHEMA:
+    if not tools_schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(msg="JSONSCHEMA is required. Please install using pip install jsonschema")
 
 

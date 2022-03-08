@@ -1,0 +1,24 @@
+# execution-environment.yml
+---
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: 'quay.io/ansible/ansible-runner:latest'
+
+dependencies:
+  galaxy: ../collections.yml
+  python: ../requirements.txt
+
+additional_build_steps:
+  prepend: |
+    RUN pip install --upgrade pip setuptools
+    RUN yum install -y \
+        make \
+        wget \
+        curl \
+        less \
+        git \
+        vim \
+        sshpass
+  append:
+    - RUN ansible-galaxy collection install arista.cvp

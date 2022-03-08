@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -48,7 +47,13 @@ coverage.xml
 .pytest_cache/
 report.html
 assets
-config.py
+*log.txt*
+
+# Ansible builder
+*context/
+*_build/
+Containerfile
+
 
 # Translations
 *.mo
@@ -110,3 +115,7 @@ venv.bak/
 *.tar.gz
 */collections/*
 *.old
+*.DS_Store
+*.log
+*.log.*
+ansible_collections/arista/cvp/tests/*

@@ -3,7 +3,9 @@
 # Subnet of ZTP interface
 {% for subnet in ztp.general.subnets %}
 subnet {{ subnet.network }} netmask {{ subnet.netmask }} {
+{%     if subnet.start is defined and subnet.end is defined %}
     range {{ subnet.start }} {{ subnet.end }};
+{%     endif %}
 {%     if subnet.gateway is defined %}
     option routers {{ subnet.gateway }};
 {%     endif %}

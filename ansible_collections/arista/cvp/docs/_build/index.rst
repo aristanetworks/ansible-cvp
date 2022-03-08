@@ -25,7 +25,9 @@ Arista Cloudvision Ansible Modules
    Module arista.cvp.cv_container <cv_container>
    Module arista.cvp.cv_configlet_v3 <cv_configlet_v3>
    Module arista.cvp.cv_task_v3 <cv_task_v3>
+   Module arista.cvp.cv_image_v3 <cv_image_v3>
    Module arista.cvp.cv_task <cv_task>
+   Module arista.cvp.cv_facts_v3 <cv_facts_v3>
    Module arista.cvp.cv_device_v3 <cv_device_v3>
    Module arista.cvp.cv_container_v3 <cv_container_v3>
    Module arista.cvp.cv_device <cv_device>

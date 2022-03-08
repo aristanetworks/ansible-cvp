@@ -9,6 +9,14 @@ Provision, Reset, or Update CloudVision Portal Devices.
    :local:
    :depth: 2
 
+DEPRECATED
+----------
+
+:In: version:
+:Why: Updated modules released with increased functionality
+:Alternative: Use :ref:`arista.cvp.cv_device_v3 <arista.cvp.cv_device_v3>` instead.
+
+
 
 Synopsis
 --------
@@ -84,6 +92,19 @@ The following options may be specified for this module:
     <td></td>
     <td>
         <div>Yaml dictionary to describe intended devices configuration from CVP stand point.</div>
+    </td>
+    </tr>
+
+    <tr>
+    <td>options<br/><div style="font-size: small;"></div></td>
+    <td>dict</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>Implements the ability to create a sub-argument_spec, where the sub</div>
+        <div>options of the top level argument are also validated using</div>
+        <div>the attributes discussed in this section.</div>
     </td>
     </tr>
 

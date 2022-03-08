@@ -1,10 +1,10 @@
-# cv\_task\_v3
+# cv_task_v3
 
 Execute or Cancel CVP Tasks.
 
 Module added in version 3.0.0
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
 
@@ -66,4 +66,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

@@ -1,10 +1,10 @@
-# cv\_device\_v3
+# cv_device_v3
 
 Manage Provisioning topology.
 
 Module added in version 3.0.0
 
-<div class="contents" data-local="" data-depth="2">
+<div class="contents" local="" depth="2">
 
 </div>
 
@@ -67,7 +67,7 @@ The following options may be specified for this module:
 <td>str</td>
 <td>no</td>
 <td>present</td>
-<td><ul><li>present</li><li>absent</li></ul></td>
+<td><ul><li>present</li><li>factory_reset</li></ul></td>
 <td>
     <div>Set if ansible should build or remove devices on CLoudvision</div>
 </td>
@@ -79,7 +79,6 @@ The following options may be specified for this module:
 ## Examples:
 
     # task in loose mode using fqdn (default)
-    ---
     - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
@@ -100,7 +99,6 @@ The following options may be specified for this module:
             search_key: fqdn
 
     # task in loose mode using serial
-    ---
     - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
@@ -121,7 +119,6 @@ The following options may be specified for this module:
             search_key: serialNumber
 
     # task in strict mode
-    ---
     - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
@@ -143,4 +140,4 @@ The following options may be specified for this module:
 
 ### Author
 
-  - EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

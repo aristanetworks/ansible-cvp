@@ -7,31 +7,25 @@
 
 ## Arista Cloudvision
 
-[Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance must be supported by [Cloudvision ansible collection](https://cvp.avd.sh/)
+!!! info
+    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
+
+| ansible-cvp | 1.0.0 | 1.1.0 | 2.0.0 & higher |
+| ----------- | ----- | ----- | -------------- |
+| 2018.2 | ✅ | ✅ | ✅ |
+| 2019.x | ✅ | ✅ | ✅ |
+| 2020.1 | | ✅ | ✅ |
+| >= 2020.2 | | | ✅ |
 
 ## Python
 
-- Python __3.6.8__ or later
+- Python __3.8__ or later
 
 ## Supported Ansible Versions
 
-- ansible __2.9.2__ or later
+- ansible-core from __2.11.3__ to __2.12.x__
 
 ## Additional Python Libraries required
-
-- [Jinja2](https://pypi.org/project/Jinja2/)
-- [netaddr](https://pypi.org/project/netaddr/)
-- [requests](https://pypi.org/project/requests/)
-- [cvprac](https://github.com/aristanetworks/cvprac)
-- [json-schema](https://github.com/Julian/jsonschema)
-
-### Python requirements installation
-
-In a shell, run following command:
-
-```shell
-$ pip3 install -r ansible_collections/arista/cvp/requirements.txt
-```
 
 ```pip
 --8<--
@@ -39,18 +33,20 @@ requirements.txt
 --8<--
 ```
 
-> Depending of your operating system settings, `pip3` might be replaced by `pip`.
+### Python requirements installation
 
-## Ansible runner requirements
-
-A optional docker container is available with all the requirements already installed. To use this container, Docker must be installed on your ansible runner.
-
-To install Docker on your system, you can refer to the following page: [Docker installation step by step](https://docs.docker.com/engine/installation/)
-
-Or if you prefer you can run this oneLiner installation script:
+In a shell, run the following commands after installing the collection from ansible-galaxy:
 
 ```shell
-$ curl -fsSL get.docker.com | sh
+export ARISTA_CVP_DIR=$(ansible-galaxy collection list arista.cvp --format yaml | head -1 | cut -d: -f1)
+pip3 install -r ${ARISTA_CVP_DIR}/arista/avd/requirements.txt
 ```
 
-In addition, docker-compose should be considered to run a stack of containers: https://docs.docker.com/compose/install/
+If the collection is cloned from GitHub, the requirements file can be referenced directly:
+
+```shell
+pip3 install -r ansible-avd/ansible_collections/arista/cvp/requirements.txt
+```
+
+!!! warning
+    Depending of your operating system settings, `pip3` might be replaced by `pip`.

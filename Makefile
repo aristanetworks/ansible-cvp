@@ -48,7 +48,7 @@ sanity-info: ## Show information about ansible-test
 .PHONY: sanity-lint
 sanity-lint: ## Run ansible-test sanity for code sanity
 	cd ansible_collections/arista/cvp/ ; \
-	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --skip-test yamllint --python $(ANSIBLE_TEST_PYTHON) ; \
+	ansible-test sanity -v --requirements --$(ANSIBLE_TEST_MODE) --skip-test yamllint --python $(ANSIBLE_TEST_PYTHON); \
 	rm -rf tests/output/
 
 .PHONY: sanity-import
@@ -92,12 +92,12 @@ build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-communi
 webdoc: ## Build documentation to publish static content
 	( cd $(WEBDOC_BUILD) ; \
 	python ansible2rst.py ; \
-	find . -name 'cv_*.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
+	find . -name 'cv_*_v3.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
 
 .PHONY: check-cvp-404
 check-cvp-404: ## Check local 404 links for AVD documentation
-	docker run --rm --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8000 -e ".*fonts.googleapis.com.*" -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=${MUFFET_TIMEOUT}
+	docker run --rm --network container:webdoc_cvp raviqqe/muffet:1.5.7 http://127.0.0.1:8001 -e ".*fonts.googleapis.com.*" -e ".*fonts.gstatic.com.*" -e ".*edit.*" -f --limit-redirections=3 --timeout=${MUFFET_TIMEOUT}
 
 #########################################
 # Misc Actions 							#

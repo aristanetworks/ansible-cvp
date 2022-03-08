@@ -28,6 +28,11 @@ module: cv_facts
 version_added: "1.0.0"
 author: EMEA AS Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
+deprecated:
+  removed_in: '4.0.0'
+  why: Features are now part of every single v3 modules.
+  alternative: Currently no alternative.
+  removed_from_collection: arista.cvp
 description:
   - Returns list of devices, configlets, containers and images
 options:
@@ -104,8 +109,8 @@ import logging
 import traceback  # noqa # pylint: disable=unused-import
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.tools_inventory as tools_inventory
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import tools_inventory
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_facts')
@@ -387,6 +392,43 @@ def facts_tasks(module, facts):
     for task in tasks:
         MODULE_LOGGER.debug('  -> Working on %s', task)
         facts['tasks'].append(task)
+    return facts
+
+
+def facts_images(module, facts):
+    """
+    Collect facts of all images.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module with parameters and instances
+    facts : dict
+        Fact dictionary where image information will be inserted.
+    debug : bool, optional
+        Activate debug logging, by default False
+
+    Returns
+    -------
+    dict
+        facts with image content added.
+    """
+
+    facts['images'] = []
+    facts['imageBundles'] = []
+    images = []
+    imageBundles = []
+
+    MODULE_LOGGER.debug('  -> Collecting images')
+    images = module.client.api.client.api.get_images()['data']
+    for image in images:
+        facts['images'].append(image)
+
+    MODULE_LOGGER.debug('  -> Collecting image bundles')
+    imageBundles = module.client.api.client.api.get_image_bundles()['data']
+    for bundle in imageBundles:
+        facts['imageBundles'].append(bundle)
+
     return facts
 
 
