@@ -25,7 +25,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_change_control_v3
-version_added: 3.3.4
+version_added: 3.4.0
 author: EMEA AS Team (@aristanetworks)
 short_description: Change Control management with Cloudvision
 description:
