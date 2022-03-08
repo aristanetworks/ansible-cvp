@@ -85,6 +85,9 @@ class CvTagTools():
         ]
         """
 
+        # XXX: REMOVE THIS!!
+        # import epdb; epdb.serve(port=8888)
+
         """
         create WS
         for each device:
@@ -130,6 +133,9 @@ class CvTagTools():
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
                     if state == 'assign':
+                        if auto_create:
+                                self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                                tag_name, tag_val)
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
@@ -159,6 +165,7 @@ class CvTagTools():
                                                         tag_name, tag_val,
                                                         remove=True)
 
+
             if 'interface_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_INTERFACE"
                 for intf_tags in per_device['interface_tags']:
@@ -170,6 +177,9 @@ class CvTagTools():
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
                         if state == 'assign':
+                            if auto_create:
+                                self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                                tag_name, tag_val)
                             self.__cv_client.api.tag_assignment_config(element_type,
                                                                        workspace_id,
                                                                        tag_name,
@@ -219,10 +229,7 @@ class CvTagTools():
         api_result.success = True
 
         ### Submit workspace
-        # XXX: call back options:
-        # Have a Flag to choose if the user wants to wait for cvp 200OK or just launch job and exit
-        # 1. timeout=2-3sec!! send status back to user to check status on cvp side
-        # 2. wait till the task is done on the CVP side, show progress bar
+        # XXX: timeout=2-3sec!! send status back to user to check status on cvp side
         request = 'REQUEST_SUBMIT'
         request_id = 's1'
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,
