@@ -44,7 +44,6 @@ MODULE_LOGGER = logging.getLogger('arista.cvp.change_tools')
 MODULE_LOGGER.info('Start change_tools module execution')
 
 
-
 class CvpChangeControlBuilder:
     """
     CvpChangeControlBuilder Class to the generation of a CVP Change control.
@@ -66,8 +65,6 @@ class CvpChangeControlBuilder:
         self.__stageMapping = {}
         # The final change control
         self.ChangeControl = {}
-
-
 
     def build_cc(self, data, name=None):
         """
@@ -164,8 +161,6 @@ class CvpChangeControlBuilder:
                 self._create_action(action['name'], action['action'], action['stage'], action['device'])
 
         return self.ChangeControl
-
-
 
     def add_known_uuid(self, existing_id):
         """
@@ -275,7 +270,6 @@ class CvpChangeControlBuilder:
                 # Keep looping until we get a unique ID
                 pass
 
-
     def __attachThing(self, ownId, parent=None):
         """
         Assign a task/action to a stage within the Change Control
@@ -294,7 +288,7 @@ class CvpChangeControlBuilder:
             The Class ChangeControl is updated to reflect the updated attachment.
         """
         # If we don't have a parent, we are attached to the Root Stage
-        if parent == None:
+        if parent is None:
             parentId = self.ChangeControl['change']['rootStageId']
         else:
             parentId = self.__stageMapping[parent]
@@ -302,7 +296,7 @@ class CvpChangeControlBuilder:
         # Depending on if it's a series or parallel stage, we need to populate the structure differently e.g. list of dicts vs list of strings
         if self.__stageMode[parentId] == 'parallel':
             if len(self.ChangeControl['change']['stages']['values'][parentId]['rows']['values']) == 0:
-                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values':[ownId]})
+                self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
             else:
                 self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'][0]['values'].append(ownId)
 
@@ -310,8 +304,6 @@ class CvpChangeControlBuilder:
             self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
 
         return None
-
-
 
     def _create_cc_struct(self, name, mode='series', notes=None):
         """
@@ -367,7 +359,6 @@ class CvpChangeControlBuilder:
 
         return None
 
-
     def _create_stage(self, name, mode='series', parent=None):
         """
         Create a stage within the Change Control
@@ -400,8 +391,6 @@ class CvpChangeControlBuilder:
         self.ChangeControl['change']['stages']['values'][stageId] = stage
 
         return None
-
-
 
     def _create_task(self, name, taskID, stage=None, timeout=3000):
         """
@@ -438,7 +427,6 @@ class CvpChangeControlBuilder:
 
         return None
 
-
     def _create_action(self, name, action, stage, deviceID):
         """
         Create a task within the Change Control
@@ -474,9 +462,6 @@ class CvpChangeControlBuilder:
         self.__attachThing(cardID, stage)
 
         return None
-
-
-
 
 
 class CvChangeControlTools():
@@ -530,15 +515,12 @@ class CvChangeControlTools():
             A list of matching change control IDs
         """
         cc_id = []
-        #cc_id = list(filter(lambda x: name in x, self.__cc_index))
+        # cc_id = list(filter(lambda x: name in x, self.__cc_index))
         for k, v in self.__cc_index:
             if name in k:
                 cc_id.append(v)
         MODULE_LOGGER.debug('%d changes found', len(cc_id))
         return cc_id
-
-
-
 
     def get_all_change_controls(self):
         """
@@ -572,7 +554,6 @@ class CvChangeControlTools():
 
         return None
 
-
     def get_change_control(self, cc_id):
         """
         Get a specific change control
@@ -599,9 +580,6 @@ class CvChangeControlTools():
 
         return change
 
-
-
-
     def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None):
 
         changed = False
@@ -612,7 +590,6 @@ class CvChangeControlTools():
         self.get_all_change_controls()
 
         if state == "show":
-
             if name is None and change_id is None:
                 return changed, {'change_controls': self.change_controls}, warnings
             else:
@@ -629,8 +606,6 @@ class CvChangeControlTools():
                         cc_list.append(self.get_change_control(change))
 
                 return changed, {'change_controls:': cc_list}, warnings
-
-
 
         elif state == "remove":
             MODULE_LOGGER.debug("Deleting change control")
@@ -680,6 +655,5 @@ class CvChangeControlTools():
 
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
-
 
         return changed, data, warnings
