@@ -153,7 +153,6 @@ class CvpChangeControlBuilder:
             else:
                 self._create_stage(stage['name'], mode=stage['mode'])
 
-
         for action in data['activities']:
             if 'task_id' in action:
                 self._create_task(action['name'], action['task_id'], action['stage'])
@@ -206,7 +205,6 @@ class CvpChangeControlBuilder:
             data['name'] = name
         elif name is not None and len(name) > 0:
             data['name'] = name
-
 
         if 'notes' not in data:
             data['notes'] = None
