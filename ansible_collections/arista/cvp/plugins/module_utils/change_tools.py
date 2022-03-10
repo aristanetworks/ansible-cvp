@@ -572,7 +572,7 @@ class CvChangeControlTools():
             change = self.__cv_client.api.get_change_control_info(cc_id)
         else:
             # Rewrite on cvprac > 1.0.7
-            params = 'key.id={}'.format(cc_id)
+            params = 'key.id={0}'.format(cc_id)
             cc_url = '/api/resources/changecontrol/v1/ChangeControl?' + params
             change = self.__cv_client.get(cc_url)
 
@@ -605,7 +605,7 @@ class CvChangeControlTools():
 
                 return changed, {'change_controls:': cc_list}, warnings
 
-        elif state == "remove":
+        elif state == "remove" and self.__check_mode == False:
             MODULE_LOGGER.debug("Deleting change control")
             if change_id is not None:
                 if name is not None:
@@ -641,7 +641,7 @@ class CvChangeControlTools():
                 e = "Unable to delete change control. Change name or change_id(s) must be specified"
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-        elif state == "set":
+        elif state == "set" and self.__check_mode == False:
             changeControl = CvpChangeControlBuilder()
             changeControl.add_known_uuid([v[1] for v in self.__cc_index])
             cc_structure = changeControl.build_cc(change, name)
