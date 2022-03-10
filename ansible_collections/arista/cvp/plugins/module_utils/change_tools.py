@@ -605,7 +605,7 @@ class CvChangeControlTools():
 
                 return changed, {'change_controls:': cc_list}, warnings
 
-        elif state == "remove" and self.__check_mode == False:
+        elif state == "remove" and self.__check_mode is False:
             MODULE_LOGGER.debug("Deleting change control")
             if change_id is not None:
                 if name is not None:
@@ -641,7 +641,7 @@ class CvChangeControlTools():
                 e = "Unable to delete change control. Change name or change_id(s) must be specified"
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-        elif state == "set" and self.__check_mode == False:
+        elif state == "set" and self.__check_mode is False:
             changeControl = CvpChangeControlBuilder()
             changeControl.add_known_uuid([v[1] for v in self.__cc_index])
             cc_structure = changeControl.build_cc(change, name)
