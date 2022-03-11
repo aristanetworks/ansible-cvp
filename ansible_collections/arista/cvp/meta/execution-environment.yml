@@ -1,5 +1,5 @@
 # execution-environment.yml
-# Referenced when this collection is part of a larger execution-environment
+# Read by ansible-builder when this collection is a dependency for an execution-environment
 ---
 version: 1
 
