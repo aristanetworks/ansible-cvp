@@ -71,6 +71,7 @@ def main():
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
+    # check for incompatible options
     if ansible_module.params['mode'] == 'delete' and ansible_module.params['state'] == 'assign':
         ansible_module.fail_json(
             msg='Error, state cannot be \'assign\' when in \'delete\' mode')

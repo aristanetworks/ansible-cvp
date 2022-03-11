@@ -83,12 +83,7 @@ class CvTagTools():
                 ]
             }
         ]
-        """
 
-        # XXX: REMOVE THIS!!
-        # import epdb; epdb.serve(port=8888)
-
-        """
         create WS
         for each device:
             if device tags: for each device tags
@@ -110,9 +105,6 @@ class CvTagTools():
         """
 
         # create workspace
-        # XXX: cannot reuse the same name every time
-        # 1. add a random number to the WS name?
-
         workspace_name_id = "AnsibleWorkspace"+''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
         workspace_id = workspace_name_id
         workspace_name = workspace_name_id
@@ -128,7 +120,6 @@ class CvTagTools():
                 for dev_tags in per_device['device_tags']:
                     tag_name = dev_tags['name']
                     tag_val = dev_tags['value']
-                    # XXX: auto-create
                     if mode == 'create':
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
@@ -151,8 +142,6 @@ class CvTagTools():
                                                                    device_id, "",
                                                                    remove=True)
                     if mode == 'delete':
-                        # XXX: what happens when you delete assigned tags?
-                        # is there a state before this mode?
                         if state == '':
                             # unassign first
                             self.__cv_client.api.tag_assignment_config(element_type,
@@ -164,7 +153,6 @@ class CvTagTools():
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val,
                                                         remove=True)
-
 
             if 'interface_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_INTERFACE"
@@ -195,7 +183,6 @@ class CvTagTools():
                                                                        interface_id,
                                                                        remove=True)
                         if mode == 'delete':
-                            # XXX: what happens when you delete assigned tags?
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val,
                                                             remove=True)
