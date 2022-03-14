@@ -30,14 +30,13 @@ class CvTagTools():
 
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None):
         self.__cv_client = cv_connection
-        self.__ansible = ansible_module
+        # self.__ansible = ansible_module
 
     def get_serial_num(self, fqdn: str):
         device_details = self.__cv_client.api.get_device_by_name(fqdn)
         if "serialNumber" in device_details.keys():
             return device_details["serialNumber"]
         return " "
-
 
     def tasker(self, tags: list, mode: string, state: string, auto_create: bool = True):
         """
@@ -105,7 +104,7 @@ class CvTagTools():
         """
 
         # create workspace
-        workspace_name_id = "AnsibleWorkspace"+''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+        workspace_name_id = "AnsibleWorkspace" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
         workspace_id = workspace_name_id
         workspace_name = workspace_name_id
         self.__cv_client.api.workspace_config(workspace_id, workspace_name)
@@ -126,7 +125,7 @@ class CvTagTools():
                     if state == 'assign':
                         if auto_create:
                                 self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                                tag_name, tag_val)
+                                                               tag_name, tag_val)
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
@@ -145,11 +144,11 @@ class CvTagTools():
                         if state == '':
                             # unassign first
                             self.__cv_client.api.tag_assignment_config(element_type,
-                                                                   workspace_id,
-                                                                   tag_name,
-                                                                   tag_val,
-                                                                   device_id, "",
-                                                                   remove=True)
+                                                                      workspace_id,
+                                                                      tag_name,
+                                                                      tag_val,
+                                                                      device_id, "",
+                                                                      remove=True)
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val,
                                                         remove=True)
@@ -187,7 +186,7 @@ class CvTagTools():
                                                             tag_name, tag_val,
                                                             remove=True)
 
-        ### Start build
+        # Start build
         request = 'REQUEST_START_BUILD'
         reques_id = 'b1'
         description = 'testing cvprac build'
@@ -196,7 +195,7 @@ class CvTagTools():
                                               description=description, request=request,
                                               request_id=reques_id)
 
-        ### Check workspace build status and proceed only after it finishes building
+        # Check workspace build status and proceed only after it finishes building
         # XXX: timeout? ansible timeout!
         b = 0
         while b == 0:
@@ -207,7 +206,7 @@ class CvTagTools():
             except CvpRequestError:
                 continue
             if request['value']['state'] == 'BUILD_STATE_SUCCESS':
-                b = b+1
+                b = b + 1
             else:
                 continue
 

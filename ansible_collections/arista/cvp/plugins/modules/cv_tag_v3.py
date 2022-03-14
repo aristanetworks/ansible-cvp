@@ -1,11 +1,43 @@
+#!/usr/bin/python
+# coding: utf-8 -*-
+#
+# GNU General Public License v3.0+
+#
+# Copyright 2019 Arista Networks AS-EMEA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # Required by Ansible and CVP
+from __future__ import absolute_import, division, print_function
+
+__metaclass__ = type
+
+DOCUMENTATION = r'''
+---
+
+'''
+
+EXAMPLES = '''
+
+'''
+
 import logging
 import traceback
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
-import ansible_collections.arista.cvp.plugins.module_utils.tools_cv as tools_cv
-import ansible_collections.arista.cvp.plugins.module_utils.schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
+from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import HAS_HASHLIB, HAS_DIFFLIB
 from ansible_collections.arista.cvp.plugins.module_utils.tag_tools import CvTagTools
 try:
@@ -45,6 +77,7 @@ def check_import(ansible_module: AnsibleModule):
 #               MAIN section -- starting point                 #
 # ------------------------------------------------------------ #
 
+
 def main():
     """
     Main entry point for module execution.
@@ -53,8 +86,8 @@ def main():
         # Topology to configure on CV side.
         tags=dict(type='list', required=True, elements='dict'),
         mode=dict(type='str',
-                   required=False,
-                   choices=['create', 'delete']),
+                 required=False,
+                 choices=['create', 'delete']),
         state=dict(type='str',
                    required=False,
                    # default='assign',
