@@ -9,7 +9,6 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 # from ansible.module_utils.connection import Connection
-
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -125,7 +124,7 @@ class CvTagTools():
                     if state == 'assign':
                         if auto_create:
                                 self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                               tag_name, tag_val)
+                                                                tag_name, tag_val)
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
@@ -144,11 +143,11 @@ class CvTagTools():
                         if state == '':
                             # unassign first
                             self.__cv_client.api.tag_assignment_config(element_type,
-                                                                      workspace_id,
-                                                                      tag_name,
-                                                                      tag_val,
-                                                                      device_id, "",
-                                                                      remove=True)
+                                                                       workspace_id,
+                                                                       tag_name,
+                                                                       tag_val,
+                                                                       device_id, "",
+                                                                       remove=True)
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val,
                                                         remove=True)
@@ -210,11 +209,11 @@ class CvTagTools():
             else:
                 continue
 
-        api_result = CvApiResult(action_name='tag_'+str(workspace_id))
+        api_result = CvApiResult(action_name='tag_' + str(workspace_id))
         api_result.changed = True
         api_result.success = True
 
-        ### Submit workspace
+        # Submit workspace
         # XXX: timeout=2-3sec!! send status back to user to check status on cvp side
         request = 'REQUEST_SUBMIT'
         request_id = 's1'

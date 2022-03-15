@@ -86,8 +86,8 @@ def main():
         # Topology to configure on CV side.
         tags=dict(type='list', required=True, elements='dict'),
         mode=dict(type='str',
-                 required=False,
-                 choices=['create', 'delete']),
+                  required=False,
+                  choices=['create', 'delete']),
         state=dict(type='str',
                    required=False,
                    # default='assign',
