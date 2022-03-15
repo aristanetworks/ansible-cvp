@@ -24,10 +24,50 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-
+module: cv_tag_v3
+version_added: "4.0.0"
+author: PM Team (@aristanetworks)
+short_description: Create/Assign/Delete/Unassign tags on CVP
+description:
+  - CloudVison Portal Tag module to Create/Assign/Delete/Unassign tags on CloudVision
+options:
+  tags:
+    description: CVP tags
+    required: True
+    type: dict
+    elements: str
+  state:
+    description: action to carry out on the tags
+                 assign - assign tags
+                 unassign - unassign tags
+    required: false
+    type: str
+    choices:
+      - assign
+      - unassign
+  mode:
+    description: mode to carry action out on the tags
+                 create - create tags
+                 delete - delete tags
+    required: false
+    type: str
+    choices:
+      - create
+      - delete
+  auto_create:
+    description: auto_create tags before assigning
+    required: false
+    type: bool
 '''
 
 EXAMPLES = '''
+---
+- name: "create tags"
+      arista.cvp.cv_tag_v3:
+        tags: "{{CVP_TAGS}}"
+        state: assign
+        mode: create
+        auto_create: true
 
 '''
 
