@@ -1,0 +1,7 @@
+make
+wget
+curl
+less
+git
+vim
+sshpass
