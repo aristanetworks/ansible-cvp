@@ -27,7 +27,7 @@ __metaclass__ = type
 class ModuleOptionValues():
     """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
-    APPLY_MODE_STRICT: str = 'stict'
+    APPLY_MODE_STRICT: str = 'strict'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
 

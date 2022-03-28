@@ -20,6 +20,13 @@ jobs:
           sed -i 's/version: 0\.0\.0/version: '"$(git describe --abbrev=0 --tags | sed 's/v//')"'/' ansible_collections/arista/cvp/galaxy.yml
           make collection-build
 
+      - name: Upload Collection Package to GH Action
+        uses: actions/upload-artifact@v2
+        with:
+          name: ansible-collection-package
+          path: |
+            ./*.tar.gz
+
       # - name: Release on Github
       #   uses: softprops/action-gh-release@v1
       #   with:
