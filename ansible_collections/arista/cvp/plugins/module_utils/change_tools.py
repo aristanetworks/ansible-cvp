@@ -26,6 +26,7 @@ import traceback
 import logging
 import random
 import string
+import uuid
 from datetime import datetime
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
@@ -57,7 +58,6 @@ class CvpChangeControlBuilder:
     """
     def __init__(self):
         # Guarantee that the generated IDs are unique, for this session
-        self.__keySize = 12
         self.__keyStore = []
         # Track if a stage is meant to be series or parallel
         self.__stageMode = {}
@@ -251,16 +251,15 @@ class CvpChangeControlBuilder:
 
         Parameters
         ----------
-        __keySize: int
-            The number of ascii_letters to include in the ID.
+        None
 
         Returns
         -------
         Str:
-            A random string, of length __keySize, guaranteed to be unique within the class instance.
+            A str of UUID4.
         """
         while True:
-            id = ''.join(random.choices(string.ascii_letters, k=self.__keySize))
+            id = str(uuid.uuid4())
             if id not in self.__keyStore:
                 self.__keyStore.append(id)
                 return(id)
