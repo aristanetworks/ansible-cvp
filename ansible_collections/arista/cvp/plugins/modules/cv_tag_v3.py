@@ -63,12 +63,11 @@ options:
 EXAMPLES = '''
 ---
 - name: "create tags"
-      arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
-        state: assign
-        mode: create
-        auto_create: true
-
+  arista.cvp.cv_tag_v3:
+    tags: "{{CVP_TAGS}}"
+    state: assign
+    mode: create
+    auto_create: true
 '''
 
 import logging
