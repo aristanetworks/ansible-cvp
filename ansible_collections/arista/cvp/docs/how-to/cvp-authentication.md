@@ -13,7 +13,7 @@ This authentication mechanism is default approach leveraged in the collection an
 # Default Ansible variables for authentication
 ansible_host: < IP address or hostname to target >
 ansible_user: < Username to connect to CVP instance >
-ansible_ssh_pass: < Password to use to connect to CVP instance >
+ansible_password: < Password to use to connect to CVP instance >
 ansible_connection: httpapi
 ansible_network_os: eos
 
