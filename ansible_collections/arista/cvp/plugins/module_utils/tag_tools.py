@@ -18,7 +18,7 @@ except ImportError:
     CVPRAC_IMP_ERR = traceback.format_exc()
 
 
-MODULE_LOGGER = logging.getLogger('arista.cvp.task_tools')
+MODULE_LOGGER = logging.getLogger('__name__')
 MODULE_LOGGER.info('Start task_tools module execution')
 
 

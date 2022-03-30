@@ -76,7 +76,7 @@ from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
-from ansible_collections.arista.cvp.plugins.module_utils import schema_v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.resources import v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import HAS_HASHLIB, HAS_DIFFLIB
 from ansible_collections.arista.cvp.plugins.module_utils.tag_tools import CvTagTools
 try:
