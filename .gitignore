@@ -53,7 +53,7 @@ assets
 *context/
 *_build/
 Containerfile
-
+Dockerfile
 
 # Translations
 *.mo
