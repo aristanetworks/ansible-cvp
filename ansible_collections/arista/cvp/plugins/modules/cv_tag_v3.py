@@ -77,7 +77,6 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 from ansible_collections.arista.cvp.plugins.module_utils import tools_schema
-from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import HAS_HASHLIB, HAS_DIFFLIB
 from ansible_collections.arista.cvp.plugins.module_utils.tag_tools import CvTagTools
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -99,14 +98,6 @@ def check_import(ansible_module: AnsibleModule):
     if HAS_CVPRAC is False:
         ansible_module.fail_json(
             msg='cvprac required for this module. Please install using pip install cvprac')
-
-    if not HAS_HASHLIB:
-        ansible_module.fail_json(
-            msg='hashlib required for this module. Please install using pip install hashlib')
-
-    if not HAS_DIFFLIB:
-        ansible_module.fail_json(
-            msg='difflib required for this module. Please install using pip install difflib')
 
     if not tools_schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(
