@@ -26,6 +26,7 @@ import logging
 import uuid
 from datetime import datetime
 from typing import List
+from copy import deepcopy
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse  # noqa # pylint: disable=unused-import
@@ -62,6 +63,7 @@ class CvpChangeControlBuilder:
         self.__stageMapping = {}
         # The final change control
         self.ChangeControl = {}
+        self._data = {}
 
     def build_cc(self, data, name=None):
         """
@@ -141,16 +143,17 @@ class CvpChangeControlBuilder:
         Dict:
             The Change control.
         """
-        data = self._validate_input(data, name)
-        self._create_cc_struct(data['name'], notes=data['notes'])
+        self._validate_input(data, name)
+        
+        self._create_cc_struct(self._data['name'], notes=self._data['notes'])
 
-        for stage in data['stages']:
+        for stage in self._data['stages']:
             if 'parent' in stage.keys():
                 self._create_stage(stage['name'], mode=stage['mode'], parent=stage['parent'])
             else:
                 self._create_stage(stage['name'], mode=stage['mode'])
 
-        for action in data['activities']:
+        for action in self._data['activities']:
             if 'task_id' in action:
                 self._create_task(action['name'], action['task_id'], action['stage'])
             else:
@@ -190,30 +193,30 @@ class CvpChangeControlBuilder:
 
         Returns
         -------
-        data: dict
-            Sanitized version of the input
-        """
+        data: None
+         """
         defined_stages = []
+        self._data = deepcopy(data)
 
-        if 'name' not in data and name is None:
+        if 'name' not in self._data and name is None:
             name = "Change "
             timestamp = datetime.now()
             name += timestamp.strftime("%Y%m%d_%H%M%S")
-            data['name'] = name
+            self._data['name'] = name
         elif name is not None and len(name) > 0:
-            data['name'] = name
+            self._data['name'] = name
 
-        if 'notes' not in data:
-            data['notes'] = None
+        if 'notes' not in self._data:
+            self._data['notes'] = None
 
-        if 'stages' not in data:
-            data['stages'] = []
+        if 'stages' not in self._data:
+            self._data['stages'] = []
 
-        if 'activities' not in data:
-            data['activities'] = []
+        if 'activities' not in self._data:
+            self._data['activities'] = []
 
         # Build a list of all the user defined stages
-        for stage in data['stages']:
+        for stage in self._data['stages']:
             if 'name' in stage:
                 defined_stages.append(stage['name'])
             if 'mode' not in stage:
@@ -221,7 +224,7 @@ class CvpChangeControlBuilder:
 
         # if a task/action is assigned to a stage that isn't created
         # assign it to the root stage
-        for task in data['activities']:
+        for task in self._data['activities']:
             if 'stage' in task:
                 if task['stage'] not in defined_stages:
                     task['stage'] = None
@@ -234,12 +237,12 @@ class CvpChangeControlBuilder:
                 task['name'] += task['device']
 
         # if the key is provided, we are updating an existing CC
-        if 'key' in data:
-            self.__changeKey = data['key']
+        if 'key' in self._data:
+            self.__changeKey = self._data['key']
         else:
             self.__changeKey = None
 
-        return data
+        return None
 
     def __genID__(self):
         """
@@ -434,7 +437,7 @@ class CvpChangeControlBuilder:
         stage: Str
             The name of the stage that this task is to be assigned to
         deviceId: Str
-            The name of the device to which the action is to be done
+            The serial number of the device to which the action is to be done
 
 
         Returns
