@@ -144,7 +144,7 @@ class CvpChangeControlBuilder:
             The Change control.
         """
         self._validate_input(data, name)
-        
+
         self._create_cc_struct(self._data['name'], notes=self._data['notes'])
 
         for stage in self._data['stages']:
