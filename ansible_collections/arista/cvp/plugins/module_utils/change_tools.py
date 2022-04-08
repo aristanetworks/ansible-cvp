@@ -662,10 +662,10 @@ class CvChangeControlTools():
                 MODULE_LOGGER.debug("Creating change control structure")
                 cc_structure = changeControl.build_cc(change, name)
                 if self.get_change_control(cc_structure['key']) is not None:
-                    MODULE_LOGGER.debug("Change ID: %s was already known. Adding to list and running again", cc_list)
+                    MODULE_LOGGER.debug("Change ID: %s was already known. Adding to list and running again", cc_structure['key'])
                     changeControl.add_known_uuid(cc_structure['key'])
                 else:
-                    MODULE_LOGGER.debug("Change ID: %s was not found, moving to next step", cc_list)
+                    MODULE_LOGGER.debug("Change ID: %s was not found, moving to next step", cc_structure['key'])
                     break
 
             try:
