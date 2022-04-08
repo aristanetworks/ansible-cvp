@@ -573,7 +573,7 @@ class CvChangeControlTools():
             try:
                 change = self.__cv_client.api.get_change_control_info(cc_id)
             except Exception:
-                MODULE_LOGGER.error('Change control with id %s not found' % cc_id)
+                MODULE_LOGGER.error('Change control with id %s not found', cc_id)
                 change = None
         else:
             # Rewrite on cvprac > 1.0.7
@@ -582,7 +582,7 @@ class CvChangeControlTools():
             try:
                 change = self.__cv_client.get(cc_url)
             except Exception:
-                MODULE_LOGGER.error('Change control with id %s not found' % cc_id)
+                MODULE_LOGGER.error('Change control with id %s not found', cc_id)
                 change = None
 
 
@@ -661,12 +661,12 @@ class CvChangeControlTools():
             while True:
                 MODULE_LOGGER.debug("Creating change control structure")
                 cc_structure = changeControl.build_cc(change, name)
-                if self.get_change_control(cc_structure['key']) is None:
-                    MODULE_LOGGER.debug("Change ID: %s was not found, moving to next step", cc_list)
-                    break
-                else:
+                if self.get_change_control(cc_structure['key']) is not None:
                     MODULE_LOGGER.debug("Change ID: %s was already known. Adding to list and running again", cc_list)
                     changeControl.add_known_uuid(cc_structure['key'])
+                else:
+                    MODULE_LOGGER.debug("Change ID: %s was not found, moving to next step", cc_list)
+                    break
 
             try:
                 MODULE_LOGGER.debug("Calling on CVP to create change")
