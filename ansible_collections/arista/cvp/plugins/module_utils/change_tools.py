@@ -585,7 +585,6 @@ class CvChangeControlTools():
                 MODULE_LOGGER.error('Change control with id %s not found', cc_id)
                 change = None
 
-
         return change
 
     def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None):
