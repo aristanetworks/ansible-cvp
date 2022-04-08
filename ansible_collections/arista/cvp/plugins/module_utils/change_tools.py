@@ -296,7 +296,6 @@ class CvpChangeControlBuilder:
                 self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
             else:
                 self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'][0]['values'].append(ownId)
-
         else:
             self.ChangeControl['change']['stages']['values'][parentId]['rows']['values'].append({'values': [ownId]})
 
@@ -493,7 +492,10 @@ class CvChangeControlTools():
         self.__cc_index.clear()
 
         for entry in self.change_controls['data']:
-            self.__cc_index.append((entry['result']['value']['change']['name'], entry['result']['value']['key']['id']))
+            if 'name' not in entry['result']['value']['change']['name']:
+                self.__cc_index.append(('Undefined', entry['result']['value']['key']['id']))
+            else:
+                self.__cc_index.append((entry['result']['value']['change']['name'], entry['result']['value']['key']['id']))
 
         return None
 
@@ -568,12 +570,21 @@ class CvChangeControlTools():
         MODULE_LOGGER.debug('Collecting change control: %s', cc_id)
         if self.apiversion < 3.0:
             MODULE_LOGGER.debug('Using legacy API call')
-            change = self.__cv_client.api.get_change_control_info(cc_id)
+            try:
+                change = self.__cv_client.api.get_change_control_info(cc_id)
+            except Exception:
+                MODULE_LOGGER.error('Change control with id %s not found' % cc_id)
+                change = None
         else:
             # Rewrite on cvprac > 1.0.7
             params = 'key.id={0}'.format(cc_id)
             cc_url = '/api/resources/changecontrol/v1/ChangeControl?' + params
-            change = self.__cv_client.get(cc_url)
+            try:
+                change = self.__cv_client.get(cc_url)
+            except Exception:
+                MODULE_LOGGER.error('Change control with id %s not found' % cc_id)
+                change = None
+
 
         return change
 
@@ -583,11 +594,10 @@ class CvChangeControlTools():
         data = dict()
         warnings = list()
 
-        MODULE_LOGGER.debug('Collecting all change controls')
-        self.get_all_change_controls()
-
         if state == "show":
             if name is None and change_id is None:
+                MODULE_LOGGER.debug('Collecting all change controls')
+                self.get_all_change_controls()
                 return changed, {'change_controls': self.change_controls}, warnings
             else:
                 cc_list = []
@@ -597,6 +607,7 @@ class CvChangeControlTools():
                         cc_list.append(self.get_change_control(change))
 
                 else:
+                    self.get_all_change_controls()
                     cc_id_list = self._find_id_by_name(name)
                     for change in cc_id_list:
                         MODULE_LOGGER.debug('Found change for search: %s with ID: %s', name, change)
@@ -619,6 +630,7 @@ class CvChangeControlTools():
                 return changed, {'remove': []}, warnings
 
             elif name is not None:
+                self.get_all_change_controls()
                 cc_list = self._find_id_by_name(name)
                 if len(cc_list) == 0:
                     warnings.append("No matching change controls found for %s" % name)
@@ -643,9 +655,21 @@ class CvChangeControlTools():
         elif state == "set" and self.__check_mode is False:
             changeControl = CvpChangeControlBuilder()
             changeControl.add_known_uuid([v[1] for v in self.__cc_index])
-            cc_structure = changeControl.build_cc(change, name)
+
+            # Check that our generated CCID is not already in use, and if it is,
+            # add the UUID to the known list, and run again
+            while True:
+                MODULE_LOGGER.debug("Creating change control structure")
+                cc_structure = changeControl.build_cc(change, name)
+                if self.get_change_control(cc_structure['key']) is None:
+                    MODULE_LOGGER.debug("Change ID: %s was not found, moving to next step", cc_list)
+                    break
+                else:
+                    MODULE_LOGGER.debug("Change ID: %s was already known. Adding to list and running again", cc_list)
+                    changeControl.add_known_uuid(cc_structure['key'])
 
             try:
+                MODULE_LOGGER.debug("Calling on CVP to create change")
                 self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
                 changed = True
                 data = cc_structure['key']
