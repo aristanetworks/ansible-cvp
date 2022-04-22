@@ -163,7 +163,7 @@ class CvpChangeControlBuilder:
             if 'task_id' in action:
                 self._create_task(action['name'], action['task_id'], action['stage'])
             else:
-                self._create_action(action['name'], action['action'], action['stage'], action['arguments'] )
+                self._create_action(action['name'], action['action'], action['stage'], action['arguments'])
 
         return self.ChangeControl
 
