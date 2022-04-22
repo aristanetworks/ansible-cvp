@@ -111,17 +111,23 @@ class CvpChangeControlBuilder:
                 stage: Stage2
               - action: "Switch Healthcheck"
                 name: "Switch1_health"
-                device: DC1-Leaf1a
+                arguments:
+                  - name: DeviceID
+                    value: <device serial number>
                 stage: Stage0
 
               - action: "Switch Healthcheck"
                 name: "Switch1_health"
-                device: switch1
+                arguments:
+                  - name: DeviceID
+                    value: <device serial number>
                 stage: Stage1b
 
               - action: "Switch Healthcheck"
                 name: "Spine 1 Health Check"
-                device: DC1-SPINE1
+                arguments:
+                  - name: DeviceID
+                    value: <device serial number>
                 stage: Stage1b
             stages:
               - name: Stage0
@@ -157,7 +163,7 @@ class CvpChangeControlBuilder:
             if 'task_id' in action:
                 self._create_task(action['name'], action['task_id'], action['stage'])
             else:
-                self._create_action(action['name'], action['action'], action['stage'], action['device'])
+                self._create_action(action['name'], action['action'], action['stage'], action['arguments'] )
 
         return self.ChangeControl
 
@@ -235,6 +241,10 @@ class CvpChangeControlBuilder:
                 task['name'] += task['action']
                 task['name'] += "_"
                 task['name'] += task['device']
+
+            # Allow for optional Custom Action arguments to be passed
+            if 'action' in task and 'arguments' not in task:
+                task['arguments'] = None
 
         # if the key is provided, we are updating an existing CC
         if 'key' in self._data:
@@ -423,7 +433,7 @@ class CvpChangeControlBuilder:
 
         return None
 
-    def _create_action(self, name, action, stage, deviceID):
+    def _create_action(self, name, action, stage, arguments=None):
         """
         Create a task within the Change Control
 
@@ -435,8 +445,10 @@ class CvpChangeControlBuilder:
             The name of the action - the is the internal action name
         stage: Str
             The name of the stage that this task is to be assigned to
-        deviceId: Str
-            The serial number of the device to which the action is to be done
+        arguments: Dict
+            Optional - pass custom arguments to the action
+            The 'DeviceID' key (serial number) is used, by convention, for actions that are applied
+            to a specific device
 
 
         Returns
@@ -450,12 +462,15 @@ class CvpChangeControlBuilder:
         task['action']['name'] = action
         task['action']['args'] = {}
         task['action']['args']['values'] = {}
-        task['action']['args']['values']['DeviceID'] = deviceID
         task['name'] = name
 
-        cardID = self.__genID__()
-        self.ChangeControl['change']['stages']['values'][cardID] = task
-        self.__attachThing(cardID, stage)
+        if arguments is not None:
+            for entry in arguments:
+                task['action']['args']['values'][entry['name']] = entry['value']
+
+        cardId = self.__genID__()
+        self.ChangeControl['change']['stages']['values'][cardId] = task
+        self.__attachThing(cardId, stage)
 
         return None
 

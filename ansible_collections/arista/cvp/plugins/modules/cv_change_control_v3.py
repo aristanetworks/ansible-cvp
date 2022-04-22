@@ -67,10 +67,13 @@ EXAMPLES = r'''
       activities:
         - action: "Switch Healthcheck"
           name: Switch1_healthcheck
-          device: DC1-Leaf1a
+          arguments:
+            - name: DeviceID
+              value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
-          device: DC1-Leaf1b
+            - name: DeviceID
+              value: <device serial number>
           stage: Pre-Checks
         - task_id: "20"
           stage: Leaf1a_upgrade
@@ -86,13 +89,11 @@ EXAMPLES = r'''
         - name: Leaf1b_upgrade
           parent: Upgrades
 
-
   tasks:
     - name: "Gather CVP change controls {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: show
       register: cv_facts
-
 
     - name: "Print out all change controls from {{inventory_hostname}}"
       debug:
