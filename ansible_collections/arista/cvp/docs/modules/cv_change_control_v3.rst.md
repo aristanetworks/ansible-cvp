@@ -85,6 +85,7 @@ The following options may be specified for this module:
               value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
+          arguments:
             - name: DeviceID
               value: <device serial number>
           stage: Pre-Checks
