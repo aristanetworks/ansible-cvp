@@ -80,11 +80,13 @@ The following options may be specified for this module:
       activities:
         - action: "Switch Healthcheck"
           name: Switch1_healthcheck
-          device: DC1-Leaf1a
+          arguments:
+            - name: DeviceID
+              value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
-          name: Switch1b_healthcheck
-          device: DC1-Leaf1b
+            - name: DeviceID
+              value: <device serial number>
           stage: Pre-Checks
         - task_id: "20"
           stage: Leaf1a_upgrade
@@ -100,67 +102,44 @@ The following options may be specified for this module:
         - name: Leaf1b_upgrade
           parent: Upgrades
 
-
   tasks:
     - name: "Gather CVP change controls {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: show
       register: cv_facts
 
-
     - name: "Print out all change controls from {{inventory_hostname}}"
       debug:
         msg: "{{cv_facts}}"
-
 
     - name: "Check CC structure"
       debug:
         msg: "{{change}}"
 
-
     - name: "Create a change control on {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
-      register: cv_change
 
-    - name: "The Change created has ID {{inventory_hostname}}"
-      debug:
-        msg: "{{ cv_change }}"
-
-    - name: "Updating Change notes"
-      ansible.utils.update_fact:
-        updates:
-          - path: change.key
-            value: "{{ cv_change.data.id }}"
-          - path: change.notes
-            value: "Change updated"
-      register: updated
-
-
-    - name: "Update the change control on {{inventory_hostname}}"
-      arista.cvp.cv_change_control_v3:
-        state: set
-        change: "{{ updated.change }}"
-      register: cv_change
-
-
-    - name: "Get the updated change control {{inventory_hostname}}"
+    - name: "Get the created change control {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: show
-        name: "{{change.name}}"
+        name: change.name
       register: cv_facts
 
     - name: "Show the created CC from {{inventory_hostname}}"
       debug:
         msg: "{{cv_facts}}"
 
-
     - name: "Delete the CC from {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
         state: remove
         name: "{{change.name}}"
       register: cv_deleted
+
+    - name: "Show deleted CCs"
+      debug:
+        msg: "{{cv_deleted}}"
 
 ### Author
 
