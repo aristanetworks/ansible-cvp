@@ -77,7 +77,7 @@ import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pyl
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 from ansible_collections.arista.cvp.plugins.module_utils import tools_schema
-from ansible_collections.arista.cvp.plugins.module_utils.tag_tools import CvTagTools
+from ansible_collections.arista.cvp.plugins.module_utils.tag_tools import CvTagTools, CvTagInput
 try:
     from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
     HAS_CVPRAC = True
@@ -133,6 +133,12 @@ def main():
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
+
+    # import epdb; epdb.serve()
+    user_tags = CvTagInput(ansible_module.params['tags'])
+    if user_tags.is_valid is False:
+      ansible_module.fail_json(
+        msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['tags']))
 
     # check for incompatible options
     if ansible_module.params['mode'] == 'delete' and ansible_module.params['state'] == 'assign':

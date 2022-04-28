@@ -1,3 +1,23 @@
+#!/usr/bin/env python
+# coding: utf-8 -*-
+#
+# GNU General Public License v3.0+
+#
+# Copyright 2019 Arista Networks AS-EMEA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
@@ -8,7 +28,8 @@ import string
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
-# from ansible.module_utils.connection import Connection
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -21,8 +42,22 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger('__name__')
 MODULE_LOGGER.info('Start task_tools module execution')
 
+class CvTagInput(object):
+    def __init__(self, tags: dict, schema=schema.SCHEMA_CV_TAG):
+        self.__tag = tags
+        self.__schema = schema
 
-class CvTagTools():
+    @property
+    def is_valid(self):
+        """
+        check_schemas Validate schemas for user's input
+        """
+        if not validate_json_schema(user_json=self.__tag, schema=self.__schema):
+            MODULE_LOGGER.error("Invalid configlet input : \n%s", str(self.__tag))
+            return False
+        return True
+
+class CvTagTools(object):
     """
     CVTagTools Class to manage CloudVision tag related tasks
     """
@@ -32,6 +67,19 @@ class CvTagTools():
         # self.__ansible = ansible_module
 
     def get_serial_num(self, fqdn: str):
+        """
+        get_serial_num Get serial number from FQDN
+
+        Parameters
+        ----------
+        fqdn: str
+            FQDN of the switch in CloudVision
+
+        Returns
+        -------
+        str
+            serial number of the switch
+        """
         device_details = self.__cv_client.api.get_device_by_name(fqdn)
         if "serialNumber" in device_details.keys():
             return device_details["serialNumber"]
@@ -40,67 +88,25 @@ class CvTagTools():
     def tasker(self, tags: list, mode: string, state: string, auto_create: bool = True):
         """
         tasker Generic entry point to manage tag related tasks
+
+        Parameters
+        ----------
+        tags: list
+            List of tags to create/assign
+        mode: string
+            create or delete mode for tags
+        state: string
+            assign or unassign state for tags
+        auto_create: bool, optional
+            auto create tags before assign, default: True
+        Returns
+        -------
+        CvAnsibleResponse
+            Data structure to pass to ansible module.
+
         """
         ansible_response = CvAnsibleResponse()
-        tag_manager = CvManagerResult(builder_name='actions_manager')
-
-        # ansible_command_timeout = connection.get_option("persistent_command_timeout")
-        # ansible_connect_timeout = connection.get_option("persistent_connect_timeout")
-
-        """
-        sample tags:
-        [
-            {
-                'device': 'leaf1',
-                'device_tags': [
-                    {'name': 'test1Tag1', 'value': 'test1Val1'},
-                    {'name': 'test1Tag2', 'value': 'test1Val2'}
-                ],
-                'interface_tags': [
-                    {
-                        'interface': 'Ethernet1',
-                        'tags': [
-                            {'name': 'test1Eth1tag1', 'value': 'test1Eth1Val1'},
-                            {'name': 'test1Eth1tag2', 'value': 'test1Eth1Val2'}
-                        ]
-                    },
-                    {
-                        'interface': 'Ethernet2',
-                        'tags': [
-                            {'name': 'test1Eth2Tag3', 'value': 'test1Eth2Val3'},
-                            {'name': 'test1Eth2Tag4', 'value': 'test1Eth2Val4'}
-                        ]
-                    }
-                ]
-            },
-            {
-                'device': 'leaf2',
-                'device_tags': [
-                    {'name': 'test1Tag3', 'value': 'test1Val3'},
-                    {'name': 'test1Tag4', 'value': 'test1Val4'}
-                ]
-            }
-        ]
-
-        create WS
-        for each device:
-            if device tags: for each device tags
-                create tag
-                assign tag to this device
-            if intf tags: for each intf
-                create tag
-                assign tag to this intf on this device
-        start WS build
-        check WS build status
-        while loop until build status == "BUILD_remove_SUCCESS"
-            exit if timeout reached
-        submit WS
-        check status again??
-        ----
-        create/delete
-        assign/unassign
-
-        """
+        tag_manager = CvManagerResult(builder_name='tags_manager')
 
         # create workspace
         workspace_name_id = "AnsibleWorkspace" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
