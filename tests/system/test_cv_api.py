@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function)
 import logging
 import pytest
-from tests.lib.config import user_token
 from tests.lib.utils import cvp_login
 from ansible_collections.arista.cvp.plugins.module_utils import api
 
@@ -33,7 +32,6 @@ def api_client():
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_get_configlets(api_client):
     r = api.get_configlets(api_client)
     assert 'data' in r
@@ -41,7 +39,6 @@ def test_get_configlets(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_get_images(api_client):
     r = api.get_images(api_client)
     assert 'data' in r
@@ -49,7 +46,6 @@ def test_get_images(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_get_containers(api_client):
     r = api.get_containers(api_client)
     assert 'data' in r
@@ -57,7 +53,6 @@ def test_get_containers(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_get_images_and_configlets(api_client):
     r = api.get_images_and_configlets(api_client)
     assert 'data' in r[0] and 'data' in r[1]
@@ -65,7 +60,6 @@ def test_get_images_and_configlets(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_get_configlets_by_name(api_client):
     r1 = api.get_configlets(api_client)
     names = []
@@ -77,7 +71,6 @@ def test_get_configlets_by_name(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_update_configlets(api_client):
     r1 = api.get_configlets(api_client)
     names = []
@@ -95,7 +88,6 @@ def test_update_configlets(api_client):
 
 @pytest.mark.api
 @pytest.mark.dependency(name='authentication')
-@pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
 def test_add_notes_to_configlets(api_client):
     r1 = api.get_configlets(api_client)
     names = []

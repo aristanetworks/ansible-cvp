@@ -15,6 +15,7 @@ from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_L
 
 MODULE_LOGGER = logging.getLogger(__name__)
 
+
 def cvp_login():
     """Login cvp devices
 
@@ -27,8 +28,8 @@ def cvp_login():
     try:
         cvp_client.connect(
             nodes=[config.server],
-            username="",
-            password="",
+            username=config.username,
+            password=config.password,
             is_cvaas=config.cvaas,
             api_token=config.user_token
         )
