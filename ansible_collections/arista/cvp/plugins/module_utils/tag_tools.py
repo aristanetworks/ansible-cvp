@@ -64,7 +64,7 @@ class CvTagTools(object):
 
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None):
         self.__cv_client = cv_connection
-        # self.__ansible = ansible_module
+        self.__ansible = ansible_module
 
     def get_serial_num(self, fqdn: str):
         """
@@ -83,7 +83,11 @@ class CvTagTools(object):
         device_details = self.__cv_client.api.get_device_by_name(fqdn)
         if "serialNumber" in device_details.keys():
             return device_details["serialNumber"]
-        return " "
+        else:
+            device_details = self.__cv_client.api.get_device_by_name(fqdn, search_by_hostname=True)
+            if "serialNumber" in device_details.keys():
+                return device_details["serialNumber"]
+        self.__ansible.fail_json(msg='Error, Device {} doesn\'t exists on CV. Check the hostname/fqdn'.format(fqdn))
 
     def tasker(self, tags: list, mode: string, state: string, auto_create: bool = True):
         """
