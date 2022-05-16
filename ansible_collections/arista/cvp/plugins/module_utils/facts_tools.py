@@ -284,7 +284,7 @@ class CvFactsTools():
         dict
             A dictionary of information with all the data from Cloudvision
         """
-        asyncio.run(self.gather(scope, regex_filter=regex_filter))
+        return asyncio.run(self.gather(scope, regex_filter=regex_filter))
 
     def __get_container_name(self, key: str = 'undefined_container'):
         """
