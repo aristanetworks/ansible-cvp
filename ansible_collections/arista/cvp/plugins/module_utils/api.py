@@ -89,8 +89,8 @@ async def call_batch(func: Callable[[int, int], dict], pagination_coeff: int = 4
     ----------
     func : Callable[[int, int], dict]
         Function to call
-    item_per_call : int, optional
-        Number of item to retrieve per concurrent API call
+    pagination_coeff : int, optional
+        Influence the number of item retrieved per concurrent API call
 
     Returns
     -------
@@ -113,9 +113,8 @@ async def call_batch(func: Callable[[int, int], dict], pagination_coeff: int = 4
         LOGGER.info('%s: Collected %s items in %ss', func.__name__, len(data), time.monotonic() - started_at)
         return {'total': total, 'data': data}
 
-    if not item_per_call:
-        # min(32, os.cpu_count() + 4) is the max_workers value of ThreadPoolExecutor in Python 3.8
-        item_per_call = int(total / min(32, os.cpu_count() + 4) * pagination_coeff)
+    # min(32, os.cpu_count() + 4) is the max_workers value of ThreadPoolExecutor in Python 3.8
+    item_per_call = int(total / min(32, os.cpu_count() + 4) * pagination_coeff)
 
     LOGGER.info('%s: Collecting %s items, %s items per API call', func.__name__, total, item_per_call)
 
