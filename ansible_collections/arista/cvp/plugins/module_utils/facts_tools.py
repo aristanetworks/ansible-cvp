@@ -224,6 +224,36 @@ class CvFactsTools():
         self._cache = {Facts.CACHE_CONTAINERS: None, Facts.CACHE_MAPPERS: None}
         self._facts = {Facts.DEVICE: [], Facts.CONFIGLET: [], Facts.CONTAINER: []}
 
+    def _get_configlets_and_mappers(self, ids: List[str] = None, force_refresh: bool = False):
+        """
+        Implements cache for the get_configlets_and_mappers() API call.
+
+        Parameters
+        ----------
+        id : str, optional
+            _description_, by default None
+        force_refresh : bool, optional
+            _description_, by default False
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        if self._cache[Facts.CACHE_MAPPERS] is None or force_refresh:
+            MODULE_LOGGER.info('Building configlet mappers cache from Cloudvision')
+            # get_configlets_and_mappers() (at least the cvprac method) does not use pagination, not implementing any concurrent logic
+            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
+            return self._cache[Facts.CACHE_MAPPERS]
+        if ids:
+            # Check if we need to refresh the cache
+            cache_ids = [configlet[ApiFields.generic.KEY] for configlet in self._cache[Facts.CACHE_MAPPERS]['configlets']]
+            if not all(id in cache_ids for id in ids):
+                MODULE_LOGGER.info('Cache does not contain the configlets we are looking for, refreshing cache')
+                return self._get_configlets_and_mappers(force_refresh=True)
+            MODULE_LOGGER.info('Found objects with IDs %s in cache', ids)
+        return self._cache[Facts.CACHE_MAPPERS]
+
     async def gather(self, scope: List[str], regex_filter: str = '.*'):
         # Create tasks to collect data from CloudVision
         tasks = []
@@ -355,10 +385,7 @@ class CvFactsTools():
         """
         if not configletIds:
             return []
-        if self._cache[Facts.CACHE_MAPPERS] is None:
-            MODULE_LOGGER.info('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        configlets = self._cache[Facts.CACHE_MAPPERS]['configlets']
+        configlets = self._get_configlets_and_mappers(ids=configletIds)['configlets']
         return [configlet[ApiFields.generic.NAME] for configlet in configlets if configlet[ApiFields.generic.KEY] in configletIds]
 
     def __device_get_configlets(self, netid: str):
@@ -378,10 +405,7 @@ class CvFactsTools():
         List[str]
             List of configlets name
         """
-        if self._cache[Facts.CACHE_MAPPERS] is None:
-            MODULE_LOGGER.info('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        mappers = self._cache[Facts.CACHE_MAPPERS]['configletMappers']
+        mappers = self._get_configlets_and_mappers()['configletMappers']
         configletIds = [mapper[ApiFields.configlet.ID] for mapper in mappers if mapper[ApiFields.mappers.OBJECT_ID] == netid]
         MODULE_LOGGER.debug('** NetelementID is %s', str(netid))
         MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
@@ -403,10 +427,7 @@ class CvFactsTools():
         List[str]
             List of configlets name
         """
-        if self._cache[Facts.CACHE_MAPPERS] is None:
-            MODULE_LOGGER.info('Build configlet mappers cache from Cloudvision')
-            self._cache[Facts.CACHE_MAPPERS] = self.__cv_client.api.get_configlets_and_mappers()['data']
-        mappers = self._cache[Facts.CACHE_MAPPERS]['configletMappers']
+        mappers = self._get_configlets_and_mappers()['configletMappers']
         configletIds = [mapper[ApiFields.configlet.ID]
                         for mapper in mappers
                         if (mapper[ApiFields.container.ID] == container_id or mapper[ApiFields.mappers.OBJECT_ID] == container_id)
