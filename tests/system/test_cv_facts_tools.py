@@ -52,13 +52,11 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_get_container_name(self, test_container):
         result = self.inventory._CvFactsTools__get_container_name(key=test_container['container_id'])
-        logger.debug('Got response from module: {0}'.format(result))
         if test_container['is_present_expected']:
             assert result == test_container['name_expected']
         else:
             assert result is None
         logger.info('Got correct response from module')
-        logger.debug('Got response from module: {0}'.format(result))
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
@@ -75,7 +73,6 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_containers(self):
         result = self.inventory.facts(scope=['containers'])
-        logger.debug('Got response from module: {0}'.format(result))
         assert Facts.CONTAINER in result
         assert validate_cv_inputs(user_json=result[Facts.CONTAINER], schema=SCHEMA_CV_CONTAINER)
         logger.info('output is valid against collection schema')
@@ -105,7 +102,6 @@ class TestCvContainerToolsDevices():
             assert len(result) == 0
         assert result is not None
         logger.info('Got correct response from Cloudvision')
-        logger.debug('Got response from module: {0}'.format(result))
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
@@ -136,7 +132,6 @@ class TestCvContainerToolsDevicesFacts():
         # Validate data with schema
         assert validate_cv_inputs(user_json=result[Facts.DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
@@ -162,7 +157,6 @@ class TestCvContainerToolsDevicesFilter():
 
         assert validate_cv_inputs(user_json=result[Facts.DEVICE], schema=SCHEMA_CV_DEVICE)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
 
 
 # -------------------
@@ -187,7 +181,6 @@ class TestCvContainerToolsConfiglets():
         assert 'cvp_configlets' in result
         assert validate_cv_inputs(user_json=result[Facts.CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result['cvp_configlets'].keys()))
 
 
 @pytest.mark.usefixtures("CvFactsTools_Manager")
@@ -213,7 +206,6 @@ class TestCvContainerToolsConfiglets():
 
         assert validate_cv_inputs(user_json=result[Facts.CONFIGLET], schema=SCHEMA_CV_CONFIGLET)
         logger.info('output is valid against collection schema')
-        logger.debug('Got response from module: {0}'.format(result))
 
 
 # -------------------
@@ -238,4 +230,3 @@ class TestCvContainerToolsAllFacts():
         assert Facts.CONFIGLET in result
         assert Facts.CONTAINER in result
         assert Facts.DEVICE in result
-        logger.debug('Got response from module: {0}'.format(result))
