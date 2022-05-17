@@ -454,7 +454,7 @@ class CvFactsTools():
             Facts verbosity: full get all data from CV where short get only cv_modules data, by default 'short'
         """
         try:
-            cv_devices = await api.call_batch(self.__cv_client.api.get_inventory)
+            cv_devices = self.__cv_client.api.get_inventory()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
         MODULE_LOGGER.info('Extract device data using filter %s', str(filter))
@@ -474,7 +474,7 @@ class CvFactsTools():
         __fact_containers Collect facts related to container structure
         """
         try:
-            cv_containers = await api.call_batch(self.__cv_client.api.get_containers)
+            cv_containers = self.__cv_client.api.get_containers()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
         facts_builder = CvFactResource()
