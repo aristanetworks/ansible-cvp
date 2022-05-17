@@ -97,6 +97,7 @@ async def call_batch(func: Callable[[int, int], dict], pagination_coeff: int = 4
     dict
         Aggregated results of concurrent API calls
     """
+    LOGGER.debug('%s: Collecting concurrently', func.__name__)
     started_at = time.monotonic()
     data = []
     loop = asyncio.get_running_loop()
@@ -108,7 +109,7 @@ async def call_batch(func: Callable[[int, int], dict], pagination_coeff: int = 4
         LOGGER.info('%s: Collected 1 item in %ss', func.__name__, time.monotonic() - started_at)
         return {'total': total, 'data': data}
 
-    # Some cvprac calls are broken and ignore the start and end parameters
+    # Some cvprac calls ignore the start and end parameters
     if len(data) == total:
         LOGGER.info('%s: Collected %s items in %ss', func.__name__, len(data), time.monotonic() - started_at)
         return {'total': total, 'data': data}
@@ -132,8 +133,6 @@ async def call_batch(func: Callable[[int, int], dict], pagination_coeff: int = 4
 
 def get_configlets_by_name(client, names: List[str]) -> List[dict]:
     return asyncio.run(call(client.api.get_configlet_by_name, [{'name': i} for i in names]))
-
-
 
 
 def get_configlets(client) -> dict:

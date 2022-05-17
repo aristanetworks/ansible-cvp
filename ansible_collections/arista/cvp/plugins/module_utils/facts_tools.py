@@ -222,6 +222,9 @@ class CvFactsTools():
     def __init__(self, cv_connection):
         self.__cv_client = cv_connection
         self._cache = {Facts.CACHE_CONTAINERS: None, Facts.CACHE_MAPPERS: None}
+        self.__init_facts()
+
+    def __init_facts(self):
         self._facts = {Facts.DEVICE: [], Facts.CONFIGLET: [], Facts.CONTAINER: []}
 
     def _get_configlets_and_mappers(self, ids: List[str] = None, force_refresh: bool = False):
