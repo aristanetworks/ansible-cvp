@@ -505,9 +505,4 @@ class CvFactsTools():
             if re.match(filter, configlet[ApiFields.generic.NAME]):
                 MODULE_LOGGER.debug('Adding configlet %s', str(configlet['name']))
                 facts_builder.add(configlet)
-
-        MODULE_LOGGER.debug(
-            'Final results for configlets: %s',
-            str(facts_builder.get(resource_model='configlet').keys())
-        )
         self._facts[Facts.CONFIGLET] = facts_builder.get(resource_model='configlet')
