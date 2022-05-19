@@ -39,6 +39,8 @@ ansible_connection: httpapi
 ansible_network_os: eos
 ```
 
+> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the password or the token.
+
 ## Cloudvision as a Service authentication
 
 This authentication method leverage a __user token__ to first get from your CVaaS instance. Then, instruct ansible to use token instead of username and password authentication
@@ -61,6 +63,8 @@ ansible_httpapi_host: '{{ ansible_host }}'
 ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
+
+> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the token.
 
 ## How to validate SSL certificate
 
