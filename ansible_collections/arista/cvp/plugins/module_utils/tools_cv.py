@@ -68,6 +68,12 @@ def cv_connect(module):
     ansible_connect_timeout = connection.get_option(
         "persistent_connect_timeout")
 
+    if not isinstance(user_authentication, str):
+        LOGGER.error('Cannot connect to CVP, password is encrypted')
+        raise NotImplementedError("Vault encrypted variables are not supported "
+                                  "as password yet. Use ansible vault file instead."
+                                  "https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault")
+
     if cert_validation:
         LOGGER.debug("  Module will check CV certificate")
     if user == 'cvaas':
@@ -91,8 +97,8 @@ def cv_connect(module):
                        connect_timeout=ansible_connect_timeout
                        )
     except CvpLoginError as e:
-        module.fail_json(msg=str(e))
         LOGGER.error('Cannot connect to CVP: %s', str(e))
+        module.fail_json(msg=str(e))
 
     LOGGER.info('Connected to CVP')
 
@@ -112,7 +118,7 @@ def isIterable(testing_object=None):
 
     """
     try:
-        some_object_iterator = iter(testing_object)  # noqa # pylint: disable=unused-variable
+        iter(testing_object)  # noqa
         return True
     except TypeError as te:  # noqa # pylint: disable=unused-variable
         return False
