@@ -2,7 +2,9 @@
 
 Cloudvision supports 2 different types of authentication depending on what kind of instance you are targeting:
 
-- [On-premise Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance: username and password authentication
+- [On-premise Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance:
+  - username and password authentication
+  - user token authentication
 - [Cloudvision-as-a-Service](https://www.youtube.com/embed/Sobh9XVZhcw?rel=0&wmode=transparent): User token authentication
 
 ## On-premise Cloudvision authentication
@@ -28,7 +30,7 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
 
-Alternatively __user token__ can be used just as with CVaaS.
+Alternatively __user token__ can be used just as with CVaaS. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps.
 
 ```yaml
 # Default Ansible variables for authentication
@@ -43,7 +45,7 @@ ansible_network_os: eos
 
 ## Cloudvision as a Service authentication
 
-This authentication method leverage a __user token__ to first get from your CVaaS instance. Then, instruct ansible to use token instead of username and password authentication
+This authentication method uses a __user token__ that has to be generated on the CVaaS UI. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps. Then, ansible can be instructed to use the token instead of username and password authentication method.
 
 ```yaml
 # Default Ansible variables for authentication
@@ -179,3 +181,15 @@ Add in either inventory file, group_vars or host_vars following lines:
 ansible_connect_timeout: 30
 ansible_command_timeout: 90
 ```
+
+## How to generate service account tokens
+
+Service accounts can be created from the Settings page where a service token can be generated as seen below:
+
+![serviceaccount1](../_media/serviceaccount1.png)
+![serviceaccount2](../_media/serviceaccount2.png)
+![serviceaccount3](../_media/serviceaccount3.png)
+
+> NOTE The name of the service account must match a username configured to be authorized on EOS, otherwise device interactive API calls might fail due to authorization denial.
+
+The token should be copied and saved to a file or as an environment variable that can be referred to in the host vars.
