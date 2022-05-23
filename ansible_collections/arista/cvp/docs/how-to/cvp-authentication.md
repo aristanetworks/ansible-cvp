@@ -67,7 +67,8 @@ ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
 ### Example using vault
 
 1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt onprem.token`
-2. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
+2. Refer to the token in your host_vars using `ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"` for example
+3. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
 
 ## Cloudvision as a Service authentication
 
