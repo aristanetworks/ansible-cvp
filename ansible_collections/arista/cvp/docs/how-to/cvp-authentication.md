@@ -35,13 +35,39 @@ Alternatively __user token__ can be used just as with CVaaS. See [How to generat
 ```yaml
 # Default Ansible variables for authentication
 ansible_host: < IP address or hostname to target >
-ansible_user: svc_account # Set this username to user api_token in cvprac
+# The username "svc_account" will change authentication process to use "api_token" towards CVP.
+# The username does not need to match anything defined on CVP, since the token
+# contains all the required information.
+ansible_user: svc_account
 ansible_password: < User token to use to connect to CVP instance >
 ansible_connection: httpapi
 ansible_network_os: eos
 ```
 
+### Example reading from a file
+
+```yaml
+ansible_user: svc_account
+ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"
+```
+
+### Example reading from an environment variable
+
+```
+export ONPREM_TOKEN=`cat /path/to/onprem.token`
+```
+
+```
+ansible_user: svc_account
+ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
+```
+
 > NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the password or the token.
+
+### Example using vault
+
+1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt onprem.token`
+2. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
 
 ## Cloudvision as a Service authentication
 
@@ -66,7 +92,28 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
 
+### Example reading from a file
+
+```yaml
+ansible_user: cvaas
+ansible_password: "{{ lookup('file', '/path/to/cvaas.token')}}"
+```
+
+### Example reading from an environment variable
+
+export CVAAS_TOKEN=`cat /path/to/cvaas.token`
+
+```yaml
+ansible_user: cvaas
+ansible_password: "{{ lookup('env', 'CVAAS_TOKEN')}}"
+```
+
 > NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the token.
+
+### Example using vault
+
+1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt cvaas.token`
+2. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
 
 ## How to validate SSL certificate
 
