@@ -66,9 +66,43 @@ ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
 
 ### Example using vault
 
-1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt onprem.token`
-2. Refer to the token in your host_vars using `ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"` for example
-3. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
+This example is based on the inventory below:
+
+```yaml
+---
+all:
+  children:
+    CVP_group:
+      hosts:
+        CloudVision:
+          ansible_httpapi_host: 192.0.2.79
+          ansible_host: 192.0.2.79
+          ansible_user: svc_account
+          ansible_password: "{{vault_token}}"
+          ansible_connection: httpapi
+          ansible_httpapi_use_ssl: True
+          ansible_httpapi_validate_certs: False
+          ansible_network_os: eos
+          ansible_httpapi_port: 443
+          ansible_python_interpreter: $(which python3)
+```
+
+1. Create a subdirectory for your CVP group in `group_vars` folder: `mkdir -p ./group_vars/CVP_group/`
+
+2. Save the token generated from the CV/CVaaS UI into a file named `vault` inside `./group_vars/CVP_group/` following the format below:
+
+  ```yaml
+  vault_token: <token>
+  ```
+
+3. Encrypt the file using `ansible-vault encrypt vault`
+
+4. Refer to the token in your host_vars or inventory file using `ansible_password: "{{ vault_token }}"`
+
+5. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass` or instead of `--ask-vault-pass`
+provide the password with any other methods as described in the [ansible vault documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html#using-encrypted-variables-and-files).
+
+> NOTE Encrypting individual variables using vault is not yet supported.
 
 ## Cloudvision as a Service authentication
 
