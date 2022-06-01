@@ -40,7 +40,7 @@ except ImportError:
 
 
 MODULE_LOGGER = logging.getLogger('__name__')
-MODULE_LOGGER.info('Start task_tools module execution')
+MODULE_LOGGER.info('Start tag_tools module execution')
 
 class CvTagInput(object):
     def __init__(self, tags: dict, schema=schema.SCHEMA_CV_TAG):
@@ -53,7 +53,7 @@ class CvTagInput(object):
         check_schemas Validate schemas for user's input
         """
         if not validate_json_schema(user_json=self.__tag, schema=self.__schema):
-            MODULE_LOGGER.error("Invalid configlet input : \n%s", str(self.__tag))
+            MODULE_LOGGER.error("Invalid tags input : \n%s", str(self.__tag))
             return False
         return True
 
@@ -127,7 +127,7 @@ class CvTagTools(object):
                 element_type = "ELEMENT_TYPE_DEVICE"
                 for dev_tags in per_device['device_tags']:
                     tag_name = dev_tags['name']
-                    tag_val = dev_tags['value']
+                    tag_val = str(dev_tags['value'])
                     if mode == 'create':
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
@@ -168,7 +168,7 @@ class CvTagTools(object):
                     interface_id = intf_tags['interface']
                     for tag in intf_tags['tags']:
                         tag_name = tag['name']
-                        tag_val = tag['value']
+                        tag_val = str(tag['value'])
                         if mode == 'create':
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)

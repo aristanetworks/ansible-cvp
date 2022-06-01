@@ -87,8 +87,8 @@ except ImportError:
 
 
 # Logger startup
-MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
-MODULE_LOGGER.info('Start cv_configlet module execution')
+MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tag_v3')
+MODULE_LOGGER.info('Start cv_tag_v3 module execution')
 
 
 def check_import(ansible_module: AnsibleModule):

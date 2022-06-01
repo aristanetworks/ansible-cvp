@@ -1,6 +1,6 @@
-# Execute / Cancel tasks on CloudVision
+# Tag management on CloudVision
 
-__cv_tag_v3__ manage tasks on CloudVision:
+__cv_tag_v3__ manage tags on CloudVision:
 
 - Create tag on CloudVision
 - Assign tag on CloudVision

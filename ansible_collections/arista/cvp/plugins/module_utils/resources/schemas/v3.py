@@ -405,9 +405,7 @@ SCHEMA_CV_TAG = {
                     }
                 ],
                 "required": [
-                    "device",
-                    "device_tags",
-                    "interface_tags"
+                    "device"
                 ],
                 "properties": {
                     "device": {
@@ -471,7 +469,7 @@ SCHEMA_CV_TAG = {
                                         },
                                         "value": {
                                             "$id": "#/items/anyOf/0/properties/device_tags/items/anyOf/0/properties/value",
-                                            "type": "string",
+                                            "type": ["string", "integer"],
                                             "title": "The value schema",
                                             "description": "An explanation about the purpose of this instance.",
                                             "default": "",
@@ -612,7 +610,7 @@ SCHEMA_CV_TAG = {
                                                             },
                                                             "value": {
                                                                 "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags/items/anyOf/0/properties/value",
-                                                                "type": "string",
+                                                                "type": ["string", "integer"],
                                                                 "title": "The value schema",
                                                                 "description": "An explanation about the purpose of this instance.",
                                                                 "default": "",
