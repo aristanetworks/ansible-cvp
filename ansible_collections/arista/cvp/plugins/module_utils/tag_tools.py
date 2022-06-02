@@ -205,7 +205,7 @@ class CvTagTools(object):
                                               request_id=reques_id)
 
         # Check workspace build status and proceed only after it finishes building
-        # XXX: timeout? ansible timeout!
+        # XXX: Handle better timeout
         b = 0
         while b == 0:
             build_id = reques_id
@@ -224,7 +224,7 @@ class CvTagTools(object):
         api_result.success = True
 
         # Submit workspace
-        # XXX: timeout=2-3sec!! send status back to user to check status on cvp side
+        # XXX: Timeout after 3s and display msg to user to check status on cvp
         request = 'REQUEST_SUBMIT'
         request_id = 's1'
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,
