@@ -198,7 +198,7 @@ class CvTagTools(object):
         # Start build
         request = 'REQUEST_START_BUILD'
         reques_id = 'b1'
-        description = 'testing cvprac build'
+        description = 'Tag management build'
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,
                                               display_name=workspace_name,
                                               description=description, request=request,
