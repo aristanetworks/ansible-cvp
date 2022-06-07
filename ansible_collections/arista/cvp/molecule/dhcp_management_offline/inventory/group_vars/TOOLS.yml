@@ -11,7 +11,8 @@ ztp:
         netmask: 255.255.0.0
         start: 172.17.255.200
         end: 172.17.255.200
-      - network: 10.255.0.0
+      - name: Remote Subnet
+        network: 10.255.0.0
         netmask: 255.255.255.0
         gateway: 10.255.0.3
         nameservers:

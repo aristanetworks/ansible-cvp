@@ -46,7 +46,8 @@ ztp:
     use_system_mac:   < true | false Configure DHCP for system-mac-address provided in show version (default false) >
   general:            < Section to define subnets parameters >
     subnets:
-      - network:      < * Subnet where DHCP will listen for request >
+      - name:         < Descriptive name, added as a comment in config file >
+        network:      < * Subnet where DHCP will listen for request >
         netmask:      < * Netmask of given subnet >
         gateway:      < Gateway to configure for given subnet >
         nameservers:  < List of name-servers to configure for given subnet >
