@@ -2,6 +2,10 @@
 # {{ ansible_managed }} - {{ inventory_hostname }}
 # Subnet of ZTP interface
 {% for subnet in ztp.general.subnets %}
+{% if subnet.name is defined %}
+
+# {{ subnet.name }}
+{% endif %}
 subnet {{ subnet.network }} netmask {{ subnet.netmask }} {
 {%     if subnet.start is defined and subnet.end is defined %}
     range {{ subnet.start }} {{ subnet.end }};
