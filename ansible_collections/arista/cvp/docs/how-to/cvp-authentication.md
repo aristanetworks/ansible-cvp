@@ -2,7 +2,9 @@
 
 Cloudvision supports 2 different types of authentication depending on what kind of instance you are targeting:
 
-- [On-premise Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance: username and password authentication
+- [On-premise Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance:
+  - username and password authentication
+  - user token authentication
 - [Cloudvision-as-a-Service](https://www.youtube.com/embed/Sobh9XVZhcw?rel=0&wmode=transparent): User token authentication
 
 ## On-premise Cloudvision authentication
@@ -13,7 +15,7 @@ This authentication mechanism is default approach leveraged in the collection an
 # Default Ansible variables for authentication
 ansible_host: < IP address or hostname to target >
 ansible_user: < Username to connect to CVP instance >
-ansible_ssh_pass: < Password to use to connect to CVP instance >
+ansible_password: < Password to use to connect to CVP instance >
 ansible_connection: httpapi
 ansible_network_os: eos
 
@@ -28,15 +30,89 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
 
+Alternatively __user token__ can be used just as with CVaaS. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps.
+
+```yaml
+# Default Ansible variables for authentication
+ansible_host: < IP address or hostname to target >
+# The username "svc_account" will change authentication process to use "api_token" towards CVP.
+# The username does not need to match anything defined on CVP, since the token
+# contains all the required information.
+ansible_user: svc_account
+ansible_password: < User token to use to connect to CVP instance >
+ansible_connection: httpapi
+ansible_network_os: eos
+```
+
+### Example reading from a file
+
+```yaml
+ansible_user: svc_account
+ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"
+```
+
+### Example reading from an environment variable
+
+```
+export ONPREM_TOKEN=`cat /path/to/onprem.token`
+```
+
+```
+ansible_user: svc_account
+ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
+```
+
+> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the password or the token.
+
+### Example using vault
+
+This example is based on the inventory below:
+
+```yaml
+---
+all:
+  children:
+    CVP_group:
+      hosts:
+        CloudVision:
+          ansible_httpapi_host: 192.0.2.79
+          ansible_host: 192.0.2.79
+          ansible_user: svc_account
+          ansible_password: "{{vault_token}}"
+          ansible_connection: httpapi
+          ansible_httpapi_use_ssl: True
+          ansible_httpapi_validate_certs: False
+          ansible_network_os: eos
+          ansible_httpapi_port: 443
+          ansible_python_interpreter: $(which python3)
+```
+
+1. Create a subdirectory for your CVP group in `group_vars` folder: `mkdir -p ./group_vars/CVP_group/`
+
+2. Save the token generated from the CV/CVaaS UI into a file named `vault` inside `./group_vars/CVP_group/` following the format below:
+
+  ```yaml
+  vault_token: <token>
+  ```
+
+3. Encrypt the file using `ansible-vault encrypt vault`
+
+4. Refer to the token in your host_vars or inventory file using `ansible_password: "{{ vault_token }}"`
+
+5. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass` or instead of `--ask-vault-pass`
+provide the password with any other methods as described in the [ansible vault documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html#using-encrypted-variables-and-files).
+
+> NOTE Encrypting individual variables using vault is not yet supported.
+
 ## Cloudvision as a Service authentication
 
-This authentication method leverage a __user token__ to first get from your CVaaS instance. Then, instruct ansible to use token instead of username and password authentication
+This authentication method uses a __user token__ that has to be generated on the CVaaS UI. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps. Then, ansible can be instructed to use the token instead of username and password authentication method.
 
 ```yaml
 # Default Ansible variables for authentication
 ansible_host: < IP address or hostname to target >
 ansible_user: cvaas # Shall not be changed. ansible will switch to cvaas mode
-ansible_ssh_pass: < User token to use to connect to CVP instance >
+ansible_password: < User token to use to connect to CVP instance >
 ansible_connection: httpapi
 ansible_network_os: eos
 
@@ -50,6 +126,29 @@ ansible_httpapi_host: '{{ ansible_host }}'
 ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
+
+### Example reading from a file
+
+```yaml
+ansible_user: cvaas
+ansible_password: "{{ lookup('file', '/path/to/cvaas.token')}}"
+```
+
+### Example reading from an environment variable
+
+export CVAAS_TOKEN=`cat /path/to/cvaas.token`
+
+```yaml
+ansible_user: cvaas
+ansible_password: "{{ lookup('env', 'CVAAS_TOKEN')}}"
+```
+
+> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the token.
+
+### Example using vault
+
+1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt cvaas.token`
+2. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
 
 ## How to validate SSL certificate
 
@@ -164,3 +263,15 @@ Add in either inventory file, group_vars or host_vars following lines:
 ansible_connect_timeout: 30
 ansible_command_timeout: 90
 ```
+
+## How to generate service account tokens
+
+Service accounts can be created from the Settings page where a service token can be generated as seen below:
+
+![serviceaccount1](../_media/serviceaccount1.png)
+![serviceaccount2](../_media/serviceaccount2.png)
+![serviceaccount3](../_media/serviceaccount3.png)
+
+> NOTE The name of the service account must match a username configured to be authorized on EOS, otherwise device interactive API calls might fail due to authorization denial.
+
+The token should be copied and saved to a file or as an environment variable that can be referred to in the host vars.
