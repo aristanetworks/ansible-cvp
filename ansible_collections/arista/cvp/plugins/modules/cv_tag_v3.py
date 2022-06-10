@@ -36,27 +36,23 @@ options:
     required: True
     type: dict
     elements: str
-  state:
-    description: action to carry out on the tags
-                 assign - assign tags
-                 unassign - unassign tags
-    required: false
-    type: str
-    choices:
-      - assign
-      - unassign
   mode:
-    description: mode to carry action out on the tags
+    description: action to carry out on the tags
                  create - create tags
                  delete - delete tags
+                 assign - assign existing tags to device
+                 unassign - unassign existing tags from device
     required: false
     type: str
     choices:
       - create
       - delete
+      - assign
+      - unassign
   auto_create:
     description: auto_create tags before assigning
     required: false
+    default: true
     type: bool
 '''
 
@@ -65,15 +61,14 @@ EXAMPLES = '''
 - name: "create tags"
   arista.cvp.cv_tag_v3:
     tags: "{{CVP_TAGS}}"
-    state: assign
     mode: create
     auto_create: true
 '''
 
 import logging
 import traceback
-from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
+from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 from ansible_collections.arista.cvp.plugins.module_utils import tools_schema
@@ -117,11 +112,7 @@ def main():
         tags=dict(type='list', required=True, elements='dict'),
         mode=dict(type='str',
                   required=False,
-                  choices=['create', 'delete']),
-        state=dict(type='str',
-                   required=False,
-                   # default='assign',
-                   choices=['assign', 'unassign']),
+                  choices=['assign', 'unassign', 'create', 'delete']),
         auto_create=dict(type='bool',
                          required=False,
                          default=True)
@@ -134,26 +125,39 @@ def main():
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
-    # import epdb; epdb.serve()
+    # import epdb; epdb.serve(port=8888)
     user_tags = CvTagInput(ansible_module.params['tags'])
     if user_tags.is_valid is False:
-      ansible_module.fail_json(
-        msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['tags']))
+        ansible_module.fail_json(
+          msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['tags']))
 
     # check for incompatible options
-    if ansible_module.params['mode'] == 'delete' and ansible_module.params['state'] == 'assign':
-        ansible_module.fail_json(
-            msg='Error, state cannot be \'assign\' when in \'delete\' mode')
-    if ansible_module.params['mode'] == 'create' and ansible_module.params['state'] == 'unassign':
-        ansible_module.fail_json(
-            msg='Error, state cannot be \'unassign\' when in \'create\' mode')
+    if ansible_module.params['mode'] == 'assign' or ansible_module.params['mode'] == 'unassign':
+        for per_device in ansible_module.params['tags']:
+            if 'device_tags' in per_device.keys() and 'device' not in per_device.keys():
+                ansible_module.fail_json(
+                  msg='Error, \'device\' needed for each \'device_tags\'' \
+                    ' when mode is \'assign\' or \'unassign\'')
+            if 'interface_tags' in per_device.keys():
+                MODULE_LOGGER.info('interface tags in keys')
+                if 'device' not in per_device.keys():
+                    ansible_module.fail_json(
+                      msg='Error, \'device\' needed for each \'interface_tags\'' \
+                        ' when mode is \'assign\' or \'unassign\'')
+                for per_intf in per_device['interface_tags']:
+                    MODULE_LOGGER.info('per_intf: %s', per_intf)
+                    MODULE_LOGGER.info('keys: %s', per_intf.keys())
+                    if 'interface' not in per_intf.keys():
+                        ansible_module.fail_json(
+                        msg='Error, \'interface\' needed for each \'interface_tags\'' \
+                          ' when mode is \'assign\' or \'unassign\'')
+
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
     tag_manager = CvTagTools(cv_connection=cv_client, ansible_module=ansible_module)
     ansible_response: CvAnsibleResponse = tag_manager.tasker(tags=ansible_module.params['tags'],
                                                              mode=ansible_module.params['mode'],
-                                                             state=ansible_module.params['state'],
                                                              auto_create=ansible_module.params['auto_create'])
 
     result = ansible_response.content

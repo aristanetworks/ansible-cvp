@@ -259,173 +259,129 @@ SCHEMA_CV_CONTAINER = {
 }
 
 SCHEMA_CV_TAG = {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$id": "http://example.com/example.json",
+    "title": "Root Schema",
     "type": "array",
-    "title": "The root schema",
-    "description": "The root schema comprises the entire JSON document.",
     "default": [],
-    "examples": [
-        [
-            {
-                "device": "leaf1",
-                "device_tags": [
-                    {
-                        "name": "tag1",
-                        "value": "value1"
-                    },
-                    {
-                        "name": "tag2",
-                        "value": "value2"
-                    }
-                ],
-                "interface_tags": [
-                    {
-                        "interface": "Ethernet1/1",
-                        "tags": [
-                            {
-                                "name": "tag1",
-                                "value": "value1"
-                            },
-                            {
-                                "name": "tag2",
-                                "value": "value2"
-                            }
-                        ]
-                    },
-                    {
-                        "interface": "Ethernet1/2",
-                        "tags": [
-                            {
-                                "name": "tag1",
-                                "value": "value1"
-                            },
-                            {
-                                "name": "tag2",
-                                "value": "value2"
-                            }
-                        ]
-                    }
+    "items": {
+        "title": "A Schema",
+        "type": "object",
+        "default": {},
+        "required": [],
+        "properties": {
+            "device": {
+                "title": "The device Schema",
+                "type": "string",
+                "default": "",
+                "examples": [
+                    "leaf1"
                 ]
             },
-            {
-                "device": "leaf2",
-                "device_tags": [
-                    {
+            "device_tags": {
+                "title": "The device_tags Schema",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "title": "A Schema",
+                    "type": "object",
+                    "required": [
+                        "name",
+                        "value"
+                    ],
+                    "properties": {
+                        "name": {
+                            "title": "The name Schema",
+                            "type": "string",
+                            "examples": [
+                                "tag1",
+                                "tag2"
+                            ]
+                        },
+                        "value": {
+                            "title": "The value Schema",
+                            "type": ["integer", "string"],
+                            "examples": [
+                                "value1",
+                                "value2"
+                            ]
+                        }
+                    },
+                    "examples": [{
                         "name": "tag1",
                         "value": "value1"
                     },
                     {
                         "name": "tag2",
                         "value": "value2"
-                    }
-                ],
-                "interface_tags": [
-                    {
-                        "interface": "Ethernet1/1",
-                        "tags": [
-                            {
-                                "name": "tag1",
-                                "value": "value1"
-                            },
-                            {
-                                "name": "tag2",
-                                "value": "value2"
-                            }
-                        ]
-                    },
-                    {
-                        "interface": "Ethernet1/2",
-                        "tags": [
-                            {
-                                "name": "tag1",
-                                "value": "value1"
-                            },
-                            {
-                                "name": "tag2",
-                                "value": "value2"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    ],
-    "additionalItems": True,
-    "items": {
-        "$id": "#/items",
-        "anyOf": [
-            {
-                "$id": "#/items/anyOf/0",
-                "type": "object",
-                "title": "The first anyOf schema",
-                "description": "An explanation about the purpose of this instance.",
-                "default": {},
+                    }]
+                },
                 "examples": [
-                    {
-                        "device": "leaf1",
-                        "device_tags": [
-                            {
-                                "name": "tag1",
-                                "value": "value1"
-                            },
-                            {
-                                "name": "tag2",
-                                "value": "value2"
-                            }
-                        ],
-                        "interface_tags": [
-                            {
-                                "interface": "Ethernet1/1",
-                                "tags": [
-                                    {
-                                        "name": "tag1",
-                                        "value": "value1"
-                                    },
-                                    {
-                                        "name": "tag2",
-                                        "value": "value2"
-                                    }
-                                ]
-                            },
-                            {
-                                "interface": "Ethernet1/2",
-                                "tags": [
-                                    {
-                                        "name": "tag1",
-                                        "value": "value1"
-                                    },
-                                    {
-                                        "name": "tag2",
-                                        "value": "value2"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ],
-                "required": [
-                    "device"
-                ],
-                "properties": {
-                    "device": {
-                        "$id": "#/items/anyOf/0/properties/device",
-                        "type": "string",
-                        "title": "The device schema",
-                        "description": "An explanation about the purpose of this instance.",
-                        "default": "",
-                        "examples": [
-                            "leaf1"
-                        ]
+                    [{
+                        "name": "tag1",
+                        "value": "value1"
                     },
-                    "device_tags": {
-                        "$id": "#/items/anyOf/0/properties/device_tags",
-                        "type": "array",
-                        "title": "The device_tags schema",
-                        "description": "An explanation about the purpose of this instance.",
-                        "default": [],
-                        "examples": [
-                            [
+                    {
+                        "name": "tag2",
+                        "value": "value2"
+                    }]
+                ]
+            },
+            "interface_tags": {
+                "title": "The interface_tags Schema",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "title": "A Schema",
+                    "type": "object",
+                    "required": [
+                        "tags"
+                    ],
+                    "properties": {
+                        "interface": {
+                            "title": "The interface Schema",
+                            "type": "string",
+                            "examples": [
+                                "Ethernet1",
+                                "Ethernet2"
+                            ]
+                        },
+                        "tags": {
+                            "title": "The tags Schema",
+                            "type": "array",
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "examples": [
+                                            "tag1",
+                                            "tag2"
+                                        ]
+                                    },
+                                    "value": {
+                                        "title": "The value Schema",
+                                        "type": ["integer", "string"],
+                                        "examples": [
+                                            "value1",
+                                            "value2"
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                },
                                 {
                                     "name": "tag1",
                                     "value": "value1"
@@ -433,206 +389,144 @@ SCHEMA_CV_TAG = {
                                 {
                                     "name": "tag2",
                                     "value": "value2"
-                                }
-                            ]
-                        ],
-                        "additionalItems": True,
-                        "items": {
-                            "$id": "#/items/anyOf/0/properties/device_tags/items",
-                            "anyOf": [
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
                                 {
-                                    "$id": "#/items/anyOf/0/properties/device_tags/items/anyOf/0",
-                                    "type": "object",
-                                    "title": "The first anyOf schema",
-                                    "description": "An explanation about the purpose of this instance.",
-                                    "default": {},
-                                    "examples": [
-                                        {
-                                            "name": "tag1",
-                                            "value": "value1"
-                                        }
-                                    ],
-                                    "required": [
-                                        "name",
-                                        "value"
-                                    ],
-                                    "properties": {
-                                        "name": {
-                                            "$id": "#/items/anyOf/0/properties/device_tags/items/anyOf/0/properties/name",
-                                            "type": "string",
-                                            "title": "The name schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "default": "",
-                                            "examples": [
-                                                "tag1"
-                                            ]
-                                        },
-                                        "value": {
-                                            "$id": "#/items/anyOf/0/properties/device_tags/items/anyOf/0/properties/value",
-                                            "type": ["string", "integer"],
-                                            "title": "The value schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "default": "",
-                                            "examples": [
-                                                "value1"
-                                            ]
-                                        }
-                                    },
-                                    "additionalProperties": True
-                                }
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }],
+                                [{
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }]
                             ]
                         }
                     },
-                    "interface_tags": {
-                        "$id": "#/items/anyOf/0/properties/interface_tags",
-                        "type": "array",
-                        "title": "The interface_tags schema",
-                        "description": "An explanation about the purpose of this instance.",
-                        "default": [],
-                        "examples": [
-                            [
-                                {
-                                    "interface": "Ethernet1/1",
-                                    "tags": [
-                                        {
-                                            "name": "tag1",
-                                            "value": "value1"
-                                        },
-                                        {
-                                            "name": "tag2",
-                                            "value": "value2"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "interface": "Ethernet1/2",
-                                    "tags": [
-                                        {
-                                            "name": "tag1",
-                                            "value": "value1"
-                                        },
-                                        {
-                                            "name": "tag2",
-                                            "value": "value2"
-                                        }
-                                    ]
-                                }
-                            ]
-                        ],
-                        "additionalItems": True,
-                        "items": {
-                            "$id": "#/items/anyOf/0/properties/interface_tags/items",
-                            "anyOf": [
-                                {
-                                    "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0",
-                                    "type": "object",
-                                    "title": "The first anyOf schema",
-                                    "description": "An explanation about the purpose of this instance.",
-                                    "default": {},
-                                    "examples": [
-                                        {
-                                            "interface": "Ethernet1/1",
-                                            "tags": [
-                                                {
-                                                    "name": "tag1",
-                                                    "value": "value1"
-                                                },
-                                                {
-                                                    "name": "tag2",
-                                                    "value": "value2"
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    "required": [
-                                        "interface",
-                                        "tags"
-                                    ],
-                                    "properties": {
-                                        "interface": {
-                                            "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/interface",
-                                            "type": "string",
-                                            "title": "The interface schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "default": "",
-                                            "examples": [
-                                                "Ethernet1/1"
-                                            ]
-                                        },
-                                        "tags": {
-                                            "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags",
-                                            "type": "array",
-                                            "title": "The tags schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "default": [],
-                                            "examples": [
-                                                [
-                                                    {
-                                                        "name": "tag1",
-                                                        "value": "value1"
-                                                    },
-                                                    {
-                                                        "name": "tag2",
-                                                        "value": "value2"
-                                                    }
-                                                ]
-                                            ],
-                                            "additionalItems": True,
-                                            "items": {
-                                                "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags/items",
-                                                "anyOf": [
-                                                    {
-                                                        "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags/items/anyOf/0",
-                                                        "type": "object",
-                                                        "title": "The first anyOf schema",
-                                                        "description": "An explanation about the purpose of this instance.",
-                                                        "default": {},
-                                                        "examples": [
-                                                            {
-                                                                "name": "tag1",
-                                                                "value": "value1"
-                                                            }
-                                                        ],
-                                                        "required": [
-                                                            "name",
-                                                            "value"
-                                                        ],
-                                                        "properties": {
-                                                            "name": {
-                                                                "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags/items/anyOf/0/properties/name",
-                                                                "type": "string",
-                                                                "title": "The name schema",
-                                                                "description": "An explanation about the purpose of this instance.",
-                                                                "default": "",
-                                                                "examples": [
-                                                                    "tag1"
-                                                                ]
-                                                            },
-                                                            "value": {
-                                                                "$id": "#/items/anyOf/0/properties/interface_tags/items/anyOf/0/properties/tags/items/anyOf/0/properties/value",
-                                                                "type": ["string", "integer"],
-                                                                "title": "The value schema",
-                                                                "description": "An explanation about the purpose of this instance.",
-                                                                "default": "",
-                                                                "examples": [
-                                                                    "value1"
-                                                                ]
-                                                            }
-                                                        },
-                                                        "additionalProperties": True
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "additionalProperties": True
-                                }
-                            ]
-                        }
-                    }
+                    "examples": [{
+                        "interface": "Ethernet1",
+                        "tags": [{
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                    },
+                    {
+                        "interface": "Ethernet2",
+                        "tags": [{
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                    }]
                 },
-                "additionalProperties": True
+                "examples": [
+                    [{
+                        "interface": "Ethernet1",
+                        "tags": [{
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                    },
+                    {
+                        "interface": "Ethernet2",
+                        "tags": [{
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                    }]
+                ]
             }
-        ]
-    }
+        },
+        "examples": [{
+            "device": "leaf1",
+            "device_tags": [{
+                "name": "tag1",
+                "value": "value1"
+            },
+            {
+                "name": "tag2",
+                "value": "value2"
+            }],
+            "interface_tags": [{
+                "interface": "Ethernet1",
+                "tags": [{
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }]
+            },
+            {
+                "interface": "Ethernet2",
+                "tags": [{
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }]
+            }]
+        }]
+    },
+    "examples": [
+        [{
+            "device": "leaf1",
+            "device_tags": [{
+                "name": "tag1",
+                "value": "value1"
+            },
+            {
+                "name": "tag2",
+                "value": "value2"
+            }],
+            "interface_tags": [{
+                "interface": "Ethernet1",
+                "tags": [{
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }]
+            },
+            {
+                "interface": "Ethernet2",
+                "tags": [{
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }]
+            }]
+        }]
+    ]
 }

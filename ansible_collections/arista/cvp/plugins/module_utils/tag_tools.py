@@ -52,6 +52,7 @@ class CvTagInput(object):
         """
         check_schemas Validate schemas for user's input
         """
+        #import epdb; epdb.serve()
         if not validate_json_schema(user_json=self.__tag, schema=self.__schema):
             MODULE_LOGGER.error("Invalid tags input : \n%s", str(self.__tag))
             return False
@@ -83,13 +84,12 @@ class CvTagTools(object):
         device_details = self.__cv_client.api.get_device_by_name(fqdn)
         if "serialNumber" in device_details.keys():
             return device_details["serialNumber"]
-        else:
-            device_details = self.__cv_client.api.get_device_by_name(fqdn, search_by_hostname=True)
-            if "serialNumber" in device_details.keys():
-                return device_details["serialNumber"]
+        device_details = self.__cv_client.api.get_device_by_name(fqdn, search_by_hostname=True)
+        if "serialNumber" in device_details.keys():
+            return device_details["serialNumber"]
         self.__ansible.fail_json(msg='Error, Device {} doesn\'t exists on CV. Check the hostname/fqdn'.format(fqdn))
 
-    def tasker(self, tags: list, mode: string, state: string, auto_create: bool = True):
+    def tasker(self, tags: list, mode: string, auto_create: bool = True):
         """
         tasker Generic entry point to manage tag related tasks
 
@@ -99,8 +99,6 @@ class CvTagTools(object):
             List of tags to create/assign
         mode: string
             create or delete mode for tags
-        state: string
-            assign or unassign state for tags
         auto_create: bool, optional
             auto create tags before assign, default: True
         Returns
@@ -120,18 +118,26 @@ class CvTagTools(object):
 
         # create tags and assign tags
         for per_device in tags:
-            device_name = per_device['device']
-            device_id = self.get_serial_num(device_name)
+            if mode in ('assign', 'unassign'):
+                device_name = per_device['device']
+                device_id = self.get_serial_num(device_name)
             tag_type = per_device.keys()
+            MODULE_LOGGER.info('tag_type = %s', tag_type)
             if 'device_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_DEVICE"
                 for dev_tags in per_device['device_tags']:
+                    MODULE_LOGGER.info('dev_tags = %s', dev_tags)
                     tag_name = dev_tags['name']
                     tag_val = str(dev_tags['value'])
                     if mode == 'create':
+                        MODULE_LOGGER.info('in create')
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
-                    if state == 'assign':
+                    if mode == 'delete':
+                        self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                        tag_name, tag_val,
+                                                        remove=True)
+                    if mode == 'assign':
                         if auto_create:
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
@@ -141,38 +147,30 @@ class CvTagTools(object):
                                                                    tag_val,
                                                                    device_id,
                                                                    "")
-                    if state == 'unassign':
-                        # unassign before deleting
+                    if mode == 'unassign':
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
                                                                    tag_val,
                                                                    device_id, "",
                                                                    remove=True)
-                    if mode == 'delete':
-                        if state == '':
-                            # unassign first
-                            self.__cv_client.api.tag_assignment_config(element_type,
-                                                                       workspace_id,
-                                                                       tag_name,
-                                                                       tag_val,
-                                                                       device_id, "",
-                                                                       remove=True)
-                        self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                        tag_name, tag_val,
-                                                        remove=True)
 
             if 'interface_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_INTERFACE"
                 for intf_tags in per_device['interface_tags']:
-                    interface_id = intf_tags['interface']
+                    if mode in ('assign', 'unassign'):
+                        interface_id = intf_tags['interface']
                     for tag in intf_tags['tags']:
                         tag_name = tag['name']
                         tag_val = str(tag['value'])
                         if mode == 'create':
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
-                        if state == 'assign':
+                        if mode == 'delete':
+                            self.__cv_client.api.tag_config(element_type, workspace_id,
+                                                            tag_name, tag_val,
+                                                            remove=True)
+                        if mode == 'assign':
                             if auto_create:
                                 self.__cv_client.api.tag_config(element_type, workspace_id,
                                                                 tag_name, tag_val)
@@ -182,7 +180,7 @@ class CvTagTools(object):
                                                                        tag_val,
                                                                        device_id,
                                                                        interface_id)
-                        if state == 'unassign':
+                        if mode == 'unassign':
                             self.__cv_client.api.tag_assignment_config(element_type,
                                                                        workspace_id,
                                                                        tag_name,
@@ -190,15 +188,12 @@ class CvTagTools(object):
                                                                        device_id,
                                                                        interface_id,
                                                                        remove=True)
-                        if mode == 'delete':
-                            self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                            tag_name, tag_val,
-                                                            remove=True)
 
         # Start build
         request = 'REQUEST_START_BUILD'
         reques_id = 'b1'
         description = 'Tag management build'
+        MODULE_LOGGER.info('starting build')
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,
                                               display_name=workspace_name,
                                               description=description, request=request,
@@ -214,10 +209,17 @@ class CvTagTools(object):
                                                                       build_id)
             except CvpRequestError:
                 continue
-            if request['value']['state'] == 'BUILD_STATE_SUCCESS':
+            build_state = request['value']['state']
+            if build_state == 'BUILD_STATE_SUCCESS':
                 b = b + 1
-            else:
-                continue
+            if build_state == 'BUILD_STATE_FAIL':
+                api_result = CvApiResult(action_name='tag_' + str(workspace_id))
+                api_result.changed = False
+                api_result.success = False
+                tag_manager.add_change(api_result)
+                ansible_response.add_manager(tag_manager)
+                return ansible_response
+            continue
 
         api_result = CvApiResult(action_name='tag_' + str(workspace_id))
         api_result.changed = True
@@ -227,6 +229,7 @@ class CvTagTools(object):
         # XXX: Timeout after 3s and display msg to user to check status on cvp
         request = 'REQUEST_SUBMIT'
         request_id = 's1'
+        MODULE_LOGGER.info('submitting build')
         self.__cv_client.api.workspace_config(workspace_id=workspace_id,
                                               display_name=workspace_name,
                                               description=description,

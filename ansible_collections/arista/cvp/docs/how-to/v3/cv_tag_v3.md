@@ -14,8 +14,7 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
 ### Input variables
 
 - list of tags
-- state (`assign` or `unassign`)
-- mode (`create` or `delete`)
+- mode (`create`, `delete`, `assign`, `unassign`)
 - auto_create (`True` or `False`). Default is `True`
 
 ### Example:
@@ -26,7 +25,6 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
       - name: create tags
         arista.cvp.cv_tag_v3:
           tags: "{{CVP_TAGS}}"
-          state: assign
           mode: create
           auto_create: true
 ```
@@ -82,7 +80,6 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
     - name: create tags
       arista.cvp.cv_tag_v3:
         tags: "{{CVP_TAGS}}"
-        state: assign
         mode: create
         auto_create: true
 ```
