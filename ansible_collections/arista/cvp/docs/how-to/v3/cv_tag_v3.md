@@ -100,7 +100,6 @@ actions_manager:
     module_args:
       auto_create: true
       mode: create
-      state: assign
       tags:
       - device: leaf1
         device_tags:
