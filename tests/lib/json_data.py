@@ -279,8 +279,8 @@ mook_data["invalid"]["device"] = [
         "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
         "configlets": [
-                "AVD_DC1-SPINE1",
-                "01TRAINING-01"
+            "AVD_DC1-SPINE1",
+            "01TRAINING-01"
         ],
         "imageBundle": []
     }]
@@ -291,16 +291,16 @@ mook_data["invalid"]["device"] = [
 #######################################
 
 mook_data["valid"]["configlet"] = [
-        {"configlet_device01": "alias sib show version"},
-        {"configlet-device01": "alias sib show version"},
-        {"configlet-device_01": CONFIGLET_CONTENT},
+    {"configlet_device01": "alias sib show version"},
+    {"configlet-device01": "alias sib show version"},
+    {"configlet-device_01": CONFIGLET_CONTENT},
 ]
 
 mook_data["invalid"]["configlet"] = [
-        {"configlet_device01": 100},
-        {"configlet_device02": True},
-        {"configlet_device02": False},
-        {"configlet-device_01": "alias sib show version", 'version': 1},
+    {"configlet_device01": 100},
+    {"configlet_device02": True},
+    {"configlet_device02": False},
+    {"configlet-device_01": "alias sib show version", 'version': 1},
 ]
 
 #######################################
@@ -397,9 +397,9 @@ CVP_DATA_CONTAINERS = {
 # CVP data used to play with Facts           #
 ##############################################
 
-mook_data['valid']['facts']= {
+mook_data['valid']['facts'] = {
     'device_ids': ['50:01:00:1e:cf:92']
 }
-mook_data['invalid']['facts']= {
+mook_data['invalid']['facts'] = {
     'device_ids': ['00:00:00:00:00:00']
 }

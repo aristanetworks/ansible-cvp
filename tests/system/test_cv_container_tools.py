@@ -194,7 +194,7 @@ class TestCvContainerTools():
         assert len(configlets) > 0
         for configlet in configlets:
             assert configlet["name"] in [
-               "cvaas-unit-test-01", "cvaas-unit-test-02", "leaf-1-unit-test"]
+                "cvaas-unit-test-01", "cvaas-unit-test-02", "leaf-1-unit-test"]
             logging.info(
                 "CVP returned {} and it is in the expected list".format(configlet["name"]))
         logging.info("All returned configlets are in expected list")

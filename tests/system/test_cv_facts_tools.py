@@ -85,6 +85,7 @@ class TestCvContainerToolsContainers():
 # -------------------
 # Test Devices
 
+
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.parametrize("test_device", FACT_DEVICE_TEST, ids=generate_test_ids_dict)
 @pytest.mark.api
@@ -109,11 +110,11 @@ class TestCvContainerToolsDevices():
         logger.info('Got correct response from Cloudvision')
         logger.debug('Got response from module: {0}'.format(result))
 
+
 @pytest.mark.usefixtures("CvFactsTools_Manager")
 @pytest.mark.api
 @pytest.mark.facts
 class TestCvContainerToolsDevicesFacts():
-
 
     @pytest.mark.dependency(name='authentication')
     @pytest.mark.skipif(user_token == 'unset_token', reason="Token is not set correctly")
@@ -181,7 +182,6 @@ class TestCvContainerToolsConfiglets():
         requests.packages.urllib3.disable_warnings()
         logger.debug(str("Class is connected to CV"))
         assert True
-
 
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_facts_configlets(self):

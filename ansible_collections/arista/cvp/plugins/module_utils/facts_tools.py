@@ -57,6 +57,7 @@ class CvFactResource():
     """
     CvFactResource Helper to render facts based on resource type
     """
+
     def __init__(self, facts_type: str = 'list'):
         if facts_type == 'list':
             self._cache = []

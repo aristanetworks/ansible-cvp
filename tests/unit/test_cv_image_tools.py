@@ -2,7 +2,8 @@
 # coding: utf-8 -*-
 
 import logging
-import os, tempfile
+import os
+import tempfile
 from pathlib import Path
 from ansible_collections.arista.cvp.plugins.module_utils.image_tools import CvImageTools
 import pytest
@@ -15,6 +16,7 @@ from tests.lib.utils import generate_test_ids_dict
 
 LOGGER = logging.getLogger(__name__)
 
+
 @pytest.fixture
 def cvp_database(request):
     database = mock.MockCVPDatabase()
@@ -26,12 +28,13 @@ def cvp_database(request):
         database.image_bundles.update(request.param.get('image_bundles', []))
     else:
         database = mock.MockCVPDatabase(
-            images = data.CV_IMAGES_PAYLOAD['images'] if 'images' in data.data.CV_IMAGES_PAYLOADS else {},
-            image_bundles = data.CV_IMAGES_PAYLOAD['image_bundles'] if 'image_bundles' in data.data.CV_IMAGES_PAYLOADS else {}
+            images=data.CV_IMAGES_PAYLOAD['images'] if 'images' in data.data.CV_IMAGES_PAYLOADS else {},
+            image_bundles=data.CV_IMAGES_PAYLOAD['image_bundles'] if 'image_bundles' in data.data.CV_IMAGES_PAYLOADS else {}
         )
     LOGGER.info('Initial CVP state: %s', database)
     yield database
     LOGGER.info('Final CVP state: %s', database)
+
 
 @pytest.fixture()
 def image_unit_tool(request, cvp_database):
@@ -50,7 +53,7 @@ def image_unit_tool(request, cvp_database):
 def test_CvImageTools__get_images(image_unit_tool, cvp_database):
     result = image_unit_tool._CvImageTools__get_images()
     LOGGER.info('__get_images response: %s', str(result))
-    if 'data' in cvp_database.images and  len(cvp_database.images['data']) > 0:
+    if 'data' in cvp_database.images and len(cvp_database.images['data']) > 0:
         LOGGER.info('Size of DB is: %s', str(len(cvp_database.images['data'])))
         assert result is True
     else:
@@ -65,7 +68,7 @@ def test_CvImageTools__get_images(image_unit_tool, cvp_database):
 def test_CvImageTools__get_image_bundles(image_unit_tool, cvp_database):
     result = image_unit_tool._CvImageTools__get_image_bundles()
     LOGGER.info('__get_image_bundles response: %s', str(result))
-    if 'data' in cvp_database.images and  len(cvp_database.image_bundles['data']) > 0:
+    if 'data' in cvp_database.images and len(cvp_database.image_bundles['data']) > 0:
         LOGGER.info('Size of DB is: %s', str(len(cvp_database.image_bundles['data'])))
         assert result is True
     else:
@@ -81,7 +84,7 @@ def test_CvImageTools_is_image_present(image_unit_tool, cvp_database):
     if 'data' not in cvp_database.images or len(cvp_database.images['data']) == 0:
         pytest.skip('Not concerned by this test as no image is in DB')
     for image in cvp_database.images['data']:
-        fake_path_file = '/fake/path/to/'+image['imageFileName']
+        fake_path_file = '/fake/path/to/' + image['imageFileName']
         is_filename_found = image_unit_tool.is_image_present(fake_path_file)
         assert is_filename_found is True
         LOGGER.info('Filename (%s) exists on CVP', str(image['imageFileName']))
@@ -99,6 +102,7 @@ def test_CvImageTools_does_bundle_exist(image_unit_tool, cvp_database):
         is_bundle_found = image_unit_tool.does_bundle_exist(bundle['name'])
         assert is_bundle_found is True
         LOGGER.info('Filename (%s) exists on CVP', str(bundle['name']))
+
 
 @pytest.mark.generic
 @pytest.mark.image
@@ -188,8 +192,8 @@ def test_CvImageTools_module_action_get_mode_unsupported(image_unit_tool, cvp_da
     try:
         image_unit_tool.module_action(mode='FAKE', image='', image_list=[], bundle_name=[])
     except mock_ansible.AnsibleFailJson as expected_error:
-            LOGGER.info('received exception: %s', str(expected_error))
-            assert 'Unsupported mode' in str(expected_error)
+        LOGGER.info('received exception: %s', str(expected_error))
+        assert 'Unsupported mode' in str(expected_error)
 
 
 @pytest.mark.generic
@@ -205,7 +209,7 @@ def test_CvImageTools_module_action_get_mode_image(image_unit_tool, cvp_database
 
     LOGGER.info('module_action response: %s', str(result_data))
 
-    if 'images' in result_data and  len(result_data['images']) > 0:
+    if 'images' in result_data and len(result_data['images']) > 0:
         LOGGER.info('Size of DB is: %s', str(len(result_data['images'])))
         assert 'images' in result_data.keys()
         assert len(result_data['images']) == len(cvp_database.image_bundles['data'])
@@ -227,7 +231,7 @@ def test_CvImageTools_module_action_get_mode_images(image_unit_tool, cvp_databas
 
     LOGGER.info('module_action response: %s', str(result_data))
 
-    if 'images' in result_data and  len(result_data['images']) > 0:
+    if 'images' in result_data and len(result_data['images']) > 0:
         LOGGER.info('Size of DB is: %s', str(len(result_data['images'])))
         assert 'images' in result_data.keys()
         assert len(result_data['images']) == len(cvp_database.image_bundles['data'])
@@ -249,7 +253,7 @@ def test_CvImageTools_module_action_get_mode_bundle(image_unit_tool, cvp_databas
 
     LOGGER.info('module_action response: %s', str(result_data))
 
-    if 'bundles' in result_data and  len(result_data['bundles']) > 0:
+    if 'bundles' in result_data and len(result_data['bundles']) > 0:
         LOGGER.info('Size of DB is: %s', str(len(result_data['bundles'])))
         assert 'bundles' in result_data.keys()
         assert len(result_data['bundles']) == len(cvp_database.image_bundles['data'])
@@ -271,13 +275,13 @@ def test_CvImageTools_module_action_get_image_in_bundle_mode_bundle(image_unit_t
         pytest.skip('Not concerned by this test as no image bundle is in DB')
     # Iterate test
     for image in cvp_database.images['data']:
-        expected_image_list = [ image for bundle in cvp_database.image_bundles['data'] if 'imageIds' in bundle.keys() for image in bundle['imageIds'] ]
+        expected_image_list = [image for bundle in cvp_database.image_bundles['data'] if 'imageIds' in bundle.keys() for image in bundle['imageIds']]
         if image['imageFileName'] not in expected_image_list:
             pytest.skip('Image (%s) is not in a bundle', str(image['imageFileName']))
 
         changed_result, result_data, result_warning = image_unit_tool.module_action(
             mode='bundles',
-            image='fake/path/to/'+image['imageFileName'],
+            image='fake/path/to/' + image['imageFileName'],
             image_list=[],
             bundle_name=[]
         )
@@ -287,8 +291,9 @@ def test_CvImageTools_module_action_get_image_in_bundle_mode_bundle(image_unit_t
         LOGGER.info('Change flag is %s', str(changed_result))
         LOGGER.info('Data sent back is %s', str(result_data))
         LOGGER.info('Warning is %s', str(result_warning))
-        assert image['imageFileName'] in [ image for bundle in result_data['bundles'] if 'imageIds' in bundle.keys() for image in bundle['imageIds'] ]
+        assert image['imageFileName'] in [image for bundle in result_data['bundles'] if 'imageIds' in bundle.keys() for image in bundle['imageIds']]
         LOGGER.info('Tested image is correctly returned by ')
+
 
 @pytest.mark.generic
 @pytest.mark.image
@@ -354,6 +359,7 @@ def test_CvImageTools_module_action_get_mode_image_action_delete_not_supported(i
         LOGGER.info('module_action warning: %s', str(result_warning))
         LOGGER.info('module_action change: %s', str(changed_result))
         assert False
+
 
 @pytest.mark.generic
 @pytest.mark.image

@@ -16,7 +16,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiRe
 from tests.lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nice_json
 from tests.lib.parametrize import generate_CvConfigletTools_content
 from tests.lib.config import user_token, provision_cv
-from tests.lib.cvaas_configlet import  SYSTEM_CONFIGLETS_TESTS
+from tests.lib.cvaas_configlet import SYSTEM_CONFIGLETS_TESTS
 from tests.lib.utils import cvp_login, generate_test_ids_dict
 from tests.lib.provisioner import CloudvisionProvisioner
 
@@ -120,7 +120,7 @@ class Test_CvConfiglet_Unit():
         diff_data = self.cv_configlet._compare(
             fromText=test_configlet['config'],
             toText=test_configlet['config_expected']
-            )
+        )
         logger.debug('Diff result is: {}'.format(diff_data))
         # Tests
         assert python_str_not_equal is diff_data[0]
@@ -162,7 +162,7 @@ class Test_CvConfiglet_Unit():
         configlet_key = self.cv_configlet.get_configlet_data_cv(configlet_name=test_configlet['name'])['key']
         logger.info('Got CV result')
         #   API Call 2
-        configlet = {'name':test_configlet['name'], 'key':configlet_key, 'config': test_configlet['config']}
+        configlet = {'name': test_configlet['name'], 'key': configlet_key, 'config': test_configlet['config']}
         logger.info('Start to update configlet data')
         api_call = self.cv_configlet.update(to_update=[configlet], note='Updated by pytest - {}'.format(time_log()))
         logger.info('Got CV result')
@@ -172,7 +172,7 @@ class Test_CvConfiglet_Unit():
         assert api_call[0].results['success'] is True
         # Revert content only if check_mode is False
         if check_mode is False:
-            configlet = {'name':test_configlet['name'], 'key':configlet_key, 'config': test_configlet['config_expected']}
+            configlet = {'name': test_configlet['name'], 'key': configlet_key, 'config': test_configlet['config_expected']}
             api_call = self.cv_configlet.update(to_update=[configlet], note='Updated by pytest - {}'.format(time_log()))
             logger.debug('Revert to expected - API result is: {}'.format(to_nice_json(data=api_call[0].results)))
 
@@ -186,7 +186,7 @@ class Test_CvConfiglet_Unit():
         self.cv_configlet._ansible.check_mode = check_mode
         # Work with API
         configlet_key = self.cv_configlet.get_configlet_data_cv(configlet_name=test_configlet['name'])['key']
-        configlet = {'name':test_configlet['name'], 'key':configlet_key}
+        configlet = {'name': test_configlet['name'], 'key': configlet_key}
         logger.info('Start to delete configlet on CV')
         api_call = self.cv_configlet.delete(to_delete=[configlet])
         logger.info('Got CV result')
@@ -200,6 +200,7 @@ class Test_CvConfiglet_Unit():
         requests.packages.urllib3.disable_warnings()
         logger.info("Object has been deleted {}".format(time_log()))
         assert True
+
 
 @pytest.mark.api
 @pytest.mark.configlet

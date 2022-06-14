@@ -20,7 +20,7 @@
 
 
 CV_IMAGES_PAYLOADS = [
-    {   'name': '0 image, 1 bundle',
+    {'name': '0 image, 1 bundle',
         'images': {
             "total": 0,
             "data": []
@@ -35,7 +35,7 @@ CV_IMAGES_PAYLOADS = [
                     "isCertifiedImageBundle": "true",
                     "updatedDateInLongFormat": 1643897984608,
                     "imageIds": [
-                    "EOS-4.26.1F.swi"
+                        "EOS-4.26.1F.swi"
                     ],
                     "appliedContainersCount": 0,
                     "appliedDevicesCount": 0
@@ -45,8 +45,8 @@ CV_IMAGES_PAYLOADS = [
             "imageBundleMapper": {},
             "assignedImageBundleId": ""
         }
-    },
-    {   'name': '0 image fake number, 1 bundle',
+     },
+    {'name': '0 image fake number, 1 bundle',
         'images': {
             "total": 100,
             "data": []
@@ -61,7 +61,7 @@ CV_IMAGES_PAYLOADS = [
                     "isCertifiedImageBundle": "true",
                     "updatedDateInLongFormat": 1643897984608,
                     "imageIds": [
-                    "EOS-4.26.1F.swi"
+                        "EOS-4.26.1F.swi"
                     ],
                     "appliedContainersCount": 0,
                     "appliedDevicesCount": 0
@@ -71,7 +71,7 @@ CV_IMAGES_PAYLOADS = [
             "imageBundleMapper": {},
             "assignedImageBundleId": ""
         }
-    },
+     },
     {
         'name': '1 image, 1 bundle',
         'images': {
@@ -89,7 +89,7 @@ CV_IMAGES_PAYLOADS = [
                     "uploadedDateinLongFormat": 1643897952009,
                     "isHotFix": "false",
                     "imageBundleKeys": [
-                    "imagebundle_1643897984608204097"
+                        "imagebundle_1643897984608204097"
                     ],
                     "key": "EOS-4.26.1F.swi",
                     "imageId": "EOS-4.26.1F.swi",
@@ -109,7 +109,7 @@ CV_IMAGES_PAYLOADS = [
                     "isCertifiedImageBundle": "true",
                     "updatedDateInLongFormat": 1643897984608,
                     "imageIds": [
-                    "EOS-4.26.1F.swi"
+                        "EOS-4.26.1F.swi"
                     ],
                     "appliedContainersCount": 0,
                     "appliedDevicesCount": 0

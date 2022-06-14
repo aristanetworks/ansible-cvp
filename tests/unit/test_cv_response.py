@@ -78,8 +78,8 @@ class TestCvReponseAction():
         api_result.add_entry(entry="action3")
         assert api_result.results["success"]
         assert api_result.results["changed"]
-        assert api_result.results[api_results_name+"_count"] == 3
-        assert len(api_result.results[api_results_name+"_list"]) == 3
+        assert api_result.results[api_results_name + "_count"] == 3
+        assert len(api_result.results[api_results_name + "_list"]) == 3
         logging.info("API strct result is {}".format(api_result.results))
 
 
@@ -115,7 +115,7 @@ class TestCvReponseManager():
         api_result.success = True
         api_manager.add_change(change=api_result)
         assert api_manager.success
-        assert int(api_manager.changes[management_name+"_count"]) == 3
+        assert int(api_manager.changes[management_name + "_count"]) == 3
         assert api_manager.changes[management_name +
                                    "_list"] == [api_results_name]
         logging.info("API Manager strct result is {}".format(

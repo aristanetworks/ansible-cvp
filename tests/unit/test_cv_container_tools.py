@@ -23,6 +23,7 @@ CVP_DATA_CONTAINERS_INIT = {
 #   FIXTURES
 # ---------------------------------------------------------------------------- #
 
+
 @pytest.fixture
 def cvp_database(request):
     database = mock.MockCVPDatabase()

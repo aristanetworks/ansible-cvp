@@ -15,6 +15,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields im
 from tests.lib.parametrize import generate_flat_data
 from tests.lib.utils import generate_container_ids
 
+
 @pytest.mark.generic
 @pytest.mark.parametrize("DEVICE", generate_flat_data(type="device"))
 class TestDeviceElement():

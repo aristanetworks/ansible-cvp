@@ -301,6 +301,7 @@ class CvManagerResult():
     }
 
     """
+
     def __init__(self, builder_name: str, default_success: bool = False):
         self.__name = builder_name
         self.__success = default_success
@@ -451,6 +452,7 @@ class CvAnsibleResponse():
           success: false
           failed: false
     """
+
     def __init__(self):
         self.success = False
         self.changed = False

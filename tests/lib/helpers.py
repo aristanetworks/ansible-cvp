@@ -63,7 +63,7 @@ def setup_custom_logger(name):
     """
     formatter = logging.Formatter(
         fmt='%(asctime)s %(levelname)-8s File: %(filename)s  - Function: %(funcName)s - Line: %(lineno)d - %(message)s',
-        )
+    )
     # Handler for logfile
     handler = logging.FileHandler('pytest.log', mode='w')
     handler.setFormatter(formatter)
@@ -101,6 +101,7 @@ def to_nice_json(data, ident: int = 4):
     """
     return pprint.pformat(data, indent=ident)
 
+
 @dataclass
 class AnsibleModuleMock():
     """
@@ -113,6 +114,7 @@ class AnsibleModuleMock():
 
     def fail_json(self, msg: str):
         logging.error("AnsibleModule.fail_json: {}".format(msg))
+
 
 def strtobool(input):
     """

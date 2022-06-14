@@ -17,6 +17,7 @@ LOGGER = setup_custom_logger(__name__)
 #   FIXTURES
 # ---------------------------------------------------------------------------- #
 
+
 @pytest.fixture
 def cvp_database():
     database = mock.MockCVPDatabase(
@@ -57,6 +58,7 @@ def test_CvFactsTools__get_container_name(fact_unit_tools, container_def):
 
 # CvFactsTools.__configletIds_to_configletName
 
+
 @pytest.mark.generic
 @pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
@@ -68,6 +70,7 @@ def test_CvFactsTools__configletIds_to_configletName(fact_unit_tools, configlet_
     LOGGER.info('** facts_tool response: %s', str(result))
     assert configlet_def['name'] in result
     LOGGER.info('Configlet name for id %s is %s', str(configlet_def[mock.MockCVPDatabase.FIELD_KEY]), str(result))
+
 
 @pytest.mark.generic
 @pytest.mark.facts
@@ -81,6 +84,7 @@ def test_CvFactsTools__configletIds_to_configletName_empty(fact_unit_tools):
     LOGGER.info('Configlet name for id [] is %s', str(result))
 
 # CvFactsTools.__device_get_configlets
+
 
 @pytest.mark.generic
 @pytest.mark.facts
@@ -96,6 +100,7 @@ def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, de
         LOGGER.info('Device name %s has configlets %s attached', str(device_def['hostname']), str(result))
     else:
         pytest.skip("skipping DEVICES with no configlet")
+
 
 @pytest.mark.generic
 @pytest.mark.facts
@@ -114,6 +119,7 @@ def test_CvFactsTools__device_get_configlets_no_configlet(fact_unit_tools, devic
 
 # CvFactsTools.__device_get_configlets
 
+
 @pytest.mark.generic
 @pytest.mark.facts
 @pytest.mark.usefixtures("fact_unit_tools")
@@ -128,6 +134,7 @@ def test_CvFactsTools__device_get_configlets_with_configlets(fact_unit_tools, co
         LOGGER.info('Container name for id %s has configlets %s attached', str(container_def[mock.MockCVPDatabase.FIELD_NAME]), str(result))
     else:
         pytest.skip("skipping CONTAINER with no configlet")
+
 
 @pytest.mark.generic
 @pytest.mark.facts

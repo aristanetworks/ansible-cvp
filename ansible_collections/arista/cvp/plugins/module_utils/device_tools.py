@@ -307,6 +307,7 @@ class CvDeviceTools(object):
     CvDeviceTools Object to operate Device operation on Cloudvision
     """
     # Updated as per issue #365 to set default search with hostname field
+
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None, search_by: str = Api.device.HOSTNAME, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module

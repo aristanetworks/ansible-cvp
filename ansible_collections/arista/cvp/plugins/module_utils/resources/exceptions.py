@@ -43,6 +43,7 @@ class AnsibleCVPError(Exception):
 
 class AnsibleCVPApiError(Exception):
     """Exception raised when an API-related error occurs"""
+
     def __init__(self, cvprac_method: Callable, message: str) -> None:
         """
         Constructor for the AnsibleCVPApiError class
@@ -64,6 +65,7 @@ class AnsibleCVPApiError(Exception):
 
 class AnsibleCVPNotFoundError(Exception):
     """Raised when the ressource is not found in CloudVision instance."""
+
     def __init__(self, name: str, type: CVPRessource, message: str = None) -> None:
         """
         Constructor for the AnsibleCVPNotFoundError class

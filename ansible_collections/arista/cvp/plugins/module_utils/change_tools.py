@@ -54,6 +54,7 @@ class CvpChangeControlBuilder:
     add_known_uuid(list(str))
         Provide a list of UUIDs already in use to the class, to prevent collisions.
     """
+
     def __init__(self):
         # Guarantee that the generated IDs are unique, for this session
         self.__keyStore = []
@@ -479,6 +480,7 @@ class CvChangeControlTools():
     """
     CvImageTools Class to manage Cloudvision Change Controls
     """
+
     def __init__(self, cv_connection, ansible_module: AnsibleModule = None, check_mode: bool = False):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module

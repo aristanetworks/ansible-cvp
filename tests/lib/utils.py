@@ -15,6 +15,7 @@ from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_L
 
 MODULE_LOGGER = logging.getLogger(__name__)
 
+
 def cvp_login():
     """Login cvp devices
 
@@ -130,6 +131,7 @@ def get_cvp_devices_after_move():
     """
     return CVP_DEVICES_1
 
+
 def get_devices_to_move():
     """Returns list of devices to move
 
@@ -142,6 +144,7 @@ def get_devices_to_move():
             entry[Api.generic.PARENT_CONTAINER_NAME] = CONTAINER_DESTINATION
         to_move.append(entry)
     return to_move
+
 
 def generate_container_ids():
     """Returns the container ids
