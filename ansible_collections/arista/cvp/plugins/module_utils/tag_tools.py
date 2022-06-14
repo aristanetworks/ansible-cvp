@@ -39,8 +39,9 @@ except ImportError:
     CVPRAC_IMP_ERR = traceback.format_exc()
 
 
-MODULE_LOGGER = logging.getLogger('__name__')
+MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start tag_tools module execution')
+
 
 class CvTagInput(object):
     def __init__(self, tags: dict, schema=schema.SCHEMA_CV_TAG):
@@ -52,11 +53,11 @@ class CvTagInput(object):
         """
         check_schemas Validate schemas for user's input
         """
-        #import epdb; epdb.serve()
         if not validate_json_schema(user_json=self.__tag, schema=self.__schema):
             MODULE_LOGGER.error("Invalid tags input : \n%s", str(self.__tag))
             return False
         return True
+
 
 class CvTagTools(object):
     """
@@ -87,7 +88,7 @@ class CvTagTools(object):
         device_details = self.__cv_client.api.get_device_by_name(fqdn, search_by_hostname=True)
         if "serialNumber" in device_details.keys():
             return device_details["serialNumber"]
-        self.__ansible.fail_json(msg='Error, Device {} doesn\'t exists on CV. Check the hostname/fqdn'.format(fqdn))
+        self.__ansible.fail_json(msg=f"Error, Device {fqdn} doesn't exists on CV. Check the hostname/fqdn")
 
     def tasker(self, tags: list, mode: string, auto_create: bool = True):
         """
