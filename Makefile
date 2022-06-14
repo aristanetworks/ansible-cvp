@@ -104,8 +104,16 @@ check-cvp-404: ## Check local 404 links for AVD documentation
 #########################################
 
 .PHONY: linting
-linting: ## Run pre-commit script for python code linting using pylint
-	sh .github/pre-commit
+linting: ## Run pre-commit script for code linting check
+	pre-commit run --all-files pylint
+	pre-commit run --all-files yamllint
+	pre-commit run --all-files ansible-lint
+
+.PHONY: sanitize
+sanitize: ## Run pre-commit script for code linting check
+	pre-commit run --all-files trailing-whitespace
+	pre-commit run --all-files end-of-file-fixer
+	pre-commit run --all-files autopep8
 
 .PHONY: pre-commit
 pre-commit: ## Execute pre-commit validation for staged files
