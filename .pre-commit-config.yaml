@@ -10,7 +10,7 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
   - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: 898691a48e7dbdbbac32f44f9336ef944d74cf82
+    rev: v1.6.0
     hooks:
       - id: autopep8
   - repo: https://github.com/pre-commit/mirrors-pylint
