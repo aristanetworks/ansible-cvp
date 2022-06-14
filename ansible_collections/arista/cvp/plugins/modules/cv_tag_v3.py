@@ -128,30 +128,25 @@ def main():
     # import epdb; epdb.serve(port=8888)
     user_tags = CvTagInput(ansible_module.params['tags'])
     if user_tags.is_valid is False:
-        ansible_module.fail_json(
-          msg='Error, your input is not valid against current schema:\n {}'.format(*ansible_module.params['tags']))
+        ansible_module.fail_json(msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['tags']}")
 
     # check for incompatible options
     if ansible_module.params['mode'] == 'assign' or ansible_module.params['mode'] == 'unassign':
         for per_device in ansible_module.params['tags']:
             if 'device_tags' in per_device.keys() and 'device' not in per_device.keys():
-                ansible_module.fail_json(
-                  msg='Error, \'device\' needed for each \'device_tags\'' \
-                    ' when mode is \'assign\' or \'unassign\'')
+                ansible_module.fail_json(msg="Error, 'device' needed for each 'device_tags"
+                                             " when mode is 'assign' or 'unassign'")
             if 'interface_tags' in per_device.keys():
                 MODULE_LOGGER.info('interface tags in keys')
                 if 'device' not in per_device.keys():
-                    ansible_module.fail_json(
-                      msg='Error, \'device\' needed for each \'interface_tags\'' \
-                        ' when mode is \'assign\' or \'unassign\'')
+                    ansible_module.fail_json(msg="Error, 'device' needed for each 'interface_tags'"
+                                                 " when mode is 'assign' or 'unassign'")
                 for per_intf in per_device['interface_tags']:
                     MODULE_LOGGER.info('per_intf: %s', per_intf)
                     MODULE_LOGGER.info('keys: %s', per_intf.keys())
                     if 'interface' not in per_intf.keys():
-                        ansible_module.fail_json(
-                        msg='Error, \'interface\' needed for each \'interface_tags\'' \
-                          ' when mode is \'assign\' or \'unassign\'')
-
+                        ansible_module.fail_json(msg="Error, 'interface' needed for each 'interface_tags'"
+                                                     " when mode is 'assign' or 'unassign'")
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
