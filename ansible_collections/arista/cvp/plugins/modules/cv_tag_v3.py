@@ -82,7 +82,7 @@ except ImportError:
 
 
 # Logger startup
-MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tag_v3')
+MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start cv_tag_v3 module execution')
 
 
