@@ -83,8 +83,6 @@ except ImportError:
 
 # Logger startup
 MODULE_LOGGER = logging.getLogger(__name__)
-MODULE_LOGGER.info('Start cv_tag_v3 module execution')
-
 
 def check_import(ansible_module: AnsibleModule):
     """
@@ -107,6 +105,7 @@ def main():
     """
     Main entry point for module execution.
     """
+    MODULE_LOGGER.info('Start cv_tag_v3 module execution')
     argument_spec = dict(
         # Topology to configure on CV side.
         tags=dict(type='list', required=True, elements='dict'),
