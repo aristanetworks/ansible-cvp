@@ -369,19 +369,12 @@ def test_CvImageTools_module_action_get_mode_image_action_add_already_exist(imag
         fake_image_path = os.path.join(fake_folder, image['imageFileName'])
         Path(fake_image_path).touch(exist_ok=True)
         LOGGER.info('Test Path is %s', str(fake_image_path))
-        try:
-            changed_result, result_data, result_warning = image_unit_tool.module_action(
-                action='add',
-                mode='image',
-                image=fake_image_path,
-                image_list=[],
-                bundle_name=[]
-            )
-        except mock_ansible.AnsibleFailJson as expected_error:
-            LOGGER.info('received exception: %s', str(expected_error))
-            assert 'Image already present on server' in str(expected_error)
-        else:
-            LOGGER.info('module_action response: %s', str(result_data))
-            LOGGER.info('module_action warning: %s', str(result_warning))
-            LOGGER.info('module_action change: %s', str(changed_result))
-            assert False
+        _, _, result_warning = image_unit_tool.module_action(
+            action='add',
+            mode='image',
+            image=fake_image_path,
+            image_list=[],
+            bundle_name=[]
+        )
+        LOGGER.info('received warning: %s', str(result_warning))
+        assert 'Image already present on server' in result_warning[0]
