@@ -34,8 +34,8 @@ options:
   tags:
     description: CVP tags
     required: True
-    type: dict
-    elements: str
+    type: list
+    elements: dict
   mode:
     description: action to carry out on the tags
                  create - create tags
