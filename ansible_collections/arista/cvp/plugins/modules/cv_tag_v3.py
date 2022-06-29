@@ -84,6 +84,7 @@ except ImportError:
 # Logger startup
 MODULE_LOGGER = logging.getLogger(__name__)
 
+
 def check_import(ansible_module: AnsibleModule):
     """
     check_import Check all imports are resolved
