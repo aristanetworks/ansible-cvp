@@ -80,6 +80,14 @@ class ApiDevice():
 
 
 # @dataclass
+class ApiImageBundle():
+    """Keys specific to image bundle resources"""
+    NAME: str = 'bundleName'
+    ID: str = 'imageBundleId'
+    TYPE: str = 'type'
+
+
+# @dataclass
 class ApiConfiglet():
     """Keys specific to Configlet resources"""
     ID: str = 'configletId'
@@ -106,3 +114,4 @@ class Api():
     generic: ApiGeneric = ApiGeneric
     mappers: ApiMappers = ApiMappers
     task: ApiTask = ApiTask
+    image: ApiImageBundle = ApiImageBundle

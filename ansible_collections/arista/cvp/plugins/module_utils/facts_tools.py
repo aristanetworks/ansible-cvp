@@ -409,6 +409,22 @@ class CvFactsTools():
         MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
         return self.__configletIds_to_configletName(configletIds=configletIds)
 
+
+    def __container_get_image_bundle(self, container_id):
+        current_image_bundle = []
+        bundle_data = {}
+        try:
+            bundle = self.__cv_client.api.get_image_bundle_by_container_id(container_id)
+        except CvpApiError as error_msg:
+            MODULE_LOGGER.error('Error when collecting container bundle facts: %s', str(error_msg))
+        
+        bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
+        bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
+        bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
+        
+        return current_image_bundle.append(bundle_data)
+
+
     # Fact management
 
     def __fact_devices(self, filter: str = '.*', verbose: bool = False):
@@ -454,8 +470,7 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                container[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_image_bundle_by_container_id(container[Api.container.KEY])
-                MODULE_LOGGER.debug('The following bundle is assigned: %s' % str(self.__cv_client.api.get_image_bundle_by_container_id(container[Api.container.KEY])))
+                container[Api.generic.IMAGE_BUNDLE] = self.__container_get_image_bundle(container_id=container[Api.container.KEY])
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
