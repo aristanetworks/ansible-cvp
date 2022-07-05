@@ -140,7 +140,7 @@ class CvFactResource():
             return {entry[Api.generic.NAME]: {
                 Api.generic.PARENT_CONTAINER_NAME: entry[Api.container.PARENT_NAME],
                 Api.generic.CONFIGLETS: entry[Api.generic.CONFIGLETS],
-                Api.container.IMAGE_BUNDLE: entry[Api.container.IMAGE_BUNDLE]}
+                Api.generic.IMAGE_BUNDLE: entry[Api.generic.IMAGE_BUNDLE]}
                 for entry in self._cache if Api.generic.NAME in entry.keys()}
 
     def _get_device(self, verbose: bool = False):
@@ -437,7 +437,7 @@ class CvFactsTools():
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
-                    device[Api.device.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
+                    device[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
@@ -454,7 +454,7 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                container[Api.container.IMAGE_BUNDLE] = self.__cv_client.api.get_image_bundle_by_container_id(container[Api.container.KEY])
+                container[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_image_bundle_by_container_id(container[Api.container.KEY])
                 MODULE_LOGGER.debug('The following bundle is assigned: %s' % str(self.__cv_client.api.get_image_bundle_by_container_id(container[Api.container.KEY])))
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')

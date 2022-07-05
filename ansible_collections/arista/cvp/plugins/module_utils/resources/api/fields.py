@@ -49,6 +49,7 @@ class ApiGeneric():
     NAME: str = 'name'
     PARENT_CONTAINER_ID: str = 'parentContainerId'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
+    IMAGE_BUNDLE: str = 'image_bundle'
 
 
 # @dataclass
@@ -59,7 +60,6 @@ class ApiContainer():
     COUNT_CONTAINER: str = 'childContainerCount'
     COUNT_DEVICE: str = 'childNetElementCount'
     ID: str = 'containerId'
-    IMAGE_BUNDLE: str = 'image_bundle'
     KEY: str = 'Key'
     TOPOLOGY: str = 'topology'
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
@@ -74,7 +74,6 @@ class ApiDevice():
     FQDN: str = 'fqdn'
     HOSTNAME: str = 'hostname'
     ID: str = 'key'
-    IMAGE_BUNDLE: str = 'image_bundle'
     SERIAL: str = 'serialNumber'
     SYSMAC: str = 'systemMacAddress'
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
