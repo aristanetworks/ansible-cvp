@@ -83,6 +83,7 @@ class CvFactResource():
                 Api.device.SERIAL,
                 Api.device.SYSMAC,
                 Api.generic.CONFIGLETS,
+                Api.device.IMAGE_BUNDLE,
             ]
         }
         fact[Api.generic.PARENT_CONTAINER_NAME] = device_fact[Api.device.CONTAINER_NAME]
@@ -435,6 +436,7 @@ class CvFactsTools():
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
+                    device[Api.device.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
@@ -451,6 +453,7 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
+                container[Api.container.IMAGE_BUNDLE] = self.__cv_client.api.get_image_bundle_by_container_id(container_id=container[Api.container.KEY])
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
