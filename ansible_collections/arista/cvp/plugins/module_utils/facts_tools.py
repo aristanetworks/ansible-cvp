@@ -139,7 +139,8 @@ class CvFactResource():
         if isinstance(self._cache, list):
             return {entry[Api.generic.NAME]: {
                 Api.generic.PARENT_CONTAINER_NAME: entry[Api.container.PARENT_NAME],
-                Api.generic.CONFIGLETS: entry[Api.generic.CONFIGLETS]}
+                Api.generic.CONFIGLETS: entry[Api.generic.CONFIGLETS],
+                Api.container.IMAGE_BUNDLE: entry[Api.container.IMAGE_BUNDLE]}
                 for entry in self._cache if Api.generic.NAME in entry.keys()}
 
     def _get_device(self, verbose: bool = False):
