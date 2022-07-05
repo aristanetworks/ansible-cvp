@@ -418,6 +418,7 @@ class CvFactsTools():
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting container bundle facts: %s', str(error_msg))
         
+        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
         bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
         bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
         bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
