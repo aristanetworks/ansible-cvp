@@ -59,6 +59,7 @@ class ApiContainer():
     COUNT_CONTAINER: str = 'childContainerCount'
     COUNT_DEVICE: str = 'childNetElementCount'
     ID: str = 'containerId'
+    IMAGE_BUNDLE: str = 'image_bundle'
     KEY: str = 'Key'
     TOPOLOGY: str = 'topology'
     UNDEFINED_CONTAINER_ID: str = 'undefined_container'
