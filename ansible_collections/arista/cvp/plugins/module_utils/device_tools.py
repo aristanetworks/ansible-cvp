@@ -418,6 +418,9 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
         elif search_by == Api.device.SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
+            
+        cv_data['imageBundle'] = self.__cv_client.api.get_device_image_info(cv_data['key'])
+        
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
 
