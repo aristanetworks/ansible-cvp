@@ -419,9 +419,14 @@ class CvFactsTools():
             MODULE_LOGGER.error('Error when collecting container bundle facts: %s', str(error_msg))
         
         MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
-        bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
-        bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
-        bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
+        if len(bundle['imageBundleList'][0] > 0):
+            bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
+            bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
+            bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
+        else:
+            bundle_data[Api.image.NAME] = None
+            bundle_data[Api.image.ID] = None
+            bundle_data[Api.image.TYPE] = None
         
         return current_image_bundle.append(bundle_data)
 
