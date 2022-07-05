@@ -1068,8 +1068,41 @@ class CvDeviceTools(object):
 
 
     def apply_bundle(self, user_inventory: DeviceInventory):
+        """
+        apply_bundle - apply an image bundle to a device
         
-        return True    
+        Execute the API calls to attach an image bundle to a device.
+        Note that only 1 image bundle can be attached to a device.
+        
+        If an image bundle is already attached to the device (type: netelement)
+        the new image bundle will replace the old.
+        
+        Our behaviour is as follows;
+        * Bundle already attached to the device - update if different, skip if the same
+        * Bundle inherited from container (type: container) - attach bundle to device, regardless
+        of whether or not it is the same
+        
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
+        results = []
+        
+        for device in user_inventory.devices:
+            result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_attached')
+            ## WIP
+            
+            
+            
+            results.append(result_data)
+        
+        return results    
 
 
     def apply_configlets(self, user_inventory: DeviceInventory):
