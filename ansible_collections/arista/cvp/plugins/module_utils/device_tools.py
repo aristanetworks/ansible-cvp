@@ -534,6 +534,8 @@ class CvDeviceTools(object):
         cv_move = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_MOVED)
         cv_configlets_attach = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_ATTACHED)
         cv_configlets_detach = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_DETACHED)
+        cv_bundle_attach = CvManagerResult(builder_name=DeviceResponseFields.BUNDLE_ATTACHED)
+        cv_bundle_detach = CvManagerResult(builder_name=DeviceResponseFields.BUNDLE_DETACHED)
         response = CvAnsibleResponse()
 
         # Check if all devices are present on CV
@@ -559,6 +561,12 @@ class CvDeviceTools(object):
         if action_result is not None:
             for update in action_result:
                 cv_configlets_attach.add_change(change=update)
+                
+        # Apply image bundle as set in inventory
+        action_result = self.apply_bundle(user_inventory=user_inventory)
+        if action_result is not None:
+            for update in action_result:
+                cv_bundle_attach.add_change(change=update)
 
         # Remove configlets configured on CVP and if module runs in strict mode
         if apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
@@ -1057,6 +1065,12 @@ class CvDeviceTools(object):
                     result_data.add_entry('{}-{}'.format(device.fqdn, *device.container))
             results.append(result_data)
         return results
+
+
+    def apply_bundle(self, user_inventory: DeviceInventory):
+        
+        return True    
+
 
     def apply_configlets(self, user_inventory: DeviceInventory):
         """
