@@ -423,14 +423,13 @@ class CvFactsTools():
             bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
             bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
             bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
+            current_image_bundle.append(bundle_data)
         elif len(bundle['imageBundleList']) > 1:
             MODULE_LOGGER.error('Number of image bundles is > 1 on %s', str(container_id) )
         else:
-            bundle_data[Api.image.NAME] = None
-            bundle_data[Api.image.ID] = None
-            bundle_data[Api.image.TYPE] = None
+            pass
         
-        return current_image_bundle.append(bundle_data)
+        return current_image_bundle
 
 
     # Fact management
