@@ -753,7 +753,7 @@ def delete_topology(module, intended, facts):
     # Build a tree of containers expected to be deleted from CVP
     MODULE_LOGGER.info('build tree topology from intended topology')
     container_intended_tree = tools_tree.tree_build_from_dict(
-        containers=intended, root=topology_root_relative)
+        containers=intended, root=topology_root)
     container_intended_ordered_list = tools_tree.tree_to_list(json_data=container_intended_tree, myList=list())
 
     MODULE_LOGGER.info('container_intended_ordered_list %s', container_intended_ordered_list)
