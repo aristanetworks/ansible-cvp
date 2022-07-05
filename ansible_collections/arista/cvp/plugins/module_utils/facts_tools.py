@@ -83,7 +83,7 @@ class CvFactResource():
                 Api.device.SERIAL,
                 Api.device.SYSMAC,
                 Api.generic.CONFIGLETS,
-                Api.device.IMAGE_BUNDLE,
+                Api.generic.IMAGE_BUNDLE,
             ]
         }
         fact[Api.generic.PARENT_CONTAINER_NAME] = device_fact[Api.device.CONTAINER_NAME]
