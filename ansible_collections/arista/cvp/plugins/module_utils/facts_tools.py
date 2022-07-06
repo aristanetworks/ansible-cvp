@@ -438,9 +438,35 @@ class CvFactsTools():
             MODULE_LOGGER.error('Number of image bundles is > 1 on %s', str(container_id) )
         else:
             pass
-        
         return bundle_name
 
+
+    def __device_get_image_bundle_name(self, device_id):
+        """
+        __device_get_image_bundle_name Get the name of the image bundle attached to a device
+
+        Parameters
+        ----------
+        device_id : str
+            MAC address/key for the device
+
+        Returns
+        -------
+        Str
+            The name of the image bundle, if assigned.
+        """
+        bundle_name = ''
+
+        try:
+            bundle = self.__cv_client.api.get_device_image_info(device_id)
+        except CvpApiError as error_msg:
+            MODULE_LOGGER.error('Error when collecting device bundle facts: %s', str(error_msg))
+        
+        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
+        if bundle['bundleName'] is not None:
+            return bundle['bundleName']    
+        else:
+            return bundle_name
 
     # Fact management
 
@@ -470,7 +496,7 @@ class CvFactsTools():
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
-                    device[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
+                    device[Api.generic.IMAGE_BUNDLE] = self.__device_get_image_bundle_name(device[Api.generic.KEY])
                     
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
