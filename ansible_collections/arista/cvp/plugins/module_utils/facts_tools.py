@@ -409,7 +409,6 @@ class CvFactsTools():
         MODULE_LOGGER.debug('** Configlet IDs are %s', str(configletIds))
         return self.__configletIds_to_configletName(configletIds=configletIds)
 
-
     def __container_get_image_bundle_name(self, container_id):
         """
         __container_get_image_bundle_name Get the name of the image bundle attached to a container
@@ -440,7 +439,6 @@ class CvFactsTools():
             pass
         return bundle_name
 
-
     def __device_get_image_bundle_name(self, device_id):
         """
         __device_get_image_bundle_name Get the name of the image bundle attached to a device
@@ -469,7 +467,6 @@ class CvFactsTools():
             return bundle_name
 
     # Fact management
-
     def __fact_devices(self, filter: str = '.*', verbose: bool = False):
         """
         __fact_devices Collect facts related to device inventory
