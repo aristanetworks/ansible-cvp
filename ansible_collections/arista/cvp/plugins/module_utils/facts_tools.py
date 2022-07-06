@@ -470,7 +470,10 @@ class CvFactsTools():
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
-                    device[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
+                    image_bundle = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
+                    if image_bundle is not None:
+                        device[Api.generic.IMAGE_BUNDLE] = image_bundle
+                    
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
