@@ -430,12 +430,12 @@ class CvFactsTools():
             bundle = self.__cv_client.api.get_image_bundle_by_container_id(container_id)
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting container bundle facts: %s', str(error_msg))
-        
-        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
+
+        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle))
         if len(bundle['imageBundleList']) == 1:
             bundle_name = bundle['imageBundleList'][0]['name']
         elif len(bundle['imageBundleList']) > 1:
-            MODULE_LOGGER.error('Number of image bundles is > 1 on %s', str(container_id) )
+            MODULE_LOGGER.error('Number of image bundles is > 1 on %s', str(container_id))
         else:
             pass
         return bundle_name
@@ -461,10 +461,10 @@ class CvFactsTools():
             bundle = self.__cv_client.api.get_device_image_info(device_id)
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting device bundle facts: %s', str(error_msg))
-        
-        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
+
+        MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle))
         if bundle['bundleName'] is not None:
-            return bundle['bundleName']    
+            return bundle['bundleName']
         else:
             return bundle_name
 
@@ -497,7 +497,7 @@ class CvFactsTools():
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
                     device[Api.generic.IMAGE_BUNDLE] = self.__device_get_image_bundle_name(device[Api.generic.KEY])
-                    
+
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
