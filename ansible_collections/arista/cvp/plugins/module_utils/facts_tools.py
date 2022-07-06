@@ -424,7 +424,7 @@ class CvFactsTools():
         Str
             The name of the image bundle, if assigned.
         """
-        bundle_name = None
+        bundle_name = ''
 
         try:
             bundle = self.__cv_client.api.get_image_bundle_by_container_id(container_id)
@@ -470,9 +470,7 @@ class CvFactsTools():
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
-                    image_bundle = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
-                    if image_bundle is not None:
-                        device[Api.generic.IMAGE_BUNDLE] = image_bundle
+                    device[Api.generic.IMAGE_BUNDLE] = self.__cv_client.api.get_device_image_info(device[Api.generic.KEY])
                     
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
@@ -490,9 +488,7 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                image_bundle = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
-                if image_bundle is not None:
-                    container[Api.generic.IMAGE_BUNDLE] = image_bundle
+                container[Api.generic.IMAGE_BUNDLE] = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
