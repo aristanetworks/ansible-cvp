@@ -410,9 +410,22 @@ class CvFactsTools():
         return self.__configletIds_to_configletName(configletIds=configletIds)
 
 
-    def __container_get_image_bundle(self, container_id):
-        current_image_bundle = []
-        bundle_data = {}
+    def __container_get_image_bundle_name(self, container_id):
+        """
+        __container_get_image_bundle_name Get the name of the image bundle attached to a container
+
+        Parameters
+        ----------
+        container_id : str
+            CVP Key for the container
+
+        Returns
+        -------
+        Str
+            The name of the image bundle, if assigned.
+        """
+        bundle_name = None
+
         try:
             bundle = self.__cv_client.api.get_image_bundle_by_container_id(container_id)
         except CvpApiError as error_msg:
@@ -420,16 +433,13 @@ class CvFactsTools():
         
         MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle) )
         if len(bundle['imageBundleList']) == 1:
-            bundle_data[Api.image.NAME] = bundle['imageBundleList'][0]['name']
-            bundle_data[Api.image.ID] = bundle['imageBundleList'][0]['key']
-            bundle_data[Api.image.TYPE] = bundle['imageBundleMapper'][bundle_data[Api.image.ID]]['type']
-            current_image_bundle.append(bundle_data)
+            bundle_name = bundle['imageBundleList'][0]['name']
         elif len(bundle['imageBundleList']) > 1:
             MODULE_LOGGER.error('Number of image bundles is > 1 on %s', str(container_id) )
         else:
             pass
         
-        return current_image_bundle
+        return bundle_name
 
 
     # Fact management
@@ -477,7 +487,7 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                container[Api.generic.IMAGE_BUNDLE] = self.__container_get_image_bundle(container_id=container[Api.container.KEY])
+                container[Api.generic.IMAGE_BUNDLE] = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
