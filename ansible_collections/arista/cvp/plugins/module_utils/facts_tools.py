@@ -490,7 +490,9 @@ class CvFactsTools():
             if container[Api.generic.NAME] != 'Tenant':
                 MODULE_LOGGER.debug('Got following information for container: %s', str(container))
                 container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                container[Api.generic.IMAGE_BUNDLE] = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
+                image_bundle = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
+                if image_bundle is not None:
+                    container[Api.generic.IMAGE_BUNDLE] = image_bundle
                 facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
