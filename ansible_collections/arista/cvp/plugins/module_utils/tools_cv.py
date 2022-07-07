@@ -118,7 +118,7 @@ def isIterable(testing_object=None):
 
     """
     try:
-        iter(testing_object)  # noqa
+        iter(testing_object)
         return True
     except TypeError as te:  # noqa # pylint: disable=unused-variable
         return False
