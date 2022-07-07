@@ -59,6 +59,7 @@ SCHEMA_CV_DEVICE = {
         [
             {
                 "fqdn": "CV-ANSIBLE-EOS01",
+                "ipAddress": "192.0.2.100",
                 "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
                 "systemMacAddress": "50:8d:00:e3:78:aa",
                 "parentContainerName": "ANSIBLE2",
@@ -82,6 +83,7 @@ SCHEMA_CV_DEVICE = {
                 "examples": [
                     {
                         "fqdn": "CV-ANSIBLE-EOS01",
+                        "ipAddress": "192.0.2.100",
                         "serialNumber": "79AEA53101E7340AEC9AA4819D5E1F5B",
                         "systemMacAddress": "50:8d:00:e3:78:aa",
                         "parentContainerName": "ANSIBLE2",
@@ -108,6 +110,16 @@ SCHEMA_CV_DEVICE = {
                 ],
                 "additionalProperties": True,
                 "properties": {
+                    "ipAddress": {
+                        "$id": "#/items/anyOf/0/properties/ipAddress",
+                        "type": "string",
+                        "title": "The ipAddress schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "192.0.2.5"
+                        ]
+                    },
                     "fqdn": {
                         "$id": "#/items/anyOf/0/properties/fqdn",
                         "type": "string",
