@@ -25,12 +25,12 @@ activities:
      stage: <str - the name of the Stage to assign the task to>
    - name: <only used internally>
      action: <The name of the action to be done e.g. "Switch Healthcheck">
-     stage: <The name of the stage to assign the action to> 
+     stage: <The name of the stage to assign the action to>
      arguments: <list of dicts, each consisting of a name, and value key>
         - name: <argument name>
           value: <argument value>
  ```
- 
+
 ## Example
 
 Create a change control
