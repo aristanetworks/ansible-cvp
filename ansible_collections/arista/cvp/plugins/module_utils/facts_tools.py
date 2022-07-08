@@ -84,6 +84,7 @@ class CvFactResource():
                 Api.device.SYSMAC,
                 Api.generic.CONFIGLETS,
                 Api.generic.IMAGE_BUNDLE,
+                Api.device.MGMTIP,
             ]
         }
         fact[Api.generic.PARENT_CONTAINER_NAME] = device_fact[Api.device.CONTAINER_NAME]

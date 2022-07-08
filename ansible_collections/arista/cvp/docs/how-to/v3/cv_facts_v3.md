@@ -59,12 +59,12 @@ ok: [CloudVision] =>
              exec /usr/bin/TerminAttr -cvaddr=apiserver.cv-staging.corp.arista.io:443 -cvcompression=gzip -taillogs -cvauth=token-secure,/tmp/cv-onboarding-token -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -disableaaa
              no shutdown
           hostname spine-2-unit-test
-          ip name-server vrf default 172.22.22.40
+          ip name-server vrf default 192.0.2.40
           dns domain ire.aristanetworks.com
           interface Management1
              mtu 1380
-             ip address 10.83.13.165/24
-          ip route 0.0.0.0/0 10.83.13.1
+             ip address 192.0.2.165/24
+          ip route 0.0.0.0/0 192.0.2.1
           ntp server ntp.aristanetworks.com
       cvp_containers:
         CVPRACTEST:
@@ -81,12 +81,14 @@ ok: [CloudVision] =>
         fqdn: leaf-1-unit-test.ire.aristanetworks.com
         hostname: leaf-1-unit-test
         parentContainerName: ansible-tests
+        ipAddress: 192.0.2.165
         serialNumber: A2BC886CB9408A0453A3CFDD9C251999
         systemMacAddress: 50:00:00:d5:5d:c0
         image_bundle: ""
       - configlets: []
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
         hostname: leaf-2-unit-test
+        ipAddress: 192.0.2.166
         parentContainerName: ansible-tests
         serialNumber: 08A7E527AF711F688A6AD7D78BB5AD0A
         systemMacAddress: 50:00:00:cb:38:c2
@@ -95,6 +97,7 @@ ok: [CloudVision] =>
         - test_configlet
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
         hostname: leaf-2-unit-test
+        ipAddress: 192.0.2.167
         parentContainerName: ansible-tests
         serialNumber: 24666013EF2271599935B4A894F356E1
         systemMacAddress: 50:00:00:03:37:66

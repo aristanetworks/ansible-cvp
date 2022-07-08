@@ -173,7 +173,13 @@ def tree_build_from_dict(containers=None, root='Tenant'):
             LOGGER.debug(
                 'create root tree entry with: %s', str(container_name))
     # Loop since expected tree is not equal to number of entries in container topology
-    while (len(tree.all_nodes()) < len(containers) + 1):
+    # When trying to create a tree with 1 child and 1 grandchild, the grandchild would
+    # not be added in the while loop as len(tree.all_nodes()) > len(containers)
+    if len(containers) == 2:
+        ctr = 1
+    else:
+        ctr = 0
+    while (len(tree.all_nodes()) < len(containers) + ctr):
         LOGGER.debug(
             ' Tree has size: %s - Containers has size: %s', str(len(tree.all_nodes())), str(len(containers)))
         for container_name, container_info in containers.items():

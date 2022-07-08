@@ -77,6 +77,7 @@ class ApiDevice():
     SERIAL: str = 'serialNumber'
     SYSMAC: str = 'systemMacAddress'
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
+    MGMTIP: str = 'ipAddress'
 
 
 # @dataclass
