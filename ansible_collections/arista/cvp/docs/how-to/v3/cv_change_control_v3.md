@@ -9,6 +9,9 @@ __cv_change_control_v3__ manage change controls on CloudVision:
 ## Module Options
 
  - `state`: Can be one of the following: `set`, `show` or `remove`
+    - `state: set`: Set Change control
+    - `state: show`: List Change control
+    - `state: remove`: Delete Change control
  - `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
  ```yaml
