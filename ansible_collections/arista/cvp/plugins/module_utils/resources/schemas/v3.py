@@ -257,3 +257,302 @@ SCHEMA_CV_CONTAINER = {
         }
     }
 }
+
+SCHEMA_CV_TAG = {
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "title": "Root Schema",
+    "type": "array",
+    "default": [],
+    "items": {
+        "title": "A Schema",
+        "type": "object",
+        "default": {},
+        "required": [],
+        "properties": {
+            "device": {
+                "title": "The device Schema",
+                "type": "string",
+                "default": "",
+                "examples": [
+                    "leaf1"
+                ]
+            },
+            "device_tags": {
+                "title": "The device_tags Schema",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "title": "A Schema",
+                    "type": "object",
+                    "required": [
+                        "name",
+                        "value"
+                    ],
+                    "properties": {
+                        "name": {
+                            "title": "The name Schema",
+                            "type": "string",
+                            "examples": [
+                                "tag1",
+                                "tag2"
+                            ]
+                        },
+                        "value": {
+                            "title": "The value Schema",
+                            "type": ["integer", "string"],
+                            "examples": [
+                                "value1",
+                                "value2"
+                            ]
+                        }
+                    },
+                    "examples": [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                },
+                "examples": [
+                    [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }]
+                ]
+            },
+            "interface_tags": {
+                "title": "The interface_tags Schema",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "title": "A Schema",
+                    "type": "object",
+                    "required": [
+                        "tags"
+                    ],
+                    "properties": {
+                        "interface": {
+                            "title": "The interface Schema",
+                            "type": "string",
+                            "examples": [
+                                "Ethernet1",
+                                "Ethernet2"
+                            ]
+                        },
+                        "tags": {
+                            "title": "The tags Schema",
+                            "type": "array",
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "examples": [
+                                            "tag1",
+                                            "tag2"
+                                        ]
+                                    },
+                                    "value": {
+                                        "title": "The value Schema",
+                                        "type": ["integer", "string"],
+                                        "examples": [
+                                            "value1",
+                                            "value2"
+                                        ]
+                                    }
+                                },
+                                "examples": [
+                                    {
+                                        "name": "tag1",
+                                        "value": "value1"
+                                    },
+                                    {
+                                        "name": "tag2",
+                                        "value": "value2"
+                                    },
+                                    {
+                                        "name": "tag1",
+                                        "value": "value1"
+                                    },
+                                    {
+                                        "name": "tag2",
+                                        "value": "value2"
+                                    }]
+                            },
+                            "examples": [
+                                [
+                                    {
+                                        "name": "tag1",
+                                        "value": "value1"
+                                    },
+                                    {
+                                        "name": "tag2",
+                                        "value": "value2"
+                                    }],
+                                [
+                                    {
+                                        "name": "tag1",
+                                        "value": "value1"
+                                    },
+                                    {
+                                        "name": "tag2",
+                                        "value": "value2"
+                                    }]
+                            ]
+                        }
+                    },
+                    "examples": [
+                        {
+                            "interface": "Ethernet1",
+                            "tags": [
+                                {
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }]
+                        },
+                        {
+                            "interface": "Ethernet2",
+                            "tags": [
+                                {
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }]
+                        }]
+                },
+                "examples": [
+                    [
+                        {
+                            "interface": "Ethernet1",
+                            "tags": [
+                                {
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }]
+                        },
+                        {
+                            "interface": "Ethernet2",
+                            "tags": [
+                                {
+                                    "name": "tag1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "name": "tag2",
+                                    "value": "value2"
+                                }]
+                        }]
+                ]
+            }
+        },
+        "examples": [{
+            "device": "leaf1",
+            "device_tags": [
+                {
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }],
+            "interface_tags": [
+                {
+                    "interface": "Ethernet1",
+                    "tags": [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }
+                    ]
+                },
+                {
+                    "interface": "Ethernet2",
+                    "tags": [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }
+                    ]
+                }
+            ]
+        }]
+    },
+    "examples": [
+        [{
+            "device": "leaf1",
+            "device_tags": [
+                {
+                    "name": "tag1",
+                    "value": "value1"
+                },
+                {
+                    "name": "tag2",
+                    "value": "value2"
+                }
+            ],
+            "interface_tags": [
+                {
+                    "interface": "Ethernet1",
+                    "tags": [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }
+                    ]
+                },
+                {
+                    "interface": "Ethernet2",
+                    "tags": [
+                        {
+                            "name": "tag1",
+                            "value": "value1"
+                        },
+                        {
+                            "name": "tag2",
+                            "value": "value2"
+                        }
+                    ]
+                }
+            ]
+        }]
+    ]
+}
