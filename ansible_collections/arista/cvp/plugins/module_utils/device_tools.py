@@ -1312,7 +1312,7 @@ class CvDeviceTools(object):
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
                     device.fqdn, current_container_info[Api.generic.NAME]))
-                device_info = self.get_device_facts(device_lookup=device.fqdn)
+                device_info = self.get_device_facts(device_lookup=device.info[self.__search_by])
                 if (current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_NAME):
                     if self.__check_mode:
                         result_data.changed = True
