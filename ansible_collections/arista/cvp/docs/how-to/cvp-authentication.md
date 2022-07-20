@@ -45,7 +45,7 @@ ansible_network_os: eos
 ```
 
 !!! note
-    Vault encrypted variables are not supported as password yet. Use ansible vault file instead. https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault"
+    Vault encrypted variables are not supported as password yet. Use ansible vault file instead. https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault
 
 ### Example reading from a file
 
