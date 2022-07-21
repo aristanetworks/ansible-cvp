@@ -1,0 +1,31 @@
+ancestor: null
+releases:
+  3.4.0:
+    changes:
+      bugfixes:
+      - Fix Changed pytest to check for a warning (https://github.com/aristanetworks/ansible-cvp/issues/485)
+      - Fix(cv_container_v3) Cannot remove containers anymore (https://github.com/aristanetworks/ansible-cvp/issues/487)
+      - Fix(cv_device_v3) device lookup to use search_key instead of FQDN always (https://github.com/aristanetworks/ansible-cvp/issues/483)
+      - Fix(image_tools) Change from error to warning if image already exists (https://github.com/aristanetworks/ansible-cvp/issues/471)
+      minor_changes:
+      - Feat (dhcp_configuration) add a name to the dhcp record (https://github.com/aristanetworks/ansible-cvp/issues/481)
+      - Feat Add support for change controls (https://github.com/aristanetworks/ansible-cvp/issues/464)
+      - Feat Add svc account token auth method for on-prem and standardize it with
+        cvaas (https://github.com/aristanetworks/ansible-cvp/issues/458)
+      - Feat Facts update (https://github.com/aristanetworks/ansible-cvp/issues/469)
+      - Feat New module to support topology tags (https://github.com/aristanetworks/ansible-cvp/issues/459)
+      - Feat(cv_facts_v3)  Show assigned image bundles on devices and containers (https://github.com/aristanetworks/ansible-cvp/issues/488)
+      - Feat(module_utils) Raise NotImplementedError if encrypted Vault password (https://github.com/aristanetworks/ansible-cvp/issues/479)
+      release_summary: 'Release 3.4.0 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.4.0.yml
+    modules:
+    - description: Change Control management with Cloudvision
+      name: cv_change_control_v3
+      namespace: ''
+    - description: Create/Assign/Delete/Unassign tags on CVP
+      name: cv_tag_v3
+      namespace: ''
+    release_date: '2022-07-21'
