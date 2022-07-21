@@ -25,7 +25,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: cv_tag_v3
-version_added: "4.0.0"
+version_added: "3.4.0"
 author: PM Team (@aristanetworks)
 short_description: Create/Assign/Delete/Unassign tags on CVP
 description:
@@ -56,7 +56,7 @@ options:
     type: bool
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 ---
 - name: "create tags"
   arista.cvp.cv_tag_v3:
