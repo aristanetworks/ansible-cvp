@@ -26,7 +26,7 @@ DOCUMENTATION = r'''
 ---
 module: cv_facts
 version_added: "1.0.0"
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: Collect facts from CloudVision Portal.
 deprecated:
   removed_in: '4.0.0'

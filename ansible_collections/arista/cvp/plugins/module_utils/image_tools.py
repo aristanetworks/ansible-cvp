@@ -214,7 +214,7 @@ class CvImageTools():
                         except Exception as e:
                             self.__ansible.fail_json(msg="{0}".format(e))
                     else:
-                        self.__ansible.fail_json(msg="Unable to add image {0}. Image already present on server".format(image))
+                        warnings.append("Unable to add image {0}. Image already present on server".format(image))
                 else:
                     self.__ansible.fail_json(msg="Specified file ({0}) does not exist".format(image))
             else:

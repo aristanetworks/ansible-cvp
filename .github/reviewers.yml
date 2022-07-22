@@ -1,15 +1,15 @@
 ---
 ansible_collections/arista/cvp/roles/**/*:
-  - titom73
+  - sugetha24
 ansible_collections/arista/cvp/plugins/**/*:
   - guillaumeVilar
-  - titom73
+  - sugetha24
   - noredistribution
 ansible_collections/arista/cvp/molecule/**/*:
   - guillaumeVilar
-  - titom73
+  - sugetha24
   - noredistribution
 ansible_collections/arista/cvp/docs/**/*:
-  - titom73
+  - sugetha24
 .github/**:
-  - titom73
+  - sugetha24

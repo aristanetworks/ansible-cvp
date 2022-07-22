@@ -1,0 +1,81 @@
+objects: {}
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module:
+    cv_change_control_v3:
+      description: Change Control management with Cloudvision
+      name: cv_change_control_v3
+      namespace: ''
+      version_added: 3.4.0
+    cv_configlet:
+      description: Create, Delete, or Update CloudVision Portal Configlets.
+      name: cv_configlet
+      namespace: ''
+      version_added: 1.0.0
+    cv_configlet_v3:
+      description: Create, Delete, or Update CloudVision Portal Configlets.
+      name: cv_configlet_v3
+      namespace: ''
+      version_added: 3.0.0
+    cv_container:
+      description: Manage Provisioning topology.
+      name: cv_container
+      namespace: ''
+      version_added: 1.0.0
+    cv_container_v3:
+      description: Manage Provisioning topology.
+      name: cv_container_v3
+      namespace: ''
+      version_added: 3.0.0
+    cv_device:
+      description: Provision, Reset, or Update CloudVision Portal Devices.
+      name: cv_device
+      namespace: ''
+      version_added: 1.0.0
+    cv_device_v3:
+      description: Manage Provisioning topology.
+      name: cv_device_v3
+      namespace: ''
+      version_added: 3.0.0
+    cv_facts:
+      description: Collect facts from CloudVision Portal.
+      name: cv_facts
+      namespace: ''
+      version_added: 1.0.0
+    cv_facts_v3:
+      description: Collect facts from Cloudvision
+      name: cv_facts_v3
+      namespace: ''
+      version_added: 3.3.0
+    cv_image_v3:
+      description: EOS Image management with Cloudvision
+      name: cv_image_v3
+      namespace: ''
+      version_added: 3.3.0
+    cv_tag_v3:
+      description: Create/Assign/Delete/Unassign tags on CVP
+      name: cv_tag_v3
+      namespace: ''
+      version_added: 3.4.0
+    cv_task:
+      description: Execute or Cancel CVP Tasks.
+      name: cv_task
+      namespace: ''
+      version_added: 1.0.0
+    cv_task_v3:
+      description: Execute or Cancel CVP Tasks.
+      name: cv_task_v3
+      namespace: ''
+      version_added: 3.0.0
+  netconf: {}
+  shell: {}
+  strategy: {}
+  vars: {}
+version: 3.4.0

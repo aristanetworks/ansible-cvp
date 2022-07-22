@@ -49,6 +49,7 @@ class ApiGeneric():
     NAME: str = 'name'
     PARENT_CONTAINER_ID: str = 'parentContainerId'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
+    IMAGE_BUNDLE: str = 'image_bundle'
 
 
 # @dataclass
@@ -73,10 +74,18 @@ class ApiDevice():
     FQDN: str = 'fqdn'
     HOSTNAME: str = 'hostname'
     ID: str = 'key'
-    IMAGE_BUNDLE: str = 'image_bundle'
     SERIAL: str = 'serialNumber'
     SYSMAC: str = 'systemMacAddress'
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
+    MGMTIP: str = 'ipAddress'
+
+
+# @dataclass
+class ApiImageBundle():
+    """Keys specific to image bundle resources"""
+    NAME: str = 'bundleName'
+    ID: str = 'imageBundleId'
+    TYPE: str = 'type'
 
 
 # @dataclass
@@ -106,3 +115,4 @@ class Api():
     generic: ApiGeneric = ApiGeneric
     mappers: ApiMappers = ApiMappers
     task: ApiTask = ApiTask
+    image: ApiImageBundle = ApiImageBundle

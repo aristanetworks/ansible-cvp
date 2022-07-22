@@ -20,12 +20,9 @@ __metaclass__ = type
 
 import os
 import re
-import sys
 import datetime
 import cgi
 import yaml
-import logging
-from distutils.version import LooseVersion
 from jinja2 import Environment, FileSystemLoader
 from ansible.module_utils.six import print_
 from ansible.module_utils.common._collections_compat import MutableMapping, MutableSet, MutableSequence

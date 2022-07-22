@@ -54,22 +54,32 @@ def cv_connect(module):
     client = CvpClient()
     LOGGER.info('Connecting to CVP')
     connection = Connection(module._socket_path)
+    # use 'cvaas' user for CVaaS connection and 'svc_account' for CV on-prem using service account token
+    svc_accounts = ['cvaas', 'svc_account']
     host = connection.get_option("host")
     port = connection.get_option("port")
     cert_validation = connection.get_option("validate_certs")
     is_cvaas = True if connection.get_option("remote_user") == 'cvaas' else False
-    cvaas_token = connection.get_option("password") if connection.get_option("remote_user") == 'cvaas' else None
+    api_token = connection.get_option("password") if connection.get_option("remote_user") in svc_accounts else None
     user = connection.get_option("remote_user") if connection.get_option("remote_user") != 'cvaas' else ''
-    user_authentication = connection.get_option("password") if connection.get_option("remote_user") != 'cvass' else ''
+    user_authentication = connection.get_option("password") if connection.get_option("remote_user") != 'cvaas' else ''
     ansible_command_timeout = connection.get_option(
         "persistent_command_timeout")
     ansible_connect_timeout = connection.get_option(
         "persistent_connect_timeout")
 
+    if not isinstance(user_authentication, str):
+        LOGGER.error('Cannot connect to CVP, password is encrypted')
+        raise NotImplementedError("Vault encrypted variables are not supported "
+                                  "as password yet. Use ansible vault file instead."
+                                  "https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault")
+
     if cert_validation:
         LOGGER.debug("  Module will check CV certificate")
     if user == 'cvaas':
         LOGGER.debug('  Connecting to a cvaas instance')
+    if user == 'svc_account':
+        LOGGER.debug('  Connecting to a on-prem instance using service account token')
     LOGGER.debug('  Connecting to a CV instance: %s with timers %s %s',
                  str(host),
                  str(ansible_connect_timeout),
@@ -77,8 +87,8 @@ def cv_connect(module):
     try:
         client.connect(nodes=[host],
                        username=user,
-                       cvaas_token=cvaas_token,
                        password=user_authentication,
+                       api_token=api_token,
                        protocol="https",
                        is_cvaas=is_cvaas,
                        port=port,
@@ -87,8 +97,8 @@ def cv_connect(module):
                        connect_timeout=ansible_connect_timeout
                        )
     except CvpLoginError as e:
-        module.fail_json(msg=str(e))
         LOGGER.error('Cannot connect to CVP: %s', str(e))
+        module.fail_json(msg=str(e))
 
     LOGGER.info('Connected to CVP')
 
@@ -108,7 +118,7 @@ def isIterable(testing_object=None):
 
     """
     try:
-        some_object_iterator = iter(testing_object)  # noqa # pylint: disable=unused-variable
+        iter(testing_object)
         return True
     except TypeError as te:  # noqa # pylint: disable=unused-variable
         return False

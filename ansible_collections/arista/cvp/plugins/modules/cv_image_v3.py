@@ -26,7 +26,7 @@ DOCUMENTATION = r'''
 ---
 module: cv_image_v3
 version_added: 3.3.0
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: EOS Image management with Cloudvision
 description:
   - CloudVision Portal Image management module.
