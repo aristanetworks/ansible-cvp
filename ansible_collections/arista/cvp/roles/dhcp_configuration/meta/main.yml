@@ -1,5 +1,5 @@
 galaxy_info:
-  : Arista Ansible Team <ansible@arista.com>
+  author: Arista Ansible Team <ansible@arista.com>
   description: Role to configure DHCP service to act as ZTP server
   issue_tracker_url: https://github.com/aristanetworks/ansible-cvp/issues
   company: Arista Networks

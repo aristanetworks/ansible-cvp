@@ -12,7 +12,7 @@ Provision, Reset, or Update CloudVision Portal Devices.
 DEPRECATED
 ----------
 
-:In: version: 
+:In: version:
 :Why: Updated modules released with increased functionality
 :Alternative: Use :ref:`arista.cvp.cv_device_v3 <arista.cvp.cv_device_v3>` instead.
 
@@ -129,7 +129,7 @@ Examples:
 ---------
 
 ::
-    
+
     ---
     - name: Test cv_device
       hosts: cvp
@@ -183,5 +183,3 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
-
-
