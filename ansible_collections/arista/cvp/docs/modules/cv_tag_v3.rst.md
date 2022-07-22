@@ -2,7 +2,7 @@
 
 Create/Assign/Delete/Unassign tags on CVP
 
-Module added in version 4.0.0
+Module added in version 3.4.0
 
 <div class="contents" local="" depth="2">
 
@@ -52,7 +52,7 @@ The following options may be specified for this module:
 
 <tr>
 <td>tags<br/><div style="font-size: small;"></div></td>
-<td>dict</td>
+<td>list</td>
 <td>yes</td>
 <td></td>
 <td></td>
@@ -75,4 +75,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   PM Team (@aristanetworks)
+-   Ansible Arista Team (@aristanetworks)

@@ -83,7 +83,7 @@ Examples:
 ---------
 
 ::
-
+    
     # task in loose mode (default)
     - name: Create container topology on CVP
       hosts: cvp
@@ -128,4 +128,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+

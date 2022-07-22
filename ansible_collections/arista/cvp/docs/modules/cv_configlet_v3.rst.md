@@ -93,4 +93,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   EMEA AS Team (@aristanetworks)
+-   Ansible Arista Team (@aristanetworks)

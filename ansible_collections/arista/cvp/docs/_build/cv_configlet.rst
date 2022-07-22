@@ -12,7 +12,7 @@ Create, Delete, or Update CloudVision Portal Configlets.
 DEPRECATED
 ----------
 
-:In: version:
+:In: version: 
 :Why: Updated modules released with increased functionality
 :Alternative: Use :ref:`arista.cvp.cv_configlet_v3 <arista.cvp.cv_configlet_v3>` instead.
 
@@ -141,7 +141,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
     - name: Test cv_configlet_v2
       hosts: cvp
@@ -173,4 +173,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+

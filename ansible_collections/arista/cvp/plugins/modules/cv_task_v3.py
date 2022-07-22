@@ -26,7 +26,7 @@ DOCUMENTATION = r'''
 ---
 module: cv_task_v3
 version_added: "3.0.0"
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
   - CloudVison Portal Task module to action pending tasks on CLoudvision

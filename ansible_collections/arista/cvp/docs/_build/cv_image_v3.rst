@@ -106,7 +106,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
     - name: CVP Image Tests
       hosts: cv_server
@@ -152,4 +152,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+

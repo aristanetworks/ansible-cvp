@@ -70,7 +70,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
     - name: Execute all tasks registered in cvp_configlets variable
       arista.cvp.cv_task:
@@ -86,4 +86,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+

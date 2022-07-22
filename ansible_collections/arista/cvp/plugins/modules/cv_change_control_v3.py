@@ -26,7 +26,7 @@ DOCUMENTATION = r'''
 ---
 module: cv_change_control_v3
 version_added: 3.4.0
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: Change Control management with Cloudvision
 description:
   - CloudVision Portal Change Control Module.

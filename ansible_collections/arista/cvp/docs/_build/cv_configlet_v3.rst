@@ -90,7 +90,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
     - name: Test cv_configlet_v3
       hosts: cvp
@@ -114,4 +114,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+

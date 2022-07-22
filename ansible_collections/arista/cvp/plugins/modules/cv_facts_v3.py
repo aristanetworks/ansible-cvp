@@ -27,7 +27,7 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 module: cv_facts_v3
 version_added: "3.3.0"
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: Collect facts from Cloudvision
 description:
 - Returns list of devices, configlets, containers and images from CloudVision

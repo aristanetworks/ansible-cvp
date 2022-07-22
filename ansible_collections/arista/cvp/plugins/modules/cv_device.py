@@ -25,7 +25,7 @@ DOCUMENTATION = r"""
 ---
 module: cv_device
 version_added: "1.0.0"
-author: EMEA AS Team (@aristanetworks)
+author: Ansible Arista Team (@aristanetworks)
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
 description:
   - CloudVison Portal Device compares the list of Devices

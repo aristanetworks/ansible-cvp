@@ -12,7 +12,7 @@ Execute or Cancel CVP Tasks.
 DEPRECATED
 ----------
 
-:In: version:
+:In: version: 
 :Why: Updated modules released with increased functionality
 :Alternative: Use :ref:`arista.cvp.cv_task_v3 <arista.cvp.cv_task_v3>` instead.
 
@@ -99,7 +99,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
     - name: Execute all tasks registered in cvp_configlets variable
       arista.cvp.cv_task:
@@ -126,4 +126,6 @@ Examples:
 Author
 ~~~~~~
 
-* EMEA AS Team (@aristanetworks)
+* Ansible Arista Team (@aristanetworks)
+
+
