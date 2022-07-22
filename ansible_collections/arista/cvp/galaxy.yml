@@ -15,7 +15,7 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- EMEA AS <ansible-dev@arista.com>
+- Ansible Arista Team (@aristanetworks)
 
 ### OPTIONAL but strongly recommended
 
