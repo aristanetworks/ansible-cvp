@@ -60,6 +60,7 @@ class DeviceElement(object):
         self.__fqdn = self.__data.get(Api.device.FQDN)
         self.__sysmac = self.__data.get(Api.device.SYSMAC)
         self.__serial = self.__data.get(Api.device.SERIAL)
+        self.__mgmtip = self.__data.get(Api.device.MGMTIP)
         self.__container = self.__data[Api.generic.PARENT_CONTAINER_NAME]
         # self.__image_bundle = []  # noqa # pylint: disable=unused-variable
         self.__current_parent_container_id = None
@@ -71,6 +72,8 @@ class DeviceElement(object):
             self.__serial = data[Api.device.SERIAL]
         if Api.device.HOSTNAME in data:
             self.__hostname = data[Api.device.HOSTNAME]
+        if Api.device.MGMTIP in data:
+            self.__mgmtip = data[Api.device.MGMTIP]
         elif Api.device.FQDN in data:
             self.__hostname = data[Api.device.FQDN].split('.')[0]
         else:
@@ -147,6 +150,30 @@ class DeviceElement(object):
             systemMac address to configure on device
         """
         self.__sysmac = mac
+
+    @property
+    def mgmt_ip(self):
+        """
+        system_mac Getter for SystemMac value
+
+        Returns
+        -------
+        str
+            mgmtIp address for the device
+        """
+        return self.__mgmtip
+
+    @mgmt_ip.setter
+    def mgmt_ip(self, mgmtip: str):
+        """
+        mgmt_ip Setter for MgmtIp address
+
+        Parameters
+        ----------
+        ip : str
+            mgmtIp address to configure on device
+        """
+        self.__mgmtip = mgmtip
 
     @property
     def serial_number(self):
@@ -1285,7 +1312,7 @@ class CvDeviceTools(object):
                     device_mac=device.system_mac)
                 MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
                     device.fqdn, current_container_info[Api.generic.NAME]))
-                device_info = self.get_device_facts(device_lookup=device.fqdn)
+                device_info = self.get_device_facts(device_lookup=device.info[self.__search_by])
                 if (current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_NAME):
                     if self.__check_mode:
                         result_data.changed = True
