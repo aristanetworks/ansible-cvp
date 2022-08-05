@@ -4,15 +4,6 @@
 
 :root {
   /* Color schema based on Arista Color Schema */
-  /* Default color shades */
-  --md-default-fg-color:               #000000;
-  --md-default-fg-color--light:        #a1a0a0;
-  --md-default-fg-color--lighter:      #FFFFFF;
-  --md-default-fg-color--lightest:     #FFFFFF;
-  --md-default-bg-color:               #FFFFFF;
-  --md-default-bg-color--light:        #FFFFFF;
-  --md-default-bg-color--lighter:      #FFFFFF;
-  --md-default-bg-color--lightest:     #FFFFFF;
 
   /* Primary color shades */
   --md-primary-fg-color:               #27569B;
@@ -37,7 +28,7 @@
   --block-code-bg-color:               #e4e4e4;
   /* --md-code-fg-color:                  ...; */
 
-  font-size: 1rem;
+  /* font-size: 1rem; */
   /* min-height: 100%;
   position: relative;
   width: 100%; */
@@ -60,8 +51,32 @@
   /* --block-code-bg-color:               #e4e4e4; */
 }
 
+[data-md-color-scheme="default"] {
+  /* Primary color shades */
+  --md-primary-fg-color:               #27569B;
+  --md-primary-fg-color--light:        #FFFFFF;
+  --md-primary-fg-color--dark:         #27569B;
+  --md-primary-bg-color:               #FFFFFF;
+  --md-primary-bg-color--light:        #FFFFFF;
+
+  /* Accent color shades */
+  --md-accent-fg-color:                #27569B;
+  --md-accent-bg-color:                #27569B;
+  --md-accent-bg-color--light:         #27569B;
+
+  /* Link color */
+  --md-typeset-a-color:                #27569B;
+  --md-typeset-a-color-fg:             #FFFFFF;
+  --md-typeset-a-color-bg:             #27569B;
+
+  /* Code block color shades */
+  --md-code-bg-color:                  #E6E6E6;
+  --md-code-border-color:              #0000004f;
+  --block-code-bg-color:               #e4e4e4;
+}
+
 @media only screen and (min-width: 76.25em) {
-  .md-main__inner, .md-header__inner {
+  .md-main__inner {
     max-width: 85%;
   }
   .md-sidebar--primary {
@@ -144,7 +159,7 @@
       margin: 1.5625em 0;
       padding: 0 .6rem;
       overflow: hidden;
-      font-size: 0.8rem;
+      font-size: .64rem;
       page-break-inside: avoid;
       border-left: .2rem solid var(--md-accent-bg-color);
       border-left-color: var(--md-accent-bg-color);
@@ -155,6 +170,7 @@
     background-color: var(--md-accent-bg-color);
     color: var(--md-default-fg-color--lighter)
   } */
+}
   .md-typeset__table {
     min-width: 100%;
   }
@@ -162,30 +178,20 @@
       display: table;
   }
 
-  .mdx-content__footer {
-      margin-top: 20px;
-      text-align: center;
-  }
-  .mdx-content__footer a {
-      display: inline-block;
-      transition: transform 250ms cubic-bezier(0.1, 0.7, 0.1, 1), color 125ms;
-  }
-  .mdx-content__footer a:focus, .mdx-content__footer a:hover {
-      transform: scale(1.2);
-  }
+.mdx-content__footer {
+    margin-top: 20px;
+    text-align: center;
+}
+.mdx-content__footer a {
+    display: inline-block;
+    transition: transform 250ms cubic-bezier(0.1, 0.7, 0.1, 1), color 125ms;
+}
+.mdx-content__footer a:focus, .mdx-content__footer a:hover {
+    transform: scale(1.2);
+}
 
-  .md-typeset table:not([class]) th {
-      min-width: 5rem;
-      padding: .6rem .8rem;
-      color: var(--md-primary-fg-color--light);
-  }
-
-  .md-footer-copyright {
-      color: var(--md-footer-fg-color--lighter);
-      font-size: .64rem;
-      margin: auto 0.6rem;
-      padding: 0.4rem;
-      width: 100%;
-      text-align: center;
-  }
+.md-typeset table:not([class]) th {
+    min-width: 5rem;
+    padding: .6rem .8rem;
+    color: var(--md-primary-fg-color--light);
 }
