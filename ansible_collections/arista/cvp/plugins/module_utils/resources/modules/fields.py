@@ -40,6 +40,7 @@ class FactsResponseFields():
     CONFIGLET: str = 'cvp_configlets'
     CONTAINER: str = 'cvp_containers'
     DEVICE: str = 'cvp_devices'
+    IMAGE_BUNDLE: str = 'cvp_image_bundle'
 
 
 # @dataclass
