@@ -419,9 +419,9 @@ class CvDeviceTools(object):
         elif search_by == Api.device.SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
 
-        if cv_data is not None:    
+        if cv_data is not None:
             cv_data['imageBundle'] = self.__cv_client.api.get_device_image_info(cv_data['key'])
-        
+
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
 
@@ -587,7 +587,7 @@ class CvDeviceTools(object):
         if action_result is not None:
             for update in action_result:
                 cv_configlets_attach.add_change(change=update)
-                
+
         # Apply image bundle as set in inventory
         action_result = self.apply_bundle(user_inventory=user_inventory)
         if action_result is not None:
@@ -1117,18 +1117,18 @@ class CvDeviceTools(object):
     def apply_bundle(self, user_inventory: DeviceInventory):
         """
         apply_bundle - apply an image bundle to a device
-        
+
         Execute the API calls to attach an image bundle to a device.
         Note that only 1 image bundle can be attached to a device.
-        
+
         If an image bundle is already attached to the device (type: netelement)
         the new image bundle will replace the old.
-        
+
         Our behaviour is as follows;
         * Bundle already attached to the device - update if different, skip if the same
         * Bundle inherited from container (type: container) - attach bundle to device, regardless
         of whether or not it is the same
-        
+
         Parameters
         ----------
         user_inventory : DeviceInventory
@@ -1140,13 +1140,13 @@ class CvDeviceTools(object):
             List of CvApiResult for all API calls
         """
         results = []
-        
+
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Applying image bundle for device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_attached')
             ## WIP
 
-            # Do we care if the device is in undefined? 
+            # Do we care if the device is in undefined?
             # TEST: Is it valid to assign an image bundle to a device in undefined state?
             # If it is ok, then delete next block
             current_container_info = self.get_container_current(device_mac=device.system_mac)
@@ -1156,7 +1156,7 @@ class CvDeviceTools(object):
             # GET IMAGE BUNDLE
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
 
-            if "image_bundle" in device:
+            if "image_bundle" in device and device["image_bundle"] is not None:
                 if device["image_bundle"] == current_image_bundle[Api.image.NAME]:
                     pass
                     # Nothing to do
@@ -1180,7 +1180,6 @@ class CvDeviceTools(object):
                             device.type
                         )
 
-
                     except CvpApiError as catch_error:
                         MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
                         self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + catch_error)
@@ -1192,15 +1191,7 @@ class CvDeviceTools(object):
 
                 results.append(result_data)
 
-
-            # if new_image_bundle != current image bundle
-            #    Create task
-            
-            
-            
-            results.append(result_data)
-        
-        return results    
+        return results
 
 
     def apply_configlets(self, user_inventory: DeviceInventory):
