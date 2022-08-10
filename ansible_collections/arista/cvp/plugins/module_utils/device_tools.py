@@ -1198,11 +1198,11 @@ class CvDeviceTools(object):
 
         return results
 
-    def remove_bundle(self, user_inventory: DeviceInventory):
+    def detach_bundle(self, user_inventory: DeviceInventory):
         """
-        remove_bundle - remove an image bundle from a device
+        detach_bundle - detach an image bundle from a device
 
-        Execute the API calls to remove an image bundle from a device.
+        Execute the API calls to detach an image bundle from a device.
 
         Parameters
         ----------
@@ -1217,7 +1217,7 @@ class CvDeviceTools(object):
         results = []
 
         for device in user_inventory.devices:
-            MODULE_LOGGER.debug("Removing image bundle from device: %s", str(device.fqdn))
+            MODULE_LOGGER.debug("Detaching image bundle from device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_detached')
             ## WIP
 
