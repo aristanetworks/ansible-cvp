@@ -420,8 +420,9 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
         elif search_by == Api.device.SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
-            
-        cv_data['imageBundle'] = self.__cv_client.api.get_device_image_info(cv_data['key'])
+
+        if cv_data is not None:    
+            cv_data['imageBundle'] = self.__cv_client.api.get_device_image_info(cv_data['key'])
         
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
@@ -829,6 +830,27 @@ class CvDeviceTools(object):
             }
         return None
 
+    def get_device_image_bundle(self, device_lookup:str):
+        """
+        get_device_image_bundle Retrieve image bundle attached to the device
+
+        Parameters
+        ----------
+        device_lookup : str
+            Device name to look for
+
+        Returns
+        -------
+        dict
+            A dict with key and name
+        """
+        cv_data = self.get_device_facts(device_lookup=device_lookup)
+        if cv_data is not None:
+            return {
+                Api.generic.IMAGE_BUNDLE: cv_data[Api.generic.IMAGE_BUNDLE]
+            }
+        return None
+
     def get_container_info(self, container_name: str):
         """
         get_container_info Retrieve container information from Cloudvision
@@ -1122,8 +1144,59 @@ class CvDeviceTools(object):
         results = []
         
         for device in user_inventory.devices:
+            MODULE_LOGGER.debug("Applying image bundle for device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_attached')
             ## WIP
+
+            # Do we care if the device is in undefined? 
+            # TEST: Is it valid to assign an image bundle to a device in undefined state?
+            # If it is ok, then delete next block
+            current_container_info = self.get_container_current(device_mac=device.system_mac)
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+                continue
+
+            # GET IMAGE BUNDLE
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
+
+            if "image_bundle" in device:
+                if device["image_bundle"] == current_image_bundle[Api.image.NAME]:
+                    pass
+                    # Nothing to do
+                else:
+                    device_facts = {}
+                    if self.__search_by == Api.device.FQDN:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=False)
+                    elif self.__search_by == Api.device.HOSTNAME:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=True)
+                    elif self.__search_by == Api.device.SERIAL:
+                        device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
+
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device["image_bundle"])
+                    try:
+                        resp = self.__cv_client.api.apply_image_to_element(
+                            assigned_image_facts,
+                            device_facts,
+                            device.hostname,
+                            device.type
+                        )
+
+
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + catch_error)
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+
+                results.append(result_data)
+
+
+            # if new_image_bundle != current image bundle
+            #    Create task
             
             
             
