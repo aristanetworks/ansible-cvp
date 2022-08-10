@@ -1232,9 +1232,9 @@ class CvDeviceTools(object):
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
 
             if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
-                # dict.get(key) will return None if the key does not exist, or if the key exists
-                # but is set to None
-                if device.get('image_bundle') is None:
+                # dict.get(key) will return None if the key does not exist, or the value if the key does exist
+                # This means that if the value is None, we get the same result as if the key doesn't exist
+                if device.get(Api.generic.IMAGE_BUNDLE) is None:
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
@@ -1246,7 +1246,7 @@ class CvDeviceTools(object):
                     elif self.__search_by == Api.device.SERIAL:
                         device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
-                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device["image_bundle"])
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(current_image_bundle[Api.image.NAME])
                     try:
                         resp = self.__cv_client.api.remove_image_from_element(
                             assigned_image_facts,
