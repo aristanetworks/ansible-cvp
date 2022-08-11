@@ -1163,6 +1163,8 @@ class CvDeviceTools(object):
             if "image_bundle" in device and device["image_bundle"] is not None:
                 if device["image_bundle"] == current_image_bundle[Api.image.NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
+                    MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
+                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.image.NAME]))
                     pass
                     # Nothing to do
                 else:
