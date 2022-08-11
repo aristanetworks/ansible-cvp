@@ -611,6 +611,8 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_deploy: %s', str(response.content))
         response.add_manager(cv_configlets_attach)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_attach: %s', str(response.content))
+        response.add_manager(cv_bundle_attach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_bundle_attach: %s', str(response.content))
         response.add_manager(cv_configlets_detach)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
 
