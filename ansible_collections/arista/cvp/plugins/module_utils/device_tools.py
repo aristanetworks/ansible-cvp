@@ -1162,7 +1162,7 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
-            current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned to %s is: %s", (str(device.fqdn),str(current_image_bundle) ) )
 
             if "image_bundle" in device and device["image_bundle"] is not None:
@@ -1236,7 +1236,7 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
-            current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
 
             if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
                 # dict.get(key) will return None if the key does not exist, or the value if the key does exist
