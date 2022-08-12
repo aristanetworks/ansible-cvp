@@ -1162,6 +1162,7 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
+            MODULE_LOGGER.debug("Get image bundle for %s",str(device))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned to %s is: %s", (str(device.fqdn),str(current_image_bundle) ) )
 
@@ -1173,6 +1174,7 @@ class CvDeviceTools(object):
                     pass
                     # Nothing to do
                 else:
+
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
                         device_facts = self.__cv_client.api.get_device_by_name(
