@@ -60,10 +60,9 @@ class DeviceElement(object):
         self.__serial = self.__data.get(Api.device.SERIAL)
         self.__mgmtip = self.__data.get(Api.device.MGMTIP)
         self.__container = self.__data[Api.generic.PARENT_CONTAINER_NAME]
-
         self.__current_parent_container_id = None
-
         self.__image_bundle = self.__data.get(Api.device.BUNDLE)
+
         if Api.device.BUNDLE in self.__data:
             self.__image_bundle = data[Api.device.BUNDLE]
         if Api.device.SYSMAC in data:
@@ -1175,7 +1174,7 @@ class CvDeviceTools(object):
             # GET IMAGE BUNDLE
             MODULE_LOGGER.debug("Get image bundle for %s",str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
-            MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle) )
+            MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
 
             if device.image_bundle is not None:
                 if device.image_bundle == current_image_bundle[Api.image.NAME] \
@@ -1185,6 +1184,7 @@ class CvDeviceTools(object):
                     pass
                     # Nothing to do
                 else:
+                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", (str(device.fqdn),str(device.image_bundle)))
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
@@ -1196,7 +1196,8 @@ class CvDeviceTools(object):
                     elif self.__search_by == Api.device.SERIAL:
                         device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
-                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device["image_bundle"])
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device.image_bundle)
+                    MODULE_LOGGER.debug("%s image bundle facts are: %s", (str(device.image_bundle), str(assigned_image_facts)) )
                     try:
                         resp = self.__cv_client.api.apply_image_to_element(
                             assigned_image_facts,
