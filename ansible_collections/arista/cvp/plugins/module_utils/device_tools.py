@@ -853,7 +853,7 @@ class CvDeviceTools(object):
             return {
                 Api.generic.NAME: cv_data['imageBundle'][Api.image.NAME],
                 Api.image.ID: cv_data['imageBundle'][Api.image.ID],
-                Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][cv_data['imageBundle'][Api.image.ID]][Api.image.TYPE]
+                Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][ cv_data['imageBundle'][Api.image.ID] ][Api.image.TYPE]
 
             }
         return None
@@ -1166,8 +1166,8 @@ class CvDeviceTools(object):
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle) )
 
-            if "image_bundle" in device and device["image_bundle"] is not None:
-                if device["image_bundle"] == current_image_bundle[Api.image.NAME] \
+            if device.image_bundle is not None:
+                if device.image_bundle == current_image_bundle[Api.image.NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
                     MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
                     MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.image.NAME]))
