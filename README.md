@@ -158,22 +158,11 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 
 ## Installation
 
-Complete installation process is available on [repository website](https://cvp.avd.sh/installation/)
+Complete installation process is available on [repository website](https://cvp.avd.sh/)
 
-### Dependencies
+### Requirements
 
-This collection requires the following to be installed on the Ansible control machine:
-
-__Ansible version:__
-
-- ansible >= `2.9.0`
-
-__3rd party Python libraries:__
-
-- [cvprac](https://github.com/aristanetworks/cvprac) version `1.0.5`
-- requests >= `2.22.0`
-- jsonschema `3.2.0`
-- treelib `1.5.5` (for modules in version 1)
+To install requirements please follow [this](https://cvp.avd.sh/en/stable/docs/installation/requirements/) guide.
 
 ### Installation from ansible-galaxy
 
