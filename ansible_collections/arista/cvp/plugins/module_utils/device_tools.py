@@ -1160,7 +1160,7 @@ class CvDeviceTools(object):
 
             # GET IMAGE BUNDLE
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.hostname)
-            MODULE_LOGGER.debug("Current image bundle assigned to %s is: %s", (str(device.fqdn),str(current_image_bundle) )
+            MODULE_LOGGER.debug("Current image bundle assigned to %s is: %s", (str(device.fqdn),str(current_image_bundle) ) )
 
             if "image_bundle" in device and device["image_bundle"] is not None:
                 if device["image_bundle"] == current_image_bundle[Api.image.NAME] \
@@ -1178,7 +1178,7 @@ class CvDeviceTools(object):
                         device_facts = self.__cv_client.api.get_device_by_name(
                             fqdn=device.fqdn, search_by_hostname=True)
                     elif self.__search_by == Api.device.SERIAL:
-                        device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serialNumber)
+                        device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
                     assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device["image_bundle"])
                     try:
