@@ -78,6 +78,7 @@ class ApiDevice():
     SYSMAC: str = 'systemMacAddress'
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
     MGMTIP: str = 'ipAddress'
+    BUNDLE: str = 'imageBundle'
 
 
 # @dataclass
