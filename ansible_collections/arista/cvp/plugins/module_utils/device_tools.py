@@ -846,6 +846,7 @@ class CvDeviceTools(object):
             A dict with key and name
         """
         cv_data = self.get_device_facts(device_lookup=device_lookup)
+        MODULE_LOGGER.debug('cv_data lookup returned: %s' % str(cv_data))
         if cv_data is not None and cv_data[Api.image.NAME] is not None:
             return {
                 Api.generic.NAME: cv_data[Api.image.NAME],
