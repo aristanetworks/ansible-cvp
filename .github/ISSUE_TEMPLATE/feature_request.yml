@@ -25,6 +25,10 @@ body:
         - cv_container_v3
         - cv_configlet_v3
         - cv_task_v3
+        - cv_tag_v3
+        - cv_facts_v3
+        - cv_image_v3
+        - cv_change_control_v3
         - other
     validations:
       required: true
