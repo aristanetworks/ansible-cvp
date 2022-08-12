@@ -847,11 +847,11 @@ class CvDeviceTools(object):
         """
         cv_data = self.get_device_facts(device_lookup=device_lookup)
         MODULE_LOGGER.debug('cv_data lookup returned: %s' % str(cv_data))
-        if cv_data is not None and cv_data[Api.image.NAME] is not None:
+        if cv_data is not None and 'imageBundle' in cv_data:
             return {
-                Api.generic.NAME: cv_data[Api.image.NAME],
-                Api.image.ID: cv_data[Api.image.ID],
-                Api.image.TYPE: cv_data['imageBundleMapper'][cv_data[Api.image.ID]][Api.image.TYPE]
+                Api.generic.NAME: cv_data['imageBundle'][Api.image.NAME],
+                Api.image.ID: cv_data['imageBundle'][Api.image.ID],
+                Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][cv_data['imageBundle'][Api.image.ID]][Api.image.TYPE]
 
             }
         return None
