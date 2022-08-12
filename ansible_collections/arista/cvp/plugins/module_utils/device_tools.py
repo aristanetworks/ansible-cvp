@@ -420,6 +420,7 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
 
         if cv_data is not None:
+            MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
             cv_data['imageBundle'] = self.__cv_client.api.get_device_image_info(cv_data['key'])
 
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
