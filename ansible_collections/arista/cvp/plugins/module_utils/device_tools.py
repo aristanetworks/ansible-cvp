@@ -1175,6 +1175,7 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug("Get image bundle for %s",str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
+            MODULE_LOGGER.debug("User assigned image bundle is %s",str(device.image_bundle))
 
             if device.image_bundle is not None:
                 if device.image_bundle == current_image_bundle[Api.image.NAME] \
