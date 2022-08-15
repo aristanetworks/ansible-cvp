@@ -71,7 +71,7 @@ SCHEMA_CV_DEVICE = {
                     "AVD_DC1-SPINE1",
                     "01TRAINING-01"
                 ],
-                "imageBundle": "spine1_bundle"
+                "imageBundle": []
             },
             "DC1-SPINE2": {
                 "name": "DC1-SPINE1",
@@ -80,7 +80,7 @@ SCHEMA_CV_DEVICE = {
                     "AVD_DC1-SPINE2",
                     "01TRAINING-01"
                 ],
-                "imageBundle": "spine2_bundle"
+                "imageBundle": []
             }
         }
     ],
@@ -103,7 +103,10 @@ SCHEMA_CV_DEVICE = {
                 },
                 "imageBundle": {
                     "id": "imageBundle",
-                    "type": "string",
+                    "type": "array",
+                    "contains": {
+                        "type": "string"
+                    },
                     "required": False
                 },
             }
