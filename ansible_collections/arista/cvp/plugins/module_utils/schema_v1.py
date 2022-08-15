@@ -104,7 +104,7 @@ SCHEMA_CV_DEVICE = {
                     "required": False
                 },
                 "imageBundle": {
-                    "id": "image_bundle",
+                    "id": "imageBundle",
                     "type": "string",
                     "required": False
                 },
