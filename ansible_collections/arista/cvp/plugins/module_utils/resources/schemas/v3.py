@@ -190,16 +190,13 @@ SCHEMA_CV_DEVICE = {
                     },
                     "imageBundle": {
                         "$id": "#/items/anyOf/0/properties/imageBundle",
-                        "type": "array",
-                        "title": "The imageBundle schema",
+                        "type": "string",
+                        "title": "The imageBundle name",
                         "description": "An explanation about the purpose of this instance.",
                         "default": [],
                         "examples": [
-                            []
-                        ],
-                        "items": {
-                            "$id": "#/items/anyOf/0/properties/imageBundle/items"
-                        }
+                            [ "spine_image_bundle" ]
+                        ]
                     }
                 },
             }
