@@ -1183,6 +1183,7 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug("Get image bundle for %s",str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
+            MODULE_LOGGER.debug("user inventory is: %s", str(device))
             MODULE_LOGGER.debug("User assigned image bundle is %s",str(device.image_bundle))
 
             if device.image_bundle is not None:
