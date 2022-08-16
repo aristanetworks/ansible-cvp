@@ -436,6 +436,8 @@ class CvDeviceTools(object):
 
         if cv_data is not None and len(cv_data) > 0:
             cv_data[Api.device.BUNDLE] = self.__cv_client.api.get_device_image_info(cv_data['key'])
+        else:
+            cv_data[Api.device.BUNDLE] = None
 
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
@@ -612,6 +614,12 @@ class CvDeviceTools(object):
         # Remove configlets configured on CVP and if module runs in strict mode
         if apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
             action_result = self.detach_configlets(
+                user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_configlets_detach.add_change(change=update)
+
+            action_result = self.detach_bundle(
                 user_inventory=user_inventory)
             if action_result is not None:
                 for update in action_result:
@@ -870,7 +878,7 @@ class CvDeviceTools(object):
                 }
             else:
                 return {
-                    Api.generic.NAME: cv_data['imageBundle'][Api.image.NAME],
+                    Api.generic.IMAGE_BUNDLE_NAME: cv_data['imageBundle'][Api.image.NAME],
                     Api.image.ID: cv_data['imageBundle'][Api.image.ID],
                     Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][ cv_data['imageBundle'][Api.image.ID] ][Api.image.TYPE]
                 }
@@ -1170,11 +1178,8 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Applying image bundle for device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_attached')
-            ## WIP
 
-            # Do we care if the device is in undefined?
-            # TEST: Is it valid to assign an image bundle to a device in undefined state?
-            # If it is ok, then delete next block
+            # We can't attach/detach an image to a device in the undefined container
             current_container_info = self.get_container_current(device_mac=device.system_mac)
             if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
                 continue
@@ -1183,14 +1188,13 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug("Get image bundle for %s",str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
-            MODULE_LOGGER.debug("user inventory is: %s", str(device.info))
             MODULE_LOGGER.debug("User assigned image bundle is: %s",str(device.image_bundle))
 
             if device.image_bundle is not None:
                 if device.image_bundle == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
                     MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
-                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.image.NAME]))
+                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]))
                     pass
                     # Nothing to do
                 else:
@@ -1250,11 +1254,8 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Detaching image bundle from device: %s", str(device.fqdn))
             result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_detached')
-            ## WIP
 
-            # Do we care if the device is in undefined?
-            # TEST: Is it valid to assign an image bundle to a device in undefined state?
-            # If it is ok, then delete next block
+            # We can't attach/detach an image to a device in the undefined container
             current_container_info = self.get_container_current(device_mac=device.system_mac)
             if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
                 continue
@@ -1262,10 +1263,9 @@ class CvDeviceTools(object):
             # GET IMAGE BUNDLE
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
 
+            # Check to make sure that the assigned image isn't inherited from the container
             if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
-                # dict.get(key) will return None if the key does not exist, or the value if the key does exist
-                # This means that if the value is None, we get the same result as if the key doesn't exist
-                if device.get(Api.generic.IMAGE_BUNDLE_NAME) is None:
+                if device.image_bundle is None:
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
@@ -1277,13 +1277,13 @@ class CvDeviceTools(object):
                     elif self.__search_by == Api.device.SERIAL:
                         device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
-                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(current_image_bundle[Api.image.NAME])
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME])
                     try:
                         resp = self.__cv_client.api.remove_image_from_element(
                             assigned_image_facts,
                             device_facts,
                             device.hostname,
-                            device.type
+                            'netelement'
                         )
 
                     except CvpApiError as catch_error:
