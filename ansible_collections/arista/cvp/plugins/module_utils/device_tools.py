@@ -1213,6 +1213,10 @@ class CvDeviceTools(object):
                         device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
                     assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device.image_bundle)
+                    if assigned_image_facts is None:
+                        MODULE_LOGGER.error('Error image bundle %s not found', str(device.image_bundle))
+                        self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + str(device.image_bundle) + 'not found')
+
                     MODULE_LOGGER.debug("%s image bundle facts are: %s", (str(device.image_bundle), str(assigned_image_facts)) )
                     try:
                         resp = self.__cv_client.api.apply_image_to_element(
