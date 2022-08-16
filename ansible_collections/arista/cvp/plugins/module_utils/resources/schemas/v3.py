@@ -89,7 +89,7 @@ SCHEMA_CV_DEVICE = {
                             "01TRAINING-01",
                             "CV-EOS-ANSIBLE01"
                         ],
-                        "imageBundle": []
+                        "imageBundle": "test_bundle"
                     }
                 ],
                 "anyOf": [
