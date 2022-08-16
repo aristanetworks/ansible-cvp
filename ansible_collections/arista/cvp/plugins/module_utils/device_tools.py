@@ -855,7 +855,7 @@ class CvDeviceTools(object):
             }
         return None
 
-    def get_device_image_bundle(self, device_lookup:str):
+    def get_device_image_bundle(self, device_lookup: str):
         """
         get_device_image_bundle Retrieve image bundle attached to the device
 
@@ -882,7 +882,7 @@ class CvDeviceTools(object):
                 return {
                     Api.generic.IMAGE_BUNDLE_NAME: cv_data['imageBundle'][Api.image.NAME],
                     Api.image.ID: cv_data['imageBundle'][Api.image.ID],
-                    Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][ cv_data['imageBundle'][Api.image.ID] ][Api.image.TYPE]
+                    Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][cv_data['imageBundle'][Api.image.ID]][Api.image.TYPE]
                 }
         return None
 
@@ -1187,7 +1187,7 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
-            MODULE_LOGGER.debug("Get image bundle for %s",str(device.serial_number))
+            MODULE_LOGGER.debug("Get image bundle for %s", str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
             MODULE_LOGGER.debug("User assigned image bundle is: %s",str(device.image_bundle))
