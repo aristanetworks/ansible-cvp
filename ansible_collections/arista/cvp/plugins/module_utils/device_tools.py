@@ -623,7 +623,7 @@ class CvDeviceTools(object):
                 user_inventory=user_inventory)
             if action_result is not None:
                 for update in action_result:
-                    cv_configlets_detach.add_change(change=update)
+                    cv_bundle_detach.add_change(change=update)
 
         # Generate result output
         response.add_manager(cv_move)
@@ -636,6 +636,8 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_bundle_attach: %s', str(response.content))
         response.add_manager(cv_configlets_detach)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
+        response.add_manager(cv_bundle_detach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_bundle_detach: %s', str(response.content))
 
         return response
 
@@ -1188,17 +1190,17 @@ class CvDeviceTools(object):
             MODULE_LOGGER.debug("Get image bundle for %s", str(device.serial_number))
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
-            MODULE_LOGGER.debug("User assigned image bundle is: %s",str(device.image_bundle))
+            MODULE_LOGGER.debug("User assigned image bundle is: %s", str(device.image_bundle))
 
             if device.image_bundle is not None:
                 if device.image_bundle == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
                     MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
-                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]))
+                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn), current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]))
                     pass
                     # Nothing to do
                 else:
-                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", (str(device.fqdn),str(device.image_bundle)))
+                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", (str(device.fqdn), str(device.image_bundle)))
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
@@ -1215,7 +1217,7 @@ class CvDeviceTools(object):
                         MODULE_LOGGER.error('Error image bundle %s not found', str(device.image_bundle))
                         self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + str(device.image_bundle) + 'not found')
 
-                    MODULE_LOGGER.debug("%s image bundle facts are: %s", (str(device.image_bundle), str(assigned_image_facts)) )
+                    MODULE_LOGGER.debug("%s image bundle facts are: %s", (str(device.image_bundle), str(assigned_image_facts)))
                     try:
                         resp = self.__cv_client.api.apply_image_to_element(
                             assigned_image_facts,
