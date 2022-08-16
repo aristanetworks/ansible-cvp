@@ -219,7 +219,7 @@ mook_data["valid"]["device"] = [
                 "AVD_DC1-SPINE1",
                 "01TRAINING-01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_bundle"
     }],
     [{
         "fqdn": "DC1-SPINE1",
@@ -239,7 +239,7 @@ mook_data["valid"]["device"] = [
         "fqdn": "DC1-SPINE1",
         "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
-        "imageBundle": []
+        "imageBundle": "test_bundle"
     }],
     [{
         "fqdn": "DC1-SPINE1.eve.emea.lab",
@@ -250,7 +250,7 @@ mook_data["valid"]["device"] = [
                 "AVD_DC1-SPINE1",
                 "01TRAINING-01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_bundle"
     }],
     [{
         "fqdn": "DC1-SPINE2",
@@ -270,7 +270,7 @@ mook_data["valid"]["device"] = [
         "fqdn": "DC1-SPINE4",
         "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
-        "imageBundle": []
+        "imageBundle": "test_bundle"
     }]
 ]
 
@@ -282,7 +282,7 @@ mook_data["invalid"]["device"] = [
                 "AVD_DC1-SPINE1",
                 "01TRAINING-01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_bundle"
     }]
 ]
 
