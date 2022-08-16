@@ -197,7 +197,7 @@ SCHEMA_CV_DEVICE = {
                         "description": "An explanation about the purpose of this instance.",
                         "default": [],
                         "examples": [
-                            [ "spine_image_bundle" ]
+                            ["spine_image_bundle"]
                         ]
                     }
                 },
