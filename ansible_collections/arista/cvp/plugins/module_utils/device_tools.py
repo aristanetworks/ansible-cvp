@@ -870,7 +870,7 @@ class CvDeviceTools(object):
             A dict with key and name
         """
         cv_data = self.get_device_facts(device_lookup=device_lookup)
-        MODULE_LOGGER.debug('cv_data lookup returned: %s' % str(cv_data))
+        MODULE_LOGGER.debug('cv_data lookup returned: %s', str(cv_data))
         if cv_data is not None and Api.generic.IMAGE_BUNDLE_NAME in cv_data:
             if cv_data[Api.generic.IMAGE_BUNDLE_NAME][Api.image.NAME] is None:
                 return {
@@ -1196,11 +1196,11 @@ class CvDeviceTools(object):
                 if device.image_bundle == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
                     MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
-                    MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn), current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]))
+                    MODULE_LOGGER.debug("%s has %s assigned and applied", str(device.fqdn), current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME])
                     pass
                     # Nothing to do
                 else:
-                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", (str(device.fqdn), str(device.image_bundle)))
+                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", str(device.fqdn), str(device.image_bundle))
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
@@ -1217,7 +1217,7 @@ class CvDeviceTools(object):
                         MODULE_LOGGER.error('Error image bundle %s not found', str(device.image_bundle))
                         self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + str(device.image_bundle) + 'not found')
 
-                    MODULE_LOGGER.debug("%s image bundle facts are: %s", (str(device.image_bundle), str(assigned_image_facts)))
+                    MODULE_LOGGER.debug("%s image bundle facts are: %s", str(device.image_bundle), str(assigned_image_facts))
                     try:
                         resp = self.__cv_client.api.apply_image_to_element(
                             assigned_image_facts,
