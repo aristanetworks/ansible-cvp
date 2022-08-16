@@ -54,7 +54,7 @@ CVP_DEVICES_UNKNOWN = [
                 "01TRAINING-01",
                 "CV-EOS-ANSIBLE01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_image_bundle"
     },
     {
         "fqdn": "TEST.ire.aristanetworks.com",
