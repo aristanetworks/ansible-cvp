@@ -49,7 +49,7 @@ class ApiGeneric():
     NAME: str = 'name'
     PARENT_CONTAINER_ID: str = 'parentContainerId'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
-    IMAGE_BUNDLE: str = 'imageBundle'
+    IMAGE_BUNDLE_NAME: str = 'imageBundle'
 
 
 # @dataclass

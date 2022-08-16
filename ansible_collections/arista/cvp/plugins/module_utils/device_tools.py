@@ -276,8 +276,8 @@ class DeviceElement(object):
         else:
             res[Api.generic.CONFIGLETS] = []
         # res[Api.generic.PARENT_CONTAINER_ID] = self.__current_parent_container_id
-        if Api.generic.IMAGE_BUNDLE in self.__data:
-            res[Api.generic.IMAGE_BUNDLE] = self.__data[Api.generic.IMAGE_BUNDLE]
+        if Api.generic.IMAGE_BUNDLE_NAME in self.__data:
+            res[Api.generic.IMAGE_BUNDLE_NAME] = self.__data[Api.generic.IMAGE_BUNDLE_NAME]
         return res
 
 
@@ -863,10 +863,10 @@ class CvDeviceTools(object):
         """
         cv_data = self.get_device_facts(device_lookup=device_lookup)
         MODULE_LOGGER.debug('cv_data lookup returned: %s' % str(cv_data))
-        if cv_data is not None and Api.generic.IMAGE_BUNDLE in cv_data:
-            if cv_data[Api.generic.IMAGE_BUNDLE][Api.image.NAME] is None:
+        if cv_data is not None and Api.generic.IMAGE_BUNDLE_NAME in cv_data:
+            if cv_data[Api.generic.IMAGE_BUNDLE_NAME][Api.image.NAME] is None:
                 return {
-                    Api.generic.NAME: None,
+                    Api.generic.IMAGE_BUNDLE_NAME: None,
                     Api.image.ID: None,
                     Api.image.TYPE: None
                 }
@@ -1186,10 +1186,10 @@ class CvDeviceTools(object):
             current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
             MODULE_LOGGER.debug("user inventory is: %s", str(device.info))
-            MODULE_LOGGER.debug("User assigned image bundle is %s",str(device.image_bundle))
+            MODULE_LOGGER.debug("User assigned image bundle is: %s",str(device.image_bundle))
 
             if device.image_bundle is not None:
-                if device.image_bundle == current_image_bundle[Api.image.NAME] \
+                if device.image_bundle == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME] \
                     and current_image_bundle[Api.image.TYPE] == 'netelement':
                     MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
                     MODULE_LOGGER.debug("%s has %s assigned and applied", (str(device.fqdn),current_image_bundle[Api.image.NAME]))
@@ -1215,7 +1215,7 @@ class CvDeviceTools(object):
                             assigned_image_facts,
                             device_facts,
                             device.hostname,
-                            device.type
+                            'netelement'
                         )
 
                     except CvpApiError as catch_error:
@@ -1267,7 +1267,7 @@ class CvDeviceTools(object):
             if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
                 # dict.get(key) will return None if the key does not exist, or the value if the key does exist
                 # This means that if the value is None, we get the same result as if the key doesn't exist
-                if device.get(Api.generic.IMAGE_BUNDLE) is None:
+                if device.get(Api.generic.IMAGE_BUNDLE_NAME) is None:
 
                     device_facts = {}
                     if self.__search_by == Api.device.FQDN:
