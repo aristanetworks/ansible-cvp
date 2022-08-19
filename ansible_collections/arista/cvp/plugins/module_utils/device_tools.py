@@ -1094,7 +1094,7 @@ class CvDeviceTools(object):
         elif state == ModuleOptionValues.STATE_MODE_REMOVE:
             MODULE_LOGGER.info('Processing data to reset devices')
             response = self.__state_provisioning_reset(user_inventory=user_inventory)
-        
+
         elif state == ModuleOptionValues.STATE_MODE_DECOMM:
             MODULE_LOGGER.info('Processing data to decommission devices')
             response = self.__state_absent(user_inventory=user_inventory)
@@ -1459,7 +1459,7 @@ class CvDeviceTools(object):
                 req_id = str(uuid.uuid4())
                 device_fact = self.get_device_facts(device_lookup=device.hostname)
                 device_id = device_fact['serialNumber']
-                MODULE_LOGGER.info(f"Found device serial number: {device_id}")
+                MODULE_LOGGER.info('Found device serial number: %s', device_id)
                 self.__cv_client.api.device_decommissioning(device_id, req_id)
             except CvpApiError:
                 MODULE_LOGGER.error('Error decommissioning device')
@@ -1474,7 +1474,7 @@ class CvDeviceTools(object):
                     try:
                         status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
                     except CvpRequestError:
-                        continue                 
+                        continue
                     if status == decomm_failure:
                         err_msg = status['result']['value']['error']
                         msg = f"Device decommissioning failed due to {err_msg}"
