@@ -23,6 +23,8 @@ __metaclass__ = type
 
 import traceback
 import logging
+import uuid
+import time
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
@@ -604,7 +606,7 @@ class CvDeviceTools(object):
 
     def __state_factory_reset(self, user_inventory: DeviceInventory):
         """
-        __state_factory_reset Execute actions when user configures state=absent
+        __state_factory_reset Execute actions when user configures state=factory_reset
 
         Run following actions:
             - Reset device to ztp mode
@@ -629,6 +631,75 @@ class CvDeviceTools(object):
 
         # Execute device reset
         action_result = self.reset_device(user_inventory=user_inventory)
+        if action_result is not None:
+            MODULE_LOGGER.debug('action_result is: %s', str(action_result))
+            for update in action_result:
+                cv_reset.add_change(change=update)
+        response.add_manager(cv_reset)
+        return response
+
+    def __state_provisioning_reset(self, user_inventory: DeviceInventory):
+        """
+        __state_provisioning_reset Execute actions when user configures state=provisioning_reset
+
+        Run following actions:
+            - Remove the device from provisioning (pre CVP 2021.3.0)
+            - Move device back to the Undefined container (post CVP 2021.3.0)
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+
+        Returns
+        -------
+        CvAnsibleResponse
+            Ansible Output message
+        """
+        response = CvAnsibleResponse()
+        cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_REMOVED)
+
+        # Check if all user defined devices are present in CV
+        self.__check_devices_exist(user_inventory=user_inventory)
+
+        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+
+        # Execute device delete
+        action_result = self.delete_device(user_inventory=user_inventory)
+        if action_result is not None:
+            MODULE_LOGGER.debug('action_result is: %s', str(action_result))
+            for update in action_result:
+                cv_reset.add_change(change=update)
+        response.add_manager(cv_reset)
+        return response
+
+    def __state_absent(self, user_inventory: DeviceInventory):
+        """
+        __state_absent Execute actions when user configures state=absent
+
+        Run following actions:
+            - decommission devices (the API stops TerminAttr and removes the device fully from CVP)
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+
+        Returns
+        -------
+        CvAnsibleResponse
+            Ansible Output message
+        """
+        response = CvAnsibleResponse()
+        cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_DECOMMISSIONED)
+
+        # Check if all user defined devices are present in CV
+        self.__check_devices_exist(user_inventory=user_inventory)
+
+        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+
+        # Execute device decommission
+        action_result = self.decommission_device(user_inventory=user_inventory)
         if action_result is not None:
             MODULE_LOGGER.debug('action_result is: %s', str(action_result))
             for update in action_result:
@@ -1020,6 +1091,14 @@ class CvDeviceTools(object):
             MODULE_LOGGER.info('Processing data to reset devices')
             response = self.__state_factory_reset(user_inventory=user_inventory)
 
+        elif state == ModuleOptionValues.STATE_MODE_REMOVE:
+            MODULE_LOGGER.info('Processing data to reset devices')
+            response = self.__state_provisioning_reset(user_inventory=user_inventory)
+        
+        elif state == ModuleOptionValues.STATE_MODE_DECOMM:
+            MODULE_LOGGER.info('Processing data to decommission devices')
+            response = self.__state_absent(user_inventory=user_inventory)
+
         return response.content
 
     def move_device(self, user_inventory: DeviceInventory):
@@ -1347,6 +1426,64 @@ class CvDeviceTools(object):
 
                     result_data.add_entry('{0} deployed to {1}'.format(
                         device.info[self.__search_by], device.container))
+            results.append(result_data)
+        return results
+
+    def delete_device(self, user_inventory: DeviceInventory):
+        results = []
+        for device in user_inventory.devices:
+            MODULE_LOGGER.info('removing device %s from provisioning', str(device.info))
+            result_data = CvApiResult(action_name=device.info[self.__search_by] + '_delete')
+            try:
+                MODULE_LOGGER.info('send reset request for device %s', str(device.info))
+                resp = self.__cv_client.api.delete_device(device.system_mac)
+            except CvpApiError:
+                MODULE_LOGGER.error('Error removing device from provisioning')
+                self.__ansible.fail_json(msg='Error removing device from provisioning')
+            else:
+                if resp['result'] == 'success':
+                    result_data.changed = True
+                    result_data.success = True
+            results.append(result_data)
+        return results
+
+    def decommission_device(self, user_inventory: DeviceInventory):
+        results = []
+        decomm_success = "DECOMMISSIONING_STATUS_SUCCESS"
+        decomm_failure = "DECOMMISSIONING_STATUS_FAILURE"
+        for device in user_inventory.devices:
+            MODULE_LOGGER.info('removing device %s from provisioning', str(device.info))
+            result_data = CvApiResult(action_name=device.info[self.__search_by] + '_delete')
+            try:
+                MODULE_LOGGER.info('send reset request for device %s', str(device.info))
+                req_id = str(uuid.uuid4())
+                device_fact = self.get_device_facts(device_lookup=device.hostname)
+                device_id = device_fact['serialNumber']
+                MODULE_LOGGER.info(f"Found device serial number: {device_id}")
+                self.__cv_client.api.device_decommissioning(device_id, req_id)
+            except CvpApiError:
+                MODULE_LOGGER.error('Error decommissioning device')
+                self.__ansible.fail_json(msg='Error decommissioning device')
+            except CvpRequestError:
+                request_err_msg = f"Device with {device_id} does not exist or is not registered to decommission"
+                MODULE_LOGGER.error(request_err_msg)
+                self.__ansible.fail_json(msg=request_err_msg)
+            else:
+                status = ""
+                while status != decomm_success:
+                    try:
+                        status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
+                    except CvpRequestError:
+                        continue                 
+                    if status == decomm_failure:
+                        err_msg = status['result']['value']['error']
+                        msg = f"Device decommissioning failed due to {err_msg}"
+                        MODULE_LOGGER.error(msg)
+                        self.__ansible.fail_json(msg=msg)
+                    else:
+                        time.sleep(10)
+                result_data.changed = True
+                result_data.success = True
             results.append(result_data)
         return results
 
