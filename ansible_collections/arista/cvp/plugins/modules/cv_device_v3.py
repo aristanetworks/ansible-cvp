@@ -42,7 +42,7 @@ options:
     description: Set if ansible should build or remove devices on CLoudvision
     required: false
     default: 'present'
-    choices: ['present', 'factory_reset']
+    choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']
     type: str
   apply_mode:
     description: Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.
