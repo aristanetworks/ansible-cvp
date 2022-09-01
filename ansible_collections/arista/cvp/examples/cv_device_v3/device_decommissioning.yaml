@@ -1,0 +1,13 @@
+- name: Decommission device
+  hosts: cv_server
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES:
+      - fqdn: leaf1
+        parentContainerName: ""
+  tasks:
+  - name: decommission device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: absent
