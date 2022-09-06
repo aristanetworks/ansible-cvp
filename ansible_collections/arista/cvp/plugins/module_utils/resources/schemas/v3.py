@@ -194,7 +194,7 @@ SCHEMA_CV_DEVICE = {
                         "$id": "#/items/anyOf/0/properties/imageBundle",
                         "type": "string",
                         "title": "The imageBundle name",
-                        "description": "An explanation about the purpose of this instance.",
+                        "description": "The imageBundle is the name of the image bundle applied to a container or device.",
                         "default": [],
                         "examples": [
                             "spine_image_bundle"
