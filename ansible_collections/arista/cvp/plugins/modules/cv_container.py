@@ -4,9 +4,7 @@
 # pylint: disable=logging-format-interpolation
 # flake8: noqa: W1202
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2019 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
