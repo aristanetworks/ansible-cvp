@@ -93,7 +93,7 @@ Examples:
 ---------
 
 ::
-    
+
     # task in loose mode using fqdn (default)
     - name: Device Management in CloudVision
       hosts: cv_server
@@ -160,5 +160,3 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
-
-

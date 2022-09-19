@@ -72,7 +72,7 @@ Examples:
 ---------
 
 ::
-    
+
       tasks:
       - name: '#01 - Collect devices facts from {{inventory_hostname}}'
         arista.cvp.cv_facts_v3:
@@ -96,5 +96,3 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
-
-
