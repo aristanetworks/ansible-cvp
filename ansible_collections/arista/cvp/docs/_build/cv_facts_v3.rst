@@ -2,7 +2,7 @@
 
 cv_facts_v3
 +++++++++++
-Collect facts from Cloudvision
+Collect facts from CloudVision
 
 Module added in version 3.3.0
 

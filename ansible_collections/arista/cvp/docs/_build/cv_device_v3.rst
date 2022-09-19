@@ -69,7 +69,7 @@ The following options may be specified for this module:
     <td>hostname</td>
     <td><ul><li>fqdn</li><li>hostname</li><li>serialNumber</li></ul></td>
     <td>
-        <div>Key name to use to look for device in Cloudvision.</div>
+        <div>Key name to use to look for device in CloudVision.</div>
     </td>
     </tr>
 
@@ -95,7 +95,7 @@ Examples:
 ::
     
     # task in loose mode using fqdn (default)
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -115,7 +115,7 @@ Examples:
             search_key: fqdn
 
     # task in loose mode using serial
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -135,7 +135,7 @@ Examples:
             search_key: serialNumber
 
     # task in strict mode
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false

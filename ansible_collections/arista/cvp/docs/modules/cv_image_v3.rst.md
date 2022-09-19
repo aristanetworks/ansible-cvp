@@ -1,6 +1,6 @@
 # cv_image_v3
 
-EOS Image management with Cloudvision
+EOS Image management with CloudVision
 
 Module added in version 3.3.0
 
@@ -12,7 +12,7 @@ Module added in version 3.3.0
 
 CloudVision Portal Image management module.
 
-Due to a current limitation in Cloudvision API, authentication with
+Due to a current limitation in CloudVision API, authentication with
 token is not supported for this module only.
 
 ## Module-specific Options

@@ -10,7 +10,7 @@ Module added in version 3.0.0
 
 ## Synopsis
 
-CloudVison Portal Task module to action pending tasks on CLoudvision
+CloudVision Portal Task module to action pending tasks on CloudVision
 
 ## Module-specific Options
 

@@ -34,7 +34,7 @@ The following options may be specified for this module:
 <td></td>
 <td></td>
 <td>
-    <div>A dict containuing the change control to be created/modified</div>
+    <div>A dict containing the change control to be created/modified</div>
 </td>
 </tr>
 

@@ -27,7 +27,7 @@ version_added: "3.4.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Create/Assign/Delete/Unassign tags on CVP
 description:
-  - CloudVison Portal Tag module to Create/Assign/Delete/Unassign tags on CloudVision
+  - CloudVision Portal Tag module to Create/Assign/Delete/Unassign tags on CloudVision
 options:
   tags:
     description: CVP tags

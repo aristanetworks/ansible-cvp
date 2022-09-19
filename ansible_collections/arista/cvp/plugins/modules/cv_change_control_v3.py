@@ -35,7 +35,7 @@ options:
     required: false
     type: str
   change:
-    description: A dict containuing the change control to be created/modified
+    description: A dict containing the change control to be created/modified
     required: false
     type: dict
   state:
