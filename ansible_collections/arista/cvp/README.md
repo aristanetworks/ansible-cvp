@@ -183,7 +183,7 @@ Project is published under [Apache License](LICENSE).
 
 ## Ask a question
 
-The best platform for general feedback, assistance, and other discussion is our [GitHub discussions](). To report a bug or request a specific feature, please open a [GitHub issue](https://github.com/aristanetworks/ansible-cvp/issues) using the appropriate template.
+To report a bug, discuss or request a specific feature, please open a [GitHub issue](https://github.com/aristanetworks/ansible-cvp/issues) using the appropriate template.
 
 ## Contributing
 

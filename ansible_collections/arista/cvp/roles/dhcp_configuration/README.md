@@ -17,11 +17,11 @@ Below is a list of platforms where DHCPd configuration has been tested:
 
 - Centos 7 / 8
 - Ubuntu 18.02
-- Arista Cloudvision 2019 and onward (for lab purpose)
+- Arista CloudVision 2019 and onward (for lab purpose)
 
 This role should work on any platform running [ISC-DHCP server](https://www.isc.org/dhcp/).
 
-> If role is applied to Cloudvision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
+> If role is applied to CloudVision server, DHCP configuration may be erased during upgrade process. Use it at your own risk in a production environment.
 
 ## Role Variables
 

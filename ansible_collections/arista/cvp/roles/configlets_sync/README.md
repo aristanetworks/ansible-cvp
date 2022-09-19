@@ -14,7 +14,7 @@ No specific requirements to use this role.
 
 ## Tested Platforms
 
-Any version of Cloudvision supported by current `arista.cvp` collection.
+Any version of CloudVision supported by current `arista.cvp` collection.
 
 ## Role Variables
 
@@ -104,7 +104,7 @@ Example playbook to to synchronize shared configlets with `generic` string in th
 
 ### Inventory
 
-`{{inventory_name}}` for Cloudvision instances can be changed to match your own environement. Only group name `cvp_sync` must be the same in inventory and playbook.
+`{{inventory_name}}` for CloudVision instances can be changed to match your own environment. Only group name `cvp_sync` must be the same in inventory and playbook.
 
 ```yaml
 ---
