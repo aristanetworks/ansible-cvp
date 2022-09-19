@@ -1,6 +1,6 @@
 # Get provisioning information from CloudVision
 
-__cv_facts_v3__ get provisioning information from CloudVision:
+**cv_facts_v3** get provisioning information from CloudVision:
 
 - Support static configlets
 - Support List of containers

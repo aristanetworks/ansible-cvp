@@ -2,24 +2,24 @@
 
 ## Tests structure
 
-- __Unit__: test with no CV interaction to test component: `tests/unit`
+- **Unit**: test with no CV interaction to test component: `tests/unit`
   - Tests with no API requirements
   - Tests objects & function with no abstraction
   - Unit Testing test each part of the program and shows that the individual parts are correct
   - Should be run at anytime by developers or CI
 
-- __System__: test to run module backend component and which requires CV connection: `tests/system`
+- **System**: test to run module backend component and which requires CV connection: `tests/system`
   - Testing based on Cloudvision API
   - Validate full integration with module inputs
   - Close to ansible module execution
   - Can be run as soon as you have access to test environment.
 
-- __Lib__: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
+- **Lib**: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
   - Provides helpers for unit and system
   - Store all tests data
   - Only available for pytest
 
-- __Data__: to provides a safe place for all tests dataset: `tests/data`
+- **Data**: to provides a safe place for all tests dataset: `tests/data`
   - Store all tests data
   - Only available for pytest
 
@@ -61,21 +61,21 @@ export ARISTA_AVD_CV_PROVISION=False
 ```bash
 # Configlet Unit testing
 pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	unit/test_configlet_input.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+ unit/test_configlet_input.py
 
 # Configlet system testing
 pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	 system/test_cv_configlet.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+  system/test_cv_configlet.py
 
 # Configlet system testing with only WARNING print in pytest.log
 $ PYTEST_LOG_LEVEL=WARNING pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	 system/test_cv_configlet.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+  system/test_cv_configlet.py
 ```
 
 ### Makefile usage
@@ -101,14 +101,12 @@ make test TAG='configlet' CLI_LOGGING=INFO PYTEST_LOGGING=WARNING
 - `CLI_LOGGING`: Log verbosity print out to your console
 - `PYTEST_LOGGING`: Log level used to report in pytest.log
 
-
 ## Tests Results
 
 Results are printed to your screen and also saved in reports:
 
 - `report.html`: Pytest result with logging
 - `htmlcov/index.html`: Coverage report
-
 
 ## Create test cases
 

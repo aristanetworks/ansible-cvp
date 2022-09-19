@@ -6,7 +6,7 @@
 
 ### Unsupported CV version
 
-Prior version __2.0.0__ `arista.cvp` collection ran test to determine CloudVision version. If version is not supported, following error should happen:
+Prior version **2.0.0** `arista.cvp` collection ran test to determine CloudVision version. If version is not supported, following error should happen:
 
 ```shell
 \"/var/folders/q0/92fg6g7s1bv6kgfdcgfjwt0c0000gp/T/ansible_arista.cvp.cv_facts_payload_2ld7vf9v/ansible_arista.cvp.\

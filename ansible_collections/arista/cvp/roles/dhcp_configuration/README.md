@@ -176,7 +176,7 @@ all:
           ansible_python_interpreter: $(which python3)
 ```
 
-If you are not using __root__ user, configure `ansible_become_password` since role always use `become: true`.
+If you are not using **root** user, configure `ansible_become_password` since role always use `become: true`.
 
 SSH connection is managed by [`paramiko`](http://www.paramiko.org/).
 

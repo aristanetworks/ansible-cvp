@@ -2,7 +2,7 @@
 
 ## Arista EOS version
 
-- EOS __4.21.8M__ or later
+- EOS **4.21.8M** or later
 - Roles validated with eAPI transport -> `ansible_connection: httpapi`
 
 ## Arista CloudVision
@@ -19,11 +19,11 @@
 
 ## Python
 
-- Python __3.8__ or later
+- Python **3.8** or later
 
 ## Supported Ansible Versions
 
-- ansible-core from __2.11.3__ to __2.12.x__
+- ansible-core from **2.11.3** to **2.12.x**
 
 ## Additional Python Libraries required
 

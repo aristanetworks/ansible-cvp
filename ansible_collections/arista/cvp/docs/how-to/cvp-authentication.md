@@ -9,7 +9,7 @@ CloudVision supports 2 different types of authentication depending on what kind 
 
 ## On-premise CloudVision authentication
 
-This authentication mechanism is default approach leveraged in the collection and can be configured as below in your variables. It is based on a pure __username/password__ model
+This authentication mechanism is default approach leveraged in the collection and can be configured as below in your variables. It is based on a pure **username/password** model
 
 ```yaml
 # Default Ansible variables for authentication
@@ -30,7 +30,7 @@ ansible_httpapi_use_ssl: true
 ansible_httpapi_validate_certs: false
 ```
 
-Alternatively __user token__ can be used just as with CVaaS. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps.
+Alternatively **user token** can be used just as with CVaaS. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps.
 
 ```yaml
 # Default Ansible variables for authentication
@@ -109,7 +109,7 @@ provide the password with any other methods as described in the [ansible vault d
 
 ## CloudVision as a Service authentication
 
-This authentication method uses a __user token__ that has to be generated on the CVaaS UI. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps. Then, ansible can be instructed to use the token instead of username and password authentication method.
+This authentication method uses a **user token** that has to be generated on the CVaaS UI. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps. Then, ansible can be instructed to use the token instead of username and password authentication method.
 
 ```yaml
 # Default Ansible variables for authentication
@@ -184,7 +184,7 @@ ansible_httpapi_validate_certs: true
 Since `HTTPAPI` plugin is based on Python `Requests` library, you need to use `Requests` method to [support custom `CA_BUNDLE`](https://requests.readthedocs.io/en/master/user/advanced/#ssl-cert-verification)
 
 ```shell
-$ export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 ```
 
 > Please note `export` is only working in your active shell unless you configure your `.bashrc` or `.zshrc` with this configuration.

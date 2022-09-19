@@ -1,6 +1,6 @@
 # Configure a Change Control on CloudVision
 
-__cv_change_control_v3__ manage change controls on CloudVision:
+**cv_change_control_v3** manage change controls on CloudVision:
 
 - Create a new change control
 - Modify/Update an existing change control

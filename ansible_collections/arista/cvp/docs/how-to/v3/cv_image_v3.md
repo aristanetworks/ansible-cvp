@@ -1,6 +1,6 @@
 # Configure Images and Image Bundles on CloudVision
 
-__cv_image_v3__ manage devices on CloudVision:
+**cv_image_v3** manage devices on CloudVision:
 
 - Support images package upload
 - Support listing existing image bundles
@@ -16,7 +16,6 @@ __cv_image_v3__ manage devices on CloudVision:
 - `bundle_name`: Name of the bundle to take care.
 - `image`: File path of the image to upload
 - `image_list`: List of file paths to upload to CloudVision
-
 
 ## Specific settings
 

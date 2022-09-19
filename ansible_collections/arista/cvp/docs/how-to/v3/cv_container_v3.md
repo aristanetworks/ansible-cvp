@@ -1,6 +1,6 @@
 # Configure container on CloudVision (v3)
 
-__cv_container_v3__ manages containers on CloudVision. It supports:
+**cv_container_v3** manages containers on CloudVision. It supports:
 
 - Creation and deletion of containers
 - Configlets binding to containers
@@ -39,9 +39,8 @@ CVP_CONTAINERS:
 
 - `state`: Keyword to define if we want to create (present) or delete (absent) the containers. Default is set to `present`.
 - `apply_mode`: Define how configlets configured to the containers are managed by ansible:
-  - `loose` (default): Configure new configlets to containers and __ignore__ configlet already configured but not listed.
-  - `strict`: Configure new configlets to containers and __remove__ configlet already configured but not listed.
-
+  - `loose` (default): Configure new configlets to containers and **ignore** configlet already configured but not listed.
+  - `strict`: Configure new configlets to containers and **remove** configlet already configured but not listed.
 
 ```yaml
 - name: lab04 - cv_container lab
