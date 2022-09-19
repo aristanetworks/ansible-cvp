@@ -42,5 +42,5 @@ repos:
       - id: markdownlint
         args:
           - --config=.github/.markdownlint.yaml
-          - --ignore-path=.github/.markdownlintignore
+          # - --ignore-path=.github/.markdownlintignore
           - --fix
