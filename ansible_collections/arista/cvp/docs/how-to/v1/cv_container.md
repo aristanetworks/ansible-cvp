@@ -1,4 +1,4 @@
-# Configure container on Cloudvision
+# Configure container on CloudVision
 
 cv_container manage containers on CloudVision:
 

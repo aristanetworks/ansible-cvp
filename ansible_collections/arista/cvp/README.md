@@ -8,7 +8,7 @@
   <img src='medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-Even if __`arista.cvp`__ collection is integrated with `arista.avd` collection to [automate configuration deployment](https://avd.sh/en/latest/roles/eos_config_deploy_cvp/index.html), this collection can also be used outside of AVD tasks to populate your Cloudvision server with your own workflows.
+Even if __`arista.cvp`__ collection is integrated with `arista.avd` collection to [automate configuration deployment](https://avd.sh/en/latest/roles/eos_config_deploy_cvp/index.html), this collection can also be used outside of AVD tasks to populate your CloudVision server with your own workflows.
 
 ## Requirements
 
@@ -19,7 +19,7 @@ Current active branch:
 - __CVP 2020.2.x and onward__: starting version [`ansible-cvp 2.0.0`](https://github.com/aristanetworks/ansible-cvp/releases/tag/v2.0.0)
 
 !!! info
-    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
+    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as CloudVision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
 
 | ansible-cvp | 1.0.0 | 1.1.0 | >= 2.0.0 |
 | ----------- | ----- | ----- | -------- |
@@ -83,13 +83,13 @@ __Version 3:__
 - [__arista.cvp.cv_container_v3__](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
 - [__arista.cvp.cv_device_v3__](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
 - [__arista.cvp.cv_task_v3__](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
-- [__arista.cvp.cv_facts_v3__](docs/modules/cv_facts_v3.rst/) - Collect information from Cloudvision.
-- [__arista.cvp.cv_image_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_image_v3.rst/) - Create EOS images and bundles on Cloudvision.
+- [__arista.cvp.cv_facts_v3__](docs/modules/cv_facts_v3.rst/) - Collect information from CloudVision.
+- [__arista.cvp.cv_image_v3__](https://cvp.avd.sh/en/latest/docs/modules/cv_image_v3.rst/) - Create EOS images and bundles on CloudVision.
 
 ### List of available roles
 
-- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/) - Configure DHCPD service on a Cloudvision server or any dhcpd service.
-- [__arista.cvp.configlet_sync__](roles/configlets_sync/) - Synchronize configlets between multiple Cloudvision servers.
+- [__arista.cvp.dhcp_configuration__](roles/dhcp_configuration/) - Configure DHCPD service on a CloudVision server or any dhcpd service.
+- [__arista.cvp.configlet_sync__](roles/configlets_sync/) - Synchronize configlets between multiple CloudVision servers.
 
 ### Deprecated modules
 

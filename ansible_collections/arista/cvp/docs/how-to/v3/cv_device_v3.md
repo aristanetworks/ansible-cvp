@@ -1,4 +1,4 @@
-# Configure devices on Cloudvision
+# Configure devices on CloudVision
 
 __cv_device_v3__ manage devices on CloudVision:
 

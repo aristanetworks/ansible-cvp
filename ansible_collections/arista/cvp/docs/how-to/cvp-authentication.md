@@ -1,13 +1,13 @@
-# Cloudvision Authentication
+# CloudVision Authentication
 
-Cloudvision supports 2 different types of authentication depending on what kind of instance you are targeting:
+CloudVision supports 2 different types of authentication depending on what kind of instance you are targeting:
 
-- [On-premise Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) instance:
+- [On-premise CloudVision](https://www.arista.com/en/products/eos/eos-cloudvision) instance:
   - username and password authentication
   - user token authentication
 - [Cloudvision-as-a-Service](https://www.youtube.com/embed/Sobh9XVZhcw?rel=0&wmode=transparent): User token authentication
 
-## On-premise Cloudvision authentication
+## On-premise CloudVision authentication
 
 This authentication mechanism is default approach leveraged in the collection and can be configured as below in your variables. It is based on a pure __username/password__ model
 
@@ -107,7 +107,7 @@ provide the password with any other methods as described in the [ansible vault d
 
 > NOTE Encrypting individual variables using vault is not yet supported.
 
-## Cloudvision as a Service authentication
+## CloudVision as a Service authentication
 
 This authentication method uses a __user token__ that has to be generated on the CVaaS UI. See [How to generate service account tokens](#how-to-generate-service-account-tokens) for the token generation steps. Then, ansible can be instructed to use the token instead of username and password authentication method.
 
@@ -196,7 +196,7 @@ For information, `Requests` embeds its bundles in the following paths, for refer
 /usr/lib/python3/dist-packages/requests/cacert.pem
 ```
 
-### Validate SSL using Cloudvision self-signed certificate
+### Validate SSL using CloudVision self-signed certificate
 
 Update httpapi as shown below:
 

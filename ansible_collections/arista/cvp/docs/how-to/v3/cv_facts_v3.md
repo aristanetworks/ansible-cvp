@@ -1,4 +1,4 @@
-# Get provisioning information from Cloudvision
+# Get provisioning information from CloudVision
 
 __cv_facts_v3__ get provisioning information from CloudVision:
 
@@ -12,34 +12,34 @@ This module does not support input data except module options.
 
 ### Optional module inputs
 
-- `facts`: List of facts to get from Cloudvision. It can be any of the following entries: [`devices`, `configlets`, `container`]
+- `facts`: List of facts to get from CloudVision. It can be any of the following entries: [`devices`, `configlets`, `container`]
 - `regexp_filter`: [Regualr expression](https://docs.python.org/3/howto/regex.html) to filter `configlets` and `devices` to only collect facts for interesting entries.
 
 ```yaml
 tasks:
 - name: '#01 - Collect devices facts from {{inventory_hostname}}'
-arista.cvp.cv_facts_v3:
+  arista.cvp.cv_facts_v3:
 
 - name: '#02 - Collect devices facts from {{inventory_hostname}}'
-arista.cvp.cv_facts_v3:
-  facts:
-  - configlets
-register: FACTS_DEVICES
+  arista.cvp.cv_facts_v3:
+    facts:
+    - configlets
+  register: FACTS_DEVICES
 
 - name: '#03 - Collect devices facts from {{inventory_hostname}}'
-arista.cvp.cv_facts_v3:
-  facts:
-  - devices
-  - containers
-register: FACTS_DEVICES
+  arista.cvp.cv_facts_v3:
+    facts:
+    - devices
+    - containers
+  register: FACTS_DEVICES
 
 - name: '#03 - Collect devices facts from {{inventory_hostname}}'
-arista.cvp.cv_facts_v3:
-  facts:
-  - devices
-  - containers
-  regexp_filter: '.*LEAF|BORDER.*'
-register: FACTS_DEVICES
+  arista.cvp.cv_facts_v3:
+    facts:
+    - devices
+    - containers
+    regexp_filter: '.*LEAF|BORDER.*'
+  register: FACTS_DEVICES
 ```
 
 ## Module output
@@ -106,4 +106,4 @@ ok: [CloudVision] =>
 ```
 
 !!! info
-    All sections can be natively reused in their respective module to reconfigure Cloudvision. It can be used as a custom backup task or to synchronize multiple Cloudvision instances.
+    All sections can be natively reused in their respective module to reconfigure CloudVision. It can be used as a custom backup task or to synchronize multiple CloudVision instances.

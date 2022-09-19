@@ -1,6 +1,6 @@
 # configlet_sync role
 
-Ansible role to synchronize configlets between 2 instances of [Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.
+Ansible role to synchronize configlets between 2 instances of [CloudVision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.
 
 This role synchronize a designated set of CVP Configlets across multiple CVP instances. This ability to synchronize Configlets provides an efficient way of ensuring organizational policies and security requirements can be quickly deployed across an entire Arista estate in a consistent automated manner. The aim will be to deploy and synchronize a set of configlets that could be updated from any instance of CVP or via an Ansible PlayBook. This provides the most flexible method of managing the configlets without imposing any requirements to exclusively use either CVP or Ansible for updating them.
 

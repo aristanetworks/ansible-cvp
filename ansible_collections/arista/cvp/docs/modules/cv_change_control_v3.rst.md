@@ -1,6 +1,6 @@
 # cv_change_control_v3
 
-Change Control management with Cloudvision
+Change Control management with CloudVision
 
 Module added in version 3.4.0
 

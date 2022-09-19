@@ -1,4 +1,4 @@
-# Configure Images and Image Bundles on Cloudvision
+# Configure Images and Image Bundles on CloudVision
 
 __cv_image_v3__ manage devices on CloudVision:
 
@@ -15,12 +15,12 @@ __cv_image_v3__ manage devices on CloudVision:
 - `mode`: What to manage with the module. Can be either `image` or `bundle`
 - `bundle_name`: Name of the bundle to take care.
 - `image`: File path of the image to upload
-- `image_list`: List of file paths to upload to cloudvision
+- `image_list`: List of file paths to upload to CloudVision
 
 
 ## Specific settings
 
-As this module is in charge of uploading large files to Cloudvision, it is highly recommended to change the default value for [ansible_command_timeoutandansible_connect_timeout](https://docs.ansible.com/ansible/latest/network/getting_started/network_connection_options.html) to allow ansible enough time to upload the files.
+As this module is in charge of uploading large files to CloudVision, it is highly recommended to change the default value for [ansible_command_timeoutandansible_connect_timeout](https://docs.ansible.com/ansible/latest/network/getting_started/network_connection_options.html) to allow ansible enough time to upload the files.
 
 As it is dependant of execution environment, these values must be defined by user and it can be updated only for a specific task:
 
@@ -42,7 +42,7 @@ As it is dependant of execution environment, these values must be defined by use
 
 ```yaml
 ---
-- name: Get Image list from Cloudvision
+- name: Get Image list from CloudVision
     hosts: cv_server
     gather_facts: no
     vars:

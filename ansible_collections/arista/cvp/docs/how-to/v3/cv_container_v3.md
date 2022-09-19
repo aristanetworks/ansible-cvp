@@ -1,4 +1,4 @@
-# Configure container on Cloudvision (v3)
+# Configure container on CloudVision (v3)
 
 __cv_container_v3__ manages containers on CloudVision. It supports:
 

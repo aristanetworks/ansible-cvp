@@ -3,7 +3,7 @@
 __cv_task_v3__ manage tasks on CloudVision:
 
 - Execute tasks on CloudVision
-- Cancel tasks on Cloudvision
+- Cancel tasks on CloudVision
 
 ## Inputs
 

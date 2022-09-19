@@ -20,6 +20,7 @@ theme:
     - search.highlight
     - header.autohide
     - content.code.annotate
+    - content.tabs.link
   highlightjs: true
   icon:
     repo: fontawesome/brands/github
@@ -71,6 +72,7 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - attr_list
   - fontawesome_markdown
   - mdx_truly_sane_lists
   - smarty
@@ -80,12 +82,16 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.critic
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.magiclink
   - pymdownx.mark
-  - pymdownx.smartsymbols
+  - pymdownx.smartsymbols:
+      fractions: false
   - pymdownx.snippets:
       base_path: 'ansible_collections/arista/cvp/'
   - pymdownx.superfences:
@@ -128,7 +134,7 @@ nav:
       - Manage tasks: docs/how-to/v3/cv_task_v3.md
       - Manage tags: docs/how-to/v3/cv_tag_v3.md
       - Manage change control: docs/how-to/v3/cv_change_control_v3.md
-      - Get facts from Cloudvision: docs/how-to/v3/cv_facts_v3.md
+      - Get facts from CloudVision: docs/how-to/v3/cv_facts_v3.md
     - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
   - Frequently Asked Questions:
@@ -136,7 +142,7 @@ nav:
     - Ansible Execution Environment: docs/faq/containers.md
   - Roles documentation:
     - DHCP Configuration role: roles/dhcp_configuration/README.md
-    - Cloudvision Configlet Sync: roles/configlets_sync/README.md
+    - CloudVision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
     - Modules version 1:
       - Module cv_facts: docs/modules/cv_facts.rst/
