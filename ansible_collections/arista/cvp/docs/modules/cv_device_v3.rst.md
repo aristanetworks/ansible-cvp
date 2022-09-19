@@ -58,7 +58,7 @@ The following options may be specified for this module:
 <td>hostname</td>
 <td><ul><li>fqdn</li><li>hostname</li><li>serialNumber</li></ul></td>
 <td>
-    <div>Key name to use to look for device in CloudVision.</div>
+    <div>Key name to use to look for device in Cloudvision.</div>
 </td>
 </tr>
 
@@ -79,7 +79,7 @@ The following options may be specified for this module:
 ## Examples:
 
     # task in loose mode using fqdn (default)
-    - name: Device Management in CloudVision
+    - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -99,7 +99,7 @@ The following options may be specified for this module:
             search_key: fqdn
 
     # task in loose mode using serial
-    - name: Device Management in CloudVision
+    - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -119,7 +119,7 @@ The following options may be specified for this module:
             search_key: serialNumber
 
     # task in strict mode
-    - name: Device Management in CloudVision
+    - name: Device Management in Cloudvision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -140,4 +140,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)

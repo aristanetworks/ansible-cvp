@@ -12,7 +12,7 @@ Collect facts from CloudVision Portal.
 DEPRECATED
 ----------
 
-:In: version:
+:In: version: 
 :Why: Features are now part of every single v3 modules.
 :Alternative: Currently no alternative.
 
@@ -82,7 +82,7 @@ Examples:
 ---------
 
 ::
-
+    
     ---
       tasks:
         - name: '#01 - Collect devices facts from {{inventory_hostname}}'
@@ -121,3 +121,5 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
+
+

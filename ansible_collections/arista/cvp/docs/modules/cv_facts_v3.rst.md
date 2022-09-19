@@ -1,6 +1,6 @@
 # cv_facts_v3
 
-Collect facts from CloudVision
+Collect facts from Cloudvision
 
 Module added in version 3.3.0
 
@@ -76,4 +76,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)

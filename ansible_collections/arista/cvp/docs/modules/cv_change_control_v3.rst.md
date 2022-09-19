@@ -1,6 +1,6 @@
 # cv_change_control_v3
 
-Change Control management with CloudVision
+Change Control management with Cloudvision
 
 Module added in version 3.4.0
 
@@ -156,4 +156,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)

@@ -1,19 +1,5 @@
 # Contribute to Arista ansible-cvp collection
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
-- [Contribute to Arista ansible-cvp collection](#contribute-to-arista-ansible-cvp-collection)
-  - [Reporting Bugs](#reporting-bugs)
-  - [Feature Requests](#feature-requests)
-  - [Using the issue tracker](#using-the-issue-tracker)
-  - [Branches](#branches)
-    - [Current active branches](#current-active-branches)
-  - [Pull requests](#pull-requests)
-
-<!-- /code_chunk_output -->
-
 Please take a moment to review this document in order to make the contribution
 process easy and effective for everyone involved.
 
@@ -92,9 +78,9 @@ appropriate labels will be applied for categorization.
 
 ## Using the issue tracker
 
-The issue tracker is the preferred channel for [**bug reports**](#bugs),
-[**features requests**](#features) and [__submitting pull
-requests__](#pull-requests), but please respect the following restrictions:
+The issue tracker is the preferred channel for [**bug reports**](#reporting-bugs),
+[**features requests**](#feature-requests) and [**submitting pull
+requests**](#pull-requests), but please respect the following restrictions:
 
 - Please **do not** use the issue tracker for personal support requests.
 
@@ -105,7 +91,7 @@ requests__](#pull-requests), but please respect the following restrictions:
 
 ### Current active branches
 
-- Current development branch: __`devel`__
+- Current development branch: **`devel`**
 - Stable branch: `releases/v1.1.x`
 
 ## Pull requests
@@ -156,7 +142,7 @@ merged:
    git pull upstream <dev-branch>
    ```
 
-> Please refer to [branches section](#branches) to get current branch to use as `<dev-branch>`
+   > Please refer to [branches section](#branches) to get current branch to use as `<dev-branch>`
 
 3. Create a new topic branch (off the main project development branch) to
    contain your feature, change, or fix:
@@ -183,5 +169,5 @@ merged:
    git push origin <topic-branch-name>
    ```
 
-10. [Open a Pull Request](https://github.com/aristanetworks/ansible-cvp/pulls)
+7. [Open a Pull Request](https://github.com/aristanetworks/ansible-cvp/pulls)
     with a clear title and description.

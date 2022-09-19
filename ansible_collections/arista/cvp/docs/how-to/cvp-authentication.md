@@ -56,11 +56,11 @@ ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"
 
 ### Example reading from an environment variable
 
-```
+```shell
 export ONPREM_TOKEN=`cat /path/to/onprem.token`
 ```
 
-```
+```yaml
 ansible_user: svc_account
 ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
 ```
@@ -94,9 +94,9 @@ all:
 
 2. Save the token generated from the CV/CVaaS UI into a file named `vault` inside `./group_vars/CVP_group/` following the format below:
 
-  ```yaml
-  vault_token: <token>
-  ```
+   ```yaml
+   vault_token: <token>
+   ```
 
 3. Encrypt the file using `ansible-vault encrypt vault`
 

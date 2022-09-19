@@ -8,7 +8,7 @@
   <img src='medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-Even if __`arista.cvp`__ collection is integrated with `arista.avd` collection to [automate configuration deployment](https://avd.sh/en/latest/roles/eos_config_deploy_cvp/index.html), this collection can also be used outside of AVD tasks to populate your CloudVision server with your own workflows.
+Even if **`arista.cvp`** collection is integrated with `arista.avd` collection to [automate configuration deployment](https://avd.sh/en/latest/roles/eos_config_deploy_cvp/index.html), this collection can also be used outside of AVD tasks to populate your CloudVision server with your own workflows.
 
 ## Requirements
 

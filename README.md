@@ -1,34 +1,10 @@
-![](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![[collection version](https://github.com/aristanetworks/ansible-cvp/tags)](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp) [![Collection code testing](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml/badge.svg)](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml)
-
 # Ansible Modules for Arista CloudVision Platform
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
-- [Ansible Modules for Arista CloudVision Platform](#ansible-modules-for-arista-cloudvision-platform)
-  - [About](#about)
-  - [List of CVP versions supported](#list-of-cvp-versions-supported)
-  - [Collection overview](#collection-overview)
-    - [List of available modules](#list-of-available-modules)
-    - [List of available roles](#list-of-available-roles)
-  - [Deprecated modules](#deprecated-modules)
-  - [Example](#example)
-  - [Installation](#installation)
-    - [Requirements](#requirements)
-    - [Installation from ansible-galaxy](#installation-from-ansible-galaxy)
-    - [Git installation as source of collection](#git-installation-as-source-of-collection)
-    - [Docker for testing](#docker-for-testing)
-  - [Resources](#resources)
-  - [Ask a question](#ask-a-question)
-  - [Branching Model](#branching-model)
-  - [License](#license)
-
-<!-- /code_chunk_output -->
+![Arista CVP](https://img.shields.io/badge/Arista-CVP%20Automation-blue) ![[collection version](https://github.com/aristanetworks/ansible-cvp/tags)](https://img.shields.io/github/v/release/aristanetworks/ansible-cvp) ![License](https://img.shields.io/github/license/aristanetworks/ansible-cvp) [![Collection code testing](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml/badge.svg)](https://github.com/aristanetworks/ansible-cvp/actions/workflows/pull-request-management.yml)
 
 ## About
 
-[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#git-installation) of this readme.
+[Arista Networks](https://www.arista.com/) supports Ansible for managing devices running the EOS operating system through [CloudVision platform (CVP)](https://www.arista.com/en/products/eos/eos-cloudvision). This roles includes a set of ansible modules that perform specific configuration tasks on CVP server. These tasks include: collecting facts, managing configlets, containers, build provisionning topology and running tasks. For installation, you can refer to [specific section](#installation) of this readme.
 
 <p align="center">
   <img src='ansible_collections/arista/cvp/medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
@@ -210,9 +186,9 @@ Support for this `arista.cvp` collection is provided by the community directly i
 
 ## Branching Model
 
-- The __`devel`__ branch corresponds to the release actively under development.
-- The __`releases/x.x.x`__ branches correspond to stable releases.
-- Fork repository and create a branch based on __`devel`__ to set up a dev environment if you want to open a PR.
+- The **`devel`** branch corresponds to the release actively under development.
+- The **`releases/x.x.x`** branches correspond to stable releases.
+- Fork repository and create a branch based on **`devel`** to set up a dev environment if you want to open a PR.
 - See the ansible-cvp release for information about active branches.
 
 ## License
