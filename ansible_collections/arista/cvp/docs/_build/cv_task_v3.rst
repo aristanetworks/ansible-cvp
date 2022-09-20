@@ -17,7 +17,7 @@ Synopsis
 --------
 
 
-CloudVison Portal Task module to action pending tasks on CLoudvision
+CloudVision Portal Task module to action pending tasks on CloudVision
 
 
 .. _module-specific-options-label:

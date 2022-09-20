@@ -1,6 +1,6 @@
 # cv_change_control_v3
 
-Change Control management with Cloudvision
+Change Control management with CloudVision
 
 Module added in version 3.4.0
 
@@ -34,7 +34,7 @@ The following options may be specified for this module:
 <td></td>
 <td></td>
 <td>
-    <div>A dict containuing the change control to be created/modified</div>
+    <div>A dict containing the change control to be created/modified</div>
 </td>
 </tr>
 
@@ -156,4 +156,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)
