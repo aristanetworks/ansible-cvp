@@ -55,7 +55,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples:
+## Examples
 
     tasks:
     - name: '#01 - Collect devices facts from {{inventory_hostname}}'

@@ -8,8 +8,6 @@ Provision, Reset, or Update CloudVision Portal Devices.
 
 ## DEPRECATED
 
-## DEPRECATED
-
 - In version: `4.0`
 - Why : Updated modules released with increased functionality
 - Alternative: Use `arista.cvp.cv_device_v3` instead.
@@ -100,7 +98,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples:
+## Examples
 
     ---
     - name: Test cv_device
@@ -151,4 +149,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   EMEA AS Team (@aristanetworks)
+- EMEA AS Team (@aristanetworks)

@@ -76,7 +76,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples:
+## Examples
 
     # task in loose mode using fqdn (default)
     - name: Device Management in CloudVision
