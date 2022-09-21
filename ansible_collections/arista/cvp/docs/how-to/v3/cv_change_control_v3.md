@@ -8,23 +8,23 @@
 
 ## Module Options
 
- - `state`: Can be one of the following: `set`, `show` or `remove`
-    - `state: set` : Set Change control
-    - `state: show` : List Change control
-    - `state: remove` : Delete Change control
- - `change`: A dict, with the structure of the change. The change dict is structured as follows:
-    - `name`: (str) The name of the change control
-    - `stages` : A list of dicts
-      - `name` : (str) The name of the stage
-      - `mode: <series | parallel>` : (str) This particular stage should have its actions executed in parallel or series
-      - `parent` : (str) The name of the parent stage
-    - `activities` : A list of dicts, containing details of the tasks or actions to be executed, and the stage they should be executed in.
-      - `name` : (str) Only used internally, "task" for any tasks
-      - `stage`: (str) The name of the stage that this task or action should be assigned to
-      - `task_id`: (str) The WorkOrderId of the task to be executed, if this is to be a task activity
-      - `timeout`: (int) The timeout, if this is to be a task activity - default is 900 seconds
-      - `action`: (str) The name of the action performed (mutually exclusive to `task_id` and `timeout`)
-      - `arguments`: (list) A list of dicts each consisting of `name` and `value` keys to provide the action arguments. `name: DeviceID` and `value: <device serial number` are commonly used.
+- `state`: Can be one of the following: `set`, `show` or `remove`
+  - `state: set` : Set Change control
+  - `state: show` : List Change control
+  - `state: remove` : Delete Change control
+- `change`: A dict, with the structure of the change. The change dict is structured as follows:
+  - `name`: (str) The name of the change control
+  - `stages` : A list of dicts
+    - `name` : (str) The name of the stage
+    - `mode: <series | parallel>` : (str) This particular stage should have its actions executed in arallel or series
+    - `parent` : (str) The name of the parent stage
+  - `activities` : A list of dicts, containing details of the tasks or actions to be executed, and the tage they should be executed in.
+    - `name` : (str) Only used internally, "task" for any tasks
+    - `stage`: (str) The name of the stage that this task or action should be assigned to
+    - `task_id`: (str) The WorkOrderId of the task to be executed, if this is to be a task activity
+    - `timeout`: (int) The timeout, if this is to be a task activity - default is 900 seconds
+    - `action`: (str) The name of the action performed (mutually exclusive to `task_id` and `timeout`)
+    - `arguments`: (list) A list of dicts each consisting of `name` and `value` keys to provide the action arguments. `name: DeviceID` and `value: <device serial number` are commonly used.
 
 ## Example
 
