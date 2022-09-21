@@ -25,7 +25,7 @@ DOCUMENTATION = r'''
 module: cv_change_control_v3
 version_added: 3.4.0
 author: Ansible Arista Team (@aristanetworks)
-short_description: Change Control management with Cloudvision
+short_description: Change Control management with CloudVision
 description:
   - CloudVision Portal Change Control Module.
   - ''
@@ -35,7 +35,7 @@ options:
     required: false
     type: str
   change:
-    description: A dict containuing the change control to be created/modified
+    description: A dict containing the change control to be created/modified
     required: false
     type: dict
   state:

@@ -27,7 +27,7 @@ version_added: "3.0.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
-  - CloudVison Portal Task module to action pending tasks on CLoudvision
+  - CloudVision Portal Task module to action pending tasks on CloudVision
 options:
   tasks:
     description: CVP taskIDs to act on

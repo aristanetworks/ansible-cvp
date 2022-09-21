@@ -1,6 +1,6 @@
-# Configure a Change Control on Cloudvision
+# Configure a Change Control on CloudVision
 
-__cv_change_control_v3__ manage change controls on CloudVision:
+**cv_change_control_v3** manage change controls on CloudVision:
 
 - Create a new change control
 - Modify/Update an existing change control
@@ -26,10 +26,10 @@ __cv_change_control_v3__ manage change controls on CloudVision:
       - `action`: (str) The name of the action performed (mutually exclusive to `task_id` and `timeout`)
       - `arguments`: (list) A list of dicts each consisting of `name` and `value` keys to provide the action arguments. `name: DeviceID` and `value: <device serial number` are commonly used.
 
-
 ## Example
 
 Create a change control
+
 ```yaml
 - name: CVP Change Control
   hosts: cv_server

@@ -10,7 +10,7 @@ plugins:
   lookup: {}
   module:
     cv_change_control_v3:
-      description: Change Control management with Cloudvision
+      description: Change Control management with CloudVision
       name: cv_change_control_v3
       namespace: ''
       version_added: 3.4.0
@@ -50,12 +50,12 @@ plugins:
       namespace: ''
       version_added: 1.0.0
     cv_facts_v3:
-      description: Collect facts from Cloudvision
+      description: Collect facts from CloudVision
       name: cv_facts_v3
       namespace: ''
       version_added: 3.3.0
     cv_image_v3:
-      description: EOS Image management with Cloudvision
+      description: EOS Image management with CloudVision
       name: cv_image_v3
       namespace: ''
       version_added: 3.3.0

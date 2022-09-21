@@ -10,7 +10,7 @@ Module added in version 3.4.0
 
 ## Synopsis
 
-CloudVison Portal Tag module to Create/Assign/Delete/Unassign tags on
+CloudVision Portal Tag module to Create/Assign/Delete/Unassign tags on
 CloudVision
 
 ## Module-specific Options

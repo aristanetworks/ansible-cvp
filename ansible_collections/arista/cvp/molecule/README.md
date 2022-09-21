@@ -1,6 +1,6 @@
 # CVP Unit test
 
-This section provides a list of Ansible Cloudvision scenario executed during Continuous Integration to validate CVP integration.
+This section provides a list of Ansible CloudVision scenario executed during Continuous Integration to validate CVP integration.
 
 ## Ansible molecule
 

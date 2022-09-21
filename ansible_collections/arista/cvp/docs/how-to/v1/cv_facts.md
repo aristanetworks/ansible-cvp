@@ -1,4 +1,4 @@
-# Get facts from Cloudvision
+# Get facts from CloudVision
 
 `cv_facts` collect Facts from CloudVision:
 

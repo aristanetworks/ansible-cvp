@@ -51,7 +51,7 @@ options:
     choices: ['loose', 'strict']
     type: str
   search_key:
-    description: Key name to use to look for device in Cloudvision.
+    description: Key name to use to look for device in CloudVision.
     required: false
     default: 'hostname'
     choices: ['fqdn', 'hostname', 'serialNumber']
@@ -60,7 +60,7 @@ options:
 
 EXAMPLES = r'''
 # task in loose mode using fqdn (default)
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false
@@ -80,7 +80,7 @@ EXAMPLES = r'''
         search_key: fqdn
 
 # task in loose mode using serial
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false
@@ -100,7 +100,7 @@ EXAMPLES = r'''
         search_key: serialNumber
 
 # task in strict mode
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false

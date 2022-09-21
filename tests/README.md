@@ -2,30 +2,30 @@
 
 ## Tests structure
 
-- __Unit__: test with no CV interaction to test component: `tests/unit`
+- **Unit**: test with no CV interaction to test component: `tests/unit`
   - Tests with no API requirements
   - Tests objects & function with no abstraction
   - Unit Testing test each part of the program and shows that the individual parts are correct
   - Should be run at anytime by developers or CI
 
-- __System__: test to run module backend component and which requires CV connection: `tests/system`
-  - Testing based on Cloudvision API
+- **System**: test to run module backend component and which requires CV connection: `tests/system`
+  - Testing based on CloudVision API
   - Validate full integration with module inputs
   - Close to ansible module execution
   - Can be run as soon as you have access to test environment.
 
-- __Lib__: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
+- **Lib**: to provides a safe place for fixtures, parametrizes, mook data: `tests/lib`
   - Provides helpers for unit and system
   - Store all tests data
   - Only available for pytest
 
-- __Data__: to provides a safe place for all tests dataset: `tests/data`
+- **Data**: to provides a safe place for all tests dataset: `tests/data`
   - Store all tests data
   - Only available for pytest
 
 ### Test requirements
 
-- Cloudvision server with some devices
+- CloudVision server with some devices
 - Pytest install as per [collection dev requirements](../ansible_collections/arista/cvp/requirements-dev.txt):
   - `pytest`
   - `pytest-cov`
@@ -42,15 +42,15 @@ pip install -r ../ansible_collections/arista/cvp/requirements-dev.txt
 Credentials are loaded from ENV variable from your shell:
 
 ```bash
-# User token generated from Cloudvision instance
+# User token generated from CloudVision instance
 export ARISTA_AVD_CV_TOKEN='your-token-from-your-cv-instance'
 
-# Cloudvision address
+# CloudVision address
 # Note: port is set to tcp/443
 export ARISTA_AVD_CV_SERVER='lab.cv.io'
 
-# Option to provision or not Cloudvision
-# If set to False, fixture will not provision Cloudvision. By default set to True
+# Option to provision or not CloudVision
+# If set to False, fixture will not provision CloudVision. By default set to True
 export ARISTA_AVD_CV_PROVISION=False
 ```
 
@@ -61,21 +61,21 @@ export ARISTA_AVD_CV_PROVISION=False
 ```bash
 # Configlet Unit testing
 pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	unit/test_configlet_input.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+ unit/test_configlet_input.py
 
 # Configlet system testing
 pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	 system/test_cv_configlet.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+  system/test_cv_configlet.py
 
 # Configlet system testing with only WARNING print in pytest.log
 $ PYTEST_LOG_LEVEL=WARNING pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
-	--html=report.html --self-contained-html --cov-report=html --color yes \
-	--cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
-	 system/test_cv_configlet.py
+ --html=report.html --self-contained-html --cov-report=html --color yes \
+ --cov=ansible_collections.arista.cvp.plugins.module_utils -m 'generic or api'\
+  system/test_cv_configlet.py
 ```
 
 ### Makefile usage
@@ -101,14 +101,12 @@ make test TAG='configlet' CLI_LOGGING=INFO PYTEST_LOGGING=WARNING
 - `CLI_LOGGING`: Log verbosity print out to your console
 - `PYTEST_LOGGING`: Log level used to report in pytest.log
 
-
 ## Tests Results
 
 Results are printed to your screen and also saved in reports:
 
 - `report.html`: Pytest result with logging
 - `htmlcov/index.html`: Coverage report
-
 
 ## Create test cases
 
@@ -184,7 +182,7 @@ A generic method is available to generate test IDs from your input Automatically
 
 #### Python Mock approach for tests with cvprac
 
-A [MagicMock](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) object is [available](./lib/mock.py) to emulate cvprac functions with coherent data. It takes in argument data extracted from Cloudvision. These data must be instantiate in your fixture:
+A [MagicMock](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) object is [available](./lib/mock.py) to emulate cvprac functions with coherent data. It takes in argument data extracted from CloudVision. These data must be instantiate in your fixture:
 
 ```python
 from tests.lib import mock, mock_ansible

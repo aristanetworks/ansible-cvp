@@ -26,7 +26,7 @@ DOCUMENTATION = r'''
 module: cv_facts_v3
 version_added: "3.3.0"
 author: Ansible Arista Team (@aristanetworks)
-short_description: Collect facts from Cloudvision
+short_description: Collect facts from CloudVision
 description:
 - Returns list of devices, configlets, containers and images from CloudVision
 options:
