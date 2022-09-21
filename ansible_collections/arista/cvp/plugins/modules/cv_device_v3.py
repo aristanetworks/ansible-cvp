@@ -4,9 +4,7 @@
 # pylint: disable=dangerous-default-value
 # flake8: noqa: W503
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2019 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +51,7 @@ options:
     choices: ['loose', 'strict']
     type: str
   search_key:
-    description: Key name to use to look for device in Cloudvision.
+    description: Key name to use to look for device in CloudVision.
     required: false
     default: 'hostname'
     choices: ['fqdn', 'hostname', 'serialNumber']
@@ -62,7 +60,7 @@ options:
 
 EXAMPLES = r'''
 # task in loose mode using fqdn (default)
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false
@@ -82,7 +80,7 @@ EXAMPLES = r'''
         search_key: fqdn
 
 # task in loose mode using serial
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false
@@ -102,7 +100,7 @@ EXAMPLES = r'''
         search_key: serialNumber
 
 # task in strict mode
-- name: Device Management in Cloudvision
+- name: Device Management in CloudVision
   hosts: cv_server
   connection: local
   gather_facts: false

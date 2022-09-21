@@ -22,7 +22,7 @@ Synopsis
 --------
 
 
-CloudVison Portal Task module
+CloudVision Portal Task module
 
 
 .. _module-specific-options-label:

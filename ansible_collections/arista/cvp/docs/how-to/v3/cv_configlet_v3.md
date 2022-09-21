@@ -1,4 +1,4 @@
-# Configure configlets on Cloudvision (v3)
+# Configure configlets on CloudVision (v3)
 
 `cv_configlet_v3` manage configlets on CloudVision:
 
