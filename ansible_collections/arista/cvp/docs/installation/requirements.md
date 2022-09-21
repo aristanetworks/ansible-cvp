@@ -2,13 +2,13 @@
 
 ## Arista EOS version
 
-- EOS __4.21.8M__ or later
+- EOS **4.21.8M** or later
 - Roles validated with eAPI transport -> `ansible_connection: httpapi`
 
-## Arista Cloudvision
+## Arista CloudVision
 
 !!! info
-    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as Cloudvision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
+    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as CloudVision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
 
 | ansible-cvp | 1.0.0 | 1.1.0 | 2.0.0 & higher |
 | ----------- | ----- | ----- | -------------- |
@@ -19,11 +19,11 @@
 
 ## Python
 
-- Python __3.8__ or later
+- Python **3.8** or later
 
 ## Supported Ansible Versions
 
-- ansible-core from __2.11.3__ to __2.12.x__
+- ansible-core from **2.11.3** to **2.12.x**
 
 ## Additional Python Libraries required
 

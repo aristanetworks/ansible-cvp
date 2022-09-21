@@ -43,7 +43,7 @@ options:
     required: true
     type: dict
   state:
-    description: Set if ansible should build or remove devices on CLoudvision
+    description: Set if ansible should build or remove devices on CloudVision
     required: false
     default: 'present'
     choices: ['present', 'absent']

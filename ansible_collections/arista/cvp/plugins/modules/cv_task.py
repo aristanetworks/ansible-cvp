@@ -27,7 +27,7 @@ version_added: "1.0.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
-  - CloudVison Portal Task module
+  - CloudVision Portal Task module
 deprecated:
   removed_in: '4.0.0'
   why: Updated modules released with increased functionality

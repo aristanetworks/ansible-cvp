@@ -1,10 +1,10 @@
 # configlet_sync role
 
-Ansible role to synchronize configlets between 2 instances of [Cloudvision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.
+Ansible role to synchronize configlets between 2 instances of [CloudVision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.
 
 This role synchronize a designated set of CVP Configlets across multiple CVP instances. This ability to synchronize Configlets provides an efficient way of ensuring organizational policies and security requirements can be quickly deployed across an entire Arista estate in a consistent automated manner. The aim will be to deploy and synchronize a set of configlets that could be updated from any instance of CVP or via an Ansible PlayBook. This provides the most flexible method of managing the configlets without imposing any requirements to exclusively use either CVP or Ansible for updating them.
 
-![](files/ansible-cvp-sync.png)
+![CVP Sync](files/ansible-cvp-sync.png)
 
 This role is implementation of example describe on [EOS Central blog](https://eos.arista.com/synchronising-cloudvision-portal-configlets-with-ansible/) by @Hugh-Adams.
 
@@ -14,7 +14,7 @@ No specific requirements to use this role.
 
 ## Tested Platforms
 
-Any version of Cloudvision supported by current `arista.cvp` collection.
+Any version of CloudVision supported by current `arista.cvp` collection.
 
 ## Role Variables
 
@@ -25,10 +25,10 @@ Any version of Cloudvision supported by current `arista.cvp` collection.
 action: < * action to run with the role: init|sync|pull|push >
 ```
 
-- __`init`__: Create initial local folder to save role outputs.
-- __`pull`__: Connects to each of the CVP instances, locates the configlets with `{{configlet_filter}}` in their name and updates local shared configlet data (config, last time changed, associated containers, associated devices) for each CVP instance.
-- __`pull`__: Connects to each of the CVP instances and updates the shared configlets on each one using the information provided by `pull` action.
-- __`sync`__: Execute both __`pull`__ and __`push`__ actions.
+- **`init`**: Create initial local folder to save role outputs.
+- **`pull`**: Connects to each of the CVP instances, locates the configlets with `{{configlet_filter}}` in their name and updates local shared configlet data (config, last time changed, associated containers, associated devices) for each CVP instance.
+- **`pull`**: Connects to each of the CVP instances and updates the shared configlets on each one using the information provided by `pull` action.
+- **`sync`**: Execute both **`pull`** and **`push`** actions.
 
 #### Optional variables
 
@@ -48,8 +48,8 @@ common_configlets_dir:  < Folder for common configlets. Default is {{cvpsync_dat
 cvp_servers_dir:        < Folder for common configlets. Default is {{cvpsync_data}}/common_configlets/ >
 ```
 
-- __`common_configlets_dir`__: contains details of the configlets that are to be synchronized across the CVP instances.
-- __`cvp_servers_dir`__:  contains details of which configlets are to be deployed to the CVP servers. This directory can be used by other PlayBooks to deploy configlets and provision devices.
+- **`common_configlets_dir`**: contains details of the configlets that are to be synchronized across the CVP instances.
+- **`cvp_servers_dir`**:  contains details of which configlets are to be deployed to the CVP servers. This directory can be used by other PlayBooks to deploy configlets and provision devices.
 
 ## Dependencies
 
@@ -104,7 +104,7 @@ Example playbook to to synchronize shared configlets with `generic` string in th
 
 ### Inventory
 
-`{{inventory_name}}` for Cloudvision instances can be changed to match your own environement. Only group name `cvp_sync` must be the same in inventory and playbook.
+`{{inventory_name}}` for CloudVision instances can be changed to match your own environment. Only group name `cvp_sync` must be the same in inventory and playbook.
 
 ```yaml
 ---

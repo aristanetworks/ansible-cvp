@@ -1,6 +1,6 @@
 # Tag management on CloudVision
 
-__cv_tag_v3__ manage tags on CloudVision:
+**cv_tag_v3** manage tags on CloudVision:
 
 - Create tag on CloudVision
 - Assign tag on CloudVision
@@ -17,7 +17,7 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
 - mode (`create`, `delete`, `assign`, `unassign`)
 - auto_create (`True` or `False`). Default is `True`
 
-### Example:
+### Example
 
 ```yaml
   - hosts: CloudVision
@@ -29,7 +29,7 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
           auto_create: true
 ```
 
-### Example of creating device and interface tags:
+### Example of creating device and interface tags
 
 ```yaml
 - name: Test cv_tag_v3
@@ -62,7 +62,7 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
         auto_create: true
 ```
 
-### Example of assigning device and interface tags:
+### Example of assigning device and interface tags
 
 ```yaml
 - name: Test cv_tag_v3
@@ -97,6 +97,7 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
         mode: assign
         auto_create: true
 ```
+
 ## Actions
 
 | Mode              |   auto_create: true   |   auto_create: false   |
@@ -105,7 +106,6 @@ The documentation is available in the [module section](../../modules/cv_tag_v3.r
 | unassign          | Unassign tag. <br>`device` field needed | Unassign tag. <br>`device` field needed |
 | create            | Create tag | Create tag |
 | delete | Delete tag | Delete tag |
-
 
 ## Module output
 

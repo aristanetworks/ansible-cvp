@@ -2,18 +2,18 @@
 
 These instructions are for regular users to install via Ansible Galaxy. To setup a development environment use [these](https://www.avd.sh/en/devel/docs/contribution/overview.html) instructions.
 
-__arista.cvp__ can also be consumed using the ["AVD All-in-one" container](https://github.com/arista-netdevops-community/avd-all-in-one-container).
+**arista.cvp** can also be consumed using the ["AVD All-in-one" container](https://github.com/arista-netdevops-community/avd-all-in-one-container).
 
 ## Install from Ansible Galaxy
 
-__arista.cvp__ collection is available on [Ansible Galaxy](https://galaxy.ansible.com/arista/cvp) server and can be automatically installed on your system.
+**arista.cvp** collection is available on [Ansible Galaxy](https://galaxy.ansible.com/arista/cvp) server and can be automatically installed on your system.
 
 Make sure to install [Python requirements](requirements.md#additional-python-libraries-required) afterwards.
 
 ### Latest version
 
 ```shell
-$ ansible-galaxy collection install arista.cvp
+ansible-galaxy collection install arista.cvp
 ```
 
 !!! warning
@@ -22,7 +22,7 @@ $ ansible-galaxy collection install arista.cvp
 ### Install a specific version
 
 ```shell
-$ ansible-galaxy collection install arista.cvp:==3.1.0
+ansible-galaxy collection install arista.cvp:==3.1.0
 ```
 
 You can specify multiple range identifiers which are split by ,. You can use the following range identifiers:
@@ -38,7 +38,7 @@ You can specify multiple range identifiers which are split by ,. You can use the
 ### Install latest `devel` version from AVD GitHub
 
 ```shell
-$ ansible-galaxy collection install git+https://github.com/aristanetworks/ansible-avd.git#/ansible_collections/arista/cvp/,devel
+ansible-galaxy collection install git+https://github.com/aristanetworks/ansible-avd.git#/ansible_collections/arista/cvp/,devel
 ```
 
 ### Install in a specific directory

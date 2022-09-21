@@ -48,7 +48,7 @@ The following options may be specified for this module:
 <td>present</td>
 <td><ul><li>present</li><li>absent</li></ul></td>
 <td>
-    <div>Set if ansible should build or remove devices on CLoudvision</div>
+    <div>Set if ansible should build or remove devices on CloudVision</div>
 </td>
 </tr>
 
@@ -109,4 +109,4 @@ The following options may be specified for this module:
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)
