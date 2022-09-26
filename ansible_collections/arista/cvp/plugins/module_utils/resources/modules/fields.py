@@ -28,6 +28,8 @@ class ModuleOptionValues():
     APPLY_MODE_STRICT: str = 'strict'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
+    STATE_MODE_DECOMM: str = 'absent'
+    STATE_MODE_REMOVE: str = 'provisioning_reset'
 
 
 # @dataclass
@@ -60,3 +62,5 @@ class DeviceResponseFields():
     DEVICE_RESET: str = 'devices_reset'
     BUNDLE_ATTACHED: str = 'bundle_attached'
     BUNDLE_DETACHED: str = 'bundle_detached'
+    DEVICE_DECOMMISSIONED: str = 'devices_decommissioned'
+    DEVICE_REMOVED: str = 'devices_removed'
