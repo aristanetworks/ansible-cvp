@@ -1,5 +1,10 @@
 
 # {{ ansible_managed }} - {{ inventory_hostname }}
+{% if ztp.general.dhcpd_raw %}
+
+# dhcpd raw configuration
+{{ ztp.general.dhcpd_raw }}
+{% endif %}
 # Subnet of ZTP interface
 {% for subnet in ztp.general.subnets %}
 {% if subnet.name is defined %}
@@ -16,11 +21,17 @@ subnet {{ subnet.network }} netmask {{ subnet.netmask }} {
 {%     if subnet.nameservers is defined and subnet.nameservers is iterable %}
     option domain-name-servers {% for nameserver in subnet.nameservers %}{{ nameserver }}{% if not loop.last %}, {% endif %}{% endfor %};
 {%     endif %}
+{%     if subnet.domain_name is defined %}
+    option domain-name {{subnet.domain_name }};
+{%     endif %}
 {%     if subnet.registration is defined %}
     option bootfile-name "{{ subnet.registration }}";
 {%     endif %}
 {%     if subnet.lease_time is defined %}
     max-lease-time {{ subnet.lease_time }};
+{%     endif %}
+{%     if subnet.dhcpd_raw is defined %}
+{% filter indent(width=4,) %}    {{ subnet.dhcpd_raw }}{% endfilter %}
 {%     endif %}
 }
 {% endfor %}
