@@ -60,5 +60,4 @@ host {{ client.name }} {
     option domain-name-servers {% for nameserver in ztp.default.nameservers %}{{ nameserver }}{% if not loop.last %}, {% endif %}{% endfor %};
 {%     endif %}
 }
-
 {% endfor %}
