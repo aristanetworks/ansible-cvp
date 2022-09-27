@@ -6,17 +6,26 @@ ztp:
     nameservers:
       - '10.255.0.3'
   general:
+    dhcpd_raw: |
+      class "vendor-class" {
+        match option vendor-class-identifier;
+      }
+      option option-242 code 242 = string;
     subnets:
       - network: 172.17.0.0
         netmask: 255.255.0.0
         start: 172.17.255.200
         end: 172.17.255.200
+        dhcpd_raw: |
+          authoritative;
+          option option-242 "MCIPADD=192.168.190.1,HTTPSRVR=192.168.190.4,HTTP DIR=/,L2QVLAN=190,L2Q=1";
       - name: Remote Subnet
         network: 10.255.0.0
         netmask: 255.255.255.0
         gateway: 10.255.0.3
         nameservers:
           - '10.255.0.3'
+        domain_name: arista.com
         start: 10.255.0.200
         end: 10.255.0.250
         lease_time: 300
