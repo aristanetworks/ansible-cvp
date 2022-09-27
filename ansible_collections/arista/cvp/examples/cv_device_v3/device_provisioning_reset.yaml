@@ -1,0 +1,13 @@
+- name: Remove device
+  hosts: cv_server
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES:
+      - fqdn: leaf2
+        parentContainerName: ""
+  tasks:
+  - name: remove device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: provisioning_reset

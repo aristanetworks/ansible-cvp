@@ -42,7 +42,7 @@ options:
     description: Set if ansible should build or remove devices on CLoudvision
     required: false
     default: 'present'
-    choices: ['present', 'factory_reset']
+    choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']
     type: str
   apply_mode:
     description: Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.
@@ -118,6 +118,52 @@ EXAMPLES = r'''
         devices: '{{CVP_DEVICES}}'
         state: present
         apply_mode: strict
+
+# Decommission devices (remove from both provisioning and telemetry)
+- name: Decommission device
+  hosts: cv_server
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES:
+      - fqdn: leaf1
+        parentContainerName: ""
+  tasks:
+  - name: decommission device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: absent
+
+# Remove a device from provisioning
+# Post 2021.3.0 the device will be automatically re-registered and moved to the Undefined container
+- name: Remove device
+  hosts: CVP
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES:
+      - fqdn: leaf2
+        parentContainerName: ""
+  tasks:
+  - name: remove device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: provisioning_reset
+
+# Factory reset a device (moves the device to ZTP mode)
+- name: Factory reset device
+  hosts: CVP
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES:
+      - fqdn: leaf2
+        parentContainerName: ""
+  tasks:
+  - name: remove device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: factory_reset
 '''
 
 import logging
@@ -163,7 +209,7 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'factory_reset']),
+                   choices=['present', 'factory_reset', 'provisioning_reset', 'absent']),
         apply_mode=dict(type='str',
                         required=False,
                         default='loose',
