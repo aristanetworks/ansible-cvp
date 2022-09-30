@@ -1,6 +1,6 @@
-# Configure devices on Cloudvision
+# Configure devices on CloudVision
 
-__cv_device_v3__ manage devices on CloudVision:
+**cv_device_v3** manage devices on CloudVision:
 
 - Support Configlets attachment
 - Support Container move during provisioning
@@ -37,8 +37,8 @@ CVP_DEVICES:
 
 - `state`: Define if module should `create / update`(default) or `reset` devices (`factory_reset`) from CV. By default it is set to `present`.
 - `apply_mode`: Define how configlets configured to the devices are managed by ansible:
-  - `loose` (default): Configure new configlets to device and __ignore__ configlet already configured but not listed.
-  - `strict`: Configure new configlets to device and __remove__ configlet already configured but not listed.
+  - `loose` (default): Configure new configlets to device and **ignore** configlet already configured but not listed.
+  - `strict`: Configure new configlets to device and **remove** configlet already configured but not listed.
 - `search_key`: Define key to use to search for devices.
   - `hostname`: Use Hostname to get devices.
   - `fqdn`: Use Hostname + DNS to get devices.

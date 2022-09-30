@@ -1,6 +1,6 @@
-# Configure a Change Control on Cloudvision
+# Configure a Change Control on CloudVision
 
-__cv_change_control_v3__ manage change controls on CloudVision:
+**cv_change_control_v3** manage change controls on CloudVision:
 
 - Create a new change control
 - Modify/Update an existing change control
@@ -8,35 +8,34 @@ __cv_change_control_v3__ manage change controls on CloudVision:
 
 ## Module Options
 
- - `state`: Can be one of the following: `set`, `show` or `remove`
-    - `state: set`: Set Change control
-    - `state: show`: List Change control
-    - `state: remove`: Delete Change control
- - `change`: A dict, with the structure of the change. The change dict is structured as follows:
+- `state`: Can be one of the following: `set`, `show` or `remove`
+  - `state: set`: Set Change control
+  - `state: show`: List Change control
+  - `state: remove`: Delete Change control
+- `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
- ```yaml
-name: <name of change control>
-notes: <Any notes that you want to add>
+```yaml
+name: <str - Name of change control>
+notes: <str - Any notes that you want to add>
 stages:
-   - name: <name of stage>
-     mode: <series | parallel>
-     parent: <name of parent stage>
+ - name: <str - Name of stage>
+   mode: <series | parallel>
+   parent: <str - Name of parent stage>
 activities:
-   - name: <only used internally, "task" for any tasks>
-     task_id: <str - the WorkOrderId of the task to be executed>
-     timeout: <int>
-     stage: <str - the name of the Stage to assign the task to>
-   - name: <only used internally>
-     action: <The name of the action to be done e.g. "Switch Healthcheck">
-     stage: <The name of the stage to assign the action to>
-     arguments: <list of dicts, each consisting of a name, and value key>
-        - name: <argument name>
-          value: <argument value>
- ```
+ - name: <str - Only used internally, "task" for any tasks>
+   stage: <str - The name of the Stage to assign the task to>
+   task_id: <str - The WorkOrderId of the task to be executed, if this is to be a task activity>
+   timeout: <int - The timeout, if this is to be a task activity - default is 900 seconds>
+   action: <str - The name of the action performed (mutually exclusive to task_id and timeout)>
+   arguments:
+     - name: <str - Device ID>
+       value: <str - Device serial number>
+```
 
 ## Example
 
 Create a change control
+
 ```yaml
 - name: CVP Change Control
   hosts: cv_server

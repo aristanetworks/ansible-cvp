@@ -69,7 +69,7 @@ The following options may be specified for this module:
     <td>hostname</td>
     <td><ul><li>fqdn</li><li>hostname</li><li>serialNumber</li></ul></td>
     <td>
-        <div>Key name to use to look for device in Cloudvision.</div>
+        <div>Key name to use to look for device in CloudVision.</div>
     </td>
     </tr>
 
@@ -78,7 +78,7 @@ The following options may be specified for this module:
     <td>str</td>
     <td>no</td>
     <td>present</td>
-    <td><ul><li>present</li><li>factory_reset</li></ul></td>
+    <td><ul><li>present</li><li>factory_reset</li><li>provisioning_reset</li><li>absent</li></ul></td>
     <td>
         <div>Set if ansible should build or remove devices on CLoudvision</div>
     </td>
@@ -95,7 +95,7 @@ Examples:
 ::
 
     # task in loose mode using fqdn (default)
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -115,7 +115,7 @@ Examples:
             search_key: fqdn
 
     # task in loose mode using serial
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -135,7 +135,7 @@ Examples:
             search_key: serialNumber
 
     # task in strict mode
-    - name: Device Management in Cloudvision
+    - name: Device Management in CloudVision
       hosts: cv_server
       connection: local
       gather_facts: false
@@ -153,6 +153,52 @@ Examples:
             devices: '{{CVP_DEVICES}}'
             state: present
             apply_mode: strict
+
+    # Decommission devices (remove from both provisioning and telemetry)
+    - name: Decommission device
+      hosts: cv_server
+      connection: local
+      gather_facts: no
+      vars:
+        CVP_DEVICES:
+          - fqdn: leaf1
+            parentContainerName: ""
+      tasks:
+      - name: decommission device
+        arista.cvp.cv_device_v3:
+            devices: '{{CVP_DEVICES}}'
+            state: absent
+
+    # Remove a device from provisioning
+    # Post 2021.3.0 the device will be automatically re-registered and moved to the Undefined container
+    - name: Remove device
+      hosts: CVP
+      connection: local
+      gather_facts: no
+      vars:
+        CVP_DEVICES:
+          - fqdn: leaf2
+            parentContainerName: ""
+      tasks:
+      - name: remove device
+        arista.cvp.cv_device_v3:
+            devices: '{{CVP_DEVICES}}'
+            state: provisioning_reset
+
+    # Factory reset a device (moves the device to ZTP mode)
+    - name: Factory reset device
+      hosts: CVP
+      connection: local
+      gather_facts: no
+      vars:
+        CVP_DEVICES:
+          - fqdn: leaf2
+            parentContainerName: ""
+      tasks:
+      - name: remove device
+        arista.cvp.cv_device_v3:
+            devices: '{{CVP_DEVICES}}'
+            state: factory_reset
 
 
 

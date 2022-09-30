@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2022 Arista Networks AS-EMEA
+# Copyright 2022 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +28,8 @@ class ModuleOptionValues():
     APPLY_MODE_STRICT: str = 'strict'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
+    STATE_MODE_DECOMM: str = 'absent'
+    STATE_MODE_REMOVE: str = 'provisioning_reset'
 
 
 # @dataclass
@@ -60,3 +60,5 @@ class DeviceResponseFields():
     DEVICE_DEPLOYED: str = 'devices_deployed'
     DEVICE_MOVED: str = 'devices_moved'
     DEVICE_RESET: str = 'devices_reset'
+    DEVICE_DECOMMISSIONED: str = 'devices_decommissioned'
+    DEVICE_REMOVED: str = 'devices_removed'

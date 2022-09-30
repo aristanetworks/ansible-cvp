@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2019 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +25,11 @@ DOCUMENTATION = r'''
 module: cv_image_v3
 version_added: 3.3.0
 author: Ansible Arista Team (@aristanetworks)
-short_description: EOS Image management with Cloudvision
+short_description: EOS Image management with CloudVision
 description:
   - CloudVision Portal Image management module.
   - ''
-  - Due to a current limitation in Cloudvision API,
+  - Due to a current limitation in CloudVision API,
   - authentication with token is not supported for this module only.
 options:
   image:

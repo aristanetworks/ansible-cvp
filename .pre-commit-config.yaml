@@ -6,9 +6,9 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: check-yaml
       - id: check-added-large-files
       - id: check-merge-conflict
+
   - repo: https://github.com/pre-commit/mirrors-pylint
     rev: 'v2.5.0'
     hooks:
@@ -16,6 +16,7 @@ repos:
       name: Check for Linting error on Python files
       description: This hook runs pylint.
       exclude: ^.*(docs|tests).*
+
   - repo: https://github.com/adrienverge/yamllint.git
     rev: 'v1.23.0'
     hooks:
@@ -26,6 +27,7 @@ repos:
       language: python
       types: [file, yaml]
       args: [-c=.github/yamllintrc]
+
   - repo: https://github.com/ansible/ansible-lint.git
     rev: v4.2.0
     hooks:
@@ -33,12 +35,12 @@ repos:
         name: Check for ansible-lint errors
         files: \.(yaml|yml)$
         exclude: ansible_collections/arista/cvp/docs
-  # - repo: https://github.com/markdownlint/markdownlint.git
-  #   rev: v0.9.0
-  #   hooks:
-  #     - id: markdownlint
-  #       name: Markdownlint
-  #       description: Run markdownlint on your Markdown files
-  #       entry: mdl
-  #       language: ruby
-  #       files: \.(md|mdown|markdown)$
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.32.1
+    hooks:
+      - id: markdownlint
+        args:
+          - --config=.github/.markdownlint.yaml
+          - --ignore-path=.github/.markdownlintignore
+          - --fix
