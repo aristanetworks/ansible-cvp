@@ -555,9 +555,8 @@ class CvChangeControlTools():
             cc_list = self.__cv_client.api.get_change_controls()
 
         else:
-            # Rewrite on cvprac > 1.0.7
             MODULE_LOGGER.debug('Using resource API call')
-            cc_list = self.__cv_client.get('/api/resources/changecontrol/v1/ChangeControl/all')
+            cc_list = self.__cv_client.api.change_control_get_all()
 
         if len(cc_list) > 0:
             self.change_controls = cc_list
@@ -589,11 +588,8 @@ class CvChangeControlTools():
                 MODULE_LOGGER.error('Change control with id %s not found', cc_id)
                 change = None
         else:
-            # Rewrite on cvprac > 1.0.7
-            params = 'key.id={0}'.format(cc_id)
-            cc_url = '/api/resources/changecontrol/v1/ChangeControl?' + params
             try:
-                change = self.__cv_client.get(cc_url)
+                change = self.__cv_client.api.change_control_get_one(cc_id)
             except Exception:
                 MODULE_LOGGER.error('Change control with id %s not found', cc_id)
                 change = None
@@ -682,10 +678,81 @@ class CvChangeControlTools():
 
             try:
                 MODULE_LOGGER.debug("Calling on CVP to create change")
-                self.__cv_client.post('/api/resources/changecontrol/v1/ChangeControlConfig', data=cc_structure)
+                self.__cv_client.api.change_control_create_with_custom_stages(cc_structure)
                 changed = True
                 data = cc_structure['key']
 
+            except Exception as e:
+                self.__ansible.fail_json(msg="{0}".format(e))
+
+        elif state in ['approve', 'unapprove', 'execute', 'approve_and_execute'] and self.__check_mode is False:
+            MODULE_LOGGER.debug("Change control state: %s", state)
+            if change_id is not None:
+                if name is not None:
+                    warnings.append(
+                        "CC ID takes precedence over handling named CCs. Only the provided CCid will be handled"
+                    )
+                if len(change_id) > 1:
+                    warnings.append( 
+                        "Approving/Executing multiple CC IDs at one time is not supported"
+                    )
+                    e = "Approve/execute of multiple CCs by name is not supported at this time"
+                    self.__ansible.fail_json(msg="{0}".format(e))
+                    return changed, {"matches": change_id}, warnings
+                else:
+                    cc_id = change_id[0]
+            elif name is not None:
+                self.get_all_change_controls()
+                cc_list = self._find_id_by_name(name)
+                if len(cc_list) == 0:
+                    warnings.append("No matching change controls found for %s" % name)
+                    return changed, {"search": name}, warnings
+                elif len(cc_list) > 1:
+                    warnings.append(
+                        "Multiple changes (%d) found matching name: %s"
+                        % (len(cc_list), name)
+                    )
+                    # Should we hard fail here?
+                    e = "Executing multiple CCs by name is not supported at this time"
+                    self.__ansible.fail_json(msg="{0}".format(e))
+                    return changed, {"matches": cc_list}, warnings
+                else:
+                    cc_id = cc_list[0]
+            else:
+                e = "Unable to approve/execute change control. Change name or change_id(s) must be specified"
+                self.__ansible.fail_json(msg="{0}".format(e))
+                return changed, data, warnings
+
+            try:
+                MODULE_LOGGER.debug("Action: %s change control: %s", state, cc_id)
+                if state == "unapprove":
+                    MODULE_LOGGER.debug("Unapprove %s", cc_id)
+                    data = self.__cv_client.api.change_control_approve(
+                        cc_id, "Unpproved via Ansible Playbook", False)
+
+                    if data == None:
+                        e = "Approve failed: change control id not found"
+                        self.__ansible.fail_json(msg="{0}".format(e))
+                        return changed, {"approve": change_id}, warnings
+                    else:
+                        changed = True
+
+                else:
+                    if state in ['approve', 'approve_and_execute']:
+                        MODULE_LOGGER.debug("Aapprove %s", cc_id)
+                        data = self.__cv_client.api.change_control_approve(
+                            cc_id, "Approved via Ansible Playbook")
+
+                        if data == None:
+                            e = "Approve failed: change control {} id not found".format(cc_id)
+                            self.__ansible.fail_json(msg="{0}".format(e))
+                            return changed, {"approve": change_id}, warnings
+
+                    if state in ['execute', 'approve_and_execute']:
+                        MODULE_LOGGER.debug("Executee %s", cc_id)
+                        data = self.__cv_client.api.change_control_start(cc_id)
+
+                    changed = True
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 

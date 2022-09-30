@@ -150,7 +150,7 @@ def main():
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),
-        state=dict(default='show', type='str', choices=['show', 'set', 'remove']),
+        state=dict(default='show', type='str', choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute', 'approve_and_execute']),
         change_id=dict(type='list', elements='str')
     )
 
