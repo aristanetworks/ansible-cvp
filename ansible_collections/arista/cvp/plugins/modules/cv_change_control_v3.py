@@ -150,8 +150,10 @@ def main():
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),
-        state=dict(default='show', type='str', choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute', 'approve_and_execute']),
-        change_id=dict(type='list', elements='str')
+        state=dict(default='show', type='str', choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
+                                                        'schedule', 'approve_and_execute', 'approve_and_schedule']),
+        change_id=dict(type='list', elements='str'),
+        schedule_time=dict(type='str')
     )
 
     ansible_module = AnsibleModule(
