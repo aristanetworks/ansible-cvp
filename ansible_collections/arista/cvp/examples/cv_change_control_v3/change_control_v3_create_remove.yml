@@ -1,12 +1,10 @@
 ---
-- name: CVP Change Control Test create and remove
+- name: CVP Change Control Test create followed by remove
   hosts: cv_server
   gather_facts: no
   vars:
-    ansible_command_timeout: 1200
-    ansible_connect_timeout: 600
     change:
-      name: Leaf 1B Change Control
+      name: Leaf 1A Change Control
       notes: Created via playbook
       activities:
         - action: "mlaghealthcheck"

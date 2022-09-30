@@ -3,10 +3,8 @@
   hosts: cv_server
   gather_facts: no
   vars:
-    ansible_command_timeout: 1200
-    ansible_connect_timeout: 600
     change:
-      name: Leaf 1B Change Control
+      name: Leaf 1A Change Control
       notes: Created via playbook
       activities:
         - action: "mlaghealthcheck"
@@ -36,7 +34,7 @@
         state: unapprove
         change_id: ["{{ cv_change_control_test.data.id }}"]
 
-    - name: "Execute a change control on {{inventory_hostname}} using change_id field"
+    - name: "Execute a change control on {{inventory_hostname}} using change_id field - this should fail"
       arista.cvp.cv_change_control_v3:
         state: execute
         change_id: ["{{ cv_change_control_test.data.id }}"]

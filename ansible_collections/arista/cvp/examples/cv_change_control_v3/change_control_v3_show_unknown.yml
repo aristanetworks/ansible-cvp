@@ -3,10 +3,8 @@
   hosts: cv_server
   gather_facts: no
   vars:
-    ansible_command_timeout: 1200
-    ansible_connect_timeout: 600
     change:
-      name: Leaf 1B Change Control
+      name: Leaf 1A Change Control
       notes: Created via playbook
       activities:
         - action: "mlaghealthcheck"
@@ -20,7 +18,7 @@
           mode: parallel
 
   tasks:
-    - name: "Show an unknown change control on {{inventory_hostname}} using change_id field"
+    - name: "Show an unknown change control on {{inventory_hostname}} using change_id field - this should fail"
       arista.cvp.cv_change_control_v3:
         state: show
         change_id: ["1234567890"]
@@ -30,7 +28,7 @@
       debug:
         msg: "{{ cv_show_unknown_id }}" 
 
-    - name: "Show an unknown change control on {{inventory_hostname}} using change control name"
+    - name: "Show an unknown change control on {{inventory_hostname}} using change control name - this should fail"
       arista.cvp.cv_change_control_v3:
         state: show
         name: "Unknown-CC-1234567890"

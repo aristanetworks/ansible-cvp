@@ -1,5 +1,5 @@
 ---
-- name: CVP Change Control Test remove unknown
+- name: CVP Change Control Test create followed by schedule
   hosts: cv_server
   gather_facts: no
   vars:
@@ -18,7 +18,14 @@
           mode: parallel
 
   tasks:
-    - name: "Remove an unknown change control on {{inventory_hostname}} using change_id field - this should fail"
+    - name: "Create a change control on {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
-        state: remove
-        change_id: ["Unknown-1234567890}"]
+        state: set
+        change: "{{ change }}"
+      register: cv_change_control_test
+
+    - name: "Schedule a change control on {{inventory_hostname}} using change_id field"
+      arista.cvp.cv_change_control_v3:
+        state: schedule
+        change_id: ["{{ cv_change_control_test.data.id }}"]
+        schedule_time: "2023-01-01T01:00:00.0Z"
