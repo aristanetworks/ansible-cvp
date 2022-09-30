@@ -1,10 +1,10 @@
 ---
-- name: CVP Change Control Test create and show
+- name: CVP Change Control Test create followed by show
   hosts: cv_server
   gather_facts: no
   vars:
     change:
-      name: Leaf 1B Change Control
+      name: Leaf 1A Change Control
       notes: Created via playbook
       activities:
         - action: "mlaghealthcheck"
