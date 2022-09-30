@@ -596,7 +596,7 @@ class CvChangeControlTools():
 
         return change
 
-    def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None):
+    def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None, schedule_time: str = None):
 
         changed = False
         data = dict()
@@ -685,7 +685,7 @@ class CvChangeControlTools():
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-        elif state in ['approve', 'unapprove', 'execute', 'approve_and_execute'] and self.__check_mode is False:
+        elif state in ['approve', 'unapprove', 'execute', 'schedule', 'approve_and_execute', 'approve_and_schedule'] and self.__check_mode is False:
             MODULE_LOGGER.debug("Change control state: %s", state)
             if change_id is not None:
                 if name is not None:
@@ -731,14 +731,14 @@ class CvChangeControlTools():
                         cc_id, "Unpproved via Ansible Playbook", False)
 
                     if data == None:
-                        e = "Approve failed: change control id not found"
+                        e = "Unapprove failed: change control {} id not found".format(cc_id)
                         self.__ansible.fail_json(msg="{0}".format(e))
                         return changed, {"approve": change_id}, warnings
                     else:
                         changed = True
 
                 else:
-                    if state in ['approve', 'approve_and_execute']:
+                    if state in ['approve', 'approve_and_execute', 'approve_and_schedule']:
                         MODULE_LOGGER.debug("Aapprove %s", cc_id)
                         data = self.__cv_client.api.change_control_approve(
                             cc_id, "Approved via Ansible Playbook")
@@ -749,8 +749,12 @@ class CvChangeControlTools():
                             return changed, {"approve": change_id}, warnings
 
                     if state in ['execute', 'approve_and_execute']:
-                        MODULE_LOGGER.debug("Executee %s", cc_id)
+                        MODULE_LOGGER.debug("Execute %s", cc_id)
                         data = self.__cv_client.api.change_control_start(cc_id)
+
+                    if state in ['schedule', 'approve_and_schedule']:
+                        MODULE_LOGGER.debug("Schedule %s", cc_id)
+                        data = self.__cv_client.api.change_control_schedule(cc_id, schedule_time)
 
                     changed = True
             except Exception as e:
