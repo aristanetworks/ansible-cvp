@@ -737,6 +737,7 @@ class CvChangeControlTools():
                         self.__ansible.fail_json(msg="{0}".format(e))
                         return changed, {"approve": change_id}, warnings
             except CvpRequestError:
+                # Skip this - covers the case where an approved CC is approved again
                 pass
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
