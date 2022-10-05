@@ -42,7 +42,8 @@ options:
     description: Set if we should get, set/update, or remove the change control
     required: false
     default: 'show'
-    choices: ['show','set','remove']
+    choices: ['show','set','remove','unapprove', 'execute', 
+              'schedule', 'approve_and_execute', 'approve_and_schedule']
     type: str
   change_id:
     description: List of change IDs to get/remove
@@ -70,6 +71,7 @@ EXAMPLES = r'''
               value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
+          name: Switch2_healthcheck
           arguments:
             - name: DeviceID
               value: <device serial number>
@@ -108,6 +110,7 @@ EXAMPLES = r'''
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
+      register: cv_change_control
 
     - name: "Get the created change control {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
@@ -129,6 +132,16 @@ EXAMPLES = r'''
     - name: "Show deleted CCs"
       debug:
         msg: "{{cv_deleted}}"
+
+    - name: "Approve a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control.data.id }}"]
+
+    - name: "Execute a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: execute
+        change_id: ["{{ cv_change_control.data.id }}"]
 
 '''
 
