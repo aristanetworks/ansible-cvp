@@ -1,7 +1,7 @@
 ---
 - name: CVP Change Control Test show unknown
   hosts: cv_server
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 1A Change Control
@@ -26,7 +26,7 @@
 
     - name: "Print out the change control}"
       debug:
-        msg: "{{ cv_show_unknown_id }}" 
+        msg: "{{ cv_show_unknown_id }}"
 
     - name: "Show an unknown change control on {{inventory_hostname}} using change control name - this should fail"
       arista.cvp.cv_change_control_v3:
@@ -36,5 +36,4 @@
 
     - name: "Print out the change control}"
       debug:
-        msg: "{{ cv_show_unknown_name }}" 
-
+        msg: "{{ cv_show_unknown_name }}"

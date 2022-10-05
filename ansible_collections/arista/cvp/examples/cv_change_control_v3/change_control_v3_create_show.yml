@@ -1,7 +1,7 @@
 ---
 - name: CVP Change Control Test create followed by show
   hosts: cv_server
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 1A Change Control
@@ -32,7 +32,7 @@
 
     - name: "Print out the change control}"
       debug:
-        msg: "{{ cv_show_cc_by_id }}"    
+        msg: "{{ cv_show_cc_by_id }}"
 
     - name: "Show a change control on {{inventory_hostname}} using CC name"
       arista.cvp.cv_change_control_v3:
@@ -42,5 +42,4 @@
 
     - name: "Print out the change control}"
       debug:
-        msg: "{{ cv_show_cc_by_name }}" 
-
+        msg: "{{ cv_show_cc_by_name }}"
