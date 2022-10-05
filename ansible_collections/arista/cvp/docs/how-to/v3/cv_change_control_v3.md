@@ -5,6 +5,9 @@
 - Create a new change control
 - Modify/Update an existing change control
 - Delete a change control
+- Approve or Unapprove a change control
+- Execute a change control
+- Schedule a change control
 
 ## Module Options
 
@@ -12,6 +15,12 @@
   - `state: set`: Set Change control
   - `state: show`: List Change control
   - `state: remove`: Delete Change control
+  - `state: approve`: Approve Change control
+  - `state: unapprove`: Unpprove Change control
+  - `state: execute`: Execute Change control
+  - `state: schedule`: Schedule Change control
+  - `state: approve_and_execute`: Approve and Execute Change control
+  - `state: schedule_and_execute`: Schedule and Execute Change control
 - `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
 ```yaml
@@ -54,6 +63,7 @@ Create a change control
               value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
+          name: Switch2_healthcheck
           arguments:
             - name: DeviceID
               value: <device serial number>
@@ -90,4 +100,15 @@ Create a change control
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
+      register: cv_change_control
+
+    - name: "Approve a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control.data.id }}"]
+
+    - name: "Execute a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: execute
+        change_id: ["{{ cv_change_control.data.id }}"]
 ```
