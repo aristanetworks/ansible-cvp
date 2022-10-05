@@ -1,7 +1,7 @@
 ---
 - name: CVP Change Control Test approve_and_schedule
   hosts: cv_server
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 1A Change Control
@@ -23,7 +23,7 @@
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
-      
+
     - name: "Approve and Schedule a change control on {{inventory_hostname}} using change_id field"
       arista.cvp.cv_change_control_v3:
         state: approve_and_schedule

@@ -1,7 +1,7 @@
 ---
 - name: CVP Change Control Test create followed by schedule
   hosts: cv_server
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 1A Change Control
