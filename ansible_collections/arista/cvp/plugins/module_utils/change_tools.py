@@ -685,7 +685,7 @@ class CvChangeControlTools():
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-        elif state in ['approve', 'unapprove', 'execute', 'schedule', 'approve_and_execute', 'approve_and_schedule'] and self.__check_mode is False:
+        elif state in ['approve', 'unapprove', 'execute', 'schedule', 'approve_and_execute', 'schedule_and_approve'] and self.__check_mode is False:
             MODULE_LOGGER.debug("Change control state: %s", state)
             if change_id is not None:
                 if name is not None:
@@ -725,12 +725,19 @@ class CvChangeControlTools():
 
             MODULE_LOGGER.debug("Action: %s change control: %s", state, cc_id)
 
-            # First check if the change control needs to be approved/unapproved 
+            # First check if the change control needs to be scheduled
             try:
-                if state in ['unapprove', 'approve', 'approve_and_execute', 'approve_and_schedule']:
-                    approve = state is not 'unapprove'
+                if state in ['schedule', 'schedule_and_approve']:
+                    data = self.__cv_client.api.change_control_schedule(cc_id, schedule_time)
+                changed = True
+            except Exception as e:
+                self.__ansible.fail_json(msg="{0}".format(e))
+
+            # Next check if the change control needs to be approved/unapproved 
+            try:
+                if state in ['unapprove', 'approve', 'approve_and_execute', 'schedule_and_approve']:      
                     data = self.__cv_client.api.change_control_approve(
-                                cc_id, "Initiated from Ansible Playbook", approve)
+                                cc_id, "Initiated from Ansible Playbook", (state != 'unapprove'))
 
                     if data == None:
                         e = "Change control {} id not found".format(cc_id)
@@ -742,12 +749,10 @@ class CvChangeControlTools():
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-            # Now check if the change control needs to be executed or scheduled
+            # Finally check if the change control needs to be executed
             try:
                 if state in ['execute', 'approve_and_execute']:
                     data = self.__cv_client.api.change_control_start(cc_id)
-                if state in ['schedule', 'approve_and_schedule']:
-                    data = self.__cv_client.api.change_control_schedule(cc_id, schedule_time)
                 changed = True
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))

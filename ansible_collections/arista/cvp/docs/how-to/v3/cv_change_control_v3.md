@@ -20,7 +20,7 @@
   - `state: execute`: Execute Change control
   - `state: schedule`: Schedule Change control
   - `state: approve_and_execute`: Approve and Execute Change control
-  - `state: schedule_and_execute`: Schedule and Execute Change control
+  - `state: schedule_and_approve`: Schedule and Approve Change control
 - `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
 ```yaml

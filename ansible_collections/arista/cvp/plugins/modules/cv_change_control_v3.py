@@ -43,7 +43,7 @@ options:
     required: false
     default: 'show'
     choices: ['show','set','remove','unapprove', 'execute', 
-              'schedule', 'approve_and_execute', 'approve_and_schedule']
+              'schedule', 'approve_and_execute', 'schedule_and_approve']
     type: str
   change_id:
     description: List of change IDs to get/remove
@@ -164,7 +164,7 @@ def main():
         name=dict(type='str'),
         change=dict(type='dict'),
         state=dict(default='show', type='str', choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
-                                                        'schedule', 'approve_and_execute', 'approve_and_schedule']),
+                                                        'schedule', 'approve_and_execute', 'schedule_and_approve']),
         change_id=dict(type='list', elements='str'),
         schedule_time=dict(type='str')
     )
