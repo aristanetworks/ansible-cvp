@@ -1,5 +1,5 @@
 ---
-- name: CVP Change Control Test approve followed by schedule
+- name: CVP Change Control Test schedule followed by approve
   hosts: cv_server
   gather_facts: false
   vars:
@@ -24,13 +24,13 @@
         change: "{{ change }}"
       register: cv_change_control_test
 
-    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
-      arista.cvp.cv_change_control_v3:
-        state: approve
-        change_id: ["{{ cv_change_control_test.data.id }}"]
-
     - name: "Schedule a change control on {{inventory_hostname}} using change_id field"
       arista.cvp.cv_change_control_v3:
         state: schedule
         change_id: ["{{ cv_change_control_test.data.id }}"]
         schedule_time: "2023-01-01T01:00:00.0Z"
+
+    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control_test.data.id }}"]
