@@ -2,17 +2,14 @@
 scenario:
   create_sequence:
     - dependency
-    - create
     - prepare
   converge_sequence:
     - dependency
-    - create
     - prepare
     - converge
   test_sequence:
     - dependency
     - syntax
-    - create
     - converge
     - idempotence
     - verify
