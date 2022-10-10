@@ -20,10 +20,6 @@ scenario:
     - destroy
 dependency:
   name: galaxy
-  options:
-    ignore-certs: True
-    ignore-errors: True
-    requirements-file: molecule/dhcp_management_offline/collections.yml
 driver:
   name: docker
 platforms:
