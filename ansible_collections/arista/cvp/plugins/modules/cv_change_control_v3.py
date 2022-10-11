@@ -42,7 +42,7 @@ options:
     description: Set if we should get, set/update, or remove the change control
     required: false
     default: 'show'
-    choices: ['show','set','remove','unapprove', 'execute', 
+    choices: ['show', 'set', 'remove', 'unapprove', 'execute',
               'schedule', 'approve_and_execute', 'schedule_and_approve']
     type: str
   change_id:
@@ -163,8 +163,9 @@ def main():
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),
-        state=dict(default='show', type='str', choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
-                                                        'schedule', 'approve_and_execute', 'schedule_and_approve']),
+        state=dict(default='show', type='str',
+                   choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
+                            'schedule', 'approve_and_execute', 'schedule_and_approve']),
         change_id=dict(type='list', elements='str'),
         schedule_time=dict(type='str')
     )
