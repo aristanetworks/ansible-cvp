@@ -693,7 +693,7 @@ class CvChangeControlTools():
                         "CC ID takes precedence over handling named CCs. Only the provided CCid will be handled"
                     )
                 if len(change_id) > 1:
-                    warnings.append( 
+                    warnings.append(
                         "Approving/Executing multiple CC IDs at one time is not supported"
                     )
                     e = "Approve/execute of multiple CCs by name is not supported at this time"
@@ -733,9 +733,9 @@ class CvChangeControlTools():
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 
-            # Next check if the change control needs to be approved/unapproved 
+            # Next check if the change control needs to be approved/unapproved
             try:
-                if state in ['unapprove', 'approve', 'approve_and_execute', 'schedule_and_approve']:      
+                if state in ['unapprove', 'approve', 'approve_and_execute', 'schedule_and_approve']:
                     data = self.__cv_client.api.change_control_approve(
                                 cc_id, "Initiated from Ansible Playbook", (state != 'unapprove'))
 
