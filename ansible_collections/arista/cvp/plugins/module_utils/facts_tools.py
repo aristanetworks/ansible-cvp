@@ -142,7 +142,7 @@ class CvFactResource():
                 Api.generic.IMAGE_BUNDLE_NAME: entry[Api.generic.IMAGE_BUNDLE_NAME]}
                 for entry in self._cache if Api.generic.NAME in entry.keys()}
 
-    def _get_device(self, verbose: bool = False):
+    def _get_device(self, verbose: str = 'short'):
         """
         _get_device Generate facts for devices resource type
 
@@ -163,15 +163,15 @@ class CvFactResource():
 
         Parameters
         ----------
-        verbose : bool, optional
-            Trigger to include or not all fields from CV, by default False
+        verbose : str, optional
+            Trigger to include or not all fields from CV, by default 'short'
 
         Returns
         -------
         list
             List of devices
         """
-        if verbose:
+        if verbose == 'long':
             return self._cache
         else:
             return [self.__shorten_device_facts(
@@ -189,7 +189,7 @@ class CvFactResource():
         if isinstance(self._cache, list):
             self._cache.append(data)
 
-    def get(self, resource_model: str, verbose: bool = False):
+    def get(self, resource_model: str, verbose: str = 'short'):
         """
         get Public method to get structured fact for a given resource
 
@@ -200,8 +200,8 @@ class CvFactResource():
         ----------
         resource_model : str
             Name of the resource to apply correct transformation. Can be ['device', 'container', 'configlet']
-        verbose : bool, optional
-            Trigger to include or not all fields from CV, by default False
+        verbose : str, optional
+            Trigger to include or not all fields from CV, by default 'short'
 
         Returns
         -------
