@@ -81,16 +81,24 @@ def does_not_raise():
 @pytest.mark.parametrize(
     "connection, connect_side_effect, expectation",
     [
-        (module_values(), None, does_not_raise()),
-        (
+        pytest.param(module_values(), None, does_not_raise(), id="Succes"),
+        pytest.param(
             module_values(password={"__ansible_vault": "DUMMY VAULT"}),
             None,
             pytest.raises(NotImplementedError),
+            id="Vault variable undecrypted",
         ),
-        (
+        pytest.param(
             module_values(),
             CvpLoginError("Test Exception"),
             pytest.raises(AnsibleFailJson),
+            id="Failed Connection",
+        ),
+        pytest.param(
+            module_values(password=1234),
+            None,
+            does_not_raise(),
+            id="Password not a string not raising",
         ),
     ],
     indirect=["connection"],
