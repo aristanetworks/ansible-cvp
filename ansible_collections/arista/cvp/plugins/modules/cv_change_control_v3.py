@@ -42,7 +42,7 @@ options:
     description: Set if we should get, set/update, or remove the change control
     required: false
     default: 'show'
-    choices: ['show', 'set', 'remove', 'unapprove', 'execute',
+    choices: ['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
               'schedule', 'approve_and_execute', 'schedule_and_approve']
     type: str
   change_id:
@@ -50,6 +50,10 @@ options:
     required: false
     type: list
     elements: str
+  schedule_time:
+    description: RFC3339 time format, e.g: 2021-12-23T02:07:00.0
+    required: false
+    type: str
 '''
 
 EXAMPLES = r'''
