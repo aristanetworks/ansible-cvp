@@ -737,10 +737,10 @@ class CvChangeControlTools():
             try:
                 if state in ['unapprove', 'approve', 'approve_and_execute', 'schedule_and_approve']:
                     data = self.__cv_client.api.change_control_approve(
-                                cc_id, "Initiated from Ansible Playbook", (state != 'unapprove'))
+                        cc_id, "Initiated from Ansible Playbook", (state != 'unapprove'))
 
-                    if data == None:
-                        e = "Change control {} id not found".format(cc_id)
+                    if data is None:
+                        e = "Change control {0} id not found".format(cc_id)
                         self.__ansible.fail_json(msg="{0}".format(e))
                         return changed, {"approve": change_id}, warnings
             except CvpRequestError:
