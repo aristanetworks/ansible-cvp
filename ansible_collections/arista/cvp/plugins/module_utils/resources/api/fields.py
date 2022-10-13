@@ -47,7 +47,7 @@ class ApiGeneric():
     NAME: str = 'name'
     PARENT_CONTAINER_ID: str = 'parentContainerId'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
-    IMAGE_BUNDLE: str = 'imageBundle'
+    IMAGE_BUNDLE_NAME: str = 'imageBundle'
 
 
 # @dataclass
@@ -76,6 +76,7 @@ class ApiDevice():
     SYSMAC: str = 'systemMacAddress'
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
     MGMTIP: str = 'ipAddress'
+    BUNDLE: str = 'imageBundle'
 
 
 # @dataclass
