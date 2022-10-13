@@ -70,7 +70,7 @@ ok: [CloudVision] =>
         CVPRACTEST:
           configlets: []
           parentContainerName: ansible-tests
-          image_bundle: ""
+          imageBundle: ""
       cvp_devices:
       - configlets:
         - leaf-2-unit-test
@@ -84,7 +84,7 @@ ok: [CloudVision] =>
         ipAddress: 192.0.2.165
         serialNumber: A2BC886CB9408A0453A3CFDD9C251999
         systemMacAddress: 50:00:00:d5:5d:c0
-        image_bundle: ""
+        imageBundle: ""
       - configlets: []
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
         hostname: leaf-2-unit-test
@@ -92,7 +92,7 @@ ok: [CloudVision] =>
         parentContainerName: ansible-tests
         serialNumber: 08A7E527AF711F688A6AD7D78BB5AD0A
         systemMacAddress: 50:00:00:cb:38:c2
-        image_bundle: ""
+        imageBundle: ""
       - configlets:
         - test_configlet
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
@@ -101,7 +101,7 @@ ok: [CloudVision] =>
         parentContainerName: ansible-tests
         serialNumber: 24666013EF2271599935B4A894F356E1
         systemMacAddress: 50:00:00:03:37:66
-        image_bundle: ""
+        imageBundle: ""
     failed: false
 ```
 
