@@ -1,0 +1,21 @@
+---
+- name: Device Image Management in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_DEVICES:
+      - serialNumber: JPE504a004ea054
+        parentContainerName: L2_Leaf
+        configlets:
+            - 'AVD_Ipmi3'
+        imageBundle: leaf_bundle
+  tasks:
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: present
+        search_key: serialNumber
+        apply_mode: strict
