@@ -22,7 +22,7 @@ releases:
     fragments:
     - v3.4.0.yml
     modules:
-    - description: Change Control management with Cloudvision
+    - description: Change Control management with CloudVision
       name: cv_change_control_v3
       namespace: ''
     - description: Create/Assign/Delete/Unassign tags on CVP

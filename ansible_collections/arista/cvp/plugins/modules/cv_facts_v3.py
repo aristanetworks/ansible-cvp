@@ -4,9 +4,7 @@
 # pylint: disable=dangerous-default-value
 # flake8: noqa: W503
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2022 Arista Networks AS-EMEA
+# Copyright 2022 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +26,7 @@ DOCUMENTATION = r'''
 module: cv_facts_v3
 version_added: "3.3.0"
 author: Ansible Arista Team (@aristanetworks)
-short_description: Collect facts from Cloudvision
+short_description: Collect facts from CloudVision
 description:
 - Returns list of devices, configlets, containers and images from CloudVision
 options:

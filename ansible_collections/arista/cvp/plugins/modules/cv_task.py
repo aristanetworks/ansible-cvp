@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2019 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +27,7 @@ version_added: "1.0.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
-  - CloudVison Portal Task module
+  - CloudVision Portal Task module
 deprecated:
   removed_in: '4.0.0'
   why: Updated modules released with increased functionality

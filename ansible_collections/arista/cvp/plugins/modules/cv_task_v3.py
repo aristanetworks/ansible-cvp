@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2019 Arista Networks AS-EMEA
+# Copyright 2019 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +27,7 @@ version_added: "3.0.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Execute or Cancel CVP Tasks.
 description:
-  - CloudVison Portal Task module to action pending tasks on CLoudvision
+  - CloudVision Portal Task module to action pending tasks on CloudVision
 options:
   tasks:
     description: CVP taskIDs to act on

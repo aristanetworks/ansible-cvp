@@ -1,6 +1,6 @@
 galaxy_info:
   author: Arista Ansible Team <ansible@arista.com>
-  description: Role to synchronize configlets across multiple Cloudvision servers
+  description: Role to synchronize configlets across multiple CloudVision servers
   issue_tracker_url: https://github.com/aristanetworks/ansible-cvp/issues
   company: Arista Networks
   license: Apache-2.0

@@ -22,7 +22,7 @@ Synopsis
 --------
 
 
-CloudVison Portal Device compares the list of Devices
+CloudVision Portal Device compares the list of Devices
 in devices against cvp-facts then adds, resets, or updates them as appropriate.
 If a device is in cvp_facts but not in devices it will be reset to factory defaults in ZTP mode
 If a device is in devices but not in cvp_facts it will be provisioned

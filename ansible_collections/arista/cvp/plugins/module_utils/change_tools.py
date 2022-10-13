@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8 -*-
 #
-# GNU General Public License v3.0+
-#
-# Copyright 2021 Arista Networks AS-EMEA
+# Copyright 2021 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -507,7 +505,7 @@ class CvChangeControlTools():
         self.__cc_index.clear()
 
         for entry in self.change_controls['data']:
-            if 'name' not in entry['result']['value']['change']['name']:
+            if 'name' not in entry['result']['value']['change']:
                 self.__cc_index.append(('Undefined', entry['result']['value']['key']['id']))
             else:
                 self.__cc_index.append((entry['result']['value']['change']['name'], entry['result']['value']['key']['id']))
