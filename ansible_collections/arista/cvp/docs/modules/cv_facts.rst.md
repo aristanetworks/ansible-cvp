@@ -63,7 +63,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
+## Examples:
 
     ---
       tasks:
@@ -99,4 +99,4 @@ The following options may be specified for this module:
 
 ### Author
 
-- EMEA AS Team (@aristanetworks)
+-   EMEA AS Team (@aristanetworks)

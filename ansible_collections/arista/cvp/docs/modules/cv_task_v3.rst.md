@@ -52,7 +52,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
+## Examples:
 
     ---
     - name: Execute all tasks registered in cvp_configlets variable

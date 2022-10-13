@@ -64,7 +64,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
+## Examples:
 
     # Create and assign device and interface tags to multiple devices and interfaces
     - name: cv_tag_v3 example1

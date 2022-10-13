@@ -66,7 +66,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
+## Examples:
 
     # task in loose mode (default)
     - name: Create container topology on CVP
