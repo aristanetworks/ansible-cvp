@@ -51,7 +51,7 @@ options:
     type: list
     elements: str
   schedule_time:
-    description: RFC3339 time format, e.g: 2021-12-23T02:07:00.0
+    description: RFC3339 time format, e.g., 2021-12-23T02:07:00.0
     required: false
     type: str
 '''
