@@ -247,6 +247,20 @@ SCHEMA_CV_CONTAINER = {
                         "type": "string"
                     },
                     "required": False
+                },
+                "imageBundle": {
+                    "$id": "#/items/anyOf/0/properties/imageBundle",
+                    "type": "string",
+                    "required": False,
+                    "title": "The name of the image bundle",
+                    "description": "The name of the image bundle to be associated with the container.",
+                    "default": "",
+                    "examples": [
+                        {"imageBundle": "spine_image_bundle"}
+                    ],
+                    "items": {
+                        "$id": "#/items/anyOf/0/properties/imageBundle/items"
+                    }
                 }
             }
         }
