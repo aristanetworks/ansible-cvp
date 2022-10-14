@@ -54,7 +54,7 @@ CVP_DEVICES_UNKNOWN = [
                 "01TRAINING-01",
                 "CV-EOS-ANSIBLE01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_image_bundle"
     },
     {
         "fqdn": "TEST.ire.aristanetworks.com",
@@ -75,7 +75,7 @@ CVP_DEVICES_SCHEMA_TEST = [
                 "AVD_DC1-SPINE1",
                 "01TRAINING-01"
         ],
-        "imageBundle": []
+        "imageBundle": "test_image_bundle"
     }],
     [{
         "fqdn": "DC1-SPINE1",
@@ -95,7 +95,7 @@ CVP_DEVICES_SCHEMA_TEST = [
         "fqdn": "DC1-SPINE1",
         "systemMacAddress": "ccccccc",
         "parentContainerName": "DC1_SPINES",
-        "imageBundle": []
+        "imageBundle": "test_image_bundle"
     }]
 ]
 

@@ -62,10 +62,11 @@ class DeviceElement(object):
         self.__serial = self.__data.get(Api.device.SERIAL)
         self.__mgmtip = self.__data.get(Api.device.MGMTIP)
         self.__container = self.__data[Api.generic.PARENT_CONTAINER_NAME]
-        # self.__image_bundle = []  # noqa # pylint: disable=unused-variable
         self.__current_parent_container_id = None
-        # if Api.device.IMAGE_BUNDLE in self.__data:
-        #     self.__image_bundle = data[Api.device.IMAGE_BUNDLE]
+        self.__image_bundle = self.__data.get(Api.device.BUNDLE)
+
+        if Api.device.BUNDLE in self.__data:
+            self.__image_bundle = data[Api.device.BUNDLE]
         if Api.device.SYSMAC in data:
             self.__sysmac = data[Api.device.SYSMAC]
         if Api.device.SERIAL in data:
@@ -225,6 +226,18 @@ class DeviceElement(object):
         """
         return self.__current_parent_container_id
 
+    @property
+    def image_bundle(self):
+        """
+        image_bundle Getter for image bundle info
+
+        Returns
+        -------
+        dict
+            Dict with name, ID and type of bundle
+        """
+        return self.__image_bundle
+
     @parent_container_id.setter
     def parent_container_id(self, id):
         """
@@ -263,6 +276,8 @@ class DeviceElement(object):
         else:
             res[Api.generic.CONFIGLETS] = []
         # res[Api.generic.PARENT_CONTAINER_ID] = self.__current_parent_container_id
+        if Api.generic.IMAGE_BUNDLE_NAME in self.__data:
+            res[Api.generic.IMAGE_BUNDLE_NAME] = self.__data[Api.generic.IMAGE_BUNDLE_NAME]
         return res
 
 
@@ -420,6 +435,12 @@ class CvDeviceTools(object):
             cv_data = self.__cv_client.api.get_device_by_mac(device_mac=search_value)
         elif search_by == Api.device.SERIAL:
             cv_data = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
+
+        if cv_data is not None and len(cv_data) > 0:
+            cv_data[Api.device.BUNDLE] = self.__cv_client.api.get_device_image_info(cv_data['key'])
+        else:
+            cv_data[Api.device.BUNDLE] = None
+
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
 
@@ -558,6 +579,8 @@ class CvDeviceTools(object):
         cv_move = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_MOVED)
         cv_configlets_attach = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_ATTACHED)
         cv_configlets_detach = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_DETACHED)
+        cv_bundle_attach = CvManagerResult(builder_name=DeviceResponseFields.BUNDLE_ATTACHED)
+        cv_bundle_detach = CvManagerResult(builder_name=DeviceResponseFields.BUNDLE_DETACHED)
         response = CvAnsibleResponse()
 
         # Check if all devices are present on CV
@@ -584,6 +607,12 @@ class CvDeviceTools(object):
             for update in action_result:
                 cv_configlets_attach.add_change(change=update)
 
+        # Apply image bundle as set in inventory
+        action_result = self.apply_bundle(user_inventory=user_inventory)
+        if action_result is not None:
+            for update in action_result:
+                cv_bundle_attach.add_change(change=update)
+
         # Remove configlets configured on CVP and if module runs in strict mode
         if apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
             action_result = self.detach_configlets(
@@ -592,6 +621,12 @@ class CvDeviceTools(object):
                 for update in action_result:
                     cv_configlets_detach.add_change(change=update)
 
+            action_result = self.detach_bundle(
+                user_inventory=user_inventory)
+            if action_result is not None:
+                for update in action_result:
+                    cv_bundle_detach.add_change(change=update)
+
         # Generate result output
         response.add_manager(cv_move)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_move: %s', str(response.content))
@@ -599,8 +634,12 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_deploy: %s', str(response.content))
         response.add_manager(cv_configlets_attach)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_attach: %s', str(response.content))
+        response.add_manager(cv_bundle_attach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_bundle_attach: %s', str(response.content))
         response.add_manager(cv_configlets_detach)
         MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_configlets_detach: %s', str(response.content))
+        response.add_manager(cv_bundle_detach)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with cv_bundle_detach: %s', str(response.content))
 
         return response
 
@@ -887,6 +926,37 @@ class CvDeviceTools(object):
             }
         return None
 
+    def get_device_image_bundle(self, device_lookup: str):
+        """
+        get_device_image_bundle Retrieve image bundle attached to the device
+
+        Parameters
+        ----------
+        device_lookup : str
+            Device name to look for
+
+        Returns
+        -------
+        dict
+            A dict with key and name
+        """
+        cv_data = self.get_device_facts(device_lookup=device_lookup)
+        MODULE_LOGGER.debug('cv_data lookup returned: %s', str(cv_data))
+        if cv_data is not None and Api.generic.IMAGE_BUNDLE_NAME in cv_data:
+            if cv_data[Api.generic.IMAGE_BUNDLE_NAME][Api.image.NAME] is None:
+                return {
+                    Api.generic.IMAGE_BUNDLE_NAME: None,
+                    Api.image.ID: None,
+                    Api.image.TYPE: None
+                }
+            else:
+                return {
+                    Api.generic.IMAGE_BUNDLE_NAME: cv_data['imageBundle'][Api.image.NAME],
+                    Api.image.ID: cv_data['imageBundle'][Api.image.ID],
+                    Api.image.TYPE: cv_data['imageBundle']['imageBundleMapper'][cv_data['imageBundle'][Api.image.ID]][Api.image.TYPE]
+                }
+        return None
+
     def get_container_info(self, container_name: str):
         """
         get_container_info Retrieve container information from Cloudvision
@@ -1157,6 +1227,161 @@ class CvDeviceTools(object):
 
                     result_data.add_entry('{}-{}'.format(device.fqdn, *device.container))
             results.append(result_data)
+        return results
+
+    def apply_bundle(self, user_inventory: DeviceInventory):
+        """
+        apply_bundle - apply an image bundle to a device
+
+        Execute the API calls to attach an image bundle to a device.
+        Note that only 1 image bundle can be attached to a device.
+
+        If an image bundle is already attached to the device (type: netelement)
+        the new image bundle will replace the old.
+
+        Our behaviour is as follows;
+        * Bundle already attached to the device - update if different, skip if the same
+        * Bundle inherited from container (type: container) - attach bundle to device, regardless
+        of whether or not it is the same
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
+        results = []
+
+        for device in user_inventory.devices:
+            MODULE_LOGGER.debug("Applying image bundle for device: %s", str(device.fqdn))
+            result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_attached')
+
+            # We can't attach/detach an image to a device in the undefined container
+            current_container_info = self.get_container_current(device_mac=device.system_mac)
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+                continue
+
+            # GET IMAGE BUNDLE
+            MODULE_LOGGER.debug("Get image bundle for %s", str(device.serial_number))
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
+            MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
+            MODULE_LOGGER.debug("User assigned image bundle is: %s", str(device.image_bundle))
+
+            if device.image_bundle is not None:
+                if device.image_bundle == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME] \
+                        and current_image_bundle[Api.image.TYPE] == 'netelement':
+                    MODULE_LOGGER.debug("No actions needed for device: %s", str(device.fqdn))
+                    MODULE_LOGGER.debug("%s has %s assigned and applied", str(device.fqdn), current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME])
+                    pass
+                    # Nothing to do
+                else:
+                    MODULE_LOGGER.debug("Updating %s to use image bundle: %s", str(device.fqdn), str(device.image_bundle))
+
+                    device_facts = {}
+                    if self.__search_by == Api.device.FQDN:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=False)
+                    elif self.__search_by == Api.device.HOSTNAME:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=True)
+                    elif self.__search_by == Api.device.SERIAL:
+                        device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
+
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(device.image_bundle)
+                    if assigned_image_facts is None:
+                        MODULE_LOGGER.error('Error image bundle %s not found', str(device.image_bundle))
+                        self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + str(device.image_bundle) + 'not found')
+
+                    MODULE_LOGGER.debug("%s image bundle facts are: %s", str(device.image_bundle), str(assigned_image_facts))
+                    try:
+                        resp = self.__cv_client.api.apply_image_to_element(
+                            assigned_image_facts,
+                            device_facts,
+                            device.hostname,
+                            'netelement'
+                        )
+
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + catch_error)
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+
+                results.append(result_data)
+
+        return results
+
+    def detach_bundle(self, user_inventory: DeviceInventory):
+        """
+        detach_bundle - detach an image bundle from a device
+
+        Execute the API calls to detach an image bundle from a device.
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
+        results = []
+
+        for device in user_inventory.devices:
+            MODULE_LOGGER.debug("Detaching image bundle from device: %s", str(device.fqdn))
+            result_data = CvApiResult(action_name=device.fqdn + '_image_bundle_detached')
+
+            # We can't attach/detach an image to a device in the undefined container
+            current_container_info = self.get_container_current(device_mac=device.system_mac)
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+                continue
+
+            # GET IMAGE BUNDLE
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
+
+            # Check to make sure that the assigned image isn't inherited from the container
+            if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
+                if device.image_bundle is None:
+
+                    device_facts = {}
+                    if self.__search_by == Api.device.FQDN:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=False)
+                    elif self.__search_by == Api.device.HOSTNAME:
+                        device_facts = self.__cv_client.api.get_device_by_name(
+                            fqdn=device.fqdn, search_by_hostname=True)
+                    elif self.__search_by == Api.device.SERIAL:
+                        device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
+
+                    assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME])
+                    try:
+                        resp = self.__cv_client.api.remove_image_from_element(
+                            assigned_image_facts,
+                            device_facts,
+                            device.hostname,
+                            'netelement'
+                        )
+
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error removing bundle from device: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error removing bundle from device' + device.fqdn + ': ' + catch_error)
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+
+                results.append(result_data)
+
         return results
 
     def apply_configlets(self, user_inventory: DeviceInventory):
