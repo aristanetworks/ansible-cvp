@@ -137,10 +137,10 @@ def main():
             default='.*'
         ),
         verbose=dict(
-          type='str',
-          required=False,
-          choices=['long', 'short'],
-          default='short'
+            type='str',
+            required=False,
+            choices=['long', 'short'],
+            default='short'
         )
     )
 
@@ -158,7 +158,8 @@ def main():
 
     # Instantiate ansible results
     facts_collector = CvFactsTools(cv_connection=cv_client)
-    facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'], verbose=ansible_module.params['verbose'])
+    facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'],
+                                  verbose=ansible_module.params['verbose'])
     result = dict(changed=False, data=facts, failed=False)
 
     # Implement logic
