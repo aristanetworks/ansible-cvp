@@ -52,6 +52,17 @@ The following options may be specified for this module:
 </td>
 </tr>
 
+<tr>
+<td>verbose<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td>short</td>
+<td><ul><li>long</li><li>short</li></ul></td>
+<td>
+    <div>get all data from CV or get only cv_modules data</div>
+</td>
+</tr>
+
 </table>
 </br>
 
@@ -74,6 +85,14 @@ The following options may be specified for this module:
           - containers
       register: FACTS_DEVICES
 
+    - name: '#04 - Collect devices facts from {{inventory_hostname}}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "spine1"
+        verbose: long
+      register: FACTS_DEVICES
+
 ### Author
 
-- Ansible Arista Team (@aristanetworks)
+-   Ansible Arista Team (@aristanetworks)

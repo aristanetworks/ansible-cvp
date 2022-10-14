@@ -14,6 +14,10 @@ This module does not support input data except module options.
 
 - `facts`: List of facts to get from CloudVision. It can be any of the following entries: [`devices`, `configlets`, `container`]
 - `regexp_filter`: [Regualr expression](https://docs.python.org/3/howto/regex.html) to filter `configlets` and `devices` to only collect facts for interesting entries.
+- `verbose`: Facts Verbosity.
+  - `full` -  get all data from CV.
+  - `short` -  get only cv_modules data.
+  - Default is `short`
 
 ```yaml
 tasks:
@@ -33,12 +37,13 @@ tasks:
     - containers
   register: FACTS_DEVICES
 
-- name: '#03 - Collect devices facts from {{inventory_hostname}}'
+- name: '#04 - Collect devices facts from {{inventory_hostname}}'
   arista.cvp.cv_facts_v3:
     facts:
     - devices
     - containers
     regexp_filter: '.*LEAF|BORDER.*'
+    verbose: long
   register: FACTS_DEVICES
 ```
 
