@@ -142,7 +142,7 @@ class CvFactResource():
                 Api.generic.IMAGE_BUNDLE_NAME: entry[Api.generic.IMAGE_BUNDLE_NAME]}
                 for entry in self._cache if Api.generic.NAME in entry.keys()}
 
-    def _get_device(self, verbose: bool = False):
+    def _get_device(self, verbose: str = 'short'):
         """
         _get_device Generate facts for devices resource type
 
@@ -163,15 +163,15 @@ class CvFactResource():
 
         Parameters
         ----------
-        verbose : bool, optional
-            Trigger to include or not all fields from CV, by default False
+        verbose : str, optional
+            Trigger to include or not all fields from CV, by default 'short'
 
         Returns
         -------
         list
             List of devices
         """
-        if verbose:
+        if verbose == 'long':
             return self._cache
         else:
             return [self.__shorten_device_facts(
@@ -189,7 +189,7 @@ class CvFactResource():
         if isinstance(self._cache, list):
             self._cache.append(data)
 
-    def get(self, resource_model: str, verbose: bool = False):
+    def get(self, resource_model: str, verbose: str = 'short'):
         """
         get Public method to get structured fact for a given resource
 
@@ -200,8 +200,8 @@ class CvFactResource():
         ----------
         resource_model : str
             Name of the resource to apply correct transformation. Can be ['device', 'container', 'configlet']
-        verbose : bool, optional
-            Trigger to include or not all fields from CV, by default False
+        verbose : str, optional
+            Trigger to include or not all fields from CV, by default 'short'
 
         Returns
         -------
@@ -230,7 +230,7 @@ class CvFactsTools():
     def __init_facts(self):
         self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [], FactsResponseFields.CONTAINER: []}
 
-    def facts(self, scope: List[str], regex_filter: str = '.*'):
+    def facts(self, scope: List[str], regex_filter: str = '.*', verbose: str = 'short'):
         """
         facts Public API to collect facts from Cloudvision
 
@@ -263,6 +263,8 @@ class CvFactsTools():
 
         regex_filter: str
             Regular expression to filter devices and configlets. Only element with filter in their name will be exported
+        verbose : str, optional
+            Facts verbosity: full get all data from CV where short get only cv_modules data, by default 'short'
 
         Returns
         -------
@@ -270,7 +272,7 @@ class CvFactsTools():
             A dictionary of information with all the data from Cloudvision
         """
         if 'devices' in scope:
-            self.__fact_devices(filter=regex_filter)
+            self.__fact_devices(filter=regex_filter, verbose=verbose)
         if 'containers' in scope:
             self.__fact_containers()
         if 'configlets' in scope:
@@ -466,7 +468,7 @@ class CvFactsTools():
             return bundle_name
 
     # Fact management
-    def __fact_devices(self, filter: str = '.*', verbose: bool = False):
+    def __fact_devices(self, filter: str = '.*', verbose: str = 'short'):
         """
         __fact_devices Collect facts related to device inventory
 
@@ -488,7 +490,7 @@ class CvFactsTools():
         for device in cv_devices:
             if re.match(filter, device[Api.device.HOSTNAME]):
                 MODULE_LOGGER.debug('Filter has been matched: %s - %s', str(filter), str(device[Api.device.HOSTNAME]))
-                if verbose:
+                if verbose == 'long':
                     facts_builder.add(self.__device_update_info(device=device))
                 else:
                     device[Api.generic.CONFIGLETS] = self.__device_get_configlets(netid=device[Api.generic.KEY])
