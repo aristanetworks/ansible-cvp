@@ -109,4 +109,8 @@ The following options may be specified for this module:
 
 ### Author
 
-- Ansible Arista Team (@aristanetworks)
+-   Ansible Arista Team (@aristanetworks)
+
+### Full Schema
+
+Get full schema docs [here](../../schema/cv_container_v3/).

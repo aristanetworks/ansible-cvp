@@ -137,6 +137,16 @@ nav:
       - Get facts from CloudVision: docs/how-to/v3/cv_facts_v3.md
     - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
+  - Schema documentation:
+    - CV Modules v3:
+      # - Module cv_configlet_v3: docs/schema/cv_tag_v3.md
+      - Module cv_container_v3: docs/schema/cv_container_v3.md
+      - Module cv_device_v3: docs/schema/cv_device_v3.md
+      # - Module cv_task_v3: docs/schema/cv_task_v3.md
+      # - Module cv_facts_v3: docs/schema/cv_facts_v3.md
+      # - Module cv_image_v3: docs/schema/cv_image_v3.md
+      - Module cv_tag_v3: docs/schema/cv_tag_v3.md
+      - Module cv_change_control_v3: docs/schema/cv_change_control_v3.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md
     - Ansible Execution Environment: docs/faq/containers.md

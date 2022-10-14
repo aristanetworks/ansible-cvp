@@ -129,3 +129,9 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
+
+
+
+Full Schema
+~~~~~~~~~~~
+Get full schema docs `here <../../schema/cv_container_v3/>`_.
