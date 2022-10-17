@@ -71,7 +71,7 @@ def cv_connect(module):
     # This is a failsafe in case the ansible version is not high enough to have the fix
     if isinstance(user_authentication, dict) and "__ansible_vault" in user_authentication:
         LOGGER.error('Cannot connect to CVP, password is encrypted')
-        raise NotImplementedError("Vault encrypted variables are not supported with as password with your version of ansible. "
+        raise NotImplementedError("Vault encrypted variables are not supported for password with your version of ansible. "
                                   "Because of https://github.com/ansible/ansible/issues/75503. "
                                   "You may either upgrade ansible of use ansible vault file instead."
                                   "https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault")

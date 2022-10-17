@@ -45,7 +45,7 @@ ansible_network_os: eos
 ```
 
 !!! note
-    Depending on the ansible version, vault encrypted variables may not supported because of https://github.com/ansible/ansible/issues/75503. ansible-cvp code will check if the provided password (and password only) is malformed and inform the user by raising an exception.
+    Depending on the ansible version, vault encrypted variables may not be supported because of https://github.com/ansible/ansible/issues/75503. ansible-cvp code will check if the provided password (and password only) is malformed and inform the user by raising an exception.
     Either upgrade ansible-core to a version that has the fix: https://github.com/ansible/ansible/pull/78236 or use ansible vault file instead: https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault
 
 ### Example reading from a file
