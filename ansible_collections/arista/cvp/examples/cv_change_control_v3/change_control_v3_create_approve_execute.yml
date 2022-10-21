@@ -1,0 +1,35 @@
+---
+- name: CVP Change Control Test approve, execute
+  hosts: cv_server
+  gather_facts: false
+  vars:
+    change:
+      name: Leaf 1A Change Control
+      notes: Created via playbook
+      activities:
+        - action: "mlaghealthcheck"
+          name: Check_LEAF1A_MLAG_Health
+          arguments:
+            - name: DeviceID
+              value: SN-DC1-POD1-LEAF1A
+          stage: LEAF1A_MLAG_Health
+      stages:
+        - name: LEAF1A_MLAG_Health
+          mode: parallel
+
+  tasks:
+    - name: "Create a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: set
+        change: "{{ change }}"
+      register: cv_change_control_test
+
+    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control_test.data.id }}"]
+
+    - name: "Execute a change control on {{inventory_hostname}} using change_id field"
+      arista.cvp.cv_change_control_v3:
+        state: execute
+        change_id: ["{{ cv_change_control_test.data.id }}"]
