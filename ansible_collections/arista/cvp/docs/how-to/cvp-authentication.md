@@ -45,7 +45,8 @@ ansible_network_os: eos
 ```
 
 !!! note
-    Vault encrypted variables are not supported as password yet. Use ansible vault file instead. https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault
+    Depending on the ansible version, vault encrypted variables may not be supported because of https://github.com/ansible/ansible/issues/75503. ansible-cvp code will check if the provided password (and password only) is malformed and inform the user by raising an exception.
+    Either upgrade ansible-core to a version that has the fix: https://github.com/ansible/ansible/pull/78236 or use ansible vault file instead: https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypting-files-with-ansible-vault
 
 ### Example reading from a file
 
@@ -105,7 +106,7 @@ all:
 5. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass` or instead of `--ask-vault-pass`
 provide the password with any other methods as described in the [ansible vault documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html#using-encrypted-variables-and-files).
 
-> NOTE Encrypting individual variables using vault is not yet supported.
+> NOTE Encrypting individual variables using vault may not be supported - cf notes at the end of ## On-premise CloudVision authentication section
 
 ## CloudVision as a Service authentication
 
