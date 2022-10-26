@@ -18,7 +18,7 @@ scenario:
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: delegated
 platforms:
   - name: dhcp_server01
     image: avdteam/base:3.6
