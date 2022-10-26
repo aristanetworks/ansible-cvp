@@ -1,6 +1,6 @@
 
 # {{ ansible_managed }} - {{ inventory_hostname }}
-{% if ztp.general.dhcpd_raw %}
+{% if ztp.general.dhcpd_raw is defined %}
 
 # dhcpd raw configuration
 {{ ztp.general.dhcpd_raw }}
