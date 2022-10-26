@@ -89,7 +89,7 @@ SCHEMA_CV_DEVICE = {
                             "01TRAINING-01",
                             "CV-EOS-ANSIBLE01"
                         ],
-                        "imageBundle": []
+                        "imageBundle": "test_bundle"
                     }
                 ],
                 "anyOf": [
@@ -190,16 +190,13 @@ SCHEMA_CV_DEVICE = {
                     },
                     "imageBundle": {
                         "$id": "#/items/anyOf/0/properties/imageBundle",
-                        "type": "array",
-                        "title": "The imageBundle schema",
-                        "description": "An explanation about the purpose of this instance.",
+                        "type": "string",
+                        "title": "The imageBundle name",
+                        "description": "The imageBundle is the name of the image bundle applied to a container or device.",
                         "default": [],
                         "examples": [
-                            []
-                        ],
-                        "items": {
-                            "$id": "#/items/anyOf/0/properties/imageBundle/items"
-                        }
+                            "spine_image_bundle"
+                        ]
                     }
                 },
             }
@@ -250,6 +247,20 @@ SCHEMA_CV_CONTAINER = {
                         "type": "string"
                     },
                     "required": False
+                },
+                "imageBundle": {
+                    "$id": "#/items/anyOf/0/properties/imageBundle",
+                    "type": "string",
+                    "required": False,
+                    "title": "The name of the image bundle",
+                    "description": "The name of the image bundle to be associated with the container.",
+                    "default": "",
+                    "examples": [
+                        {"imageBundle": "spine_image_bundle"}
+                    ],
+                    "items": {
+                        "$id": "#/items/anyOf/0/properties/imageBundle/items"
+                    }
                 }
             }
         }

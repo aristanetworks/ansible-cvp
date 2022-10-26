@@ -5,6 +5,9 @@
 - Create a new change control
 - Modify/Update an existing change control
 - Delete a change control
+- Approve or Unapprove a change control
+- Execute a change control
+- Schedule a change control
 
 ## Module Options
 
@@ -12,26 +15,30 @@
   - `state: set`: Set Change control
   - `state: show`: List Change control
   - `state: remove`: Delete Change control
+  - `state: approve`: Approve Change control
+  - `state: unapprove`: Unpprove Change control
+  - `state: execute`: Execute Change control
+  - `state: schedule`: Schedule Change control
+  - `state: approve_and_execute`: Approve and Execute Change control
+  - `state: schedule_and_approve`: Schedule and Approve Change control
 - `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
 ```yaml
-name: <name of change control>
-notes: <Any notes that you want to add>
+name: <str - Name of change control>
+notes: <str - Any notes that you want to add>
 stages:
- - name: <name of stage>
+ - name: <str - Name of stage>
    mode: <series | parallel>
-   parent: <name of parent stage>
+   parent: <str - Name of parent stage>
 activities:
- - name: <only used internally, "task" for any tasks>
-   task_id: <str - the WorkOrderId of the task to be executed>
-   timeout: <int>
-   stage: <str - the name of the Stage to assign the task to>
- - name: <only used internally>
-   action: <The name of the action to be done e.g. "Switch Healthcheck">
-   stage: <The name of the stage to assign the action to>
-   arguments: <list of dicts, each consisting of a name, and value key>
-      - name: <argument name>
-        value: <argument value>
+ - name: <str - Only used internally, "task" for any tasks>
+   stage: <str - The name of the Stage to assign the task to>
+   task_id: <str - The WorkOrderId of the task to be executed, if this is to be a task activity>
+   timeout: <int - The timeout, if this is to be a task activity - default is 900 seconds>
+   action: <str - The name of the action performed (mutually exclusive to task_id and timeout)>
+   arguments:
+     - name: <str - Device ID>
+       value: <str - Device serial number>
 ```
 
 ## Example
@@ -56,6 +63,7 @@ Create a change control
               value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
+          name: Switch2_healthcheck
           arguments:
             - name: DeviceID
               value: <device serial number>
@@ -92,4 +100,15 @@ Create a change control
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
+      register: cv_change_control
+
+    - name: "Approve a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control.data.id }}"]
+
+    - name: "Execute a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: execute
+        change_id: ["{{ cv_change_control.data.id }}"]
 ```

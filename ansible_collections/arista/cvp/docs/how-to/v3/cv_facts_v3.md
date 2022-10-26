@@ -14,6 +14,10 @@ This module does not support input data except module options.
 
 - `facts`: List of facts to get from CloudVision. It can be any of the following entries: [`devices`, `configlets`, `container`]
 - `regexp_filter`: [Regualr expression](https://docs.python.org/3/howto/regex.html) to filter `configlets` and `devices` to only collect facts for interesting entries.
+- `verbose`: Facts Verbosity.
+  - `full` -  get all data from CV.
+  - `short` -  get only cv_modules data.
+  - Default is `short`
 
 ```yaml
 tasks:
@@ -33,12 +37,13 @@ tasks:
     - containers
   register: FACTS_DEVICES
 
-- name: '#03 - Collect devices facts from {{inventory_hostname}}'
+- name: '#04 - Collect devices facts from {{inventory_hostname}}'
   arista.cvp.cv_facts_v3:
     facts:
     - devices
     - containers
     regexp_filter: '.*LEAF|BORDER.*'
+    verbose: long
   register: FACTS_DEVICES
 ```
 
@@ -70,7 +75,7 @@ ok: [CloudVision] =>
         CVPRACTEST:
           configlets: []
           parentContainerName: ansible-tests
-          image_bundle: ""
+          imageBundle: ""
       cvp_devices:
       - configlets:
         - leaf-2-unit-test
@@ -84,7 +89,7 @@ ok: [CloudVision] =>
         ipAddress: 192.0.2.165
         serialNumber: A2BC886CB9408A0453A3CFDD9C251999
         systemMacAddress: 50:00:00:d5:5d:c0
-        image_bundle: ""
+        imageBundle: ""
       - configlets: []
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
         hostname: leaf-2-unit-test
@@ -92,7 +97,7 @@ ok: [CloudVision] =>
         parentContainerName: ansible-tests
         serialNumber: 08A7E527AF711F688A6AD7D78BB5AD0A
         systemMacAddress: 50:00:00:cb:38:c2
-        image_bundle: ""
+        imageBundle: ""
       - configlets:
         - test_configlet
         fqdn: leaf-2-unit-test.ire.aristanetworks.com
@@ -101,7 +106,7 @@ ok: [CloudVision] =>
         parentContainerName: ansible-tests
         serialNumber: 24666013EF2271599935B4A894F356E1
         systemMacAddress: 50:00:00:03:37:66
-        image_bundle: ""
+        imageBundle: ""
     failed: false
 ```
 

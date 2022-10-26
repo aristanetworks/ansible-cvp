@@ -60,5 +60,7 @@ class DeviceResponseFields():
     DEVICE_DEPLOYED: str = 'devices_deployed'
     DEVICE_MOVED: str = 'devices_moved'
     DEVICE_RESET: str = 'devices_reset'
+    BUNDLE_ATTACHED: str = 'bundle_attached'
+    BUNDLE_DETACHED: str = 'bundle_detached'
     DEVICE_DECOMMISSIONED: str = 'devices_decommissioned'
     DEVICE_REMOVED: str = 'devices_removed'

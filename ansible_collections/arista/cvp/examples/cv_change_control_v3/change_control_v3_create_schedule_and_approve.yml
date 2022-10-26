@@ -1,0 +1,47 @@
+---
+- name: CVP Change Control Test schedule_and_approve
+  hosts: cv_server
+  gather_facts: false
+  vars:
+    change:
+      name: Leaf1 Pair Change Control
+      notes: Created via playbook
+      activities:
+        - action: "mlaghealthcheck"
+          name: Check_Leaf1A_MLAG_Health
+          arguments:
+            - name: DeviceID
+              value: SN-DC1-POD1-LEAF1A
+          stage: Leaf_MLAG_Health
+        - action: "mlaghealthcheck"
+          name: Check_Leaf1B_MLAG_Health
+          arguments:
+            - name: DeviceID
+              value: SN-DC1-POD1-LEAF1B
+          stage: Leaf_MLAG_Health
+        - task_id: "50"
+          stage: Leaf1A_upgrade
+        - task_id: "51"
+          stage: Leaf1B_upgrade
+      stages:
+        - name: Leaf_MLAG_Health
+          mode: parallel
+        - name: Leaf Upgrades
+          modes: series
+        - name: Leaf1A_upgrade
+          parent: Leaf Upgrades
+        - name: Leaf1B_upgrade
+          parent: Leaf Upgrades
+
+  tasks:
+    - name: "Create a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: set
+        change: "{{ change }}"
+      register: cv_change_control_test
+
+    - name: "Schedule and Approve a change control on {{inventory_hostname}} using change_id field"
+      arista.cvp.cv_change_control_v3:
+        state: schedule_and_approve
+        change_id: ["{{ cv_change_control_test.data.id }}"]
+        schedule_time: "2023-01-01T01:00:00.0Z"

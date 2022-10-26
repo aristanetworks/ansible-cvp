@@ -42,13 +42,18 @@ options:
     description: Set if we should get, set/update, or remove the change control
     required: false
     default: 'show'
-    choices: ['show','set','remove']
+    choices: ['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
+              'schedule', 'approve_and_execute', 'schedule_and_approve']
     type: str
   change_id:
     description: List of change IDs to get/remove
     required: false
     type: list
     elements: str
+  schedule_time:
+    description: RFC3339 time format, e.g., 2021-12-23T02:07:00.0
+    required: false
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -70,6 +75,7 @@ EXAMPLES = r'''
               value: <device serial number>
           stage: Pre-Checks
         - action: "Switch Healthcheck"
+          name: Switch2_healthcheck
           arguments:
             - name: DeviceID
               value: <device serial number>
@@ -108,6 +114,7 @@ EXAMPLES = r'''
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
+      register: cv_change_control
 
     - name: "Get the created change control {{inventory_hostname}}"
       arista.cvp.cv_change_control_v3:
@@ -130,6 +137,16 @@ EXAMPLES = r'''
       debug:
         msg: "{{cv_deleted}}"
 
+    - name: "Approve a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: approve
+        change_id: ["{{ cv_change_control.data.id }}"]
+
+    - name: "Execute a change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: execute
+        change_id: ["{{ cv_change_control.data.id }}"]
+
 '''
 
 # Required by Ansible and CVP
@@ -150,8 +167,11 @@ def main():
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),
-        state=dict(default='show', type='str', choices=['show', 'set', 'remove']),
-        change_id=dict(type='list', elements='str')
+        state=dict(default='show', type='str',
+                   choices=['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
+                            'schedule', 'approve_and_execute', 'schedule_and_approve']),
+        change_id=dict(type='list', elements='str'),
+        schedule_time=dict(type='str')
     )
 
     ansible_module = AnsibleModule(

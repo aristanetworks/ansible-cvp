@@ -45,6 +45,12 @@ options:
     required: false
     default: '.*'
     type: str
+  verbose:
+    description: get all data from CV or get only cv_modules data
+    required: false
+    choices: ['long', 'short']
+    default: 'short'
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -63,6 +69,14 @@ EXAMPLES = r'''
       facts:
         - devices
         - containers
+    register: FACTS_DEVICES
+
+  - name: '#04 - Collect devices facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - devices
+      regexp_filter: "spine1"
+      verbose: long
     register: FACTS_DEVICES
 '''
 
@@ -122,6 +136,12 @@ def main():
             required=False,
             default='.*'
         ),
+        verbose=dict(
+            type='str',
+            required=False,
+            choices=['long', 'short'],
+            default='short'
+        )
     )
 
     # Make module global to use it in all functions when required
@@ -138,7 +158,8 @@ def main():
 
     # Instantiate ansible results
     facts_collector = CvFactsTools(cv_connection=cv_client)
-    facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'])
+    facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'],
+                                  verbose=ansible_module.params['verbose'])
     result = dict(changed=False, data=facts, failed=False)
 
     # Implement logic
