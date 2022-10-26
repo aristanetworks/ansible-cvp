@@ -119,3 +119,6 @@ venv.bak/
 *.log
 *.log.*
 ansible_collections/arista/cvp/tests/output
+
+# ignore temporary dhcpd.conf.<timestamp>~ files
+**/dhcpd.conf.*~

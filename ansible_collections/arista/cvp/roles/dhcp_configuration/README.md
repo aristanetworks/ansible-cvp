@@ -45,15 +45,18 @@ ztp:
     nameservers:      < List of default NS to use on a per host basis >
     use_system_mac:   < true | false Configure DHCP for system-mac-address provided in show version (default false) >
   general:            < Section to define subnets parameters >
+    dhcpd_raw:        < Multi-line string of raw configuration >
     subnets:
       - name:         < Descriptive name, added as a comment in config file >
         network:      < * Subnet where DHCP will listen for request >
         netmask:      < * Netmask of given subnet >
         gateway:      < Gateway to configure for given subnet >
         nameservers:  < List of name-servers to configure for given subnet >
+        domain_name:  < Domain name to be appended to name lookups >
         start:        < First IP available in the pool >
         end:          < Last IP available in the pool >
         lease_time:   < Maximum lease time before device loose IP. Renewal is max/2 >
+        dhcpd_raw:    < Multi-line string of raw configuration >
   clients:            < List of clients on a mac-address basis >
     - name:           < * Hostname to provide when device do a DHCP request >
       mac:            < * Mac address of the host. Mac address value MUST be protected by either single or dual quotes >
