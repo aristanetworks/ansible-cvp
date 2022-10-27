@@ -34,7 +34,7 @@ description:
   - Returns number of created and/or deleted containers
 options:
   devices:
-    description: List of devices with their container and configlets information
+    description: List of devices with their container, configlet, and image bundle information
     required: true
     type: list
     elements: dict
@@ -45,7 +45,7 @@ options:
     choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']
     type: str
   apply_mode:
-    description: Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached.
+    description: Set how configlets are attached/detached on device. If set to strict, all configlets and image bundles not listed in your vars are detached.
     required: false
     default: 'loose'
     choices: ['loose', 'strict']
@@ -72,6 +72,7 @@ EXAMPLES = r'''
         parentContainerName: ANSIBLE
         configlets:
             - 'CV-EOS-ANSIBLE01'
+        imageBundle: leaf_image_bundle
   tasks:
     - name: "Configure devices on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:

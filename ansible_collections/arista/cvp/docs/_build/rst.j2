@@ -554,3 +554,9 @@ This module is flagged as **@{cur_state}@** which means that @{module_states[cur
 {% endif %}
 {% endif %}
 {% endif %}
+
+{% if 'cv_change_control_v3' in module or 'cv_container_v3' in module or 'cv_device_v3' in module or 'cv_tag_v3' in module %}
+Full Schema
+~~~~~~~~~~~
+Get full schema docs `here <../../schema/@{ module }@/>`_.
+{% endif %}

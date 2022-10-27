@@ -1,80 +1,98 @@
-# cv_change_control_v3
+.. _cv_change_control_v3:
 
+cv_change_control_v3
+++++++++++++++++++++
 Change Control management with CloudVision
 
 Module added in version 3.4.0
 
-<div class="contents" local="" depth="2">
 
-</div>
 
-## Synopsis
+.. contents::
+   :local:
+   :depth: 2
+
+
+Synopsis
+--------
+
 
 CloudVision Portal Change Control Module.
 
-## Module-specific Options
 
+
+.. _module-specific-options-label:
+
+Module-specific Options
+-----------------------
 The following options may be specified for this module:
 
-<table border=1 cellpadding=4>
+.. raw:: html
 
-<tr>
-<th class="head">parameter</th>
-<th class="head">type</th>
-<th class="head">required</th>
-<th class="head">default</th>
-<th class="head">choices</th>
-<th class="head">comments</th>
-</tr>
+    <table border=1 cellpadding=4>
 
-<tr>
-<td>change<br/><div style="font-size: small;"></div></td>
-<td>dict</td>
-<td>no</td>
-<td></td>
-<td></td>
-<td>
-    <div>A dict containing the change control to be created/modified</div>
-</td>
-</tr>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">type</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
 
-<tr>
-<td>change_id<br/><div style="font-size: small;"></div></td>
-<td>list</td>
-<td>no</td>
-<td></td>
-<td></td>
-<td>
-    <div>List of change IDs to get/remove</div>
-</td>
-</tr>
+    <tr>
+    <td>change<br/><div style="font-size: small;"></div></td>
+    <td>dict</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>A dict containing the change control to be created/modified</div>
+    </td>
+    </tr>
 
-<tr>
-<td>name<br/><div style="font-size: small;"></div></td>
-<td>str</td>
-<td>no</td>
-<td></td>
-<td></td>
-<td>
-    <div>The name of the change control. If not provided, one will be generated.</div>
-</td>
-</tr>
+    <tr>
+    <td>change_id<br/><div style="font-size: small;"></div></td>
+    <td>list</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>List of change IDs to get/remove</div>
+    </td>
+    </tr>
 
-<tr>
-<td>state<br/><div style="font-size: small;"></div></td>
-<td>str</td>
-<td>no</td>
-<td>show</td>
-<td><ul><li>show</li><li>set</li><li>remove</li></ul></td>
-<td>
-    <div>Set if we should get, set/update, or remove the change control</div>
-</td>
-</tr>
+    <tr>
+    <td>name<br/><div style="font-size: small;"></div></td>
+    <td>str</td>
+    <td>no</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>The name of the change control. If not provided, one will be generated.</div>
+    </td>
+    </tr>
 
-</table>
-</br>
+    <tr>
+    <td>state<br/><div style="font-size: small;"></div></td>
+    <td>str</td>
+    <td>no</td>
+    <td>show</td>
+    <td><ul><li>show</li><li>set</li><li>remove</li></ul></td>
+    <td>
+        <div>Set if we should get, set/update, or remove the change control</div>
+    </td>
+    </tr>
 
-## Examples:
+    </table>
+    </br>
+
+.. _cv_change_control_v3-examples-label:
+
+Examples:
+---------
+
+::
 
     ---
     - name: CVP Change Control Tests
@@ -154,10 +172,16 @@ The following options may be specified for this module:
           debug:
             msg: "{{cv_deleted}}"
 
-### Author
 
--   Ansible Arista Team (@aristanetworks)
 
-### Full Schema
 
-Get full schema docs [here](../../schema/cv_change_control_v3/).
+Author
+~~~~~~
+
+* Ansible Arista Team (@aristanetworks)
+
+
+
+Full Schema
+~~~~~~~~~~~
+Get full schema docs `here <../../schema/cv_change_control_v3/>`_.

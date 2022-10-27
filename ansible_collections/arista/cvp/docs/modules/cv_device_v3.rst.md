@@ -187,4 +187,8 @@ The following options may be specified for this module:
 
 ### Author
 
-- Ansible Arista Team (@aristanetworks)
+-   Ansible Arista Team (@aristanetworks)
+
+### Full Schema
+
+Get full schema docs [here](../../schema/cv_device_v3/).
