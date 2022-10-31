@@ -1266,8 +1266,8 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
-            MODULE_LOGGER.debug("Get image bundle for %s", str(device.serial_number))
-            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
+            MODULE_LOGGER.debug("Attempting to get current image bundle for %s using %s", str(device.fqdn), str(device.info[self.__search_by]))
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.info[self.__search_by])
             MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
             MODULE_LOGGER.debug("User assigned image bundle is: %s", str(device.image_bundle))
 
@@ -1346,7 +1346,9 @@ class CvDeviceTools(object):
                 continue
 
             # GET IMAGE BUNDLE
-            current_image_bundle = self.get_device_image_bundle(device_lookup=device.serial_number)
+            MODULE_LOGGER.debug("Attempting to get current image bundle for %s using %s", str(device.fqdn), str(device.info[self.__search_by]))
+            current_image_bundle = self.get_device_image_bundle(device_lookup=device.info[self.__search_by])
+            MODULE_LOGGER.debug("Current image bundle assigned is: %s", str(current_image_bundle))
 
             # Check to make sure that the assigned image isn't inherited from the container
             if current_image_bundle is not None and current_image_bundle[Api.image.TYPE] == 'netelement':
