@@ -228,12 +228,13 @@ jobs:
           until docker exec webdoc_cvp curl -s -I http://localhost:8000/ ; do sleep 2; done
       - name: check links for 404
         run: |
-          docker run --network container:webdoc_cvp raviqqe/muffet:2.4.0 http://127.0.0.1:8000 \
+          docker run --network container:webdoc_cvp raviqqe/muffet:2.6.1 http://127.0.0.1:8000 \
             -e ".*fonts.googleapis.com.*" \
             -e ".*fonts.gstatic.com.*" \
             -e ".*edit.*" \
             -e ".*aristanetworks.force.com.*" \
             -e ".*https://s3.amazonaws.com/onelogin-sourcemaps/.*" \
+            -e "twitter.com" \
             -f --buffer-size=8192 \
             --color=always \
             --skip-tls-verification \

@@ -10,7 +10,7 @@ repo_url: https://github.com/aristanetworks/ansible-cvp
 
 # Configuration
 use_directory_urls: true
-edit_uri: ""
+edit_uri: edit/devel/ansible_collections/arista/cvp/
 theme:
   name: material
   custom_dir: ansible_collections/arista/cvp/docs/_overrides
@@ -25,6 +25,7 @@ theme:
   icon:
     repo: fontawesome/brands/github
     logo: fontawesome/solid/book
+    edit: fontawesome/solid/file-pen
   favicon: docs/_media/favicon.ico
   font:
     code: Fira Mono
@@ -47,8 +48,8 @@ extra:
   social:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/aristanetworks/ansible-cvp
-    # - icon: fontawesome/brands/twitter
-    #   link: https://twitter.com/AristaNetworks
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/AristaNetworks
     - icon: fontawesome/solid/globe
       link: https://www.arista.com
 
