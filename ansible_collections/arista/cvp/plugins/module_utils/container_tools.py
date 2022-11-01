@@ -395,6 +395,88 @@ class CvContainerTools(object):
 
         return change_response
 
+    def __image_bundle_add(self, container: dict, image_bundle: str):
+        """__image_bundle_add Add an image bundle to a container on CV
+
+        Execute the API call to add the image bundle to the container in question
+        Args:
+            container : dict
+                Container information to use in API call. Format: {key:'', name:''}
+            image_bundle : str
+                The name of the image bundle to be applied
+        Returns:
+            dict
+                API call result
+        """
+        container_name = 'Undefined'
+        change_response = CvApiResult(action_name=container_name)
+        change_response.changed = False
+
+        if container is not None:
+            if self.__check_mode:
+                if self.__cvp_client.api.get_image_bundle_by_name(image_bundle):
+                    change_response.success = True
+                    change_response.taskIds = ['check_mode']
+                    change_response.add_entries(
+                        f'{container[Api.generic.NAME]}: {image_bundle}'
+                    )
+                else:
+                    change_response.success = False
+                    message = "Error: The image bundle " + str(image_bundle) + " assigned to container " + str(container[Api.generic.NAME]) + " does not exist."
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+            else:
+                # Get the assigned image bundle information
+                try:
+                    MODULE_LOGGER.info("Getting the image bundle info for bundle: %s", str(image_bundle))
+                    assigned_image_facts = self.__cvp_client.api.get_image_bundle_by_name(image_bundle)
+                except CvpApiError as e:
+                    message = "Error retrieving image bundle info for: " + str(image_bundle)
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+                # Get the current image bundle
+                try:
+                    MODULE_LOGGER.info("Checking if container has an image bundle already")
+                    current_image_facts = self.__cvp_client.api.get_image_bundle_by_container_id(container[Api.generic.KEY])
+                    pass
+                except CvpApiError as e:
+                    message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY])
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+
+                if assigned_image_facts is not None:
+                    # We have a valid image bundle to assign
+                    if len(current_image_facts['imageBundleList']) != 0 and\
+                            current_image_facts['imageBundleList'][0][Api.generic.KEY] == assigned_image_facts['id']:
+                        # Check that the current image bundle and the assigned image bundle are the same
+                        MODULE_LOGGER.info("Nothing to do. Image bundle already assigned to %s container" % container[Api.generic.NAME])
+                    else:
+                        MODULE_LOGGER.debug("Image bundle %s has key %s" % image_bundle, assigned_image_facts['id'])
+                        MODULE_LOGGER.info("Applying %s to container %s" % image_bundle, container[Api.generic.NAME])
+                        try:
+                            resp = self.__cv_client.api.apply_image_to_element(
+                                assigned_image_facts,
+                                container,
+                                container[Api.generic.NAME],
+                                'container'
+                            )
+                        except CvpApiError as catch_error:
+                                MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                                self.__ansible.fail_json(msg='Error applying bundle to container' + container[Api.generic.NAME] + ': ' + catch_error)
+                        else:
+                            if resp['data']['status'] == 'success':
+                                change_response.changed = True
+                                change_response.success = True
+                                change_response.taskIds = resp['data'][Api.task.TASK_IDS]
+                else:
+                    message = "Error - assigned image bundle: " + str(image_bundle) + "does not exist."
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+        return change_response
+
     #############################################
     #   Generic functions
     #############################################
