@@ -5,6 +5,31 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.5.0
+======
+
+Release Summary
+---------------
+
+Release 3.5.0 - See documentation on cvp.avd.sh for details.
+
+
+Minor Changes
+-------------
+
+- Feat(cv_change_control_v3) Add support for approve/execute/schedule actions(#529)
+- Feat(cv_device_v3) Implement image bundle on device level(#505)
+- Feat(cv_device_v3) Support device decommissioning and device removal from provisioning(#507)
+- Feat(cv_facts_v3) Expose verbose option in cv_facts_v3(#535)
+- Feat(dhcp_configuration) Request add support for access point provisioning(#527)
+
+Bugfixes
+--------
+
+- Fix(cv_change_control_v3) Dict key check on CC indexing is broken(#524)
+- Fix(cv_device_v3) Allow all search_by options when assigning and removing image bundles(#541)
+- Fix(cv_facts_v3) Make image bundle name key usage consistent(#513)
+
 v3.4.0
 ======
 
@@ -36,5 +61,5 @@ Bugfixes
 New Modules
 -----------
 
-- arista.cvp.cv_change_control_v3 - Change Control management with Cloudvision
+- arista.cvp.cv_change_control_v3 - Change Control management with CloudVision
 - arista.cvp.cv_tag_v3 - Create/Assign/Delete/Unassign tags on CVP
