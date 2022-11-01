@@ -4,8 +4,8 @@ release_summary: |
 minor_changes:
 - Feat(cv_device_v3) Implement image bundle on device level(#505)
 - Feat(cv_device_v3) Support device decommissioning and device removal from provisioning(#507)
-- Feat(dhcp_configuration) Request add support for access point provisioning(#527) 
-- Feat(cv_change_control_v3) Add support for approve/execute/schedule actions(#529) 
+- Feat(dhcp_configuration) Request add support for access point provisioning(#527)
+- Feat(cv_change_control_v3) Add support for approve/execute/schedule actions(#529)
 - Feat(cv_facts_v3) Expose verbose option in cv_facts_v3(#535)
 
 bugfixes:
