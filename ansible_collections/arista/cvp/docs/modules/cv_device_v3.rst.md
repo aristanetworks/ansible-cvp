@@ -36,7 +36,7 @@ The following options may be specified for this module:
 <td>loose</td>
 <td><ul><li>loose</li><li>strict</li></ul></td>
 <td>
-    <div>Set how configlets are attached/detached on device. If set to strict all configlets and image bundles not listed in your vars are detached.</div>
+    <div>Set how configlets are attached/detached on device. If set to strict, all configlets and image bundles not listed in your vars are detached.</div>
 </td>
 </tr>
 
@@ -47,7 +47,7 @@ The following options may be specified for this module:
 <td></td>
 <td></td>
 <td>
-    <div>List of devices with their container, configlet and image bundle information</div>
+    <div>List of devices with their container, configlet, and image bundle information</div>
 </td>
 </tr>
 
@@ -69,7 +69,7 @@ The following options may be specified for this module:
 <td>present</td>
 <td><ul><li>present</li><li>factory_reset</li><li>provisioning_reset</li><li>absent</li></ul></td>
 <td>
-    <div>Set if ansible should build or remove devices on CLoudvision</div>
+    <div>Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision</div>
 </td>
 </tr>
 

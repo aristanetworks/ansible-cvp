@@ -56,7 +56,18 @@ The following options may be specified for this module:
 <td></td>
 <td></td>
 <td>
-    <div>The name of the change control. If not provided, one will be generated.</div>
+    <div>The name of the change control, If not provided, one will be generated automatically.</div>
+</td>
+</tr>
+
+<tr>
+<td>schedule_time<br/><div style="font-size: small;"></div></td>
+<td>str</td>
+<td>no</td>
+<td></td>
+<td></td>
+<td>
+    <div>RFC3339 time format, e.g., 2021-12-23T02:07:00.0</div>
 </td>
 </tr>
 
@@ -65,7 +76,7 @@ The following options may be specified for this module:
 <td>str</td>
 <td>no</td>
 <td>show</td>
-<td><ul><li>show</li><li>set</li><li>remove</li></ul></td>
+<td><ul><li>show</li><li>set</li><li>remove</li><li>approve</li><li>unapprove</li><li>execute</li><li>schedule</li><li>approve_and_execute</li><li>schedule_and_approve</li></ul></td>
 <td>
     <div>Set if we should get, set/update, or remove the change control</div>
 </td>
@@ -94,6 +105,7 @@ The following options may be specified for this module:
                   value: <device serial number>
               stage: Pre-Checks
             - action: "Switch Healthcheck"
+              name: Switch2_healthcheck
               arguments:
                 - name: DeviceID
                   value: <device serial number>
@@ -132,6 +144,7 @@ The following options may be specified for this module:
           arista.cvp.cv_change_control_v3:
             state: set
             change: "{{ change }}"
+          register: cv_change_control
 
         - name: "Get the created change control {{inventory_hostname}}"
           arista.cvp.cv_change_control_v3:
@@ -153,6 +166,16 @@ The following options may be specified for this module:
         - name: "Show deleted CCs"
           debug:
             msg: "{{cv_deleted}}"
+
+        - name: "Approve a change control on {{inventory_hostname}}"
+          arista.cvp.cv_change_control_v3:
+            state: approve
+            change_id: ["{{ cv_change_control.data.id }}"]
+
+        - name: "Execute a change control on {{inventory_hostname}}"
+          arista.cvp.cv_change_control_v3:
+            state: execute
+            change_id: ["{{ cv_change_control.data.id }}"]
 
 ### Author
 

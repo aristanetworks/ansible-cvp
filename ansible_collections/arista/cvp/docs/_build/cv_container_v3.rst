@@ -48,7 +48,7 @@ The following options may be specified for this module:
     <td>loose</td>
     <td><ul><li>loose</li><li>strict</li></ul></td>
     <td>
-        <div>Set how configlets are attached/detached on container. If set to strict all configlets not listed in your vars are detached.</div>
+        <div>Set how configlets are attached/detached to containers. If set to strict all configlets not listed in your vars will be detached.</div>
     </td>
     </tr>
 
@@ -59,7 +59,7 @@ The following options may be specified for this module:
     <td>present</td>
     <td><ul><li>present</li><li>absent</li></ul></td>
     <td>
-        <div>Set if ansible should build or remove devices on CloudVision</div>
+        <div>Set if Ansible should build or remove devices on CloudVision</div>
     </td>
     </tr>
 
@@ -70,7 +70,7 @@ The following options may be specified for this module:
     <td></td>
     <td></td>
     <td>
-        <div>Yaml dictionary to describe intended containers</div>
+        <div>YAML dictionary to describe intended containers</div>
     </td>
     </tr>
 
