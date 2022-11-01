@@ -205,7 +205,7 @@ class CvContainerTools(object):
 
     def __standard_output(self, source: dict):
         """
-        __standard_output Filter dict to create a standard output with relevant leys
+        __standard_output Filter dict to create a standard output with relevant keys
 
         Parameters
         ----------
