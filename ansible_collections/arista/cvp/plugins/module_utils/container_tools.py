@@ -188,6 +188,43 @@ class ContainerInput(object):
             )
         )
 
+    def get_image_bundle(self, container_name: str, bundle_key: str = Api.generic.IMAGE_BUNDLE_NAME):
+        """
+        get_image_bundle Read and extract image bundle name for a container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to search configlets
+        bundle_key : str, optional
+            Key where the image bundle name is saved in inventory, by default 'imageBundle'
+
+        Returns
+        -------
+        String
+            The name of the assigned image bundle
+        """
+        return self.__get_container_data(container_name=container_name, key_name=bundle_key)
+
+    def has_image_bundle(self, container_name: str, bundle_key: str = Api.generic.IMAGE_BUNDLE_NAME):
+        """
+        get_image_bundle Read and extract image bundle name for a container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to search configlets
+        bundle_key : str, optional
+            Key where the image bundle name is saved in inventory, by default 'imageBundle'
+
+        Returns
+        -------
+        bool
+            True if an image bundle is assigned, False if not
+        """
+        return bool(
+            self.__get_container_data(container_name=container_name, key_name=bundle_key)
+        )
 
 class CvContainerTools(object):
     """
@@ -222,7 +259,8 @@ class CvContainerTools(object):
             Api.generic.NAME,
             Api.container.COUNT_CONTAINER,
             Api.container.COUNT_DEVICE,
-            Api.generic.PARENT_CONTAINER_ID
+            Api.generic.PARENT_CONTAINER_ID,
+            Api.generic.IMAGE_BUNDLE_NAME
         ]
         return {k: v for k, v in source.items() if k in standard_keys}
 
@@ -575,6 +613,15 @@ class CvContainerTools(object):
         if cv_response is not None and Api.generic.KEY in cv_response:
             container_id = cv_response[Api.generic.KEY]
             container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[Api.container.TOPOLOGY]
+            MODULE_LOGGER.debug('Collecting assigned image bundle name')
+            assigned_bundle = self.__cvp_client.api.get_image_bundle_by_container_id(container_id)
+            MODULE_LOGGER.debug('Retrieved the bundle information: %s', str(assigned_bundle))
+            if len(assigned_bundle['imageBundleList']) == 1:
+                container_facts[Api.generic.IMAGE_BUNDLE_NAME] = assigned_bundle['imageBundleList'][0][Api.generic.NAME]
+            elif len(assigned_bundle['imageBundleList']) == 0:
+                container_facts[Api.generic.IMAGE_BUNDLE_NAME] = None
+            else:
+                MODULE_LOGGER.error('Image bundle list is larger than expected (%d): %s', int(assigned_bundle['imageBundleList']), str(assigned_bundle))
             MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
