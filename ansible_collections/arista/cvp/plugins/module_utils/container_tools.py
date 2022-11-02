@@ -985,6 +985,13 @@ class CvContainerTools(object):
         MODULE_LOGGER.info('Sending data to self.__configlet_del: %s', str(detach_configlets))
         return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
+    def image_bundle_attach(self, container: str, image_name: str):
+
+        container_info = self.get_container_info(container_name=container)
+        MODULE_LOGGER.debug("Attempting to apply image bundle %s to container %s", str(image_name),str(container))
+        return self.__image_bundle_add(container=container_info, image_bundle=image_name)
+
+
     def build_topology(self, user_topology: ContainerInput, present: bool = True, apply_mode: str = 'loose'):
         """
         build_topology Class entry point to build container topology on Cloudvision
