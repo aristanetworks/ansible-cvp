@@ -49,3 +49,13 @@ releases:
     fragments:
     - v3.5.0.yml
     release_date: '2022-11-01'
+  3.5.1:
+    changes:
+      bugfixes:
+      - Fix Bump update min cvprac version(#547)
+      release_summary: 'Release 3.5.1 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.5.1.yml
+    release_date: '2022-11-02'

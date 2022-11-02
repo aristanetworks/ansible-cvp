@@ -5,6 +5,20 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.5.1
+======
+
+Release Summary
+---------------
+
+Release 3.5.1 - See documentation on cvp.avd.sh for details.
+
+
+Bugfixes
+--------
+
+- Fix Bump update min cvprac version(#547)
+
 v3.5.0
 ======
 
