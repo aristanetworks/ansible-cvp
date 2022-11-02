@@ -39,17 +39,17 @@ description:
   - Returns number of created and/or deleted containers
 options:
   topology:
-    description: Yaml dictionary to describe intended containers
+    description: YAML dictionary to describe intended containers
     required: true
     type: dict
   state:
-    description: Set if ansible should build or remove devices on CloudVision
+    description: Set if Ansible should build or remove devices on CloudVision
     required: false
     default: 'present'
     choices: ['present', 'absent']
     type: str
   apply_mode:
-    description: Set how configlets are attached/detached on container. If set to strict all configlets not listed in your vars are detached.
+    description: Set how configlets are attached/detached to containers. If set to strict all configlets not listed in your vars will be detached.
     required: false
     default: 'loose'
     choices: ['loose', 'strict']

@@ -31,7 +31,7 @@ description:
   - ''
 options:
   name:
-    description: The name of the change control. If not provided, one will be generated.
+    description: The name of the change control, If not provided, one will be generated automatically.
     required: false
     type: str
   change:

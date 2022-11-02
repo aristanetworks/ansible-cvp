@@ -39,7 +39,7 @@ options:
     type: list
     elements: dict
   state:
-    description: Set if ansible should build or remove devices on CLoudvision
+    description: Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision
     required: false
     default: 'present'
     choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']
