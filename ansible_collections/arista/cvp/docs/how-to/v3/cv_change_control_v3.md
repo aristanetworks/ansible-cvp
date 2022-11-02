@@ -18,9 +18,9 @@
   - `state: approve`: Approve Change control
   - `state: unapprove`: Unpprove Change control
   - `state: execute`: Execute Change control
-  - `state: schedule`: Schedule Change control (available only on cvp2022.1.0 and newer)
+  - `state: schedule`: Schedule Change control (available only on CVP 2022.1.0 and newer or CVaaS)
   - `state: approve_and_execute`: Approve and Execute Change control
-  - `state: schedule_and_approve`: Schedule and Approve Change control (available only on cvp2022.1.0 and newer)
+  - `state: schedule_and_approve`: Schedule and Approve Change control (available only on CVP 2022.1.0 and newer or CVaaS)
 - `change`: A dict, with the structure of the change. The change dict is structured as follows:
 
 ```yaml
