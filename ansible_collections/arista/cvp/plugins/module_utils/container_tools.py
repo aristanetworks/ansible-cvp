@@ -491,10 +491,10 @@ class CvContainerTools(object):
                         # Check that the current image bundle and the assigned image bundle are the same
                         MODULE_LOGGER.info("Nothing to do. Image bundle already assigned to %s container" % container[Api.generic.NAME])
                     else:
-                        MODULE_LOGGER.debug("Image bundle %s has key %s" % image_bundle, assigned_image_facts['id'])
-                        MODULE_LOGGER.info("Applying %s to container %s" % image_bundle, container[Api.generic.NAME])
+                        MODULE_LOGGER.debug("Image bundle %s has key %s", str(image_bundle), str(assigned_image_facts['id']))
+                        MODULE_LOGGER.info("Applying %s to container %s", str(image_bundle), str(container[Api.generic.NAME]))
                         try:
-                            resp = self.__cv_client.api.apply_image_to_element(
+                            resp = self.__cvp_client.api.apply_image_to_element(
                                 assigned_image_facts,
                                 container,
                                 container[Api.generic.NAME],
@@ -594,7 +594,8 @@ class CvContainerTools(object):
             "name": "DC1_L3LEAFS",
             "childContainerCount": 5,
             "childNetElementCount": 0,
-            "parentContainerId": "container_614c6678-1769-4acf-9cc1-214728238c2f"
+            "parentContainerId": "container_614c6678-1769-4acf-9cc1-214728238c2f",
+            "imageBundle": "top_level_container"
         }
 
         Parameters
@@ -1075,10 +1076,8 @@ class CvContainerTools(object):
                             container=user_container, image_name=user_topology.get_image_bundle(container_name=user_container))
                         cv_image_bundle_attach.add_change(resp)
                     elif apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
-                        container_facts = self.get_container_id(container_name=user_container)
-                        if container_facts[API.generic.IMAGE_BUNDLE_NAME] is not None:
-                            resp = self.image_bundle_detach(container=user_container)
-                            cv_image_bundle_detach.add_change(resp)
+                        resp = self.image_bundle_detach(container=user_container)
+                        cv_image_bundle_detach.add_change(resp)
 
             else:
                 for user_container in reversed(user_topology.ordered_list_containers):
