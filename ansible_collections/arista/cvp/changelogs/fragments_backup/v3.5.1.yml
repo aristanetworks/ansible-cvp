@@ -1,0 +1,5 @@
+release_summary: |
+  Release 3.5.1 - See documentation on cvp.avd.sh for details.
+
+bugfixes:
+- Fix Bump update min cvprac version(#547)
