@@ -552,9 +552,10 @@ class CvContainerTools(object):
                     self.__ansible.fail_json(msg=message)
 
                 if len(current_image_facts['imageBundleList']) != 0:
+                    MODULE_LOGGER.debug('Remove image %s from container %s', str(current_image_facts), str(container))
                     try:
                         resp = self.__cvp_client.api.remove_image_from_element(
-                            current_image_facts,
+                            current_image_facts['imageBundleList'][0],
                             container,
                             container[Api.generic.NAME],
                             'container'
