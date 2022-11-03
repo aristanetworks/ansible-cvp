@@ -471,7 +471,7 @@ class CvContainerTools(object):
                     MODULE_LOGGER.info("Getting the image bundle info for bundle: %s", str(image_bundle))
                     assigned_image_facts = self.__cvp_client.api.get_image_bundle_by_name(image_bundle)
                 except CvpApiError as e:
-                    message = "Error retrieving image bundle info for: " + str(image_bundle)
+                    message = "Error retrieving image bundle info for: " + str(image_bundle) + ". Error was: " + str(e)
                     MODULE_LOGGER.error(message)
                     self.__ansible.fail_json(msg=message)
                 # Get the current image bundle
@@ -489,7 +489,7 @@ class CvContainerTools(object):
                     if len(current_image_facts['imageBundleList']) != 0 and\
                             current_image_facts['imageBundleList'][0][Api.generic.KEY] == assigned_image_facts['id']:
                         # Check that the current image bundle and the assigned image bundle are the same
-                        MODULE_LOGGER.info("Nothing to do. Image bundle already assigned to %s container" % container[Api.generic.NAME])
+                        MODULE_LOGGER.info("Nothing to do. Image bundle already assigned to %s container", str(container[Api.generic.NAME]))
                     else:
                         MODULE_LOGGER.debug("Image bundle %s has key %s", str(image_bundle), str(assigned_image_facts['id']))
                         MODULE_LOGGER.info("Applying %s to container %s", str(image_bundle), str(container[Api.generic.NAME]))
@@ -547,7 +547,7 @@ class CvContainerTools(object):
                     current_image_facts = self.__cvp_client.api.get_image_bundle_by_container_id(container[Api.generic.KEY])
                     pass
                 except CvpApiError as e:
-                    message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY])
+                    message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY]) + ". Error was: " + str(e)
                     MODULE_LOGGER.error(message)
                     self.__ansible.fail_json(msg=message)
 
