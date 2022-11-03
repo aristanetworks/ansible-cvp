@@ -226,6 +226,7 @@ class ContainerInput(object):
             self.__get_container_data(container_name=container_name, key_name=bundle_key)
         )
 
+
 class CvContainerTools(object):
     """
     CvContainerTools Class to manage container actions for arista.cvp.cv_container module
@@ -483,7 +484,6 @@ class CvContainerTools(object):
                     MODULE_LOGGER.error(message)
                     self.__ansible.fail_json(msg=message)
 
-
                 if assigned_image_facts is not None:
                     # We have a valid image bundle to assign
                     if len(current_image_facts['imageBundleList']) != 0 and\
@@ -501,8 +501,8 @@ class CvContainerTools(object):
                                 'container'
                             )
                         except CvpApiError as catch_error:
-                                MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
-                                self.__ansible.fail_json(msg='Error applying bundle to container' + container[Api.generic.NAME] + ': ' + catch_error)
+                            MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                            self.__ansible.fail_json(msg='Error applying bundle to container' + container[Api.generic.NAME] + ': ' + catch_error)
                         else:
                             if resp['data']['status'] == 'success':
                                 change_response.changed = True
@@ -1014,9 +1014,8 @@ class CvContainerTools(object):
             Action result
         """
         container_info = self.get_container_info(container_name=container)
-        MODULE_LOGGER.debug("Attempting to apply image bundle %s to container %s", str(image_name),str(container))
+        MODULE_LOGGER.debug("Attempting to apply image bundle %s to container %s", str(image_name), str(container))
         return self.__image_bundle_add(container=container_info, image_bundle=image_name)
-
 
     def image_bundle_detach(self, container: str):
         """
@@ -1045,8 +1044,6 @@ class CvContainerTools(object):
         container_info = self.get_container_info(container_name=container)
         MODULE_LOGGER.debug("Attampting to remove image bundle from %s", str(container))
         return self.__image_bundle_del(container=container_info)
-
-
 
     def build_topology(self, user_topology: ContainerInput, present: bool = True, apply_mode: str = 'loose'):
         """

@@ -53,6 +53,7 @@ class ContainerResponseFields():
     BUNDLE_ATTACHED: str = 'bundle_attached'
     BUNDLE_DETACHED: str = 'bundle_detached'
 
+
 # @dataclass
 class DeviceResponseFields():
     """Fields to build output of cv_device_v3 module"""
