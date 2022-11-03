@@ -988,12 +988,60 @@ class CvContainerTools(object):
         return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
     def image_bundle_attach(self, container: str, image_name: str):
+        """
+        image_bundle_attach - send bundle attach to the the element API call
+
+        Example
+        -------
+        >>> CvContainerTools.image_bundle_attach(container='Test123', image_name='top_level_bundle')
+        {
+            'success': True,
+            'taskIDs': [],
+            'container': 'Test123',
+            'imageBundle': 'top_level_bundle
+        }
+
+        Parameters
+        ----------
+        container: str
+            Name of the container
+        image_name: str
+            Name of the image bundle to assign
+
+        Returns
+        -------
+        dict
+            Action result
+        """
         container_info = self.get_container_info(container_name=container)
         MODULE_LOGGER.debug("Attempting to apply image bundle %s to container %s", str(image_name),str(container))
         return self.__image_bundle_add(container=container_info, image_bundle=image_name)
 
 
     def image_bundle_detach(self, container: str):
+        """
+        image_bundle_detach - send bundle detach to the the element API call
+
+        Example
+        -------
+        >>> CvContainerTools.image_bundle_detach(container='Test123')
+        {
+            'success': True,
+            'taskIDs': [],
+            'container': 'Test123',
+            'imageBundle': 'top_level_bundle
+        }
+
+        Parameters
+        ----------
+        container: str
+            Name of the container
+
+        Returns
+        -------
+        dict
+            Action result
+        """
         container_info = self.get_container_info(container_name=container)
         MODULE_LOGGER.debug("Attampting to remove image bundle from %s", str(container))
         return self.__image_bundle_del(container=container_info)
@@ -1070,7 +1118,7 @@ class CvContainerTools(object):
                         if len(configlet_to_remove) > 0:
                             resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                             cv_configlets_detach.add_change(resp)
-                    
+
                     if user_topology.has_image_bundle(container_name=user_container):
                         MODULE_LOGGER.debug('%s container has an image bundle assigned', str(user_container))
                         resp = self.image_bundle_attach(
