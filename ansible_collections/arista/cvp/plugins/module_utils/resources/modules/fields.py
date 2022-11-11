@@ -30,6 +30,7 @@ class ModuleOptionValues():
     STATE_MODE_PRESENT: str = 'present'
     STATE_MODE_DECOMM: str = 'absent'
     STATE_MODE_REMOVE: str = 'provisioning_reset'
+    STATE_MODE_VALIDATE: str = 'validate'
 
 
 # @dataclass
@@ -59,6 +60,7 @@ class DeviceResponseFields():
     """Fields to build output of cv_device_v3 module"""
     CONFIGLET_ATTACHED: str = 'configlets_attached'
     CONFIGLET_DETACHED: str = 'configlets_detached'
+    CONFIGLET_VALIDATED: str = 'configlets_validated'
     DEVICE_DEPLOYED: str = 'devices_deployed'
     DEVICE_MOVED: str = 'devices_moved'
     DEVICE_RESET: str = 'devices_reset'
