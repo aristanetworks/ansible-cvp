@@ -224,7 +224,11 @@ def main():
         search_key=dict(type='str',
                         required=False,
                         default='hostname',
-                        choices=['fqdn', 'hostname', 'serialNumber'])
+                        choices=['fqdn', 'hostname', 'serialNumber']),
+        validate_mode=dict(type='str',
+                           required=False,
+                           default='skip',
+                           choices=['skip', 'stop_on_warning', 'stop_on_error'])
     )
 
     # Make module global to use it in all functions when required
@@ -259,6 +263,7 @@ def main():
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
         search_mode=ansible_module.params['search_key'],
+        validate_mode=ansible_module.params['validate_mode'],
         state=ansible_module.params['state'])
 
     ansible_module.exit_json(**result)

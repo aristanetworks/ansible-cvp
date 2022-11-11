@@ -850,7 +850,7 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_validate(self, user_inventory: DeviceInventory):
+    def __state_validate(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP):
         """
         __state_validate Execute actions when user configures state=validate
 
@@ -877,7 +877,7 @@ class CvDeviceTools(object):
 
         # Execute configlet validation
         # device.system_mac
-        action_result = self.validate_config(user_inventory=user_inventory)
+        action_result = self.validate_config(user_inventory=user_inventory, validate_mode=validate_mode)
         if action_result is not None:
             MODULE_LOGGER.debug('action_result is: %s', str(action_result))
             for update in action_result:
@@ -1360,7 +1360,8 @@ class CvDeviceTools(object):
         user_inventory: DeviceInventory,
         search_mode: str = Api.device.HOSTNAME,
         apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
-        state: str = ModuleOptionValues.STATE_MODE_PRESENT,
+        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP,
+        state: str = ModuleOptionValues.STATE_MODE_PRESENT
     ):
         """
         manager Main entry point to support all device
@@ -1369,6 +1370,7 @@ class CvDeviceTools(object):
         - Deploy devices
         - Move deployed devices to container
         - Attach configlets to devices
+        - Validate configlets against devices
 
         Parameters
         ----------
@@ -1379,7 +1381,7 @@ class CvDeviceTools(object):
         apply_mode: str, optional
             Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
         state: str, optional
-            Define if devices must be provisioned or reset to default configuration.
+            Define if devices must be provisioned or reset to default configuration or the configlet validated against the device.
 
         Returns
         -------
@@ -1410,7 +1412,7 @@ class CvDeviceTools(object):
 
         elif state == ModuleOptionValues.STATE_MODE_VALIDATE:
             MODULE_LOGGER.info('Validating configlets against devices')
-            response = self.__state_validate(user_inventory=user_inventory)
+            response = self.__state_validate(user_inventory=user_inventory, validate_mode=validate_mode)
 
         return response.content
 
@@ -2260,16 +2262,16 @@ class CvDeviceTools(object):
             results.append(result_data)
         return results
 
-    def validate_config(self, user_inventory: DeviceInventory):
+    def validate_config(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP):
         results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_validated')
             if device.system_mac is not None:
-                MODULE_LOGGER.debug('DEBUG--- device configlets are {}'.format(str(device.configlets)))
+                MODULE_LOGGER.debug('Device configlets are {}'.format(str(device.configlets)))
                 for configlet in device.configlets:
-                    MODULE_LOGGER.debug('DEBUG--- configlet is {}'.format(str(configlet)))
+                    MODULE_LOGGER.debug('Configlet being validated is {}'.format(str(configlet)))
                     vc_configlet = self.__get_configlet_info(configlet_name=configlet)
-                    MODULE_LOGGER.debug('DEBUG--- vc_configlet is {}'.format(str(vc_configlet)))
+                    MODULE_LOGGER.debug('Configlet information: {}'.format(str(vc_configlet)))
                     if vc_configlet is None:
                         error_message = "The configlet \'{0}\' defined to be validated against device \'{1}\' does not \
                             exist on the CVP server.".format(str(configlet), str(device.fqdn))
@@ -2280,14 +2282,14 @@ class CvDeviceTools(object):
                             MODULE_LOGGER.debug('Ansible is going to validate configlet %s against device %s ',
                                                 str(vc_configlet['name']),
                                                 str(device.fqdn))
-                            MODULE_LOGGER.debug('queryParams are deviceMac=%s and configuration=%s',
+                            MODULE_LOGGER.debug('queryParams are deviceMac: %s and configuration: %s',
                                                 str(device.system_mac),
                                                 str(vc_configlet['config']))
                             resp = self.__cv_client.api.validate_config_for_device(
                                 device_mac=device.system_mac,
                                 config=vc_configlet['config'],
                               )
-                            MODULE_LOGGER.debug('resp is ={}'.format(str(resp)))
+                            MODULE_LOGGER.debug('resp is: {}'.format(str(resp)))
                         except CvpApiError:
                             self.__ansible.fail_json(msg='Error validation failed on device {}'.format(
                                 device.fqdn))
@@ -2296,13 +2298,25 @@ class CvDeviceTools(object):
                             if 'result' in resp:
                                 result_data.changed = True
                                 result_data.success = True
-                            if any(value in resp for value in ['warnings', 'errors']):
-                                err_msg = resp['warnings'] + resp['errors']
+                            if 'warnings' in resp:
+                                err_msg = resp['warnings']
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
                                 MODULE_LOGGER.error(msg)
-                                self.__ansible.fail_json(msg=msg)
-
+                                MODULE_LOGGER.debug('validate_mode is: {}'.format(str(validate_mode)))
+                                if validate_mode == ModuleOptionValues.VALIDATE_MODE_SKIP or validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR:
+                                    self.__ansible.exit_json(msg=msg)
+                                else:
+                                    self.__ansible.fail_json(msg=msg)
+                            if 'errors' in resp:
+                                err_msg = resp['errors']
+                                msg = f"Configlet validation failed with {err_msg}"
+                                result_data.success = False
+                                MODULE_LOGGER.error(msg)
+                                if validate_mode == ModuleOptionValues.VALIDATE_MODE_SKIP or validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
+                                    self.__ansible.exit_json(msg=msg)
+                                else:
+                                    self.__ansible.fail_json(msg=msg)
                     result_data.add_entry('{0} validated against {1}'.format(
                         device.info[self.__search_by], vc_configlet))
             results.append(result_data)
