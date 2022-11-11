@@ -210,7 +210,7 @@ def main():
         state=dict(type='str',
                    required=False,
                    default='present',
-                   choices=['present', 'factory_reset', 'provisioning_reset', 'absent']),
+                   choices=['present', 'factory_reset', 'provisioning_reset', 'absent', 'validate']),
         apply_mode=dict(type='str',
                         required=False,
                         default='loose',
