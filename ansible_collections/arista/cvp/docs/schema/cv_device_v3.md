@@ -4,7 +4,7 @@
 | -------- | ---- | -------- | ------- | ------------------ | ----------- |
 | apply_mode | str | No | loose | loose<br>strict | Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached |
 | search_key | str | No | hostname | fqdn<br>hostname<br>serialNumber | Key name to use to look for device in CloudVision |
-| state | str| No | present | present<br>factory_reset<br>provisioning_reset<br>absent | Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision |
+| state | str| No | present | present<br>factory_reset<br>provisioning_reset<br>absent<br>validate | Set if Ansible should build, remove devices from provisioning, fully decommission, factory reset devices on CloudVision or validate configlets against devices|
 | devices | List | Yes |  |  | List of devices with their container and configlets information |
 | &nbsp;&nbsp;&nbsp;&nbsp;ipAddress | str | Yes |  |  | IP address of the device |
 | &nbsp;&nbsp;&nbsp;&nbsp;fqdn | str | Yes |  |  | Fully Qualified Domain Name of the device.<br>This field is required along with `parentContainerName` |

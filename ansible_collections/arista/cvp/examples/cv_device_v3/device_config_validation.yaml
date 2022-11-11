@@ -1,0 +1,19 @@
+---
+- name: Device Config Validation in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  vars:
+    CVP_DEVICES:
+      - serialNumber: leaf1
+        fqdn: leaf1
+        hostname: leaf1
+        parentContainerName: Leafs
+        configlets: #[]
+         - dc1-avd_leaf1
+  tasks:
+  - name: Validate configurations
+    arista.cvp.cv_device_v3:
+      devices: "{{CVP_DEVICES}}"
+      state: validate
+    register: CVP_DEVICES_RESULTS

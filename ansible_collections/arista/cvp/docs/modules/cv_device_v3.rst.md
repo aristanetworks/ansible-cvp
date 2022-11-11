@@ -67,9 +67,9 @@ The following options may be specified for this module:
 <td>str</td>
 <td>no</td>
 <td>present</td>
-<td><ul><li>present</li><li>factory_reset</li><li>provisioning_reset</li><li>absent</li></ul></td>
+<td><ul><li>present</li><li>factory_reset</li><li>provisioning_reset</li><li>absent</li><li>validate</li></ul></td>
 <td>
-    <div>Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision</div>
+    <div>Set if Ansible should build, remove devices from provisioning, fully decommission, factory reset devices on CloudVision or validate configlets against devices</div>
 </td>
 </tr>
 
