@@ -39,6 +39,10 @@ CVP_DEVICES:
 - `apply_mode`: Define how configlets configured to the devices are managed by ansible:
   - `loose` (default): Configure new configlets to device and **ignore** configlet already configured but not listed.
   - `strict`: Configure new configlets to device and **remove** configlet already configured but not listed.
+- `validate_mode`: Set if configlet validations should be stopped on warning/error and fail the playbook or continue to the next task
+  - `skip`: don't fail the playbook if there are warnings or errors in the configlets
+  - `stop_on_warning`: fail the playbook if there are warnings in the configlet
+  - `stop_on_error`: fail the playbook if there are errors in the configlet
 - `search_key`: Define key to use to search for devices.
   - `hostname`: Use Hostname to get devices.
   - `fqdn`: Use Hostname + DNS to get devices.

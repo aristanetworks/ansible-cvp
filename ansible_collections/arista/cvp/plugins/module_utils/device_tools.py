@@ -2264,6 +2264,10 @@ class CvDeviceTools(object):
 
     def validate_config(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP):
         results = []
+        device_data = {"warnings": [], "errors": []}
+        vldm_skip = ModuleOptionValues.VALIDATE_MODE_SKIP
+        vldm_err = ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR
+        vldm_warn = ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_validated')
             if device.system_mac is not None:
@@ -2302,24 +2306,38 @@ class CvDeviceTools(object):
                                 err_msg = resp['warnings']
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
+                                result_data.count += 1
                                 MODULE_LOGGER.error(msg)
                                 MODULE_LOGGER.debug('validate_mode is: {}'.format(str(validate_mode)))
-                                if validate_mode == ModuleOptionValues.VALIDATE_MODE_SKIP or validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR:
-                                    self.__ansible.exit_json(msg=msg)
-                                else:
-                                    self.__ansible.fail_json(msg=msg)
+                                device_data['warnings'].append({'device': device.hostname, 'warnings':err_msg})
                             if 'errors' in resp:
                                 err_msg = resp['errors']
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
+                                result_data.count += 1
                                 MODULE_LOGGER.error(msg)
-                                if validate_mode == ModuleOptionValues.VALIDATE_MODE_SKIP or validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
-                                    self.__ansible.exit_json(msg=msg)
-                                else:
-                                    self.__ansible.fail_json(msg=msg)
+                                device_data['errors'].append({'device': device.hostname, 'errors': err_msg})
                     result_data.add_entry('{0} validated against {1}'.format(
                         device.info[self.__search_by], vc_configlet))
             results.append(result_data)
+        MODULE_LOGGER.debug('device_data is: {}'.format(str(device_data)))
+        if len(device_data['warnings']) > 0 and len(device_data['errors']) == 0:
+            if validate_mode == vldm_skip or validate_mode == vldm_err:
+                self.__ansible.exit_json(msg=str(device_data))
+            else:
+                self.__ansible.fail_json(msg=str(device_data))
+
+        elif len(device_data['warnings']) == 0 and len(device_data['errors']) > 0:
+            if validate_mode == vldm_skip or validate_mode == vldm_warn:
+                self.__ansible.exit_json(msg=str(device_data))
+            else:
+                self.__ansible.fail_json(msg=str(device_data))
+        else:
+            if validate_mode == vldm_skip:
+                self.__ansible.exit_json(msg=str(device_data))
+            else:
+                self.__ansible.fail_json(msg=str(device_data))
+
         return results
 
 

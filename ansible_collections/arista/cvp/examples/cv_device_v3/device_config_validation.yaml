@@ -16,4 +16,5 @@
     arista.cvp.cv_device_v3:
       devices: "{{CVP_DEVICES}}"
       state: validate
+      validate_mode: stop_on_warning
     register: CVP_DEVICES_RESULTS
