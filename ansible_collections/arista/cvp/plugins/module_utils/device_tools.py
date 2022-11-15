@@ -2371,7 +2371,6 @@ class CvDeviceTools(object):
 
         return results
 
-
     # ------------------------------------------ #
     # Helpers function
     # ------------------------------------------ #

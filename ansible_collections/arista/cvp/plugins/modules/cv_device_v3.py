@@ -42,7 +42,7 @@ options:
     description: Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision
     required: false
     default: 'present'
-    choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']
+    choices: ['present', 'factory_reset', 'provisioning_reset', 'absent', 'validate']
     type: str
   apply_mode:
     description: Set how configlets are attached/detached on device. If set to strict, all configlets and image bundles not listed in your vars are detached.
@@ -55,6 +55,12 @@ options:
     required: false
     default: 'hostname'
     choices: ['fqdn', 'hostname', 'serialNumber']
+    type: str
+  validate_mode:
+    description: Set if configlet validations should be stopped on warning/error and fail the playbook or continue to the next task
+    required: false
+    default: skip
+    choices: ['skip', 'stop_on_warning', 'stop_on_error']
     type: str
 '''
 
