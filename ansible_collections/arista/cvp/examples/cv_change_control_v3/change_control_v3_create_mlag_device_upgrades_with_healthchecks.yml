@@ -18,7 +18,7 @@
         task_list: "{{ task_list|default([]) + [ item.workOrderId ] }}"
         device_names: "{{ device_names|default([]) + [ item.workOrderDetails.netElementHostName ]}}"
       when:
-        - item.workOrderDetails.netElementHostName.find("leaf") != -1 or 
+        - item.workOrderDetails.netElementHostName.find("leaf") != -1 or
           item.workOrderDetails.netElementHostName.find("storage") != -1
         - item.data.WORKFLOW_ACTION == "Image Push"
         - item.taskStatus == "ACTIVE"
