@@ -2262,72 +2262,103 @@ class CvDeviceTools(object):
             results.append(result_data)
         return results
 
-    def validate_config(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP):
+    def validate_config(
+        self,
+        user_inventory: DeviceInventory,
+        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP,
+    ):
         results = []
         device_data = {"warnings": [], "errors": []}
         vldm_skip = ModuleOptionValues.VALIDATE_MODE_SKIP
         vldm_err = ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR
         vldm_warn = ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
         for device in user_inventory.devices:
-            result_data = CvApiResult(action_name=device.info[self.__search_by] + '_validated')
+            result_data = CvApiResult(
+                action_name=device.info[self.__search_by] + "_validated"
+            )
             if device.system_mac is not None:
-                MODULE_LOGGER.debug('Device configlets are {}'.format(str(device.configlets)))
+                MODULE_LOGGER.debug(
+                    "Device configlets are {0}".format(str(device.configlets))
+                )
                 for configlet in device.configlets:
-                    MODULE_LOGGER.debug('Configlet being validated is {}'.format(str(configlet)))
+                    MODULE_LOGGER.debug(
+                        "Configlet being validated is {0}".format(str(configlet))
+                    )
                     vc_configlet = self.__get_configlet_info(configlet_name=configlet)
-                    MODULE_LOGGER.debug('Configlet information: {}'.format(str(vc_configlet)))
+                    MODULE_LOGGER.debug(
+                        "Configlet information: {0}".format(str((vc_configlet)))
+                    )
                     if vc_configlet is None:
-                        error_message = "The configlet \'{0}\' defined to be validated against device \'{1}\' does not \
-                            exist on the CVP server.".format(str(configlet), str(device.fqdn))
+                        error_message = "The configlet '{0}' defined to be validated against device '{1}' does not \
+                            exist on the CVP server.".format(
+                            str(configlet), str(device.fqdn)
+                        )
                         MODULE_LOGGER.error(error_message)
                         self.__ansible.fail_json(msg=error_message)
                     else:
                         try:
-                            MODULE_LOGGER.debug('Ansible is going to validate configlet %s against device %s ',
-                                                str(vc_configlet['name']),
-                                                str(device.fqdn))
-                            MODULE_LOGGER.debug('queryParams are deviceMac: %s and configuration: %s',
-                                                str(device.system_mac),
-                                                str(vc_configlet['config']))
+                            MODULE_LOGGER.debug(
+                                "Ansible is going to validate configlet {0} against device {1}".format(
+                                    str(vc_configlet["name"]), str(device.fqdn)
+                                )
+                            )
+                            MODULE_LOGGER.debug(
+                                "queryParams are deviceMac: {0} and configuration: {1}".format(
+                                    str(device.system_mac), str(vc_configlet["config"])
+                                )
+                            )
                             resp = self.__cv_client.api.validate_config_for_device(
                                 device_mac=device.system_mac,
-                                config=vc_configlet['config'],
-                              )
-                            MODULE_LOGGER.debug('resp is: {}'.format(str(resp)))
+                                config=vc_configlet["config"],
+                            )
+                            MODULE_LOGGER.debug("resp is: {0}".format(str(resp)))
                         except CvpApiError:
-                            self.__ansible.fail_json(msg='Error validation failed on device {}'.format(
-                                device.fqdn))
-                            MODULE_LOGGER.critical('Error validation failed on device {}'.format(device.fqdn))
+                            MODULE_LOGGER.critical(
+                                "Error validation failed on device {0}".format(
+                                    device.fqdn
+                                )
+                            )
+                            self.__ansible.fail_json(
+                                msg="Error validation failed on device {0}".format(
+                                    device.fqdn
+                                )
+                            )
                         else:
-                            if 'result' in resp:
+                            if "result" in resp:
                                 result_data.changed = True
                                 result_data.success = True
-                            if 'warnings' in resp:
-                                err_msg = resp['warnings']
+                            if "warnings" in resp:
+                                err_msg = resp["warnings"]
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
                                 result_data.count += 1
                                 MODULE_LOGGER.error(msg)
-                                MODULE_LOGGER.debug('validate_mode is: {}'.format(str(validate_mode)))
-                                device_data['warnings'].append({'device': device.hostname, 'warnings':err_msg})
-                            if 'errors' in resp:
-                                err_msg = resp['errors']
+                                device_data["warnings"].append(
+                                    {"device": device.hostname, "warnings": err_msg}
+                                )
+                            if "errors" in resp:
+                                err_msg = resp["errors"]
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
                                 result_data.count += 1
                                 MODULE_LOGGER.error(msg)
-                                device_data['errors'].append({'device': device.hostname, 'errors': err_msg})
-                    result_data.add_entry('{0} validated against {1}'.format(
-                        device.info[self.__search_by], vc_configlet))
+                                device_data["errors"].append(
+                                    {"device": device.hostname, "errors": err_msg}
+                                )
+                    result_data.add_entry(
+                        "{0} validated against {1}".format(
+                            device.info[self.__search_by], vc_configlet
+                        )
+                    )
             results.append(result_data)
-        MODULE_LOGGER.debug('device_data is: {}'.format(str(device_data)))
-        if len(device_data['warnings']) > 0 and len(device_data['errors']) == 0:
+        MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
+        if len(device_data["warnings"]) > 0 and len(device_data["errors"]) == 0:
             if validate_mode == vldm_skip or validate_mode == vldm_err:
                 self.__ansible.exit_json(msg=str(device_data))
             else:
                 self.__ansible.fail_json(msg=str(device_data))
 
-        elif len(device_data['warnings']) == 0 and len(device_data['errors']) > 0:
+        elif len(device_data["warnings"]) == 0 and len(device_data["errors"]) > 0:
             if validate_mode == vldm_skip or validate_mode == vldm_warn:
                 self.__ansible.exit_json(msg=str(device_data))
             else:
