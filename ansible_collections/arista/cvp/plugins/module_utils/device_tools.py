@@ -2327,7 +2327,7 @@ class CvDeviceTools(object):
                             if "result" in resp:
                                 result_data.changed = True
                                 result_data.success = True
-                            if "warnings" in resp:
+                            if "warnings" in resp and resp["warningCount"] > 0:
                                 err_msg = resp["warnings"]
                                 msg = f"Configlet validation failed with {err_msg}"
                                 result_data.success = False
@@ -2352,24 +2352,27 @@ class CvDeviceTools(object):
                     )
             results.append(result_data)
         MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
-        if len(device_data["warnings"]) > 0 and len(device_data["errors"]) == 0:
+        if len(device_data["errors"]) > 0:
+            if len(device_data["warnings"]) == 0: # errors but no warnings
+                if validate_mode == vldm_skip or validate_mode == vldm_warn:
+                    self.__ansible.exit_json(msg=str(device_data))
+                else:
+                    self.__ansible.fail_json(msg=str(device_data))
+            elif len(device_data["warnings"]) > 0: # errors and warnings
+                if validate_mode == vldm_err or validate_mode == vldm_warn:
+                    self.__ansible.fail_json(msg=str(device_data))
+                if validate_mode == vldm_skip:
+                    self.__ansible.exit_json(msg=str(device_data))
+
+        # warnings but no errors
+        elif len(device_data["warnings"]) > 0 and len(device_data["errors"]) == 0:
             if validate_mode == vldm_skip or validate_mode == vldm_err:
                 self.__ansible.exit_json(msg=str(device_data))
             else:
                 self.__ansible.fail_json(msg=str(device_data))
 
-        elif len(device_data["warnings"]) == 0 and len(device_data["errors"]) > 0:
-            if validate_mode == vldm_skip or validate_mode == vldm_warn:
-                self.__ansible.exit_json(msg=str(device_data))
-            else:
-                self.__ansible.fail_json(msg=str(device_data))
         else:
-            if validate_mode == vldm_skip:
-                self.__ansible.exit_json(msg=str(device_data))
-            else:
-                self.__ansible.fail_json(msg=str(device_data))
-
-        return results
+            return results
 
     # ------------------------------------------ #
     # Helpers function
