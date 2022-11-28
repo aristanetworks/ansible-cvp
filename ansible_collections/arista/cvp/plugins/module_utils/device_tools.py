@@ -2312,9 +2312,7 @@ class CvDeviceTools(object):
                         MODULE_LOGGER.debug("resp is: {0}".format(str(resp)))
                     except CvpApiError:
                         MODULE_LOGGER.critical(
-                            "Error validation failed on device {0}".format(
-                                device.fqdn
-                            )
+                            "Error validation failed on device {0}".format(device.fqdn)
                         )
                         self.__ansible.fail_json(
                             msg="Error validation failed on device {0}".format(
@@ -2350,9 +2348,15 @@ class CvDeviceTools(object):
                 )
             results.append(result_data)
         MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
-        if len(device_data["errors"]) > 0 and validate_mode in [ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING, ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR]:
+        if len(device_data["errors"]) > 0 and validate_mode in [
+            ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
+            ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
+        ]:
             self.__ansible.fail_json(msg=str(device_data))
-        elif len(device_data["warnings"]) > 0 and validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
+        elif (
+            len(device_data["warnings"]) > 0
+            and validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
+        ):
             self.__ansible.fail_json(msg=str(device_data))
         else:
             self.__ansible.exit_json(msg=str(device_data))
