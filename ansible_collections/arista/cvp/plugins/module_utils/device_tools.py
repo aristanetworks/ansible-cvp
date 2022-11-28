@@ -2269,8 +2269,6 @@ class CvDeviceTools(object):
     ):
         results = []
         device_data = {"warnings": [], "errors": []}
-        vldm_err = ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR
-        vldm_warn = ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
         for device in user_inventory.devices:
             result_data = CvApiResult(
                 action_name=device.info[self.__search_by] + "_validated"
@@ -2352,9 +2350,9 @@ class CvDeviceTools(object):
                 )
             results.append(result_data)
         MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
-        if len(device_data["errors"]) > 0 and validate_mode in [vldm_warn, vldm_err]:
+        if len(device_data["errors"]) > 0 and validate_mode in [ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING, ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR]:
             self.__ansible.fail_json(msg=str(device_data))
-        elif len(device_data["warnings"]) > 0 and validate_mode == vldm_warn:
+        elif len(device_data["warnings"]) > 0 and validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
             self.__ansible.fail_json(msg=str(device_data))
         else:
             self.__ansible.exit_json(msg=str(device_data))
