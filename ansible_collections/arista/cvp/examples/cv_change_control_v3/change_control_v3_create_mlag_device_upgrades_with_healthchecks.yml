@@ -1,0 +1,142 @@
+---
+- name: Create Compute and Storage Leaf Upgrade Change Control
+  hosts: cv_server
+  gather_facts: no
+  tasks:
+    - name: "Gather CVP facts {{inventory_hostname}}"
+      arista.cvp.cv_facts:
+        facts:
+          tasks
+      register: cv_facts
+
+#
+# This playbook assumes that we want to filter the tasks to those with "leaf" or "storage" in their name
+# The device naming schema also splits them into a/b MLAG pairs e.g. leaf-01a and leaf-01b
+#
+    - name: "Get filtered tasks from {{inventory_hostname}}"
+      set_fact:
+        task_list: "{{ task_list|default([]) + [ item.workOrderId ] }}"
+        device_names: "{{ device_names|default([]) + [ item.workOrderDetails.netElementHostName ]}}"
+      when:
+        - item.workOrderDetails.netElementHostName.find("leaf") != -1 or
+          item.workOrderDetails.netElementHostName.find("storage") != -1
+        - item.data.WORKFLOW_ACTION == "Image Push"
+        - item.taskStatus == "ACTIVE"
+      loop: "{{cv_facts.ansible_facts.tasks}}"
+
+
+    - name: "Show tasks to be used in CC"
+      debug:
+        var=task_list
+
+    - name: "Devices in change scope"
+      debug:
+        var=device_names
+
+    - name: "Get device info"
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{ item.split('.')[0] }}"
+      register: device_facts
+      loop: "{{ device_names }}"
+
+
+    - name: "Extracting device serial numbers"
+      set_fact:
+        device_serial: "{{ device_serial|default([]) + [ item.data.cvp_devices[0].serialNumber ]}}"
+      loop: "{{ device_facts.results}}"
+
+    - name: "Collected serial number"
+      debug:
+        var=device_serial
+
+    - name: "Adding pre-checks stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'Pre-Checks','mode':'parallel'} ] }}"
+
+    - name: "Add upgrade parent stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'Upgrades','mode':'series'} ] }}"
+
+# This stage uses a CVP Custom Action whose ActionID == Action Name, which in this case is "Switch Healthcheck"
+    - name: "Creating pre-upgrade health checks"
+      set_fact:
+              task_register: "{{ task_register|default([]) + [ { 'action': 'Switch Healthcheck', 'name': device_names[action_index].split('.')[0] + '_precheck', 'arguments': [ { 'name':'DeviceID', 'value':device_serial[action_index] } ], 'stage':'Pre-Checks' } ] }}"
+      loop_control:
+        index_var: action_index
+      loop: "{{task_list}}"
+
+    - name: "Creating B Leaf Upgrade Stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'B-Leaf Upgrade','mode':'parallel','parent':'Upgrades'} ] }}"
+
+    - name: "Creating upgrades for B compute leafs"
+      set_fact:
+        task_register:  "{{ task_register|default([]) + [ { 'task_id': task_list[action_index], 'stage':'B-Leaf Upgrade'}  ] }}"
+      when:
+        - item.endswith("b")
+      loop: "{{device_names}}"
+      loop_control:
+        index_var: action_index
+
+    - name: "Creating B Leaf Post-Upgrade Check Stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'B-Leaf Post Checks','mode':'parallel','parent':'Upgrades'} ] }}"
+
+    - name: "Creating B Leaf post-upgrade health checks"
+      set_fact:
+              task_register: "{{ task_register|default([]) + [ { 'action': 'Switch Healthcheck', 'name': item.split('.')[0] + '_precheck', 'arguments': [ { 'name':'DeviceID', 'value':device_serial[action_index] } ], 'stage':'B-Leaf Post Checks' } ] }}"
+      when:
+        - item.endswith("b")
+      loop_control:
+        index_var: action_index
+      loop: "{{device_names}}"
+
+
+    - name: "Creating A Leaf Upgrade Stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'A-Leaf Upgrade','mode':'parallel','parent':'Upgrades'} ] }}"
+
+    - name: "Creating upgrades for A compute leafs"
+      set_fact:
+        task_register:  "{{ task_register|default([]) + [ { 'task_id': task_list[action_index], 'stage':'A-Leaf Upgrade'}  ] }}"
+      when:
+        - item.endswith("a")
+      loop: "{{device_names}}"
+      loop_control:
+        index_var: action_index
+
+    - name: "Creating A Leaf Post-Upgrade Check Stage"
+      set_fact:
+        stage_register: "{{ stage_register|default([]) + [  {'name':'A-Leaf Post Checks','mode':'parallel','parent':'Upgrades'} ] }}"
+
+
+    - name: "Creating A Leaf post-upgrade health checks"
+      set_fact:
+              task_register: "{{ task_register|default([]) + [ { 'action': 'Switch Healthcheck', 'name': item.split('.')[0] + '_precheck', 'arguments': [ { 'name':'DeviceID', 'value':device_serial[action_index] } ], 'stage':'A-Leaf Post Checks' } ] }}"
+      when:
+        - item.endswith("a")
+      loop_control:
+        index_var: action_index
+      loop: "{{device_names}}"
+
+
+    - name: "Finalising change control"
+      set_fact:
+        change: "{{ change | default( {'name': 'Compute Leaf Upgrade','notes':'generated by ansible-cvp', 'activities': task_register, 'stages': stage_register } )   }}"
+
+    - name: "Change control ready"
+      debug:
+        var=change
+
+
+    - name: "Creating change control on {{inventory_hostname}}"
+      arista.cvp.cv_change_control_v3:
+        state: set
+        change: "{{change}}"
+      register: cv_change
+
+    - name: "Change created with change id:"
+      debug:
+        msg: "{{ cv_change }}"
