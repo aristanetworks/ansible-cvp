@@ -207,7 +207,7 @@ class TestCvDeviceTools():
             'CvDeviceTools._CvDeviceTools__get_configlet_info'
         mock__get_configlet_info = mocker.patch(get_configlet_info)
         return mock_ansible_module, mock__get_configlet_info
-    
+
     def test_warning_stop_on_warning(self, mocker):
         mock_ansible_module, mock__get_configlet_info = self.apply_mocks(mocker)
         user_topology = DeviceInventory(data=device_data)
@@ -220,7 +220,7 @@ class TestCvDeviceTools():
         expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
         assert mock_ansible_module.mock_calls == expected_call
 
-    
+
     def test_warning_stop_on_error(self, mocker):
         mock_ansible_module, mock__get_configlet_info = self.apply_mocks(mocker)
         user_topology = DeviceInventory(data=device_data)
@@ -251,7 +251,7 @@ class TestCvDeviceTools():
         user_topology = DeviceInventory(data=device_data)
         cv_tools = CvDeviceTools(MockCvpClient(), mock_ansible_module)
         mock__get_configlet_info.return_value=validate_ruter_bgp
-        
+
         # error, mode=stop_on_warning; should fail!
         _ = cv_tools.validate_config(user_inventory=user_topology,
             validate_mode=ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING)
@@ -290,7 +290,7 @@ class TestCvDeviceTools():
         user_topology = DeviceInventory(data=device_data)
         cv_tools = CvDeviceTools(MockCvpClient(), mock_ansible_module)
         mock__get_configlet_info.return_value=validate_true
-        
+
         expected_result = {'changed': True,
             'diff': None,
             'success': True,
@@ -308,12 +308,12 @@ class TestCvDeviceTools():
                                             "'reconciled': False, 'sslConfig': False, "
                                             "'type': 'Static', 'typeStudioConfiglet': "
                                             "False, 'user': 'cvpadmin', 'visible': True}"]}
-        
+
         # valid, mode=stop_on_warning; should NOT fail!
         result = cv_tools.validate_config(user_inventory=user_topology,
             validate_mode=ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING)
         assert result[0].results == expected_result
-        
+
     def test_valid_stop_on_error(self, mocker):
         mock_ansible_module, mock__get_configlet_info = self.apply_mocks(mocker)
         user_topology = DeviceInventory(data=device_data)
@@ -337,12 +337,12 @@ class TestCvDeviceTools():
                                             "'reconciled': False, 'sslConfig': False, "
                                             "'type': 'Static', 'typeStudioConfiglet': "
                                             "False, 'user': 'cvpadmin', 'visible': True}"]}
-        
+
         # valid, mode=stop_on_error; should NOT fail!
         result = cv_tools.validate_config(user_inventory=user_topology,
             validate_mode=ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR)
         assert result[0].results == expected_result
-        
+
     def test_valid_skip(self, mocker):
         mock_ansible_module, mock__get_configlet_info = self.apply_mocks(mocker)
         user_topology = DeviceInventory(data=device_data)
@@ -366,7 +366,7 @@ class TestCvDeviceTools():
                                             "'reconciled': False, 'sslConfig': False, "
                                             "'type': 'Static', 'typeStudioConfiglet': "
                                             "False, 'user': 'cvpadmin', 'visible': True}"]}
-    
+
         # valid, mode=skip; should NOT fail!
         result = cv_tools.validate_config(user_inventory=user_topology,
             validate_mode=ModuleOptionValues.VALIDATE_MODE_SKIP)
