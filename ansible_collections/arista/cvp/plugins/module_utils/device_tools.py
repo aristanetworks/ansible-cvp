@@ -2358,9 +2358,13 @@ class CvDeviceTools(object):
             and validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
         ):
             self.__ansible.fail_json(msg=str(device_data))
-        else:
+        elif (
+            len(device_data["warnings"]) > 0
+            and validate_mode != ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING
+        ):
             self.__ansible.exit_json(msg=str(device_data))
-        return results
+        else:
+            return results
 
     # ------------------------------------------ #
     # Helpers function
