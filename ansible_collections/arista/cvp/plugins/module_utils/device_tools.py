@@ -2350,8 +2350,8 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
         if len(device_data["errors"]) > 0:
             if validate_mode in [
-            ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
-            ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
+                ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
+                ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
             ]:
                 self.__ansible.fail_json(msg=str(device_data))
             else:
@@ -2361,7 +2361,7 @@ class CvDeviceTools(object):
                 self.__ansible.fail_json(msg=str(device_data))
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
-                ModuleOptionValues.VALIDATE_MODE_SKIP
+                ModuleOptionValues.VALIDATE_MODE_SKIP,
             ]:
                 self.__ansible.exit_json(msg=str(device_data))
         else:
