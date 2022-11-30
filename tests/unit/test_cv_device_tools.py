@@ -7,7 +7,6 @@
 # flake8: noqa: W1202
 # flake8: noqa: R0801
 
-from __future__ import (absolute_import, division, print_function)
 from unittest.mock import call
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
