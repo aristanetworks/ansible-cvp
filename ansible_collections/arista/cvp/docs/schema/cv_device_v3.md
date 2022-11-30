@@ -3,7 +3,7 @@
 | Variable | Type | Required | Default | Choices | Description |
 | -------- | ---- | -------- | ------- | ------------------ | ----------- |
 | apply_mode | str | No | loose | loose<br>strict | Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached |
-| validate_mode | str | No | skip | skip<br>stop_on_warning<br>stop_on_error| Set if config validations should be stopped on warning/error and fail the playbook or continue to the next task |
+| validate_mode | str | No | skip | skip<br>stop_on_warning<br>stop_on_error| Set if config validation should be stopped on warning/error and fail the playbook or continue to the next task |
 | search_key | str | No | hostname | fqdn<br>hostname<br>serialNumber | Key name to use to look for device in CloudVision |
 | state | str| No | present | present<br>factory_reset<br>provisioning_reset<br>absent<br>validate | Set if Ansible should build, remove devices from provisioning, fully decommission, factory reset devices on CloudVision or validate configlets against devices|
 | devices | List | Yes |  |  | List of devices with their container and configlets information |
