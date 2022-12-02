@@ -9,7 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import logging
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
-from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import (
+    SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE, SCHEMA_CV_CONFIGLET, SCHEMA_CV_CHANGE_CONTROL )
 from tests.lib.parametrize import generate_inventory_data
 
 
@@ -86,3 +87,24 @@ class TestJsonSchemaDevice():
         assert result is False
         logging.info(
             "Topology {} is INVALID against SCHEMA_CV_DEVICE".format(CV_DEVICE_INVALID))
+
+# --------------------------------------------------------
+# Device format validation
+# --------------------------------------------------------
+
+
+@pytest.mark.generic
+class TestJsonSchemaChangeControl():
+    @pytest.mark.parametrize("CV_CHANGE_CONTROL",
+    generate_inventory_data(type="changecontrol"))
+    def test_change_control_schema_valid(self, CV_CHANGE_CONTROL):
+        result = validate_json_schema(
+            user_json=CV_CHANGE_CONTROL, schema=SCHEMA_CV_CHANGE_CONTROL)
+        assert result
+
+    @pytest.mark.parametrize("CV_CHANGE_CONTROL",
+        generate_inventory_data(type="changecontrol", mode="invalid"))
+    def test_change_control_schema_invalid(self, CV_CHANGE_CONTROL):
+        result = validate_json_schema(
+            user_json=CV_CHANGE_CONTROL, schema=SCHEMA_CV_CHANGE_CONTROL)
+        assert result is False

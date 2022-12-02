@@ -28,6 +28,8 @@ from copy import deepcopy
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse  # noqa # pylint: disable=unused-import
+from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
+from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
     from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
     from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
@@ -43,6 +45,20 @@ MODULE_LOGGER.info('Start change_tools module execution')
 # TODO - use f-strings
 # pylint: disable=consider-using-f-string
 
+class CvChangeControlInput(object):
+    def __init__(self, user_change: dict, schema=schema.SCHEMA_CV_CHANGE_CONTROL) -> None:
+        self.__user_change = user_change
+        self.__schema = schema
+
+    @property
+    def is_valid(self):
+        """
+        check_schemas Validate schemas for user's input
+        """
+        if not validate_json_schema(user_json=self.__user_change, schema=self.__schema):
+            MODULE_LOGGER.error("Invalid tags input : \n%s", str(self.__user_change))
+            return False
+        return True
 
 class CvpChangeControlBuilder:
     """
