@@ -23,4 +23,3 @@
       arista.cvp.cv_container_v3:
         topology: '{{containers_provision}}'
         apply_mode: strict
-        
