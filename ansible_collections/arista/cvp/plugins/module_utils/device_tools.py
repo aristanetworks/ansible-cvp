@@ -879,7 +879,7 @@ class CvDeviceTools(object):
         # device.system_mac
         action_result = self.validate_config(user_inventory=user_inventory, validate_mode=validate_mode)
         if action_result is not None:
-            MODULE_LOGGER.debug('action_result is: %s', str(action_result))
+            MODULE_LOGGER.debug(f'action_result is: {action_result}')
             for update in action_result:
                 cv_validate.add_change(change=update)
         response.add_manager(cv_validate)
@@ -2276,15 +2276,15 @@ class CvDeviceTools(object):
             if device.system_mac is None:
                 continue
             MODULE_LOGGER.debug(
-                "Device configlets are {0}".format(str(device.configlets))
+                "Device configlets are {0}".format(device.configlets)
             )
             for configlet in device.configlets:
                 MODULE_LOGGER.debug(
-                    "Configlet being validated is {0}".format(str(configlet))
+                    "Configlet being validated is {0}".format(configlet))
                 )
                 vc_configlet = self.__get_configlet_info(configlet_name=configlet)
                 MODULE_LOGGER.debug(
-                    "Configlet information: {0}".format(str((vc_configlet)))
+                    "Configlet information: {0}".format(vc_configlet)
                 )
                 if vc_configlet is None:
                     error_message = "The configlet '{0}' defined to be validated against device '{1}' does not \
@@ -2297,19 +2297,19 @@ class CvDeviceTools(object):
                     try:
                         MODULE_LOGGER.debug(
                             "Ansible is going to validate configlet {0} against device {1}".format(
-                                str(vc_configlet["name"]), str(device.fqdn)
+                                vc_configlet["name"], device.fqdn
                             )
                         )
                         MODULE_LOGGER.debug(
                             "queryParams are deviceMac: {0} and configuration: {1}".format(
-                                str(device.system_mac), str(vc_configlet["config"])
+                                device.system_mac, vc_configlet["config"]
                             )
                         )
                         resp = self.__cv_client.api.validate_config_for_device(
                             device_mac=device.system_mac,
                             config=vc_configlet["config"],
                         )
-                        MODULE_LOGGER.debug("resp is: {0}".format(str(resp)))
+                        MODULE_LOGGER.debug("resp is: {0}".format(resp))
                     except CvpApiError:
                         MODULE_LOGGER.critical(
                             "Error validation failed on device {0}".format(device.fqdn)
@@ -2347,7 +2347,7 @@ class CvDeviceTools(object):
                     )
                 )
             results.append(result_data)
-        MODULE_LOGGER.debug("device_data is: {0}".format(str(device_data)))
+        MODULE_LOGGER.debug("device_data is: {0}".format(device_data))
         if len(device_data["errors"]) > 0:
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
