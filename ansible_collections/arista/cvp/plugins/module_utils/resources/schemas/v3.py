@@ -567,183 +567,183 @@ SCHEMA_CV_TAG = {
 }
 
 SCHEMA_CV_CHANGE_CONTROL = {
-	"definitions": {},
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "https://example.com/object1669851072.json",
-	"title": "Root",
-	"type": "object",
-	"required": [
-		"stages"
-	],
-	"properties": {
-		"name": {
-			"$id": "#root/change/name",
-			"title": "Name",
-			"type": "string",
-			"default": "",
-			"examples": [
-				"Ansible playbook test change"
-			],
-			"pattern": "^.*$"
-		},
-		"notes": {
-			"$id": "#root/change/notes",
-			"title": "Notes",
-			"type": "string",
-			"default": "",
-			"examples": [
-				"Created via playbook"
-			],
-			"pattern": "^.*$"
-		},
-		"activities": {
-			"$id": "#root/change/activities",
-			"title": "Activities",
-			"type": "array",
-			"default": [],
-			"items":{
-				"$id": "#root/change/activities/items",
-				"title": "Items",
-				"type": "object",
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/object1669851072.json",
+    "title": "Root",
+    "type": "object",
+    "required": [
+        "stages"
+    ],
+    "properties": {
+        "name": {
+            "$id": "#root/change/name",
+            "title": "Name",
+            "type": "string",
+            "default": "",
+            "examples": [
+                "Ansible playbook test change"
+            ],
+            "pattern": "^.*$"
+        },
+        "notes": {
+            "$id": "#root/change/notes",
+            "title": "Notes",
+            "type": "string",
+            "default": "",
+            "examples": [
+                "Created via playbook"
+            ],
+            "pattern": "^.*$"
+        },
+        "activities": {
+            "$id": "#root/change/activities",
+            "title": "Activities",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/change/activities/items",
+                "title": "Items",
+                "type": "object",
                 "oneOf": [
                     {"required": ["action"]},
                     {"required": ["task_id"]}
                 ],
-				"properties": {
-					"action": {
-						"$id": "#root/change/activities/items/action",
-						"title": "Action",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"Switch Healthcheck"
-						],
-						"pattern": "^.*$"
-					},
-					"name": {
-						"$id": "#root/change/activities/items/name",
-						"title": "Name",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"Switch1_healthcheck"
-						],
-						"pattern": "^.*$"
-					},
-					"arguments": {
-						"$id": "#root/change/activities/items/arguments",
-						"title": "Arguments",
-						"type": "array",
-						"default": [],
-						"items":{
-							"$id": "#root/change/activities/items/arguments/items",
-							"title": "Items",
-							"type": "object",
-							"required": [
-								"name",
-								"value"
-							],
-							"properties": {
-								"name": {
-									"$id": "#root/change/activities/items/arguments/items/name",
-									"title": "Name",
-									"type": "string",
-									"default": "",
-									"examples": [
-										"DeviceID"
-									],
-									"pattern": "^.*$"
-								},
-								"value": {
-									"$id": "#root/change/activities/items/arguments/items/value",
-									"title": "Value",
-									"type": "string",
-									"default": "",
-									"examples": [
-										"<device serial number>"
-									],
-									"pattern": "^.*$"
-								}
-							}
-					    }
+                "properties": {
+                    "action": {
+                        "$id": "#root/change/activities/items/action",
+                        "title": "Action",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "Switch Healthcheck"
+                        ],
+                        "pattern": "^.*$"
                     },
-					"stage": {
-						"$id": "#root/change/activities/items/stage",
-						"title": "Stage",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"Pre-Checks"
-						],
-						"pattern": "^.*$"
-					},
-					"task_id": {
-						"$id": "#root/change/activities/items/task_id",
-						"title": "Task_id",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"20"
-						],
-						"pattern": "^.*$"
-					},
-					"timeout": {
-						"$id": "#root/change/activities/items/timeout",
-						"title": "Timeout",
-						"type": "integer",
-						"examples": [
-							10
-						],
-						"default": 0
-					}
+                    "name": {
+                        "$id": "#root/change/activities/items/name",
+                        "title": "Name",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "Switch1_healthcheck"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "arguments": {
+                        "$id": "#root/change/activities/items/arguments",
+                        "title": "Arguments",
+                        "type": "array",
+                        "default": [],
+                        "items": {
+                            "$id": "#root/change/activities/items/arguments/items",
+                            "title": "Items",
+                            "type": "object",
+                            "required": [
+                                "name",
+                                "value"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "$id": "#root/change/activities/items/arguments/items/name",
+                                    "title": "Name",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "DeviceID"
+                                    ],
+                                    "pattern": "^.*$"
+                                },
+                                "value": {
+                                    "$id": "#root/change/activities/items/arguments/items/value",
+                                    "title": "Value",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "<device serial number>"
+                                    ],
+                                    "pattern": "^.*$"
+                                }
+                            }
+                        }
+                    },
+                    "stage": {
+                        "$id": "#root/change/activities/items/stage",
+                        "title": "Stage",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "Pre-Checks"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "task_id": {
+                        "$id": "#root/change/activities/items/task_id",
+                        "title": "Task_id",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "20"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "timeout": {
+                        "$id": "#root/change/activities/items/timeout",
+                        "title": "Timeout",
+                        "type": "integer",
+                        "examples": [
+                            10
+                        ],
+                        "default": 0
+                    }
                 }
             }
-		},
-		"stages": {
-			"$id": "#root/change/stages",
-			"title": "Stages",
-			"type": "array",
-			"default": [],
-			"items":{
-				"$id": "#root/change/stages/items",
-				"title": "Items",
-				"type": "object",
-				"required": [
-					"name"
-				],
-				"properties": {
-					"name": {
-						"$id": "#root/change/stages/items/name",
-						"title": "Name",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"Leaf1a_upgrade"
-						],
-						"pattern": "^.*$"
-					},
-					"mode": {
-						"$id": "#root/change/stages/items/mode",
-						"title": "Mode",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"parallel"
-						],
-						"pattern": "^.*$"
-					},
-					"parent": {
-						"$id": "#root/change/stages/items/parent",
-						"title": "Parent",
-						"type": "string",
-						"default": "",
-						"examples": [
-							"Upgrades"
-						],
-						"pattern": "^.*$"
-					}
-				}
+        },
+        "stages": {
+            "$id": "#root/change/stages",
+            "title": "Stages",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/change/stages/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "$id": "#root/change/stages/items/name",
+                        "title": "Name",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "Leaf1a_upgrade"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "mode": {
+                        "$id": "#root/change/stages/items/mode",
+                        "title": "Mode",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "parallel"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "parent": {
+                        "$id": "#root/change/stages/items/parent",
+                        "title": "Parent",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "Upgrades"
+                        ],
+                        "pattern": "^.*$"
+                    }
+                }
             }
-		}
-	}
+        }
+    }
 }

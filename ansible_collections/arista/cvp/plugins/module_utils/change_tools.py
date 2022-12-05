@@ -60,6 +60,7 @@ class CvChangeControlInput(object):
             return False
         return True
 
+
 class CvpChangeControlBuilder:
     """
     CvpChangeControlBuilder Class to the generation of a CVP Change control.
