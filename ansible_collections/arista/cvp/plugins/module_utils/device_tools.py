@@ -879,7 +879,7 @@ class CvDeviceTools(object):
         # device.system_mac
         action_result = self.validate_config(user_inventory=user_inventory, validate_mode=validate_mode)
         if action_result is not None:
-            MODULE_LOGGER.debug(f'action_result is: {action_result}')
+            MODULE_LOGGER.debug("action_result is: {0}".format(action_result))
             for update in action_result:
                 cv_validate.add_change(change=update)
         response.add_manager(cv_validate)
@@ -2280,7 +2280,7 @@ class CvDeviceTools(object):
             )
             for configlet in device.configlets:
                 MODULE_LOGGER.debug(
-                    "Configlet being validated is {0}".format(configlet))
+                    "Configlet being validated is {0}".format(configlet)
                 )
                 vc_configlet = self.__get_configlet_info(configlet_name=configlet)
                 MODULE_LOGGER.debug(
