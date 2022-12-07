@@ -40,7 +40,7 @@ CVP_DEVICES:
   - `loose` (default): Configure new configlets to device and **ignore** configlet already configured but not listed.
   - `strict`: Configure new configlets to device and **remove** configlet already configured but not listed.
 - `validate_mode`: Set if configlet validations should be stopped on warning/error and fail the playbook or continue to the next task
-  - `skip`: don't fail the playbook if there are warnings or errors in the configlets
+  - `ignore`: don't fail the playbook if there are warnings or errors in the configlets
   - `stop_on_warning`: fail the playbook if there are warnings in the configlet
   - `stop_on_error`: fail the playbook if there are errors in the configlet
 - `search_key`: Define key to use to search for devices.

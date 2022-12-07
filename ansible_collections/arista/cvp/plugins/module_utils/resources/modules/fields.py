@@ -26,7 +26,7 @@ class ModuleOptionValues():
     """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
     APPLY_MODE_STRICT: str = 'strict'
-    VALIDATE_MODE_SKIP: str = 'skip'
+    VALIDATE_MODE_IGNORE: str = 'ignore'
     VALIDATE_MODE_STOP_ON_WARNING: str = 'stop_on_warning'
     VALIDATE_MODE_STOP_ON_ERROR: str = 'stop_on_error'
     STATE_MODE_ABSENT: str = 'factory_reset'

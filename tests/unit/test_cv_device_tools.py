@@ -240,7 +240,7 @@ class TestCvDeviceTools():
         mock__get_configlet_info.return_value=validate_intf
         # warning, mode=skip; should NOT fail!
         _ = cv_tools.validate_config(user_inventory=user_topology,
-            validate_mode=ModuleOptionValues.VALIDATE_MODE_SKIP)
+            validate_mode=ModuleOptionValues.VALIDATE_MODE_IGNORE)
         expected_fail_json_call_msg = "{'warnings': [{'device': 'tp-avd-leaf2', 'warnings': ['! Interface does not exist. The configuration will not take effect until the module is inserted. at line 1']}], 'errors': []}"
         expected_call = [call.exit_json(msg=expected_fail_json_call_msg)]
         assert mock_ansible_module.mock_calls == expected_call
@@ -279,7 +279,7 @@ class TestCvDeviceTools():
 
         # error, mode=SKIP; should NOT fail!
         _ = cv_tools.validate_config(user_inventory=user_topology,
-            validate_mode=ModuleOptionValues.VALIDATE_MODE_SKIP)
+            validate_mode=ModuleOptionValues.VALIDATE_MODE_IGNORE)
         expected_fail_json_call_msg = '{\'warnings\': [], \'errors\': [{\'device\': \'tp-avd-leaf2\', \'errors\': [{\'error\': "> ruter bgp 1111% Invalid input (at token 0: \'ruter\') at line 1", \'lineNo\': \' 1\'}, {\'error\': ">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: \'1.1.1.1\') at line 2", \'lineNo\': \' 2\'}]}]}'
         expected_call = [call.exit_json(msg=expected_fail_json_call_msg)]
         assert mock_ansible_module.mock_calls == expected_call
@@ -368,5 +368,5 @@ class TestCvDeviceTools():
 
         # valid, mode=skip; should NOT fail!
         result = cv_tools.validate_config(user_inventory=user_topology,
-            validate_mode=ModuleOptionValues.VALIDATE_MODE_SKIP)
+            validate_mode=ModuleOptionValues.VALIDATE_MODE_IGNORE)
         assert result[0].results == expected_result

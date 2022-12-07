@@ -850,7 +850,7 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_validate(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP):
+    def __state_validate(self, user_inventory: DeviceInventory, validate_mode: str = ModuleOptionValues.VALIDATE_MODE_IGNORE):
         """
         __state_validate Execute actions when user configures state=validate
 
@@ -1360,7 +1360,7 @@ class CvDeviceTools(object):
         user_inventory: DeviceInventory,
         search_mode: str = Api.device.HOSTNAME,
         apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
-        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP,
+        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_IGNORE,
         state: str = ModuleOptionValues.STATE_MODE_PRESENT
     ):
         """
@@ -1382,6 +1382,10 @@ class CvDeviceTools(object):
             Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
         state: str, optional
             Define if devices must be provisioned or reset to default configuration or the configlet validated against the device.
+        validate_mode: str, optional
+            Define whether validation should fail upon warnings: stop_on_warning
+            or fail on errors: stop_on_errors
+            or ignore them and move forward to the next task: ignore.
 
         Returns
         -------
@@ -2265,8 +2269,23 @@ class CvDeviceTools(object):
     def validate_config(
         self,
         user_inventory: DeviceInventory,
-        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_SKIP,
+        validate_mode: str = ModuleOptionValues.VALIDATE_MODE_IGNORE,
     ):
+        """
+        validate_config Entry point to validate configuration on a device
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Ansible inventory to configure on Cloudvision
+        validate_mode  : str, optional
+            Method for validation mode: < ignore | stop_on_warning | stop_on_error >
+
+        Returns
+        -------
+        list
+            List of CvApiResult for all API calls
+        """
         results = []
         device_data = {"warnings": [], "errors": []}
         for device in user_inventory.devices:
@@ -2361,7 +2380,7 @@ class CvDeviceTools(object):
                 self.__ansible.fail_json(msg=str(device_data))
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
-                ModuleOptionValues.VALIDATE_MODE_SKIP,
+                ModuleOptionValues.VALIDATE_MODE_IGNORE,
             ]:
                 self.__ansible.exit_json(msg=str(device_data))
         else:

@@ -59,8 +59,8 @@ options:
   validate_mode:
     description: Set if configlet validations should be stopped on warning/error and fail the playbook or continue to the next task
     required: false
-    default: skip
-    choices: ['skip', 'stop_on_warning', 'stop_on_error']
+    default: ignore
+    choices: ['ignore', 'stop_on_warning', 'stop_on_error']
     type: str
 '''
 
@@ -233,8 +233,8 @@ def main():
                         choices=['fqdn', 'hostname', 'serialNumber']),
         validate_mode=dict(type='str',
                            required=False,
-                           default='skip',
-                           choices=['skip', 'stop_on_warning', 'stop_on_error'])
+                           default='ignore',
+                           choices=['ignore', 'stop_on_warning', 'stop_on_error'])
     )
 
     # Make module global to use it in all functions when required
