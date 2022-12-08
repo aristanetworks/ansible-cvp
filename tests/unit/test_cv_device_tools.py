@@ -178,7 +178,7 @@ device_data = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'TP_LEAF1',
-    'configlets': ['validate_intf']}]
+    'configlets': ['']}] # this is dummy device_data that has no effect
 
 class MockCvpApi():
     def validate_config_for_device(self, device_mac, config):
@@ -195,7 +195,7 @@ class MockCvpClient():
 
 
 @pytest.mark.generic
-class TestCvDeviceTools():
+class TestValidateConfig():
 
     # mocking
     def apply_mocks(self, mocker):
