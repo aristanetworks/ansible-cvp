@@ -462,7 +462,7 @@ class CvFactsTools():
             MODULE_LOGGER.error('Error when collecting device bundle facts: %s', str(error_msg))
 
         MODULE_LOGGER.debug('Bundle data assigned to container: %s', str(bundle))
-        if bundle['bundleName'] is not None:
+        if bundle is not None and bundle['bundleName'] is not None:
             return bundle['bundleName']
         else:
             return bundle_name
