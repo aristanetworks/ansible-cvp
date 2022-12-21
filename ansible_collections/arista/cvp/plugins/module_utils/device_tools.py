@@ -1595,7 +1595,7 @@ class CvDeviceTools(object):
                         result_data.changed = False
                         result_data.success = True
                         result_data.taskIds = ['check_mode']
-                        MODULE_LOGGER.warning('[check_mode] - Fake removal of %d configlets from %s', len(configlets_info), device.hostname)                
+                        MODULE_LOGGER.warning('[check_mode] - Fake removal of %d configlets from %s', len(configlets_info), device.hostname)
                     else:
                         try:
                             resp = self.__cv_client.api.remove_configlets_from_device(
@@ -1703,7 +1703,7 @@ class CvDeviceTools(object):
                 result_data.changed = False
                 result_data.success = True
                 result_data.taskIds = ['check_mode']
-                MODULE_LOGGER.warning('[check_mode] - Fake removal of device %s', device.hostname)   
+                MODULE_LOGGER.warning('[check_mode] - Fake removal of device %s', device.hostname)
             else:
                 try:
                     MODULE_LOGGER.info('send reset request for device %s', str(device.info))
@@ -1744,7 +1744,7 @@ class CvDeviceTools(object):
                     result_data.changed = False
                     result_data.success = True
                     result_data.taskIds = ['check_mode']
-                    MODULE_LOGGER.warning('[check_mode] - Fake decomissioning of device %s', device.hostname)   
+                    MODULE_LOGGER.warning('[check_mode] - Fake decomissioning of device %s', device.hostname)
                 else:
                     status = ""
                     while status != decomm_success:
@@ -1774,7 +1774,7 @@ class CvDeviceTools(object):
                 result_data.changed = False
                 result_data.success = True
                 result_data.taskIds = ['check_mode']
-                MODULE_LOGGER.warning('[check_mode] - Fake resetting of device %s', device.hostname)   
+                MODULE_LOGGER.warning('[check_mode] - Fake resetting of device %s', device.hostname)
             else:
                 try:
                     MODULE_LOGGER.info('send reset request for device %s', str(device.info))
