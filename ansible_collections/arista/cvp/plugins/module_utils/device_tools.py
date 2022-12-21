@@ -1303,22 +1303,28 @@ class CvDeviceTools(object):
                         self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + str(device.image_bundle) + 'not found')
 
                     MODULE_LOGGER.debug("%s image bundle facts are: %s", str(device.image_bundle), str(assigned_image_facts))
-                    try:
-                        resp = self.__cv_client.api.apply_image_to_element(
-                            assigned_image_facts,
-                            device_facts,
-                            device.hostname,
-                            'netelement'
-                        )
 
-                    except CvpApiError as catch_error:
-                        MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
-                        self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + catch_error)
+                    if self.__check_mode:
+                        result_data.success = True
+                        result_data.taskIds = ['check_mode']
+                        MODULE_LOGGER.warning('[check_mode] - Fake assign of %s to %s', str(device.image_bundle), device.hostname)
                     else:
-                        if resp['data']['status'] == 'success':
-                            result_data.changed = True
-                            result_data.success = True
-                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                        try:
+                            resp = self.__cv_client.api.apply_image_to_element(
+                                assigned_image_facts,
+                                device_facts,
+                                device.hostname,
+                                'netelement'
+                            )
+
+                        except CvpApiError as catch_error:
+                            MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                            self.__ansible.fail_json(msg='Error applying bundle to device' + device.fqdn + ': ' + catch_error)
+                        else:
+                            if resp['data']['status'] == 'success':
+                                result_data.changed = True
+                                result_data.success = True
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
 
                 results.append(result_data)
 
