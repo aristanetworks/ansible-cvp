@@ -82,6 +82,7 @@ The following options may be specified for this module:
                 parentContainerName: Fabric
                 configlets:
                     - container_configlet
+                imageBundle: EOS-4.25.4M
       tasks:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:

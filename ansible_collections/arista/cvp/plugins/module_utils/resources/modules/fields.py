@@ -51,6 +51,8 @@ class ContainerResponseFields():
     CONFIGLETS_DETACHED: str = 'configlets_detached'
     CONTAINER_ADDED: str = 'container_added'
     CONTAINER_DELETED: str = 'container_deleted'
+    BUNDLE_ATTACHED: str = 'bundle_attached'
+    BUNDLE_DETACHED: str = 'bundle_detached'
 
 
 # @dataclass

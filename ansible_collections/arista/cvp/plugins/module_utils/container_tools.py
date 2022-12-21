@@ -188,6 +188,44 @@ class ContainerInput(object):
             )
         )
 
+    def get_image_bundle(self, container_name: str, bundle_key: str = Api.generic.IMAGE_BUNDLE_NAME):
+        """
+        get_image_bundle Read and extract image bundle name for a container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to search configlets
+        bundle_key : str, optional
+            Key where the image bundle name is saved in inventory, by default 'imageBundle'
+
+        Returns
+        -------
+        String
+            The name of the assigned image bundle
+        """
+        return self.__get_container_data(container_name=container_name, key_name=bundle_key)
+
+    def has_image_bundle(self, container_name: str, bundle_key: str = Api.generic.IMAGE_BUNDLE_NAME):
+        """
+        get_image_bundle Read and extract image bundle name for a container
+
+        Parameters
+        ----------
+        container_name : str
+            Name of the container to search configlets
+        bundle_key : str, optional
+            Key where the image bundle name is saved in inventory, by default 'imageBundle'
+
+        Returns
+        -------
+        bool
+            True if an image bundle is assigned, False if not
+        """
+        return bool(
+            self.__get_container_data(container_name=container_name, key_name=bundle_key)
+        )
+
 
 class CvContainerTools(object):
     """
@@ -205,7 +243,7 @@ class CvContainerTools(object):
 
     def __standard_output(self, source: dict):
         """
-        __standard_output Filter dict to create a standard output with relevant leys
+        __standard_output Filter dict to create a standard output with relevant keys
 
         Parameters
         ----------
@@ -222,7 +260,8 @@ class CvContainerTools(object):
             Api.generic.NAME,
             Api.container.COUNT_CONTAINER,
             Api.container.COUNT_DEVICE,
-            Api.generic.PARENT_CONTAINER_ID
+            Api.generic.PARENT_CONTAINER_ID,
+            Api.generic.IMAGE_BUNDLE_NAME
         ]
         return {k: v for k, v in source.items() if k in standard_keys}
 
@@ -395,6 +434,148 @@ class CvContainerTools(object):
 
         return change_response
 
+    def __image_bundle_add(self, container: dict, image_bundle: str):
+        """__image_bundle_add Add an image bundle to a container on CV
+
+        Execute the API call to add the image bundle to the container in question
+        Args:
+            container : dict
+                Container information to use in API call. Format: {key:'', name:''}
+            image_bundle : str
+                The name of the image bundle to be applied
+        Returns:
+            dict
+                API call result
+        """
+        container_name = 'Undefined'
+        change_response = CvApiResult(action_name=container_name)
+        change_response.changed = False
+
+        if container is not None:
+            if self.__check_mode:
+                if self.__cvp_client.api.get_image_bundle_by_name(image_bundle):
+                    change_response.success = True
+                    change_response.taskIds = ['check_mode']
+                    change_response.add_entries(
+                        f'{container[Api.generic.NAME]}: {image_bundle}'
+                    )
+                else:
+                    change_response.success = False
+                    message = "Error: The image bundle " + str(image_bundle) + " assigned to container " + str(container[Api.generic.NAME]) + " does not exist."
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+            else:
+                # Get the assigned image bundle information
+                try:
+                    MODULE_LOGGER.info("Getting the image bundle info for bundle: %s", str(image_bundle))
+                    assigned_image_facts = self.__cvp_client.api.get_image_bundle_by_name(image_bundle)
+                except CvpApiError as e:
+                    message = "Error retrieving image bundle info for: " + str(image_bundle) + ". Error was: " + str(e)
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+                # Get the current image bundle
+                try:
+                    MODULE_LOGGER.info("Checking if container has an image bundle already")
+                    current_image_facts = self.__cvp_client.api.get_image_bundle_by_container_id(container[Api.generic.KEY])
+                    pass
+                except CvpApiError as e:
+                    message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY])
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+                if assigned_image_facts is not None:
+                    # We have a valid image bundle to assign
+                    if len(current_image_facts['imageBundleList']) != 0 and\
+                            current_image_facts['imageBundleList'][0][Api.generic.KEY] == assigned_image_facts['id']:
+                        # Check that the current image bundle and the assigned image bundle are the same
+                        MODULE_LOGGER.info("Nothing to do. Image bundle already assigned to %s container", str(container[Api.generic.NAME]))
+                    else:
+                        MODULE_LOGGER.debug("Image bundle %s has key %s", str(image_bundle), str(assigned_image_facts['id']))
+                        MODULE_LOGGER.info("Applying %s to container %s", str(image_bundle), str(container[Api.generic.NAME]))
+                        try:
+                            resp = self.__cvp_client.api.apply_image_to_element(
+                                assigned_image_facts,
+                                container,
+                                container[Api.generic.NAME],
+                                'container'
+                            )
+                        except CvpApiError as catch_error:
+                            MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
+                            self.__ansible.fail_json(msg='Error applying bundle to container' + container[Api.generic.NAME] + ': ' + catch_error)
+                        else:
+                            if resp['data']['status'] == 'success':
+                                change_response.changed = True
+                                change_response.success = True
+                                change_response.taskIds = resp['data'][Api.task.TASK_IDS]
+                else:
+                    message = "Error - assigned image bundle: " + str(image_bundle) + "does not exist."
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+        return change_response
+
+    def __image_bundle_del(self, container: dict):
+        """__image_bundle_del Delete an image bundle from a container on CV
+
+        Execute the API call to delete the image bundle to the container in question
+        Args:
+            container : dict
+                Container information to use in API call. Format: {key:'', name:''}
+            image_bundle : str
+                The name of the image bundle to be applied
+        Returns:
+            dict
+                API call result
+        """
+        container_name = 'Undefined'
+        change_response = CvApiResult(action_name=container_name)
+        change_response.changed = False
+
+        if container is not None:
+            if self.__check_mode:
+                change_response.success = True
+                change_response.taskIds = ['check_mode']
+                change_response.add_entries(
+                    f'{container[Api.generic.NAME]}: Image removed'
+                )
+
+            else:
+                # Get the assigned image bundle information
+                try:
+                    MODULE_LOGGER.info("Checking if container has an image bundle already")
+                    current_image_facts = self.__cvp_client.api.get_image_bundle_by_container_id(container[Api.generic.KEY])
+                    pass
+                except CvpApiError as e:
+                    message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY]) + ". Error was: " + str(e)
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
+
+                if len(current_image_facts['imageBundleList']) != 0:
+                    MODULE_LOGGER.debug('Remove image %s from container %s', str(current_image_facts), str(container))
+                    try:
+                        resp = self.__cvp_client.api.remove_image_from_element(
+                            current_image_facts['imageBundleList'][0],
+                            container,
+                            container[Api.generic.NAME],
+                            'container'
+                        )
+                    except CvpApiError as catch_error:
+                        MODULE_LOGGER.error('Error removing bundle from container: %s', str(catch_error))
+                        self.__ansible.fail_json(msg='Error removing bundle from container: ' + container[Api.generic.NAME] + ': ' + catch_error)
+                    else:
+                        if resp['data']['status'] == 'success':
+                            change_response.changed = True
+                            change_response.success = True
+                            change_response.taskIds = resp['data'][Api.task.TASK_IDS]
+
+                else:
+                    # No image assigned, so nothing to do
+                    change_response.success = True
+                    change_response.taskIds = []
+
+        return change_response
+
     #############################################
     #   Generic functions
     #############################################
@@ -414,7 +595,8 @@ class CvContainerTools(object):
             "name": "DC1_L3LEAFS",
             "childContainerCount": 5,
             "childNetElementCount": 0,
-            "parentContainerId": "container_614c6678-1769-4acf-9cc1-214728238c2f"
+            "parentContainerId": "container_614c6678-1769-4acf-9cc1-214728238c2f",
+            "imageBundle": "top_level_container"
         }
 
         Parameters
@@ -433,6 +615,15 @@ class CvContainerTools(object):
         if cv_response is not None and Api.generic.KEY in cv_response:
             container_id = cv_response[Api.generic.KEY]
             container_facts = self.__cvp_client.api.filter_topology(node_id=container_id)[Api.container.TOPOLOGY]
+            MODULE_LOGGER.debug('Collecting assigned image bundle name')
+            assigned_bundle = self.__cvp_client.api.get_image_bundle_by_container_id(container_id)
+            MODULE_LOGGER.debug('Retrieved the bundle information: %s', str(assigned_bundle))
+            if len(assigned_bundle['imageBundleList']) == 1:
+                container_facts[Api.generic.IMAGE_BUNDLE_NAME] = assigned_bundle['imageBundleList'][0][Api.generic.NAME]
+            elif len(assigned_bundle['imageBundleList']) == 0:
+                container_facts[Api.generic.IMAGE_BUNDLE_NAME] = None
+            else:
+                MODULE_LOGGER.error('Image bundle list is larger than expected (%d): %s', int(assigned_bundle['imageBundleList']), str(assigned_bundle))
             MODULE_LOGGER.debug('Return info for container %s', str(container_name))
             return self.__standard_output(source=container_facts)
         return None
@@ -796,6 +987,64 @@ class CvContainerTools(object):
         MODULE_LOGGER.info('Sending data to self.__configlet_del: %s', str(detach_configlets))
         return self.__configlet_del(container=container_info, configlets=detach_configlets)
 
+    def image_bundle_attach(self, container: str, image_name: str):
+        """
+        image_bundle_attach - send bundle attach to the the element API call
+
+        Example
+        -------
+        >>> CvContainerTools.image_bundle_attach(container='Test123', image_name='top_level_bundle')
+        {
+            'success': True,
+            'taskIDs': [],
+            'container': 'Test123',
+            'imageBundle': 'top_level_bundle
+        }
+
+        Parameters
+        ----------
+        container: str
+            Name of the container
+        image_name: str
+            Name of the image bundle to assign
+
+        Returns
+        -------
+        dict
+            Action result
+        """
+        container_info = self.get_container_info(container_name=container)
+        MODULE_LOGGER.debug("Attempting to apply image bundle %s to container %s", str(image_name), str(container))
+        return self.__image_bundle_add(container=container_info, image_bundle=image_name)
+
+    def image_bundle_detach(self, container: str):
+        """
+        image_bundle_detach - send bundle detach to the the element API call
+
+        Example
+        -------
+        >>> CvContainerTools.image_bundle_detach(container='Test123')
+        {
+            'success': True,
+            'taskIDs': [],
+            'container': 'Test123',
+            'imageBundle': 'top_level_bundle
+        }
+
+        Parameters
+        ----------
+        container: str
+            Name of the container
+
+        Returns
+        -------
+        dict
+            Action result
+        """
+        container_info = self.get_container_info(container_name=container)
+        MODULE_LOGGER.debug("Attampting to remove image bundle from %s", str(container))
+        return self.__image_bundle_del(container=container_info)
+
     def build_topology(self, user_topology: ContainerInput, present: bool = True, apply_mode: str = 'loose'):
         """
         build_topology Class entry point to build container topology on Cloudvision
@@ -829,7 +1078,10 @@ class CvContainerTools(object):
             builder_name=ContainerResponseFields.CONFIGLETS_ATTACHED)
         cv_configlets_detach = CvManagerResult(
             builder_name=ContainerResponseFields.CONFIGLETS_DETACHED, default_success=True)
-
+        cv_image_bundle_attach = CvManagerResult(
+            builder_name=ContainerResponseFields.BUNDLE_ATTACHED)
+        cv_image_bundle_detach = CvManagerResult(
+            builder_name=ContainerResponseFields.BUNDLE_DETACHED)
         try:
 
             # Create containers topology in Cloudvision
@@ -863,6 +1115,15 @@ class CvContainerTools(object):
                         if len(configlet_to_remove) > 0:
                             resp = self.configlets_detach(container=user_container, configlets=configlet_to_remove)
                             cv_configlets_detach.add_change(resp)
+
+                    if user_topology.has_image_bundle(container_name=user_container):
+                        MODULE_LOGGER.debug('%s container has an image bundle assigned', str(user_container))
+                        resp = self.image_bundle_attach(
+                            container=user_container, image_name=user_topology.get_image_bundle(container_name=user_container))
+                        cv_image_bundle_attach.add_change(resp)
+                    elif apply_mode == ModuleOptionValues.APPLY_MODE_STRICT:
+                        resp = self.image_bundle_detach(container=user_container)
+                        cv_image_bundle_detach.add_change(resp)
 
             else:
                 for user_container in reversed(user_topology.ordered_list_containers):

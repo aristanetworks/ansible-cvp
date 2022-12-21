@@ -1,0 +1,25 @@
+---
+- name: Container Image Management in Cloudvision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+
+  vars:
+    # Container definition
+    containers_provision:
+        Undefined:
+            configlets: []
+            imageBundle: EOS-4.25.4M
+            parentContainerName: Tenant
+        Test123:
+            configlets: []
+            imageBundle: ''
+            parentContainerName: Tenant
+
+  tasks:
+    - name: "Apply updated Container topology on {{inventory_hostname}} in strict mode"
+      arista.cvp.cv_container_v3:
+        topology: '{{containers_provision}}'
+        apply_mode: strict
