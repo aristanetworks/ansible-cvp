@@ -1305,6 +1305,7 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.debug("%s image bundle facts are: %s", str(device.image_bundle), str(assigned_image_facts))
 
                     if self.__check_mode:
+                        result_data.changed = False
                         result_data.success = True
                         result_data.taskIds = ['check_mode']
                         MODULE_LOGGER.warning('[check_mode] - Fake assign of %s to %s', str(device.image_bundle), device.hostname)
@@ -1377,22 +1378,29 @@ class CvDeviceTools(object):
                         device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
 
                     assigned_image_facts = self.__cv_client.api.get_image_bundle_by_name(current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME])
-                    try:
-                        resp = self.__cv_client.api.remove_image_from_element(
-                            assigned_image_facts,
-                            device_facts,
-                            device.hostname,
-                            'netelement'
-                        )
 
-                    except CvpApiError as catch_error:
-                        MODULE_LOGGER.error('Error removing bundle from device: %s', str(catch_error))
-                        self.__ansible.fail_json(msg='Error removing bundle from device' + device.fqdn + ': ' + catch_error)
+                    if self.__check_mode:
+                        result_data.changed = False
+                        result_data.success = True
+                        result_data.taskIds = ['check_mode']
+                        MODULE_LOGGER.warning('[check_mode] - Fake removal of image bundle from %s', device.hostname)
                     else:
-                        if resp['data']['status'] == 'success':
-                            result_data.changed = True
-                            result_data.success = True
-                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                        try:
+                            resp = self.__cv_client.api.remove_image_from_element(
+                                assigned_image_facts,
+                                device_facts,
+                                device.hostname,
+                                'netelement'
+                            )
+
+                        except CvpApiError as catch_error:
+                            MODULE_LOGGER.error('Error removing bundle from device: %s', str(catch_error))
+                            self.__ansible.fail_json(msg='Error removing bundle from device' + device.fqdn + ': ' + catch_error)
+                        else:
+                            if resp['data']['status'] == 'success':
+                                result_data.changed = True
+                                result_data.success = True
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
 
                 results.append(result_data)
 
