@@ -1466,30 +1466,36 @@ class CvDeviceTools(object):
                 device_facts = self.__cv_client.api.get_device_by_serial(device_serial=device.serial_number)
             # Attach configlets to device
             if len(configlets_reordered_list) > 0:
-                try:
-                    resp = self.__cv_client.api.apply_configlets_to_device(
-                        app_name='CvDeviceTools.apply_configlets',
-                        dev=device_facts,
-                        new_configlets=configlets_reordered_list,
-                        create_task=True,
-                        reorder_configlets=True
-                    )
-                except TypeError:
-                    error_message = 'The function to reorder the configlet is not present. Please, check your cvprac version (>= 1.0.7 required).'
-                    MODULE_LOGGER.error(error_message)
-                    self.__ansible.fail_json(msg=error_message)
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error applying configlets to device')
-                    self.__ansible.fail_json(msg='Error applying configlets to device')
+                if self.__check_mode:
+                    result_data.changed = False
+                    result_data.success = True
+                    result_data.taskIds = ['check_mode']
+                    MODULE_LOGGER.warning('[check_mode] - Fake appcation of %d configlets to %s', len(configlets_reordered_list), device.hostname)
                 else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
-                        result_data.success = True
-                        result_data.taskIds = resp['data'][Api.task.TASK_IDS]
-                        result_data.add_entry('{0} adds {1}'.format(device.fqdn, *device.configlets))
-                        MODULE_LOGGER.debug('CVP response is: %s', str(resp))
-                        MODULE_LOGGER.info('Reponse data is: %s', str(result_data.results))
-                result_data.add_entry('{0} to {1}'.format(device.fqdn, *device.container))
+                    try:
+                        resp = self.__cv_client.api.apply_configlets_to_device(
+                            app_name='CvDeviceTools.apply_configlets',
+                            dev=device_facts,
+                            new_configlets=configlets_reordered_list,
+                            create_task=True,
+                            reorder_configlets=True
+                        )
+                    except TypeError:
+                        error_message = 'The function to reorder the configlet is not present. Please, check your cvprac version (>= 1.0.7 required).'
+                        MODULE_LOGGER.error(error_message)
+                        self.__ansible.fail_json(msg=error_message)
+                    except CvpApiError:
+                        MODULE_LOGGER.error('Error applying configlets to device')
+                        self.__ansible.fail_json(msg='Error applying configlets to device')
+                    else:
+                        if resp['data']['status'] == 'success':
+                            result_data.changed = True
+                            result_data.success = True
+                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                            result_data.add_entry('{0} adds {1}'.format(device.fqdn, *device.configlets))
+                            MODULE_LOGGER.debug('CVP response is: %s', str(resp))
+                            MODULE_LOGGER.info('Reponse data is: %s', str(result_data.results))
+                    result_data.add_entry('{0} to {1}'.format(device.fqdn, *device.container))
             else:
                 result_data.name = result_data.name + ' - nothing attached'
             results.append(result_data)
@@ -1535,23 +1541,29 @@ class CvDeviceTools(object):
                             device.fqdn, [x[Api.generic.NAME] for x in configlets_to_remove]
                         )
                     )
-                    try:
-                        resp = self.__cv_client.api.remove_configlets_from_device(
-                            app_name='CvDeviceTools.detach_configlets',
-                            dev=device_facts,
-                            del_configlets=configlets_to_remove,
-                            create_task=True
-                        )
-                    except CvpApiError as catch_error:
-                        MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
-                        self.__ansible.fail_json(msg='Error detaching configlets from device ' + device.fqdn + ': ' + catch_error)
+                    if self.__check_mode:
+                        result_data.changed = False
+                        result_data.success = True
+                        result_data.taskIds = ['check_mode']
+                        MODULE_LOGGER.warning('[check_mode] - Fake detach of %d configlets from %s', len(configlets_to_remove), device.hostname)
                     else:
-                        if resp['data']['status'] == 'success':
-                            result_data.changed = True
-                            result_data.success = True
-                            result_data.taskIds = resp['data'][Api.task.TASK_IDS]
-                            result_data.add_entry('{} removes {}'.format(
-                                device.fqdn, *device.configlets))
+                        try:
+                            resp = self.__cv_client.api.remove_configlets_from_device(
+                                app_name='CvDeviceTools.detach_configlets',
+                                dev=device_facts,
+                                del_configlets=configlets_to_remove,
+                                create_task=True
+                            )
+                        except CvpApiError as catch_error:
+                            MODULE_LOGGER.error('Error applying configlets to device: %s', str(catch_error))
+                            self.__ansible.fail_json(msg='Error detaching configlets from device ' + device.fqdn + ': ' + catch_error)
+                        else:
+                            if resp['data']['status'] == 'success':
+                                result_data.changed = True
+                                result_data.success = True
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                                result_data.add_entry('{} removes {}'.format(
+                                    device.fqdn, *device.configlets))
                 else:
                     result_data.name = result_data.name + ' - nothing detached'
                 results.append(result_data)
@@ -1579,23 +1591,29 @@ class CvDeviceTools(object):
                     device_facts = self.__cv_client.api.get_device_by_name(
                         fqdn=device.fqdn, search_by_hostname=True)
                 # Attach configlets to device
-                try:
-                    resp = self.__cv_client.api.remove_configlets_from_device(
-                        app_name='CvDeviceTools.remove_configlets',
-                        dev=device_facts,
-                        del_configlets=configlets_info,
-                        create_task=True
-                    )
-                except CvpApiError:
-                    MODULE_LOGGER.error('Error removing configlets to device')
-                    self.__ansible.fail_json(msg='Error removing configlets to device')
-                else:
-                    if resp['data']['status'] == 'success':
-                        result_data.changed = True
+                    if self.__check_mode:
+                        result_data.changed = False
                         result_data.success = True
-                        result_data.taskIds = resp['data'][Api.task.TASK_IDS]
-                        result_data.add_entry('{} removes {}'.format(
-                            device.fqdn, *device.configlets))
+                        result_data.taskIds = ['check_mode']
+                        MODULE_LOGGER.warning('[check_mode] - Fake removal of %d configlets from %s', len(configlets_info), device.hostname)                
+                    else:
+                        try:
+                            resp = self.__cv_client.api.remove_configlets_from_device(
+                                app_name='CvDeviceTools.remove_configlets',
+                                dev=device_facts,
+                                del_configlets=configlets_info,
+                                create_task=True
+                            )
+                        except CvpApiError:
+                            MODULE_LOGGER.error('Error removing configlets to device')
+                            self.__ansible.fail_json(msg='Error removing configlets to device')
+                        else:
+                            if resp['data']['status'] == 'success':
+                                result_data.changed = True
+                                result_data.success = True
+                                result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                                result_data.add_entry('{} removes {}'.format(
+                                    device.fqdn, *device.configlets))
             results.append(result_data)
         return results
 
@@ -1681,16 +1699,22 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             MODULE_LOGGER.info('removing device %s from provisioning', str(device.info))
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_delete')
-            try:
-                MODULE_LOGGER.info('send reset request for device %s', str(device.info))
-                resp = self.__cv_client.api.delete_device(device.system_mac)
-            except CvpApiError:
-                MODULE_LOGGER.error('Error removing device from provisioning')
-                self.__ansible.fail_json(msg='Error removing device from provisioning')
+            if self.__check_mode:
+                result_data.changed = False
+                result_data.success = True
+                result_data.taskIds = ['check_mode']
+                MODULE_LOGGER.warning('[check_mode] - Fake removal of device %s', device.hostname)   
             else:
-                if resp['result'] == 'success':
-                    result_data.changed = True
-                    result_data.success = True
+                try:
+                    MODULE_LOGGER.info('send reset request for device %s', str(device.info))
+                    resp = self.__cv_client.api.delete_device(device.system_mac)
+                except CvpApiError:
+                    MODULE_LOGGER.error('Error removing device from provisioning')
+                    self.__ansible.fail_json(msg='Error removing device from provisioning')
+                else:
+                    if resp['result'] == 'success':
+                        result_data.changed = True
+                        result_data.success = True
             results.append(result_data)
         return results
 
@@ -1716,21 +1740,28 @@ class CvDeviceTools(object):
                 MODULE_LOGGER.error(request_err_msg)
                 self.__ansible.fail_json(msg=request_err_msg)
             else:
-                status = ""
-                while status != decomm_success:
-                    try:
-                        status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
-                    except CvpRequestError:
-                        continue
-                    if status == decomm_failure:
-                        err_msg = status['result']['value']['error']
-                        msg = f"Device decommissioning failed due to {err_msg}"
-                        MODULE_LOGGER.error(msg)
-                        self.__ansible.fail_json(msg=msg)
-                    else:
-                        time.sleep(10)
-                result_data.changed = True
-                result_data.success = True
+                if self.__check_mode:
+                    result_data.changed = False
+                    result_data.success = True
+                    result_data.taskIds = ['check_mode']
+                    MODULE_LOGGER.warning('[check_mode] - Fake decomissioning of device %s', device.hostname)   
+                else:
+                    status = ""
+                    while status != decomm_success:
+                        try:
+                            status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
+                        except CvpRequestError:
+                            continue
+                        if status == decomm_failure:
+                            err_msg = status['result']['value']['error']
+                            msg = f"Device decommissioning failed due to {err_msg}"
+                            MODULE_LOGGER.error(msg)
+                            self.__ansible.fail_json(msg=msg)
+                        else:
+                            time.sleep(10)
+                    result_data.changed = True
+                    result_data.success = True
+
             results.append(result_data)
         return results
 
@@ -1739,23 +1770,29 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             MODULE_LOGGER.info('start process resetting device %s', str(device.info))
             result_data = CvApiResult(action_name=device.info[self.__search_by] + '_reset')
-            try:
-                MODULE_LOGGER.info('send reset request for device %s', str(device.info))
-                resp = self.__cv_client.api.reset_device(
-                    app_name='CvDeviceTools.reset_device',
-                    device=device.info,
-                    create_task=True
-                )
-            except CvpApiError:
-                MODULE_LOGGER.error('Error resetting device')
-                self.__ansible.fail_json(msg='Error resetting device')
+            if self.__check_mode:
+                result_data.changed = False
+                result_data.success = True
+                result_data.taskIds = ['check_mode']
+                MODULE_LOGGER.warning('[check_mode] - Fake resetting of device %s', device.hostname)   
             else:
-                if resp['data']['status'] == 'success':
-                    result_data.changed = True
-                    result_data.success = True
-                    result_data.taskIds = resp['data'][Api.task.TASK_IDS]
-                    result_data.add_entry('{} resets {}'.format(
-                        device.fqdn, *device.configlets))
+                try:
+                    MODULE_LOGGER.info('send reset request for device %s', str(device.info))
+                    resp = self.__cv_client.api.reset_device(
+                        app_name='CvDeviceTools.reset_device',
+                        device=device.info,
+                        create_task=True
+                    )
+                except CvpApiError:
+                    MODULE_LOGGER.error('Error resetting device')
+                    self.__ansible.fail_json(msg='Error resetting device')
+                else:
+                    if resp['data']['status'] == 'success':
+                        result_data.changed = True
+                        result_data.success = True
+                        result_data.taskIds = resp['data'][Api.task.TASK_IDS]
+                        result_data.add_entry('{} resets {}'.format(
+                            device.fqdn, *device.configlets))
             results.append(result_data)
         return results
 
