@@ -191,9 +191,10 @@ def main():
         MODULE_LOGGER.warning('! check_mode is enable')
         # module.exit_json(changed=True)
 
-    user_change = CvChangeControlInput(ansible_module.params['change'])
-    if user_change.is_valid is False:
-        ansible_module.fail_json(msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['change']}")
+    if ansible_module.params['change']:
+        user_change = CvChangeControlInput(ansible_module.params['change'])
+        if user_change.is_valid is False:
+            ansible_module.fail_json(msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['change']}")
 
     if not tools_cv.HAS_CVPRAC:
         ansible_module.fail_json(
