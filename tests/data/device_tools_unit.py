@@ -167,16 +167,6 @@ return_validate_config_for_device = {
     'return_validate_ruter_bgp' : return_validate_ruter_bgp
 }
 
-# mock device data
-device_data = [{
-    'serialNumber': '0123F2E4462997EB155B7C50EC148767',
-    'systemMacAddress': '50:08:00:b1:5b:0b',
-    'key': '50:08:00:b1:5b:0b',
-    'fqdn': 'tp-avd-leaf2',
-    'hostname': 'tp-avd-leaf2',
-    'parentContainerName': 'TP_LEAF1',
-    'configlets': ['']}] # this is dummy device_data that has no effect
-
 # expected warning output
 EXP_WARN = {
     'warnings': [
@@ -227,3 +217,26 @@ EXP_VALID = {
     'validate_test_true_on_tp-avd-leaf2_validated_count': 1,
     'validate_test_true_on_tp-avd-leaf2_validated_list': ['validate_test_true_validated_against_tp-avd-leaf2']
 }
+
+# mock device data
+device_data = [{
+    'serialNumber': '0123F2E4462997EB155B7C50EC148767',
+    'systemMacAddress': '50:08:00:b1:5b:0b',
+    'key': '50:08:00:b1:5b:0b',
+    'fqdn': 'tp-avd-leaf2',
+    'hostname': 'tp-avd-leaf2',
+    'parentContainerName': 'TP_LEAF1',
+    'parentContainerId': 'TP_LEAF1',
+    'configlets': [''],
+    'imageBundle': 'EOS-4.25.4M',
+}]  # this is dummy device_data that has no effect
+
+device_data_invalid = [{
+    'serialNumber': '0123F2E4462997EB155B7C50EC148768', # wrong serial number
+    'systemMacAddress': '50:08:00:b1:5b:0a',  # wrong mac address
+    'key': '50:08:00:b1:5b:0b',
+    'fqdn': 'tp-avd-leaf2',
+    'hostname': 'tp-avd-leaf2',
+    'parentContainerName': 'Undefined',  # undefined parent container name
+    'parentContainerId': 'Undefined',  # undefined parent container id
+    'configlets': ['']}]
