@@ -5,6 +5,25 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.6.0
+======
+
+Release Summary
+---------------
+
+Release 3.6.0 - See documentation on cvp.avd.sh for details.
+
+
+Minor Changes
+-------------
+
+- Feat(cv_container_v3) Add support for image bundles on containers(#550)
+
+Bugfixes
+--------
+
+- Fix(cv_facts_v3) Handle stale and empty devices in the inventory having an image bundle of type None(#569)
+
 v3.5.1
 ======
 
