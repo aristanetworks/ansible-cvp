@@ -59,3 +59,16 @@ releases:
     fragments:
     - v3.5.1.yml
     release_date: '2022-11-02'
+  3.6.0:
+    changes:
+      bugfixes:
+      - Fix(cv_facts_v3) Handle stale and empty devices in the inventory having an
+        image bundle of type None(#569)
+      minor_changes:
+      - Feat(cv_container_v3) Add support for image bundles on containers(#550)
+      release_summary: 'Release 3.6.0 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.6.0.yml
+    release_date: '2023-01-12'
