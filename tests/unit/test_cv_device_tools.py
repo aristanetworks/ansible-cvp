@@ -25,11 +25,9 @@ def setup(apply_mock, mock_cvpClient):
     """
     mock_ansible_module, mock__get_device = apply_mock(MOCK_LIST)
     mock_ansible_module.fail_json.side_effect = mock_cvpClient.api.fail_json
-
     cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools
-
 
 @pytest.mark.state
 class TestDecommissionDevice():
@@ -48,12 +46,10 @@ class TestDecommissionDevice():
     def test_decommission_device(self, setup, device_data, expected, expected_fail_json_call_msg):
         """
         Tests decommission_device() method for state_absent
-
         if device_data['serialNumber'] is correct:
             expected = true
         else:
             expected = false and error_msg
-
         """
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, mock__get_device, cv_tools = setup
@@ -84,9 +80,7 @@ class TestResetDevice():
     def test_reset_device(self, setup, device_data, expected):
         """
         Tests reset_device method for state factory_reset
-
         device_data: dummy_device_data
-
         if device_data['parentContainerName'] is "undefined":
             expected = false
         else:
@@ -109,9 +103,7 @@ class TestResetDevice():
     def test_reset_device_cvp_api_error(self, setup, device_data, expected_fail_json_call_msg):
         """
         Tests reset_device method with CvpApiError
-
         device_data: dummy_device_data
-
         if not device_data['parentContainerName']:
             fail_json() raises SystemExit
         """
@@ -141,9 +133,7 @@ class TestDeleteDevice():
     def test_delete_device(self, setup, device_data, expected):
         """
         Tests delete_device method for state provisioning_reset
-
         device_data: dummy_device_data
-
         if device_data['systemMacAddress'] is correct:
             expected = true
         elif device_data['systemMacAddress'] is incorrect:
