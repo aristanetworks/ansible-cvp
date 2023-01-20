@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device, validate_intf, validate_true, device_data)
 from unittest.mock import MagicMock
 from cvprac.cvp_client_errors import CvpApiError
+=======
+from unittest.mock import create_autospec
+from tests.data.device_tools_unit import device_data
+from cvprac.cvp_client import CvpClient, CvpApi
+>>>>>>> 7ca03e5 (Added docstrings and update code)
 
 class MockCvpApi(MagicMock):
     def validate_config_for_device(self, device_mac, config):
@@ -12,9 +18,13 @@ class MockCvpApi(MagicMock):
             return return_validate_config_for_device['return_validate_true']
 
     def device_decommissioning(self, device_id, request_id):
+<<<<<<< HEAD
         """
         mock method for cvprac device_decommissioning()
         """
+=======
+        # TODO: need to check cvp_api.get_device_by_serial output for device_info
+>>>>>>> 7ca03e5 (Added docstrings and update code)
         if device_id == device_data[0]["serialNumber"]:
             self.result = {'value': {'key': {'requestId': request_id},
                                      'deviceId': device_id},
@@ -65,12 +75,23 @@ class MockCvpApi(MagicMock):
         #TODO: need to write testcase - if create_task returns None, raised issue #585 in ansible-cvp
 
     def delete_device(self, device_mac):
+<<<<<<< HEAD
         """
         mock method for cvprac delete_device()
         """
         device_info = {}
         if not device_mac:
             raise CvpApiError(msg='Error removing device from provisioning')
+=======
+        device_macs = [device_mac]
+        device_info = {}
+        for dev_mac in device_macs:
+            if dev_mac == device_data[0]['systemMacAddress']:
+                device_info = device_data[0]
+
+        if device_info is not None and 'serialNumber' in device_info:
+            return {'result': 'success'}  # need to check this in lab
+>>>>>>> 7ca03e5 (Added docstrings and update code)
         else:
             if device_mac == device_data[0]['systemMacAddress']:
                 device_info = device_data[0]

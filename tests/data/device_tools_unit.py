@@ -240,3 +240,8 @@ device_data_invalid = [{
     'parentContainerName': 'Undefined',  # undefined parent container name
     'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 7ca03e5 (Added docstrings and update code)
