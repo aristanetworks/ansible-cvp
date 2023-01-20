@@ -1,0 +1,8 @@
+release_summary: |
+  Release 3.6.0 - See documentation on cvp.avd.sh for details.
+
+minor_changes:
+- Feat(cv_container_v3) Add support for image bundles on containers(#550)
+
+bugfixes:
+- Fix(cv_facts_v3) Handle stale and empty devices in the inventory having an image bundle of type None(#569)
