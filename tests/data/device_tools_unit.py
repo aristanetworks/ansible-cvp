@@ -241,7 +241,10 @@ device_data_invalid = [{
     'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+>>>>>>> 384f2ed (Restructured pytest)

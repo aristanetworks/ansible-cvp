@@ -10,10 +10,13 @@
 from unittest.mock import call
 import pytest
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from tests.lib import mockMagic
 from ansible.module_utils.basic import AnsibleModule
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+>>>>>>> 384f2ed (Restructured pytest)
 from tests.data.device_tools_unit import device_data, device_data_invalid
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 
@@ -34,6 +37,22 @@ def setup(apply_mock, mock_cvpClient):
 
     return mock_ansible_module, mock__get_device, cv_tools
 
+@pytest.fixture
+def setup(apply_mock, mock_cvprac):
+    """
+    setup - setup method to apply mocks and patches
+    """
+    mock_ansible_module, mock__get_device = apply_mock(TestState.MOCK_LIST)
+    dummy_cvprac, mock_cvpClient = mock_cvprac
+    mock_cvpClient.api.device_decommissioning.side_effect = dummy_cvprac.device_decommissioning
+    mock_cvpClient.api.device_decommissioning_status_get_one.side_effect = dummy_cvprac.device_decommissioning_status_get_one
+    mock_cvpClient.api.reset_device.side_effect = dummy_cvprac.reset_device
+    mock_cvpClient.api.delete_device.side_effect = dummy_cvprac.delete_device
+    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
+
+    return mock_ansible_module, mock__get_device, cv_tools
+
+
 @pytest.mark.state
 <<<<<<< HEAD
 class TestDecommissionDevice():
@@ -45,6 +64,7 @@ class TestState():
     """
     Contains unit tests for state: absent, factory_reset and provisioning_reset
     """
+<<<<<<< HEAD
 
     def apply_mocks(self, mocker):  # mocker is a magicmock object which is used for patching
         mock_ansible_module = mock_m.apply_mock_patch(mocker,
@@ -55,11 +75,18 @@ class TestState():
                                                            '_CvDeviceTools__get_device')
         return mock_ansible_module, mock__get_device
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+    # list of paths to patch
+    MOCK_LIST = [
+        'ansible_collections.arista.cvp.plugins.module_utils.device_tools.AnsibleModule',
+        'ansible_collections.arista.cvp.plugins.module_utils.device_tools.CvDeviceTools._CvDeviceTools__get_device']
+>>>>>>> 384f2ed (Restructured pytest)
 
     @pytest.mark.parametrize(
         "device_data, expected, expected_fail_json_call_msg",
         [
             (device_data, True, ""),
+<<<<<<< HEAD
 <<<<<<< HEAD
             (device_data_invalid, False, "Device decommissioning failed due to Device does "
                                          "not exist or is not registered to decommission"),
@@ -86,29 +113,41 @@ class TestState():
             assert pytest_error.value.code == 1
 =======
             # (device_data_invalid, False, expected_fail_json_call_msg="----"), getting fail for err_msg
+=======
+            (device_data_invalid, False, "Device decommissioning failed due to Device does "
+                                         "not exist or is not registered to decommission"),  # getting fail for err_msg
+>>>>>>> 384f2ed (Restructured pytest)
         ],
     )
-    def test_state_absent(self, mocker, device_data, expected, expected_fail_json_call_msg):
+    def test_state_absent(self, setup, device_data, expected, expected_fail_json_call_msg):
         """
         Tests decommission_device() method for state_absent
 
         if device_data['serialNumber'] is correct:
             expected = true
         else:
-            expected = false
+            expected = false and error_msg
 
         """
         # status = 'DECOMMISSIONING_STATUS_SUCCESS'
-        mock_ansible_module, mock__get_device = self.apply_mocks(mocker)
         user_topology = DeviceInventory(data=device_data)
-        cv_tools = CvDeviceTools(mockCvpClient.mock_cvpClient, mock_ansible_module)
+        mock_ansible_module, mock__get_device, cv_tools = setup
         mock__get_device.return_value = device_data[0]  # mocked for get_device_facts, device_info is in tests/datadevice_tools_unit.py
         # TODO: need to check cvp_api.get_device_by_serial output through lab for device_info
+<<<<<<< HEAD
         result = cv_tools.decommission_device(user_inventory=user_topology)
         assert result[0].success == expected
         assert result[0].changed == expected
         if not expected:
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+        if expected:
+            result = cv_tools.decommission_device(user_inventory=user_topology)
+            assert result[0].success == expected
+            assert result[0].changed == expected
+        else:
+            _ = cv_tools.decommission_device(user_inventory=user_topology)
+>>>>>>> 384f2ed (Restructured pytest)
             expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
             assert mock_ansible_module.mock_calls == expected_call
 
@@ -125,12 +164,16 @@ class TestResetDevice():
         ],
     )
 <<<<<<< HEAD
+<<<<<<< HEAD
     def test_reset_device(self, setup, device_data, expected):
         """
         Tests reset_device method for state factory_reset
         device_data: dummy_device_data
 =======
     def test_state_factory_reset(self, mocker, device_data, expected):
+=======
+    def test_state_factory_reset(self, setup, device_data, expected):
+>>>>>>> 384f2ed (Restructured pytest)
         """
         Tests reset_device method for state factory_reset
 
@@ -187,6 +230,7 @@ class TestDeleteDevice():
         ],
     )
 <<<<<<< HEAD
+<<<<<<< HEAD
     def test_delete_device(self, setup, device_data, expected):
         """
         Tests delete_device method for state provisioning_reset
@@ -199,6 +243,9 @@ class TestDeleteDevice():
 
 =======
     def test_state_provisioning_reset(self, mocker, device_data, expected):
+=======
+    def test_state_provisioning_reset(self, setup, device_data, expected):
+>>>>>>> 384f2ed (Restructured pytest)
         """
         Tests reset_device method for state provisioning_reset
 
@@ -209,10 +256,15 @@ class TestDeleteDevice():
         else:
             expected = false
         """
+<<<<<<< HEAD
         # mock_ansible_module = self.apply_mocks(mocker)
 >>>>>>> 7ca03e5 (Added docstrings and update code)
         user_topology = DeviceInventory(data=device_data)
         _, _, cv_tools = setup
+=======
+        user_topology = DeviceInventory(data=device_data)
+        mock_ansible_module, mock__get_device, cv_tools = setup
+>>>>>>> 384f2ed (Restructured pytest)
         result = cv_tools.delete_device(user_inventory=user_topology)
         assert result[0].success == expected
         assert result[0].changed == expected
