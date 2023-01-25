@@ -1,18 +1,9 @@
-#!/usr/bin/python
-# coding: utf-8 -*-
-# pylint: disable=logging-format-interpolation
-# pylint: disable=dangerous-default-value
-# pylint: disable=redefined-outer-name
-# pylint:disable=duplicate-code
-# flake8: noqa: W503
-# flake8: noqa: W1202
-# flake8: noqa: R0801
-
 from unittest.mock import call
 import pytest
-from tests.data.device_tools_unit import validate_router_bgp, validate_intf, validate_true, device_data, EXP_WARN_WARN, EXP_ERROR, EXP_VALID
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import ModuleOptionValues
+from tests.data.device_tools_unit import (validate_router_bgp,
+    validate_intf, validate_true, device_data, EXP_WARN_WARN, EXP_ERROR, EXP_VALID)
 
 @pytest.fixture
 def setup(apply_mock, mock_cvprac):
