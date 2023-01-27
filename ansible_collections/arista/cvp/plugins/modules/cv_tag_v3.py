@@ -271,14 +271,11 @@ def main():
     # check for incompatible options
     if ansible_module.params['mode'] == 'assign' or ansible_module.params['mode'] == 'unassign':
         for per_device in ansible_module.params['tags']:
-            if 'device_tags' in per_device.keys() and 'device' not in per_device.keys():
-                ansible_module.fail_json(msg="Error, 'device' needed for each 'device_tags"
-                                             " when mode is 'assign' or 'unassign'")
+            if not ('device' in per_device.keys() or 'device_id' in per_device.keys()):
+                error_msg = "Error, either 'device' or 'device_id' needed for each 'device tags/interface tags when mode is 'assign' or 'unassign'"
+                ansible_module.fail_json(msg=error_msg)
             if 'interface_tags' in per_device.keys():
                 MODULE_LOGGER.info('interface tags in keys')
-                if 'device' not in per_device.keys():
-                    ansible_module.fail_json(msg="Error, 'device' needed for each 'interface_tags'"
-                                                 " when mode is 'assign' or 'unassign'")
                 for per_intf in per_device['interface_tags']:
                     MODULE_LOGGER.info('per_intf: %s', per_intf)
                     MODULE_LOGGER.info('keys: %s', per_intf.keys())
