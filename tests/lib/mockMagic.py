@@ -23,12 +23,15 @@ class MockCvpApi(MagicMock):
 
     def device_decommissioning(self, device_id, request_id):
 <<<<<<< HEAD
+<<<<<<< HEAD
         """
         mock method for cvprac device_decommissioning()
         """
 =======
         # TODO: need to check cvp_api.get_device_by_serial output for device_info
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+>>>>>>> 59617e4 (Class arrangement)
         if device_id == device_data[0]["serialNumber"]:
             self.result = {'value': {'key': {'requestId': request_id},
                                      'deviceId': device_id},
@@ -61,6 +64,7 @@ class MockCvpApi(MagicMock):
         if 'parentContainerId' in device:
             from_id = device['parentContainerId']
         else:
+<<<<<<< HEAD
             if device['parentContainerName']:
                 from_id = device['parentContainerName']
             else:
@@ -73,6 +77,20 @@ class MockCvpApi(MagicMock):
                 return {'data': {'taskIds': ['57'], 'status': 'success'}}
             else:
                 raise CvpApiError(msg="Error resetting device")
+=======
+            if device['parentContainerName'] == "undefined":
+                parent_cont = {'key': 'undefined'}  # need to check this data from CVP instace
+            else:
+                parent_cont = {'key': device['parentContainerName']}  # need to check this data from CVP instance
+
+            from_id = parent_cont['key']
+
+        if create_task:
+            if from_id == "undefined":
+                return {'data': {'status': 'fail', 'taskIds': []}}
+            else:
+                return {'data': {'taskIds': ['57'], 'status': 'success'}}
+>>>>>>> 59617e4 (Class arrangement)
         else:
             return None
 
@@ -94,6 +112,7 @@ class MockCvpApi(MagicMock):
                 device_info = device_data[0]
 
         if device_info is not None and 'serialNumber' in device_info:
+<<<<<<< HEAD
             return {'result': 'success'}  # need to check this in lab
 >>>>>>> 7ca03e5 (Added docstrings and update code)
         else:
@@ -114,3 +133,8 @@ class MockCvpApi(MagicMock):
 =======
             return {'result': 'fail'}  # need to check this in lab
 >>>>>>> 384f2ed (Restructured pytest)
+=======
+            return {'result': 'success'}
+        else:
+            return {'result': 'fail'}
+>>>>>>> 59617e4 (Class arrangement)

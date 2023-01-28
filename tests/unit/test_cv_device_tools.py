@@ -21,10 +21,15 @@ from tests.data.device_tools_unit import device_data, device_data_invalid
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 
 
+<<<<<<< HEAD
+=======
+# status = ''
+>>>>>>> 59617e4 (Class arrangement)
 # list of paths to patch
 MOCK_LIST = [
     'ansible_collections.arista.cvp.plugins.module_utils.device_tools.AnsibleModule',
     'ansible_collections.arista.cvp.plugins.module_utils.device_tools.CvDeviceTools._CvDeviceTools__get_device']
+<<<<<<< HEAD
 
 @pytest.fixture
 def setup(apply_mock, mock_cvpClient):
@@ -36,13 +41,15 @@ def setup(apply_mock, mock_cvpClient):
     cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools
+=======
+>>>>>>> 59617e4 (Class arrangement)
 
 @pytest.fixture
 def setup(apply_mock, mock_cvprac):
     """
     setup - setup method to apply mocks and patches
     """
-    mock_ansible_module, mock__get_device = apply_mock(TestState.MOCK_LIST)
+    mock_ansible_module, mock__get_device = apply_mock(MOCK_LIST)
     dummy_cvprac, mock_cvpClient = mock_cvprac
     mock_cvpClient.api.device_decommissioning.side_effect = dummy_cvprac.device_decommissioning
     mock_cvpClient.api.device_decommissioning_status_get_one.side_effect = dummy_cvprac.device_decommissioning_status_get_one
@@ -55,15 +62,20 @@ def setup(apply_mock, mock_cvprac):
 
 @pytest.mark.state
 <<<<<<< HEAD
+<<<<<<< HEAD
 class TestDecommissionDevice():
     """
     Contains unit tests for decommission_device()
     """
 =======
 class TestState():
+=======
+class TestDecommissionDevice():
+>>>>>>> 59617e4 (Class arrangement)
     """
-    Contains unit tests for state: absent, factory_reset and provisioning_reset
+    Contains unit tests for state: absent
     """
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     def apply_mocks(self, mocker):  # mocker is a magicmock object which is used for patching
@@ -81,6 +93,8 @@ class TestState():
         'ansible_collections.arista.cvp.plugins.module_utils.device_tools.AnsibleModule',
         'ansible_collections.arista.cvp.plugins.module_utils.device_tools.CvDeviceTools._CvDeviceTools__get_device']
 >>>>>>> 384f2ed (Restructured pytest)
+=======
+>>>>>>> 59617e4 (Class arrangement)
 
     @pytest.mark.parametrize(
         "device_data, expected, expected_fail_json_call_msg",
@@ -115,8 +129,12 @@ class TestState():
             # (device_data_invalid, False, expected_fail_json_call_msg="----"), getting fail for err_msg
 =======
             (device_data_invalid, False, "Device decommissioning failed due to Device does "
+<<<<<<< HEAD
                                          "not exist or is not registered to decommission"),  # getting fail for err_msg
 >>>>>>> 384f2ed (Restructured pytest)
+=======
+                                         "not exist or is not registered to decommission"),
+>>>>>>> 59617e4 (Class arrangement)
         ],
     )
     def test_state_absent(self, setup, device_data, expected, expected_fail_json_call_msg):
@@ -132,6 +150,7 @@ class TestState():
         # status = 'DECOMMISSIONING_STATUS_SUCCESS'
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, mock__get_device, cv_tools = setup
+<<<<<<< HEAD
         mock__get_device.return_value = device_data[0]  # mocked for get_device_facts, device_info is in tests/datadevice_tools_unit.py
         # TODO: need to check cvp_api.get_device_by_serial output through lab for device_info
 <<<<<<< HEAD
@@ -141,6 +160,9 @@ class TestState():
         if not expected:
 >>>>>>> 7ca03e5 (Added docstrings and update code)
 =======
+=======
+        mock__get_device.return_value = device_data[0]  # mocked for get_device_facts, device_data is in tests/datadevice_tools_unit.py
+>>>>>>> 59617e4 (Class arrangement)
         if expected:
             result = cv_tools.decommission_device(user_inventory=user_topology)
             assert result[0].success == expected
@@ -151,10 +173,29 @@ class TestState():
             expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
             assert mock_ansible_module.mock_calls == expected_call
 
+<<<<<<< HEAD
 @pytest.mark.state
 class TestResetDevice():
     """
     Contains unit tests for reset_device()
+=======
+    # def test_state_absent_in_progress(self, mocker):
+    #     status = 'DECOMMISSIONING_STATUS_IN_PROGRESS'
+    #     mock_ansible_module, mock__get_device = self.apply_mocks(mocker)
+    #     user_topology = DeviceInventory(data=device_data)
+    #     cv_tools = CvDeviceTools(mockCvpClient.mock_cvpClient, mock_ansible_module)
+    #     mock__get_device.return_value = device_data[0]  # mocked for get_device_facts, device_data is in tests/datadevice_tools_unit.py
+    #     # TODO: need to check cvp_api.get_device_by_serial output through lab for device_info
+    #     result = cv_tools.decommission_device(user_inventory=user_topology)
+    #     assert result[0].success == True
+    #     assert result[0].changed == True
+
+
+@pytest.mark.state
+class TestResetDevice():
+    """
+    Contains unit tests for state: factory_reset
+>>>>>>> 59617e4 (Class arrangement)
     """
     @pytest.mark.parametrize(
         "device_data, expected",
@@ -193,6 +234,12 @@ class TestResetDevice():
         if expected:
             assert result[0].taskIds == ['57']
 
+
+@pytest.mark.state
+class TestDeleteDevice():
+    """
+    Contains unit tests for state: provisioning_reset
+    """
     @pytest.mark.parametrize(
         "device_data, expected_fail_json_call_msg",
         [
@@ -263,8 +310,12 @@ class TestDeleteDevice():
         _, _, cv_tools = setup
 =======
         user_topology = DeviceInventory(data=device_data)
+<<<<<<< HEAD
         mock_ansible_module, mock__get_device, cv_tools = setup
 >>>>>>> 384f2ed (Restructured pytest)
+=======
+        mock_ansible_module, _, cv_tools = setup
+>>>>>>> 59617e4 (Class arrangement)
         result = cv_tools.delete_device(user_inventory=user_topology)
         assert result[0].success == expected
         assert result[0].changed == expected
