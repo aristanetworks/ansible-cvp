@@ -868,7 +868,7 @@ class CvDeviceTools(object):
             Ansible Output message
         """
         response = CvAnsibleResponse()
-        cv_validate = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_VALIDATED)
+        configlets_validated = CvManagerResult(builder_name=DeviceResponseFields.CONFIGLET_VALIDATED)
 
         # Check if all user defined devices are present in CV
         self.__check_devices_exist(user_inventory=user_inventory)
@@ -876,13 +876,19 @@ class CvDeviceTools(object):
         user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
 
         # Execute configlet validation
-        # device.system_mac
+        MODULE_LOGGER.debug("DEBUG == Calling action result")
         action_result = self.validate_config(user_inventory=user_inventory, validate_mode=validate_mode)
+        MODULE_LOGGER.debug("action_result is: {0}".format(action_result))
+        #import epdb; epdb.serve(port=8080)
         if action_result is not None:
             MODULE_LOGGER.debug("action_result is: {0}".format(action_result))
+
             for update in action_result:
-                cv_validate.add_change(change=update)
-        response.add_manager(cv_validate)
+                MODULE_LOGGER.debug("action_result index is: {0}".format(update.__dict__))
+                configlets_validated.add_change(change=update)
+        # Generate result output
+        response.add_manager(configlets_validated)
+        MODULE_LOGGER.debug('AnsibleResponse updated, new content with configlets_validated: %s', str(response.content))
         return response
 
     def __build_topology_cache(self, container):
@@ -2287,24 +2293,25 @@ class CvDeviceTools(object):
             List of CvApiResult for all API calls
         """
         results = []
-        device_data = {"warnings": [], "errors": []}
+        device_data = {
+            "warnings": [],
+            "errors": [],
+            "configlets_validated_count": 0,
+            "configlets_validated_list": [],
+            "diff": {},
+            "success": True,
+            "taskIds": [],
+        }
         for device in user_inventory.devices:
-            result_data = CvApiResult(
-                action_name=device.info[self.__search_by] + "_validated"
-            )
             if device.system_mac is None:
                 continue
-            MODULE_LOGGER.debug(
-                "Device configlets are {0}".format(device.configlets)
-            )
+            MODULE_LOGGER.debug("Device configlets are {0}".format(device.configlets))
             for configlet in device.configlets:
                 MODULE_LOGGER.debug(
                     "Configlet being validated is {0}".format(configlet)
                 )
                 vc_configlet = self.__get_configlet_info(configlet_name=configlet)
-                MODULE_LOGGER.debug(
-                    "Configlet information: {0}".format(vc_configlet)
-                )
+                MODULE_LOGGER.debug("Configlet information: {0}".format(vc_configlet))
                 if vc_configlet is None:
                     error_message = "The configlet '{0}' defined to be validated against device '{1}' does not \
                         exist on the CVP server.".format(
@@ -2313,6 +2320,13 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
                 else:
+                    result_data = CvApiResult(
+                        action_name=vc_configlet["name"]
+                        + "_on_"
+                        + device.info[self.__search_by]
+                        + "_validated"
+                    )
+                    MODULE_LOGGER.debug(f"adding {0} to result_data".format(vc_configlet['name']))
                     try:
                         MODULE_LOGGER.debug(
                             "Ansible is going to validate configlet {0} against device {1}".format(
@@ -2328,7 +2342,12 @@ class CvDeviceTools(object):
                             device_mac=device.system_mac,
                             config=vc_configlet["config"],
                         )
-                        MODULE_LOGGER.debug("resp is: {0}".format(resp))
+                        result_data.add_entry(
+                            vc_configlet["name"] + "_validated_against_" + device.fqdn
+                        )
+                        result_data.changed = True
+                        result_data.success = True
+
                     except CvpApiError:
                         MODULE_LOGGER.critical(
                             "Error validation failed on device {0}".format(device.fqdn)
@@ -2345,8 +2364,7 @@ class CvDeviceTools(object):
                         if "warnings" in resp and resp["warningCount"] > 0:
                             err_msg = resp["warnings"]
                             msg = f"Configlet validation failed with {err_msg}"
-                            result_data.success = False
-                            result_data.count += 1
+                            result_data.success = True
                             MODULE_LOGGER.error(msg)
                             device_data["warnings"].append(
                                 {"device": device.hostname, "warnings": err_msg}
@@ -2354,37 +2372,43 @@ class CvDeviceTools(object):
                         if "errors" in resp:
                             err_msg = resp["errors"]
                             msg = f"Configlet validation failed with {err_msg}"
-                            result_data.success = False
-                            result_data.count += 1
+                            result_data.success = True
                             MODULE_LOGGER.error(msg)
                             device_data["errors"].append(
                                 {"device": device.hostname, "errors": err_msg}
                             )
-                result_data.add_entry(
-                    "{0} validated against {1}".format(
-                        device.info[self.__search_by], vc_configlet
-                    )
+                    results.append(result_data)
+                device_data["configlets_validated_count"] += 1
+                device_data["configlets_validated_list"].append(
+                    configlet + "_on_" + device.fqdn + "_validated"
                 )
-            results.append(result_data)
-        MODULE_LOGGER.debug("device_data is: {0}".format(device_data))
+
         if len(device_data["errors"]) > 0:
+            message = (
+                f"Encountered {len(device_data['errors'])} errors during"
+                " validation. Refer to 'validation_results' for details."
+            )
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
             ]:
-                self.__ansible.fail_json(msg=str(device_data))
+                self.__ansible.fail_json(msg=message, configlets_validated=device_data)
             else:
-                self.__ansible.exit_json(msg=str(device_data))
+                self.__ansible.exit_json(msg=message, configlets_validated=device_data)
         elif len(device_data["warnings"]) > 0:
+            message = (
+                f"Encountered {len(device_data['warnings'])} warnings during"
+                " validation. Refer to 'validation_results' for details."
+            )
             if validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
-                self.__ansible.fail_json(msg=str(device_data))
+                self.__ansible.fail_json(msg=message, configlets_validated=device_data)
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
-                ModuleOptionValues.VALIDATE_MODE_IGNORE,
             ]:
-                self.__ansible.exit_json(msg=str(device_data))
-        else:
-            return results
+                self.__ansible.exit_json(msg=message, configlets_validated=device_data)
+            else:
+                return results
+        return results
 
     # ------------------------------------------ #
     # Helpers function
