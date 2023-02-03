@@ -2386,7 +2386,7 @@ class CvDeviceTools(object):
         if len(device_data["errors"]) > 0:
             message = (
                 f"Encountered {len(device_data['errors'])} errors during"
-                " validation. Refer to 'validation_results' for details."
+                " validation. Refer to 'configlets_validated' for more details."
             )
             if validate_mode in [
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
@@ -2398,7 +2398,7 @@ class CvDeviceTools(object):
         elif len(device_data["warnings"]) > 0:
             message = (
                 f"Encountered {len(device_data['warnings'])} warnings during"
-                " validation. Refer to 'validation_results' for details."
+                " validation. Refer to 'configlets_validated' for more details."
             )
             if validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
                 self.__ansible.fail_json(msg=message, configlets_validated=device_data)
