@@ -22,9 +22,12 @@ from ansible_collections.arista.cvp.plugins.module_utils.device_tools import Dev
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 # status = ''
 >>>>>>> 59617e4 (Class arrangement)
+=======
+>>>>>>> c035398 (Added unittests for CvpApiError)
 # list of paths to patch
 MOCK_LIST = [
     'ansible_collections.arista.cvp.plugins.module_utils.device_tools.AnsibleModule',
@@ -147,7 +150,6 @@ class TestDecommissionDevice():
             expected = false and error_msg
 
         """
-        # status = 'DECOMMISSIONING_STATUS_SUCCESS'
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, mock__get_device, cv_tools = setup
 <<<<<<< HEAD
@@ -174,6 +176,7 @@ class TestDecommissionDevice():
             assert mock_ansible_module.mock_calls == expected_call
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 @pytest.mark.state
 class TestResetDevice():
     """
@@ -191,6 +194,8 @@ class TestResetDevice():
     #     assert result[0].changed == True
 
 
+=======
+>>>>>>> c035398 (Added unittests for CvpApiError)
 @pytest.mark.state
 class TestResetDevice():
     """
@@ -241,6 +246,7 @@ class TestDeleteDevice():
     Contains unit tests for state: provisioning_reset
     """
     @pytest.mark.parametrize(
+<<<<<<< HEAD
         "device_data, expected_fail_json_call_msg",
         [
             (device_data_invalid, "Error resetting device"),
@@ -271,11 +277,16 @@ class TestDeleteDevice():
     """
     @pytest.mark.parametrize(
         "device_data, expected",
+=======
+        "device_data, expected,expected_fail_json_call_msg",
+>>>>>>> c035398 (Added unittests for CvpApiError)
         [
-            (device_data, True),
-            (device_data_invalid, False),
+            (device_data, True, ""),
+            (device_data_invalid, False, ""),
+            (device_data_invalid, "Error", "Error removing device from provisioning")
         ],
     )
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     def test_delete_device(self, setup, device_data, expected):
@@ -293,6 +304,9 @@ class TestDeleteDevice():
 =======
     def test_state_provisioning_reset(self, setup, device_data, expected):
 >>>>>>> 384f2ed (Restructured pytest)
+=======
+    def test_delete_device(self, setup, device_data, expected, expected_fail_json_call_msg):
+>>>>>>> c035398 (Added unittests for CvpApiError)
         """
         Tests reset_device method for state provisioning_reset
 
@@ -304,8 +318,14 @@ class TestDeleteDevice():
             expected = false
         """
 <<<<<<< HEAD
+<<<<<<< HEAD
         # mock_ansible_module = self.apply_mocks(mocker)
 >>>>>>> 7ca03e5 (Added docstrings and update code)
+=======
+        if expected == "Error":
+            device_data[0]['systemMacAddress'] = None
+        print(device_data)
+>>>>>>> c035398 (Added unittests for CvpApiError)
         user_topology = DeviceInventory(data=device_data)
         _, _, cv_tools = setup
 =======
@@ -315,6 +335,7 @@ class TestDeleteDevice():
 >>>>>>> 384f2ed (Restructured pytest)
 =======
         mock_ansible_module, _, cv_tools = setup
+<<<<<<< HEAD
 >>>>>>> 59617e4 (Class arrangement)
         result = cv_tools.delete_device(user_inventory=user_topology)
         assert result[0].success == expected
@@ -337,3 +358,13 @@ class TestDeleteDevice():
         assert pytest_error.value.code == 1
         expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
         assert mock_ansible_module.mock_calls == expected_call
+=======
+        if expected == "Error":
+            _ = cv_tools.delete_device(user_inventory=user_topology)
+            expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
+            assert mock_ansible_module.mock_calls == expected_call
+        else:
+            result = cv_tools.delete_device(user_inventory=user_topology)
+            assert result[0].success == expected
+            assert result[0].changed == expected
+>>>>>>> c035398 (Added unittests for CvpApiError)

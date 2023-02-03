@@ -227,9 +227,13 @@ device_data = [{
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'TP_LEAF1',
     'parentContainerId': 'TP_LEAF1',
+<<<<<<< HEAD
     'configlets': [''],
     'imageBundle': 'EOS-4.25.4M',
 }]  # this is dummy device_data that has no effect
+=======
+    'configlets': ['']}]  # this is dummy device_data that has no effect
+>>>>>>> c035398 (Added unittests for CvpApiError)
 
 device_data_invalid = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148768', # wrong serial number
@@ -237,7 +241,11 @@ device_data_invalid = [{
     'key': '50:08:00:b1:5b:0b',
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
+<<<<<<< HEAD
     'parentContainerName': 'Undefined',  # undefined parent container name
+=======
+    'parentContainerName': 'Undefined',
+>>>>>>> c035398 (Added unittests for CvpApiError)
     'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 <<<<<<< HEAD

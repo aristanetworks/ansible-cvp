@@ -6,6 +6,7 @@ from cvprac.cvp_client_errors import CvpApiError
 =======
 from unittest.mock import create_autospec
 from tests.data.device_tools_unit import device_data
+<<<<<<< HEAD
 from cvprac.cvp_client import CvpClient, CvpApi
 >>>>>>> 7ca03e5 (Added docstrings and update code)
 =======
@@ -20,6 +21,11 @@ class MockCvpApi(MagicMock):
             return return_validate_config_for_device['return_validate_intf']
         if config == validate_true['config']:
             return return_validate_config_for_device['return_validate_true']
+=======
+from cvprac.cvp_client_errors import CvpApiError
+
+class MockCvpApi():
+>>>>>>> c035398 (Added unittests for CvpApiError)
 
     def device_decommissioning(self, device_id, request_id):
 <<<<<<< HEAD
@@ -58,6 +64,7 @@ class MockCvpApi(MagicMock):
         return resp["result"]
 
     def reset_device(self, app_name, device, create_task=True):
+<<<<<<< HEAD
         """
         mock method for cvprac reset_device()
         """
@@ -85,14 +92,19 @@ class MockCvpApi(MagicMock):
 
             from_id = parent_cont['key']
 
+=======
+>>>>>>> c035398 (Added unittests for CvpApiError)
         if create_task:
-            if from_id == "undefined":
+            if device['parentContainerName'] == "Undefined":
                 return {'data': {'status': 'fail', 'taskIds': []}}
             else:
                 return {'data': {'taskIds': ['57'], 'status': 'success'}}
+<<<<<<< HEAD
 >>>>>>> 59617e4 (Class arrangement)
         else:
             return None
+=======
+>>>>>>> c035398 (Added unittests for CvpApiError)
 
         #TODO: need to write testcase - if create_task returns None, raised issue #585 in ansible-cvp
 
@@ -107,6 +119,7 @@ class MockCvpApi(MagicMock):
 =======
         device_macs = [device_mac]
         device_info = {}
+<<<<<<< HEAD
         for dev_mac in device_macs:
             if dev_mac == device_data[0]['systemMacAddress']:
                 device_info = device_data[0]
@@ -138,3 +151,16 @@ class MockCvpApi(MagicMock):
         else:
             return {'result': 'fail'}
 >>>>>>> 59617e4 (Class arrangement)
+=======
+        if not device_macs[0]:
+            raise CvpApiError(msg='Error removing device from provisioning')
+        else:
+            for dev_mac in device_macs:
+                if dev_mac == device_data[0]['systemMacAddress']:
+                    device_info = device_data[0]
+
+            if device_info is not None and 'serialNumber' in device_info:
+                return {'result': 'success'}
+            else:
+                return {'result': 'fail'}
+>>>>>>> c035398 (Added unittests for CvpApiError)
