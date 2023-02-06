@@ -23,6 +23,4 @@ def mock_cvpClient():
     # mocked cvpClient object
     mock_cvpClient = create_autospec(CvpClient)
     mock_cvpClient.api = mockMagic.MockCvpApi(spec=CvpApi)
-    # mock_cvpClient.api = create_autospec(CvpApi)
-    # mock_cvpClient.api.validate_config_for_device.side_effect = dummy_cvprac.validate_config_for_device
     return mock_cvpClient
