@@ -1731,7 +1731,13 @@ class CvDeviceTools(object):
                 device_fact = self.get_device_facts(device_lookup=device.hostname)
                 device_id = device_fact['serialNumber']
                 MODULE_LOGGER.info('Found device serial number: %s', device_id)
-                self.__cv_client.api.device_decommissioning(device_id, req_id)
+                if self.__check_mode:
+                    result_data.changed = False
+                    result_data.success = True
+                    result_data.taskIds = ['check_mode']
+                    MODULE_LOGGER.warning('[check_mode] - Fake decomissioning of device %s', device.hostname)
+                else:
+                    self.__cv_client.api.device_decommissioning(device_id, req_id)
             except CvpApiError:
                 MODULE_LOGGER.error('Error decommissioning device')
                 self.__ansible.fail_json(msg='Error decommissioning device')
@@ -1741,26 +1747,24 @@ class CvDeviceTools(object):
                 self.__ansible.fail_json(msg=request_err_msg)
             else:
                 if self.__check_mode:
-                    result_data.changed = False
-                    result_data.success = True
-                    result_data.taskIds = ['check_mode']
-                    MODULE_LOGGER.warning('[check_mode] - Fake decomissioning of device %s', device.hostname)
+                    status = decomm_success
                 else:
                     status = ""
-                    while status != decomm_success:
-                        try:
-                            status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
-                        except CvpRequestError:
-                            continue
-                        if status == decomm_failure:
-                            err_msg = status['result']['value']['error']
-                            msg = f"Device decommissioning failed due to {err_msg}"
-                            MODULE_LOGGER.error(msg)
-                            self.__ansible.fail_json(msg=msg)
-                        else:
-                            time.sleep(10)
-                    result_data.changed = True
-                    result_data.success = True
+
+                while status != decomm_success:
+                    try:
+                        status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
+                    except CvpRequestError:
+                        continue
+                    if status == decomm_failure:
+                        err_msg = status['result']['value']['error']
+                        msg = f"Device decommissioning failed due to {err_msg}"
+                        MODULE_LOGGER.error(msg)
+                        self.__ansible.fail_json(msg=msg)
+                    else:
+                        time.sleep(10)
+                result_data.changed = True
+                result_data.success = True
 
             results.append(result_data)
         return results
