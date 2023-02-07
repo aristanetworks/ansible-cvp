@@ -1763,7 +1763,8 @@ class CvDeviceTools(object):
                         self.__ansible.fail_json(msg=msg)
                     else:
                         time.sleep(10)
-                result_data.changed = True
+                if not self.__check_mode:
+                    result_data.changed = True
                 result_data.success = True
 
             results.append(result_data)
