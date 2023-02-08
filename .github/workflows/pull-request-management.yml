@@ -78,8 +78,8 @@ jobs:
           fetch-depth: 0
       - name: Install requirements
         run: |
-          pip install -r ansible_collections/arista/cvp/requirements-dev.txt
-          pip install -r ansible_collections/arista/cvp/requirements.txt
+          pip install -r ansible_collections/arista/cvp/requirements-dev.txt --upgrade
+          pip install -r ansible_collections/arista/cvp/requirements.txt --upgrade
       - name: Run pre-commit
         run: |
           pre-commit run --color always --from-ref origin/devel --to-ref HEAD

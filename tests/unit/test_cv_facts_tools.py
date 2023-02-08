@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
-from tests.lib import mock, mock_ansible
+from tests.lib import mock
 from tests.data import facts_unit
 from tests.lib.parametrize import generate_list_from_dict
 from tests.lib.helpers import setup_custom_logger

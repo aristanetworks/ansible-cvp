@@ -5,9 +5,7 @@ from unittest.mock import MagicMock, create_autospec
 import pprint
 import logging
 from cvprac.cvp_client import CvpClient, CvpApi
-from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
-from tests.data import facts_unit
 
 LOGGER = logging.getLogger(__name__)
 

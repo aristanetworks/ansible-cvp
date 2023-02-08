@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# pylint: skip-file
 # coding: utf-8 -*-
 #
 # Copyright 2019 Arista Networks

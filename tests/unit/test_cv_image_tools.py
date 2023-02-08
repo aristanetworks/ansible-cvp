@@ -2,13 +2,13 @@
 # coding: utf-8 -*-
 
 import logging
-import os, tempfile
+import os
+import tempfile
 from pathlib import Path
 from ansible_collections.arista.cvp.plugins.module_utils.image_tools import CvImageTools
 import pytest
 import pprint
 from ansible_collections.arista.cvp.plugins.module_utils.image_tools import CvImageTools
-from ansible_collections.arista.cvp.plugins.module_utils.resources.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError
 from tests.lib import mock, mock_ansible
 from tests.data import image_unit as data
 from tests.lib.utils import generate_test_ids_dict
