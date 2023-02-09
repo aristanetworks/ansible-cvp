@@ -49,6 +49,9 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start device_tools module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 class DeviceElement(object):
     """
@@ -793,6 +796,9 @@ class CvDeviceTools(object):
         parent_container_name = device.container
         # Get parent container id of the device by comparing all containers name in the topology
         parent_container_id = ''
+        # TODO - use dict items
+        #      for container_id in ..
+        # pylint: disable=consider-using-dict-items
         for container_id in self.__containers_configlet_list_cache:
             if self.__containers_configlet_list_cache[container_id][Api.generic.NAME] == parent_container_name:
                 parent_container_id = container_id

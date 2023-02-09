@@ -139,6 +139,10 @@ from ansible_collections.arista.cvp.plugins.module_utils import tools
 from ansible_collections.arista.cvp.plugins.module_utils import schema_v1 as schema
 
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
+
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_device')
 MODULE_LOGGER.info('Start cv_device module execution')
 
@@ -1158,6 +1162,9 @@ def main():
     """
     Module entry point.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         devices=dict(type="dict", required=True),

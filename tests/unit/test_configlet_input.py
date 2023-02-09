@@ -18,6 +18,8 @@ import pytest
 
 logger = setup_custom_logger(__name__)
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 @pytest.mark.generic
 @pytest.mark.configlet

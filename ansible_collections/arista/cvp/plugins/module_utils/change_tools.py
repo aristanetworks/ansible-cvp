@@ -40,6 +40,9 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger('arista.cvp.change_tools')
 MODULE_LOGGER.info('Start change_tools module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 class CvpChangeControlBuilder:
     """
@@ -599,8 +602,8 @@ class CvChangeControlTools():
     def module_action(self, change: dict, name: str = None, state: str = "show", change_id: List[str] = None, schedule_time: str = None):
 
         changed = False
-        data = dict()
-        warnings = list()
+        data = {}
+        warnings = []
 
         if state == "show":
             if name is None and change_id is None:

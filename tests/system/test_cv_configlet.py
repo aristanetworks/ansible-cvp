@@ -23,6 +23,8 @@ from tests.lib.provisioner import CloudvisionProvisioner
 # Set specific logging syntax
 logger = setup_custom_logger('configlet_system')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management

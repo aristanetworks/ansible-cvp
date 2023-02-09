@@ -94,6 +94,9 @@ def main():
     """
     Main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         # Topology to configure on CV side.
         tasks=dict(type='list', required=True, elements='str'),
@@ -108,8 +111,8 @@ def main():
                                    supports_check_mode=True)
     # Instantiate ansible results
     result = dict(changed=False, data={}, failed=False)
-    result['data']['taskIds'] = list()
-    result['data']['tasks'] = list()
+    result['data']['taskIds'] = []
+    result['data']['tasks'] = []
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)

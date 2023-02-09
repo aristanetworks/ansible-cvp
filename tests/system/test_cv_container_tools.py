@@ -20,6 +20,8 @@ from tests.lib.utils import cvp_login, get_container_name_id, get_unit_container
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management

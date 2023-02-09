@@ -24,7 +24,6 @@ import logging
 import pprint
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.logger  # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import ContainerResponseFields, ModuleOptionValues
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
@@ -41,6 +40,10 @@ except ImportError:
 
 MODULE_LOGGER = logging.getLogger(__name__)
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
+
+
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 
 class ContainerInput(object):
@@ -479,6 +482,8 @@ class CvContainerTools(object):
                     MODULE_LOGGER.info("Checking if container has an image bundle already")
                     current_image_facts = self.__cvp_client.api.get_image_bundle_by_container_id(container[Api.generic.KEY])
                     pass
+                # TODO - remove variable e
+                # pylint: disable=unused-variable
                 except CvpApiError as e:
                     message = "Error retrieving image bundle info for container: " + str(container[Api.generic.KEY])
                     MODULE_LOGGER.error(message)

@@ -18,6 +18,9 @@ from tests.data.facts_system_cvaas import FACTS_CONTAINERS_TEST, FACT_DEVICE_TES
 # Set specific logging syntax
 logger = setup_custom_logger('facts_v3_system')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #
@@ -54,6 +57,8 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_get_container_name(self, test_container):
         result = self.inventory._CvFactsTools__get_container_name(key=test_container['container_id'])
+        # TODO - use lazy %s for logging
+        # pylint: disable=logging-format-interpolation
         logger.debug('Got response from module: {0}'.format(result))
         if test_container['is_present_expected']:
             assert result == test_container['name_expected']

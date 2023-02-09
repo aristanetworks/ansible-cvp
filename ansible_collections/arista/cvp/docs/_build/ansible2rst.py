@@ -44,6 +44,9 @@ except ImportError:
 
 from ansible import __version__ as ansible_version
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 #####################################################################################
 # constants and paths
 

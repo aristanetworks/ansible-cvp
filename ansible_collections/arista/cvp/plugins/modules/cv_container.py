@@ -119,6 +119,10 @@ MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container')
 MODULE_LOGGER.info('Start cv_container module execution')
 
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
+
 def create_builtin_containers(facts):
     """
     Update builtin containers with root container name
@@ -821,6 +825,9 @@ def main():
     """
     Main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         options={'type': 'dict', 'removed_in_version': '4.0.0', 'removed_from_collection': 'arista.cvp'},
         topology=dict(type='dict', required=True),
