@@ -242,10 +242,14 @@ device_data_invalid = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
 <<<<<<< HEAD
+<<<<<<< HEAD
     'parentContainerName': 'Undefined',  # undefined parent container name
 =======
     'parentContainerName': 'Undefined',
 >>>>>>> c035398 (Added unittests for CvpApiError)
+=======
+    'parentContainerName': 'Undefined',  # undefined parent container name
+>>>>>>> 1828674 (Added tests with fail_json)
     'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 <<<<<<< HEAD
