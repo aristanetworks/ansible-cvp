@@ -2369,12 +2369,18 @@ class CvDeviceTools(object):
                             device_data["warnings"].append(
                                 {"device": device.hostname, "warnings": err_msg}
                             )
+                            result_data.add_warning(
+                                {"device": device.hostname, "warnings": err_msg}
+                            )
                         if "errors" in resp:
                             err_msg = resp["errors"]
                             msg = f"Configlet validation failed with {err_msg}"
                             result_data.success = True
                             MODULE_LOGGER.error(msg)
                             device_data["errors"].append(
+                                {"device": device.hostname, "errors": err_msg}
+                            )
+                            result_data.add_errors(
                                 {"device": device.hostname, "errors": err_msg}
                             )
                     results.append(result_data)
@@ -2393,8 +2399,7 @@ class CvDeviceTools(object):
                 ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
             ]:
                 self.__ansible.fail_json(msg=message, configlets_validated=device_data)
-            else:
-                self.__ansible.exit_json(msg=message, configlets_validated=device_data)
+
         elif len(device_data["warnings"]) > 0:
             message = (
                 f"Encountered {len(device_data['warnings'])} warnings during"
@@ -2402,12 +2407,6 @@ class CvDeviceTools(object):
             )
             if validate_mode == ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING:
                 self.__ansible.fail_json(msg=message, configlets_validated=device_data)
-            if validate_mode in [
-                ModuleOptionValues.VALIDATE_MODE_STOP_ON_ERROR,
-            ]:
-                self.__ansible.exit_json(msg=message, configlets_validated=device_data)
-            else:
-                return results
         return results
 
     # ------------------------------------------ #

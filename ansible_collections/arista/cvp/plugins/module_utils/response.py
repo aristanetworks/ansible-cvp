@@ -20,7 +20,6 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 from typing import Any
 import logging
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
@@ -33,6 +32,8 @@ FIELD_COUNT = '_count'
 FIELD_CHANGE_LIST = '_list'
 FIELD_DIFFS = 'diff'
 FIELD_DIFF = 'diff'
+FIELD_WARNINGS = 'warnings'
+FIELD_ERRORS = 'errors'
 
 
 class CvApiResult():
@@ -68,6 +69,8 @@ class CvApiResult():
         self.__diff = None
         self.__list_changes = list()
         self.__action_name = action_name
+        self.__warnings = []
+        self.__errors = []
 
     @property
     def name(self):
@@ -193,6 +196,14 @@ class CvApiResult():
     def list_changes(self):
         return self.__list_changes
 
+    @property
+    def warnings(self):
+        return self.__warnings
+
+    @property
+    def errors(self):
+        return self.__errors
+
     def add_entry(self, entry: str):
         """
         add_entry Add an event to CvActionResult object
@@ -218,6 +229,32 @@ class CvApiResult():
         """
         self.__count += len(entries)
         self.__list_changes += entries
+
+    def add_warning(self, entry: list):
+        """
+        add_warning Add a warning to CvActionResult object
+
+        Adding an event create an entry in event base and increment count of event
+
+        Parameters
+        ----------
+        entry : str
+            Event message to store
+        """
+        self.__warnings.append(entry)
+
+    def add_errors(self, entry: list):
+        """
+        add_errrors Add an error to CvActionResult object
+
+        Adding an event create an entry in event base and increment count of event
+
+        Parameters
+        ----------
+        entry : str
+            Event message to store
+        """
+        self.__errors.append(entry)
 
     @property
     def taskIds(self):
@@ -269,6 +306,8 @@ class CvApiResult():
         result[self.__action_name + FIELD_COUNT] = self.__count
         result[self.__action_name +
                FIELD_CHANGE_LIST] = self.__list_changes
+        result[FIELD_WARNINGS] = self.__warnings
+        result[FIELD_ERRORS] = self.__errors
         return result
 
 
@@ -304,10 +343,12 @@ class CvManagerResult():
         self.__success = default_success
         self.__changed = False
         self.__counter: int = 0
-        self.__taskIds = []
-        self.__changes = {}
-        self.__diffs = {}
-        self.__changes[self.__name + FIELD_CHANGE_LIST] = []
+        self.__taskIds = list()
+        self.__changes = dict()
+        self.__diffs = dict()
+        self.__changes[self.__name + FIELD_CHANGE_LIST] = list()
+        self.__changes['warnings'] = []
+        self.__changes['errors'] = []
 
     def add_change(self, change: CvApiResult):
         """
@@ -332,6 +373,10 @@ class CvManagerResult():
             self.__changes[self.__name + FIELD_CHANGE_LIST].append(change.name)
             if change.diff is not None:
                 self.__diffs[change.name] = change.diff
+            if change.warnings:
+                self.__changes['warnings'] = list(change.warnings)
+            if change.errors:
+                self.__changes['errors'] = list(change.errors)
 
     @property
     def changed(self):
