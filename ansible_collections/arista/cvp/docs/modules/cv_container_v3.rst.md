@@ -15,6 +15,14 @@ containers with their parent, to create and delete containers on CVP
 side. Module also supports to configure configlets at container level.
 Returns number of created and/or deleted containers
 
+The module doesn't merge the existing container structure with the one
+specified in your playbook's topology; instead, it will try to remove
+unspecified containers from CVP. Existing containers are removed under
+two circumstances:
+
+-   The container has no confliglets attached to it.
+-   Strict apply_mode is set (see below).
+
 ## Module-specific Options
 
 The following options may be specified for this module:
@@ -86,7 +94,7 @@ The following options may be specified for this module:
       tasks:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:
-            topology: "{{CVP_CONTAINERS}}"
+            topology: "{{ containers }}"
 
     # task in strict mode
     - name: Create container topology on CVP
@@ -105,7 +113,7 @@ The following options may be specified for this module:
       tasks:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:
-            topology: "{{CVP_CONTAINERS}}"
+            topology: "{{ containers }}"
             apply_mode: strict
 
 ### Author
