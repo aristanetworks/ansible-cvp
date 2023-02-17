@@ -273,7 +273,7 @@ class CvpChangeControlBuilder:
             id = str(uuid.uuid4())
             if id not in self.__keyStore:
                 self.__keyStore.append(id)
-                return(id)
+                return (id)
             else:
                 # Keep looping until we get a unique ID
                 pass

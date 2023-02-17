@@ -37,11 +37,11 @@ description:
 options:
   gather_subset:
     description:
-      - When supplied, this argument will restrict the facts collected
+      - cv_facts. When supplied, this argument will restrict the facts collected
       - to a given subset.  Possible values for this argument include
-      - all, hardware, config, and interfaces.  Can specify a list of
-      - values to include a larger subset.  Values can also be used
-      - with an initial C(M(!)) to specify that a specific subset should
+      - all, hardware, config, and interfaces. Can specify a list of
+      - values to include a larger subset. Values can also be used
+      - with an initial `!` to specify that a specific subset should
       - not be collected.
     required: false
     default: ['default']

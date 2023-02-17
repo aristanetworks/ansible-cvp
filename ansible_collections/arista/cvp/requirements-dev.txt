@@ -1,4 +1,4 @@
-ansible-core>=2.11.3,<2.13.0
+ansible-core>=2.12.6,<2.15.0,!=2.13.0
 ansible-builder
 ansible-lint
 galaxy-importer>=0.3.1

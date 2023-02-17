@@ -135,6 +135,7 @@ MODULE_LOGGER.info('Start cv_configlet module execution')
 # TODO - use f-strings
 # pylint: disable=consider-using-f-string
 
+
 def get_tasks(taskIds, module):
     taskList = list()
     tasksField = {'workOrderId': 'workOrderId', 'workOrderState': 'workOrderState',

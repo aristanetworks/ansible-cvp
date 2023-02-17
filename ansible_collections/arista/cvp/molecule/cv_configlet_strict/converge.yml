@@ -21,7 +21,7 @@
       arista.cvp.cv_configlet:
         cvp_facts: "{{ansible_facts}}"
         configlets: "{{CVP_CONFIGLETS}}"
-        configlet_filter: ["TRAINING","01TRAINING-01","01TRAINING-02"]
+        configlet_filter: ["TRAINING", "01TRAINING-01", "01TRAINING-02"]
         state: present
         filter_mode: strict
       register: CVP_CONFIGLET_RESULT
