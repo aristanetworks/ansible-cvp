@@ -879,7 +879,6 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug("DEBUG == Calling action result")
         action_result = self.validate_config(user_inventory=user_inventory, validate_mode=validate_mode)
         MODULE_LOGGER.debug("action_result is: {0}".format(action_result))
-        #import epdb; epdb.serve(port=8080)
         if action_result is not None:
             MODULE_LOGGER.debug("action_result is: {0}".format(action_result))
 
