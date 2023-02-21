@@ -1484,6 +1484,7 @@ class CvDeviceTools(object):
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
             )
+<<<<<<< HEAD
             if (
                 device.configlets is None
                 or current_container_info[Api.generic.NAME]
@@ -1492,6 +1493,9 @@ class CvDeviceTools(object):
                 MODULE_LOGGER.debug(
                     "The device is in undefined container"
                 )
+=======
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+>>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
 
             # GET IMAGE BUNDLE
@@ -1624,11 +1628,15 @@ class CvDeviceTools(object):
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
             )
+<<<<<<< HEAD
             if (
                 device.configlets is None
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
+=======
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+>>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
 
             # GET IMAGE BUNDLE
@@ -1722,6 +1730,7 @@ class CvDeviceTools(object):
         )
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Applying configlet for device: %s", str(device.fqdn))
+<<<<<<< HEAD
             result_data = CvApiResult(action_name=device.fqdn + "_configlet_attached")
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
@@ -1731,6 +1740,13 @@ class CvDeviceTools(object):
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
+=======
+            result_data = CvApiResult(action_name=device.fqdn + '_configlet_attached')
+            current_container_info = self.get_container_current(
+                device_lookup=device.info[self.__search_by]
+            )
+            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
+>>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
             # get configlet information from CV
             configlets_attached = []
@@ -2009,6 +2025,7 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_lookup=device.info[self.__search_by]
                 )
+<<<<<<< HEAD
                 MODULE_LOGGER.debug(
                     "Device {0} is currently under {1}".format(
                         device.fqdn, current_container_info[Api.generic.NAME]
@@ -2021,6 +2038,12 @@ class CvDeviceTools(object):
                     current_container_info[Api.generic.NAME]
                     == Api.container.UNDEFINED_CONTAINER_NAME
                 ):
+=======
+                MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
+                    device.fqdn, current_container_info[Api.generic.NAME]))
+                device_info = self.get_device_facts(device_lookup=device.info[self.__search_by])
+                if (current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_NAME):
+>>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                     if self.__check_mode:
                         result_data.changed = True
                         result_data.success = True
