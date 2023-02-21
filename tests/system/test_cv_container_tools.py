@@ -12,7 +12,7 @@ import logging
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, CvContainerTools
 from tests.system.constants_data import STATIC_CONFIGLET_NAME_DETACH, STATIC_CONFIGLET_NAME_ATTACH
-from tests.lib import mock, mock_ansible
+from tests.lib import mock_ansible
 from tests.lib.helpers import time_log
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login, get_container_name_id, get_unit_container, get_topology_user_input
@@ -20,6 +20,8 @@ from tests.lib.utils import cvp_login, get_container_name_id, get_unit_container
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management

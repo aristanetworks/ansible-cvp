@@ -132,6 +132,9 @@ from ansible_collections.arista.cvp.plugins.module_utils import schema_v1 as sch
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 def get_tasks(taskIds, module):
     taskList = list()

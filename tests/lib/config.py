@@ -5,6 +5,9 @@
 """
 import os
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 def strtobool(val):
     """

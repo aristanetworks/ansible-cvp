@@ -261,7 +261,7 @@ class CvApiResult():
         dict
             Dictionary with all values
         """
-        result = dict()
+        result = {}
         result[FIELD_SUCCESS] = self.__success
         result[FIELD_CHANGED] = self.__changed
         result[FIELD_TASKIDS] = self.__taskIds
@@ -304,10 +304,10 @@ class CvManagerResult():
         self.__success = default_success
         self.__changed = False
         self.__counter: int = 0
-        self.__taskIds = list()
-        self.__changes = dict()
-        self.__diffs = dict()
-        self.__changes[self.__name + FIELD_CHANGE_LIST] = list()
+        self.__taskIds = []
+        self.__changes = {}
+        self.__diffs = {}
+        self.__changes[self.__name + FIELD_CHANGE_LIST] = []
 
     def add_change(self, change: CvApiResult):
         """

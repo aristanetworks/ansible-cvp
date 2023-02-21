@@ -110,6 +110,9 @@ from ansible_collections.arista.cvp.plugins.module_utils.container_tools import 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_container_v3')
 MODULE_LOGGER.info('Start cv_container_v3 module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 def check_import(ansible_module: AnsibleModule):
     """
@@ -131,6 +134,9 @@ def main():
     """
     Main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         # Topology to configure on CV side.
         topology=dict(type='dict', required=True),

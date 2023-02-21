@@ -13,6 +13,10 @@ from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 im
 from tests.lib.parametrize import generate_inventory_data
 
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
+
 # --------------------------------------------------------
 # Container format validation
 # --------------------------------------------------------

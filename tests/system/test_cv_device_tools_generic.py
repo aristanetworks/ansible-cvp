@@ -26,6 +26,9 @@ from tests.lib.utils import cvp_login
 ssl._create_default_https_context = ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #

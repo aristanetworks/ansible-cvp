@@ -241,6 +241,9 @@ def main():
     """
     Main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     MODULE_LOGGER.info('Start cv_tag_v3 module execution')
     argument_spec = dict(
         # Topology to configure on CV side.

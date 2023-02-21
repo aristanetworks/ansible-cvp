@@ -6,9 +6,7 @@
 # flake8: noqa: W1202
 
 from __future__ import absolute_import, division, print_function
-from tests.lib.parametrize import generate_flat_data
 from ansible_collections.arista.cvp.plugins.module_utils.tools_cv import cv_connect
-import logging
 import pytest
 from unittest import mock
 

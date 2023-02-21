@@ -168,7 +168,7 @@ def match_filter(input, filter, default_always='all'):
 
 
 def cv_update_configlets_on_device(module, device_facts, add_configlets, del_configlets):
-    response = dict()
+    response = {}
     device_deletion = None
     device_addition = None
     # Initial Logging

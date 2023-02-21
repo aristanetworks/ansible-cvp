@@ -95,6 +95,9 @@ from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_tasks')
 MODULE_LOGGER.info('Start cv_tasks module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 def get_id(task):
     return task.get("workOrderId")
