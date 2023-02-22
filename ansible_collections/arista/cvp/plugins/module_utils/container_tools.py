@@ -830,7 +830,7 @@ class CvContainerTools(object):
                 if self.__check_mode:
                     change_result.success = True
                     change_result.changed = True
-                    change_result.add_entry(container[Api.generic.NAME])
+                    change_result.add_entry(container)
                 else:
                     try:
                         resp = self.__cvp_client.api.add_container(
