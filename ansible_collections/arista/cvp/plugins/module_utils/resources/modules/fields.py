@@ -29,6 +29,8 @@ class ModuleOptionValues():
     VALIDATE_MODE_IGNORE: str = 'ignore'
     VALIDATE_MODE_STOP_ON_WARNING: str = 'stop_on_warning'
     VALIDATE_MODE_STOP_ON_ERROR: str = 'stop_on_error'
+    INVENTORY_MODE_LOOSE: str = 'loose'
+    INVENTORY_MODE_STRICT: str = 'strict'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
     STATE_MODE_DECOMM: str = 'absent'

@@ -627,11 +627,47 @@ class CvDeviceTools(object):
             self.__ansible.fail_json(msg=error_message)
         return True
 
-    def __state_present(
-        self,
-        user_inventory: DeviceInventory,
-        apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
-    ):
+    def __remove_missing_devices(self, user_inventory: DeviceInventory):
+        """
+        __remove_missing_devices Check if devices are present on Cloudvision and remove missing devices from the user_inventory
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+
+        Returns
+        -------
+        DeviceInventory
+            Device inventory where missing devices are removed
+        """
+
+        # Use dict to map the relevant attribute of the device to use for search
+        DEVICE_SEARCH_ATTRIBUTE = {
+            Api.device.HOSTNAME: "fqdn",
+            Api.device.FQDN: "fqdn",
+            Api.device.SYSMAC: "system_mac",
+            Api.device.SERIAL: "serial_number",
+        }
+
+        MODULE_LOGGER.debug('Remove missing devices from user_inventory')
+
+        # Loop through devices and record index of missing ones for later removal
+        missing_devices_indexes: list = []
+        for index, device in enumerate(user_inventory.devices):
+            device_search_key = getattr(device, DEVICE_SEARCH_ATTRIBUTE[self.__search_by], "fqdn")
+            if self.is_device_exist(device_search_key, search_mode=self.__search_by) is False:
+                    missing_devices_indexes.append(index)
+                    MODULE_LOGGER.debug('Device not present in CVP, removing from user_inventory: %s', device_search_key)
+
+        # Remove missing devices from list - reversed to not change indexes.
+        missing_devices_indexes.reverse()
+        for index in missing_devices_indexes:
+            user_inventory.devices.pop(index)
+
+        return user_inventory
+
+    def __state_present(self, user_inventory: DeviceInventory, apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
         """
         __state_present Execute actions when user configures state=present
 
@@ -669,8 +705,12 @@ class CvDeviceTools(object):
         )
         response = CvAnsibleResponse()
 
-        # Check if all devices are present on CV
-        self.__check_devices_exist(user_inventory=user_inventory)
+        if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
+            # Remove missing devices on CV from inventory (ignore missing)
+            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+        else:
+            # Check if all devices are present on CV (fail on missing)
+            self.__check_devices_exist(user_inventory=user_inventory)
 
         # Refresh UserInventory data with data from Cloudvision
         user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
@@ -745,7 +785,7 @@ class CvDeviceTools(object):
 
         return response
 
-    def __state_factory_reset(self, user_inventory: DeviceInventory):
+    def __state_factory_reset(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
         """
         __state_factory_reset Execute actions when user configures state=factory_reset
 
@@ -765,8 +805,12 @@ class CvDeviceTools(object):
         response = CvAnsibleResponse()
         cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_RESET)
 
-        # Check if all user defined devices are present in CV
-        self.__check_devices_exist(user_inventory=user_inventory)
+        if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
+            # Remove missing devices on CV from inventory (ignore missing)
+            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+        else:
+            # Check if all devices are present on CV (fail on missing)
+            self.__check_devices_exist(user_inventory=user_inventory)
 
         user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
 
@@ -779,7 +823,7 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_provisioning_reset(self, user_inventory: DeviceInventory):
+    def __state_provisioning_reset(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
         """
         __state_provisioning_reset Execute actions when user configures state=provisioning_reset
 
@@ -800,8 +844,12 @@ class CvDeviceTools(object):
         response = CvAnsibleResponse()
         cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_REMOVED)
 
-        # Check if all user defined devices are present in CV
-        self.__check_devices_exist(user_inventory=user_inventory)
+        if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
+            # Remove missing devices on CV from inventory (ignore missing)
+            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+        else:
+            # Check if all devices are present on CV (fail on missing)
+            self.__check_devices_exist(user_inventory=user_inventory)
 
         user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
 
@@ -814,7 +862,7 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_absent(self, user_inventory: DeviceInventory):
+    def __state_absent(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
         """
         __state_absent Execute actions when user configures state=absent
 
@@ -836,8 +884,12 @@ class CvDeviceTools(object):
             builder_name=DeviceResponseFields.DEVICE_DECOMMISSIONED
         )
 
-        # Check if all user defined devices are present in CV
-        self.__check_devices_exist(user_inventory=user_inventory)
+        if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
+            # Remove missing devices on CV from inventory (ignore missing)
+            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+        else:
+            # Check if all devices are present on CV (fail on missing)
+            self.__check_devices_exist(user_inventory=user_inventory)
 
         user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
 
@@ -1326,6 +1378,7 @@ class CvDeviceTools(object):
         search_mode: str = Api.device.HOSTNAME,
         apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
         state: str = ModuleOptionValues.STATE_MODE_PRESENT,
+        inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT,
     ):
         """
         manager Main entry point to support all device
@@ -1345,6 +1398,8 @@ class CvDeviceTools(object):
             Define how manager will apply configlets to device: loose (only attach listed configlet) or strict (attach listed configlet, remove others)
         state: str, optional
             Define if devices must be provisioned or reset to default configuration.
+        inventory_mode: str, optional
+            Define how manager will handle missing devices: loose (ignore missing devices) or strict (fail on missing devices)
 
         Returns
         -------
@@ -1356,22 +1411,20 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug("Manager search mode is set to: %s", str(self.__search_by))
 
         if state == ModuleOptionValues.STATE_MODE_PRESENT:
-            MODULE_LOGGER.info("Processing data to create/update devices")
-            response = self.__state_present(
-                user_inventory=user_inventory, apply_mode=apply_mode
-            )
+            MODULE_LOGGER.info('Processing data to create/update devices')
+            response = self.__state_present(user_inventory=user_inventory, apply_mode=apply_mode, inventory_mode=inventory_mode)
 
         elif state == ModuleOptionValues.STATE_MODE_ABSENT:
-            MODULE_LOGGER.info("Processing data to reset devices")
-            response = self.__state_factory_reset(user_inventory=user_inventory)
+            MODULE_LOGGER.info('Processing data to reset devices')
+            response = self.__state_factory_reset(user_inventory=user_inventory, inventory_mode=inventory_mode)
 
         elif state == ModuleOptionValues.STATE_MODE_REMOVE:
-            MODULE_LOGGER.info("Processing data to reset devices")
-            response = self.__state_provisioning_reset(user_inventory=user_inventory)
+            MODULE_LOGGER.info('Processing data to reset devices')
+            response = self.__state_provisioning_reset(user_inventory=user_inventory, inventory_mode=inventory_mode)
 
         elif state == ModuleOptionValues.STATE_MODE_DECOMM:
-            MODULE_LOGGER.info("Processing data to decommission devices")
-            response = self.__state_absent(user_inventory=user_inventory)
+            MODULE_LOGGER.info('Processing data to decommission devices')
+            response = self.__state_absent(user_inventory=user_inventory, inventory_mode=inventory_mode)
 
         return response.content
 
@@ -1484,7 +1537,6 @@ class CvDeviceTools(object):
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
             )
-<<<<<<< HEAD
             if (
                 device.configlets is None
                 or current_container_info[Api.generic.NAME]
@@ -1493,9 +1545,6 @@ class CvDeviceTools(object):
                 MODULE_LOGGER.debug(
                     "The device is in undefined container"
                 )
-=======
-            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
->>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
 
             # GET IMAGE BUNDLE
@@ -1628,15 +1677,11 @@ class CvDeviceTools(object):
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
             )
-<<<<<<< HEAD
             if (
                 device.configlets is None
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
-=======
-            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
->>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
 
             # GET IMAGE BUNDLE
@@ -1730,7 +1775,6 @@ class CvDeviceTools(object):
         )
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Applying configlet for device: %s", str(device.fqdn))
-<<<<<<< HEAD
             result_data = CvApiResult(action_name=device.fqdn + "_configlet_attached")
             current_container_info = self.get_container_current(
                 device_lookup=device.info[self.__search_by]
@@ -1740,13 +1784,6 @@ class CvDeviceTools(object):
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
-=======
-            result_data = CvApiResult(action_name=device.fqdn + '_configlet_attached')
-            current_container_info = self.get_container_current(
-                device_lookup=device.info[self.__search_by]
-            )
-            if (device.configlets is None or current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_ID):
->>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                 continue
             # get configlet information from CV
             configlets_attached = []
@@ -2025,7 +2062,7 @@ class CvDeviceTools(object):
                 current_container_info = self.get_container_current(
                     device_lookup=device.info[self.__search_by]
                 )
-<<<<<<< HEAD
+
                 MODULE_LOGGER.debug(
                     "Device {0} is currently under {1}".format(
                         device.fqdn, current_container_info[Api.generic.NAME]
@@ -2038,12 +2075,6 @@ class CvDeviceTools(object):
                     current_container_info[Api.generic.NAME]
                     == Api.container.UNDEFINED_CONTAINER_NAME
                 ):
-=======
-                MODULE_LOGGER.debug('Device {0} is currently under {1}'.format(
-                    device.fqdn, current_container_info[Api.generic.NAME]))
-                device_info = self.get_device_facts(device_lookup=device.info[self.__search_by])
-                if (current_container_info[Api.generic.NAME] == Api.container.UNDEFINED_CONTAINER_NAME):
->>>>>>> 0800903 (Refactor: Avoid redundant API calls)
                     if self.__check_mode:
                         result_data.changed = True
                         result_data.success = True
