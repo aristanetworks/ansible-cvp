@@ -1,3 +1,4 @@
+# error configlet
 validate_router_bgp = {
     "config": "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111",
     "containerCount": 0,
@@ -17,6 +18,7 @@ validate_router_bgp = {
     "user": "cvpadmin",
     "visible": True,
 }
+
 # warning configlet
 validate_intf = {'config': 'interface Ethernet10\n  description test\n!\n',
     'containerCount': 0,
@@ -35,7 +37,7 @@ validate_intf = {'config': 'interface Ethernet10\n  description test\n!\n',
     'typeStudioConfiglet': False,
     'user': 'cvpadmin',
     'visible': True}
-# device_data = [{'serialNumber': 'BAD032986065E8DC14CBB6472EC314A6', 'fqdn': 'tp-avd-leaf1', 'hostname': 'tp-avd-leaf1', 'parentContainerName': 'TP_LEAF1', 'configlets': ['validate_ruter_bgp']}, {'serialNumber': '0123F2E4462997EB155B7C50EC148767', 'fqdn': 'tp-avd-leaf2', 'hostname': 'tp-avd-leaf2', 'parentContainerName': 'TP_LEAF1', 'configlets': ['validate_intf']}]
+
 # true configlet
 validate_true = {'config': 'interface Ethernet1\n  description test_validate',
     'containerCount': 0,
@@ -55,6 +57,7 @@ validate_true = {'config': 'interface Ethernet1\n  description test_validate',
     'user': 'cvpadmin',
     'visible': True}
 
+# return value when input is validate_true
 return_validate_true = {'id': 'Arista-3-4135109651348942',
  'jsonrpc': '2.0',
  'result': [{'messages': ['Copy completed successfully.'],
@@ -96,6 +99,7 @@ return_validate_true = {'id': 'Arista-3-4135109651348942',
  'warningCount': 0,
  'warnings': []}
 
+# return value when input is validate_intf
 return_validate_intf = {'id': 'Arista-3-3551555206824559',
  'jsonrpc': '2.0',
  'result': [{'messages': ['Copy completed successfully.'],
@@ -145,6 +149,7 @@ return_validate_intf = {'id': 'Arista-3-3551555206824559',
  'warnings': ['! Interface does not exist. The configuration will not take '
               'effect until the module is inserted. at line 1']}
 
+# return value when input is validate_ruter_bgp
 return_validate_ruter_bgp = {'errorCount': 2,
  'errors': [{'error': "> ruter bgp 1111% Invalid input (at token 0: 'ruter') "
                       'at line 1',
@@ -155,12 +160,14 @@ return_validate_ruter_bgp = {'errorCount': 2,
  'warningCount': 0,
  'warnings': []}
 
+# validate_config_for_device() i/p to o/p matrix
 return_validate_config_for_device = {
     'return_validate_true' : return_validate_true,
     'return_validate_intf' : return_validate_intf,
     'return_validate_ruter_bgp' : return_validate_ruter_bgp
 }
 
+# mock device data
 device_data = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148767',
     'systemMacAddress': '50:08:00:b1:5b:0b',
@@ -170,6 +177,7 @@ device_data = [{
     'parentContainerName': 'TP_LEAF1',
     'configlets': ['']}] # this is dummy device_data that has no effect
 
+# expected warning output
 EXP_WARN = {
     'warnings': [
         {'device': 'tp-avd-leaf2',
@@ -183,6 +191,7 @@ EXP_WARN = {
     'taskIds': []
 }
 
+# expected output for mode:ignore and warning configlet
 EXP_WARN_IGNORE = {
     'success': True,
     'changed': True,
@@ -191,6 +200,8 @@ EXP_WARN_IGNORE = {
     'validate_intf_on_tp-avd-leaf2_validated_count': 1,
     'validate_intf_on_tp-avd-leaf2_validated_list': ['validate_intf_validated_against_tp-avd-leaf2']
 }
+
+# expected error output
 EXP_ERROR = {
     'warnings': [],
     'errors': [
@@ -207,6 +218,7 @@ EXP_ERROR = {
     'taskIds': []
 }
 
+# expected valid output
 EXP_VALID = {
     'success': True,
     'changed': True,
