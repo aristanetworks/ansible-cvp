@@ -51,7 +51,7 @@ options:
     choices: ['loose', 'strict']
     type: str
   inventory_mode:
-    description: Set how missing devices are handled. "loose" will ignore missing devices. "strict" will fail on any missing device.
+    description: Define how missing devices are handled. "loose" will ignore missing devices. "strict" will fail on any missing device.
     required: false
     default: 'strict'
     choices: ['loose', 'strict']

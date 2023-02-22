@@ -3,6 +3,7 @@
 | Variable | Type | Required | Default | Choices | Description |
 | -------- | ---- | -------- | ------- | ------------------ | ----------- |
 | apply_mode | str | No | loose | loose<br>strict | Set how configlets are attached/detached on device. If set to strict all configlets not listed in your vars are detached |
+| inventory_mode | str | No | strict | loose<br>strict | Define how missing devices are handled. "loose" will ignore missing devices. "strict" will fail on any missing device |
 | search_key | str | No | hostname | fqdn<br>hostname<br>serialNumber | Key name to use to look for device in CloudVision |
 | state | str| No | present | present<br>factory_reset<br>provisioning_reset<br>absent | Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision |
 | devices | List | Yes |  |  | List of devices with their container and configlets information |
