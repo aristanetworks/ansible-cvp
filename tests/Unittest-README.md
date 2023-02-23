@@ -19,7 +19,7 @@ The structure of unit tests are described below
 
 - Create your unittest file under `tests/unit` following the naming convention mentioned in the [above section](#unit-test-structure).
 - If the file is already present, add your unittests in the file.
-- Each function in the **file-under-test**(example: `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py`) should be placed in a class of its own with the class name starting with `Test` followed by the function's name.
+- Each function in the **file-under-test** (example: `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py`) should be placed in a class of its own with the class name starting with `Test` followed by the function's name.
 
 ```python
 class TestValidateConfig():
@@ -66,7 +66,7 @@ class TestValidateConfig():
 
 ### Fixtures
 
-Fixtures are used to prepare the context for the tests. It can include environment( *`CVP` configured with some topology* ) as well as content( *`CVP` configured with some configlet* ). Some important fixures are described below. For more information, please refer to the [conftest](./unit/conftest.py) file.
+Fixtures are used to prepare the context for the tests. It can include environment (*`CVP` configured with some topology*) as well as content (*`CVP` configured with some configlet*). Some important fixures are described below. For more information, please refer to the [conftest](./unit/conftest.py) file.
 
 - `apply_mock()`: Factory function to return a method to apply mocker.patch() on paths
 - `mock_cvpClient()`: mock cvprac classes and objects
