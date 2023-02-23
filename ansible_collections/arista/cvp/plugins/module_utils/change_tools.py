@@ -45,6 +45,7 @@ MODULE_LOGGER.info('Start change_tools module execution')
 # TODO - use f-strings
 # pylint: disable=consider-using-f-string
 
+
 class CvChangeControlInput(object):
     def __init__(self, user_change: dict, schema=schema.SCHEMA_CV_CHANGE_CONTROL) -> None:
         self.__user_change = user_change
