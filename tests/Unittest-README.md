@@ -1,10 +1,12 @@
 # Ansible CVP Unit testing
 
 ## Unit test structure
-The structure of unittests are described below
-- **`tests/unit`**: Contains all unittests 
-  - Filename start with `test_` followed by the name of the file it's testing. 
-    - For eg: Unittests for `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py` will be under `tests/unit/test_cv_device_tools.py`
+
+The structure of unit tests are described below
+
+- **`tests/unit`**: Contains all unittests
+  - Filename start with `test_` followed by the name of the file it's testing.
+    - For example: Unittests for `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py` will be under `tests/unit/test_cv_device_tools.py`
   - `tests/unit/conftest.py`: This is a special python script that defines all the fixtures available for use while testing `ansible-cvp` modules
 - **`tests/lib`**: Contains library functions
   - **`tests/lib/mockMagic.py`**: Contains mock cvprac functions
@@ -12,10 +14,12 @@ The structure of unittests are described below
 - **`tests/data`**: Contains faked datasets for use by the mocked cvprac functions
 
 ## Write unittests
+
 ### General guidelines
-- Create your unittest file under `tests/unit` following the naming convention mentioned in the [above section](#unit-test-structure)
-- If the file is already present, add your unittests in the file. 
-- Each function in the __file-under-test__(eg: `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py`) should be placed in a class of it's own with the class name starting with `Test` followed by the name of the function.
+
+- Create your unittest file under `tests/unit` following the naming convention mentioned in the [above section](#unit-test-structure).
+- If the file is already present, add your unittests in the file.
+- Each function in the **file-under-test**(example: `ansible_collection/arista/cvp/plugins/module_utils/device_tools.py`) should be placed in a class of its own with the class name starting with `Test` followed by the function's name.
 
 ```python
 class TestValidateConfig():
@@ -24,7 +28,8 @@ class TestValidateConfig():
     """
 ...
 ```
-- Add tags to run cases selectively
+
+- Add tags to run cases selectively.
 
 ```python
 @pytest.mark.api
@@ -32,8 +37,8 @@ class TestValidateConfig():
 ```
 
 > Tags must be defined in [pytest.ini](./pytest.ini) file.
-
 > Tags can be added at `class` or `test` level.
+
 ```python
 @pytest.mark.api
 class TestFoo(..):
@@ -44,6 +49,7 @@ class TestBar(...):
   def test_bar_scenario1(...):
     ...
 ```
+
 - Place the test suite within this class.
 
 ```python
@@ -57,15 +63,21 @@ class TestValidateConfig():
       pass
     ....
 ```
+
 ### Fixtures
-Fixtures are used to prepare the context for the tests. It can include environment(_`CVP` configured with some topology_) as well as content(_`CVP` configured with some configlet_). Some important fixures are described below. For more information, please refer to this file: `tests/unit/conftest.py`
+
+Fixtures are used to prepare the context for the tests. It can include environment( *`CVP` configured with some topology* ) as well as content( *`CVP` configured with some configlet* ). Some important fixures are described below. For more information, please refer to the [conftest](./unit/conftest.py) file.
+
 - `apply_mock()`: Factory function to return a method to apply mocker.patch() on paths
 - `mock_cvpClient()`: mock cvprac classes and objects
 
-For more info on pytest fixtures refer to [this](https://docs.pytest.org/en/7.1.x/how-to/fixtures.html) link
+For more info on pytest fixtures refer to the official [pytest documentation](https://docs.pytest.org/en/7.1.x/how-to/fixtures.html)
 
 #### How to use Fixtures
-A test function can request a fixture by declaring them as arguments in the function definition. For eg:
+
+A test function can request a fixture by declaring them as arguments in the function definition.
+For example:
+
 ```python
 def test_foo(apply_mock):
   mock_foo = apply_mock("path.to.original.foo")
@@ -73,10 +85,13 @@ def test_foo(apply_mock):
 ```
 
 ### Setup and Teardown functions
-Setup and Teardown functions are used to set up and clear up state for testing. They are executed before and after every test in a test suite. 
+
+Setup and Teardown functions are used to set up and clear up state for testing. They are executed before and after every test in a test suite.
 
 #### How to write setup and teardown function
+
 Setup/Teardown functions can be written as a fixture and called at the beginning and end of each test.
+
 ```python
 @pytest.fixture
 def setup(fixture1, fixture2):
@@ -93,7 +108,8 @@ def test_foo(setup, ...):
 ```
 
 ### Parameterizing the tests
-Pytest allows to easily parameterize tests in which case they will be called multiple times, each time with different set of inputs. 
+
+Pytest allows you to easily parameterize tests, in which case they will be called multiple times, each time with a different set of inputs.
 
 Use the decorator `@pytest.mark.parameterize` to parametrize arguments for a test function.
 
@@ -132,7 +148,7 @@ pytest -rA --cov-report term:skip-covered -v --cov-report term:skip-covered \
 
 ```bash
 # Configlet Unit testing
-$ make test TESTS=unit/test_configlet_input.py
+make test TESTS=unit/test_configlet_input.py
 
 # Run all tests related to configlets with logging in CLI set to INFO
 make test TAG='configlet' CLI_LOGGING=INFO
@@ -155,5 +171,4 @@ Results are printed to your screen and also saved in reports:
 - `report.html`: Pytest result with logging
 - `htmlcov/index.html`: Coverage report
 
-> More information on pytest, can be found [here](https://docs.pytest.org/)
-
+> More information on pytest, can be found at the official [pytest documentation](https://docs.pytest.org/).
