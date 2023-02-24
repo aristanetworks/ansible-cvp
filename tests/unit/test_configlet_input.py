@@ -11,17 +11,15 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import ConfigletInput
-from lib.parametrize import generate_CvConfigletTools_content
-from lib.cvaas_configlet import SYSTEM_CONFIGLETS_TESTS
-from lib.json_data import mook_data
 from lib.parametrize import generate_flat_data
-from lib.helpers import time_log, to_nice_json, setup_custom_logger
-import logging
+from lib.helpers import to_nice_json, setup_custom_logger
 import pytest
 
 
 logger = setup_custom_logger(__name__)
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 @pytest.mark.generic
 @pytest.mark.configlet

@@ -164,6 +164,9 @@ def main():
     """
     main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         name=dict(type='str'),
         change=dict(type='dict'),

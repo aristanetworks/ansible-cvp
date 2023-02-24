@@ -11,6 +11,8 @@ import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 from tests.lib.parametrize import generate_cv_response_api_action_name, generate_cv_response_result_manager_name
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   PYTEST

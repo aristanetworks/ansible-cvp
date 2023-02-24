@@ -30,6 +30,8 @@ from tests.system.constants_data import ANSIBLE_CV_SEARCH_MODE, CHECK_MODE, CONT
 ssl._create_default_https_context = ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management

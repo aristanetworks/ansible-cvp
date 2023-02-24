@@ -99,6 +99,9 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_configlet')
 MODULE_LOGGER.info('Start cv_configlet module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 def check_import(ansible_module: AnsibleModule):
     """
@@ -129,6 +132,9 @@ def main():
     """
     Main entry point for module execution.
     """
+    # TODO - ansible module prefers constructor over literal
+    #        for dict
+    # pylint: disable=use-dict-literal
     argument_spec = dict(
         # Topology to configure on CV side.
         configlets=dict(type='dict', required=True),
@@ -146,8 +152,8 @@ def main():
                                    supports_check_mode=True)
     # Instantiate ansible results
     result = dict(changed=False, data={}, failed=False)
-    result['data']['taskIds'] = list()
-    result['data']['tasks'] = list()
+    result['data']['taskIds'] = []
+    result['data']['tasks'] = []
 
     # State management
     is_present = True

@@ -19,6 +19,10 @@ import pytest
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
+
 @pytest.fixture()
 @pytest.mark.parametrize("CVP_CONTAINER", generate_flat_data(type="container"))
 def ContainerInput_Creation(request, CVP_CONTAINER):

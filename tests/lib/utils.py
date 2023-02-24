@@ -13,6 +13,9 @@ from tests.lib.json_data import CONTAINER_IDS
 from tests.data.container_tools_unit import CVP_DEVICES
 from tests.system.constants_data import USER_CONTAINERS, CV_CONTAINERS_NAME_ID_LIST, CVP_DEVICES, CVP_DEVICES_1, CVP_DEVICES_UNKNOWN, CVP_DEVICES_SCHEMA_TEST, CONTAINER_DESTINATION
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 MODULE_LOGGER = logging.getLogger(__name__)
 
 def cvp_login():
@@ -23,6 +26,8 @@ def cvp_login():
     """
     requests.packages.urllib3.disable_warnings()
     cvp_client = CvpClient(log_level=logging.getLevelName(MODULE_LOGGER.getEffectiveLevel()))
+    # TODO - use lazy %s for logging
+    # pylint: disable=logging-format-interpolation
     MODULE_LOGGER.info("Start CV login process at {}".format(time_log()))
     try:
         cvp_client.connect(

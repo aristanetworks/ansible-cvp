@@ -9,7 +9,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.field
 from ansible_collections.arista.cvp.plugins.module_utils.facts_tools import CvFactsTools
 from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas.v3 import SCHEMA_CV_CONFIGLET, SCHEMA_CV_CONTAINER, SCHEMA_CV_DEVICE
-from tests.lib.helpers import AnsibleModuleMock, setup_custom_logger
+from tests.lib.helpers import setup_custom_logger
 from tests.lib.config import user_token
 from tests.lib.utils import cvp_login, generate_test_ids_dict
 from tests.data.facts_system_cvaas import FACTS_CONTAINERS_TEST, FACT_DEVICE_TEST, FACT_FILTER_TEST
@@ -17,6 +17,9 @@ from tests.data.facts_system_cvaas import FACTS_CONTAINERS_TEST, FACT_DEVICE_TES
 
 # Set specific logging syntax
 logger = setup_custom_logger('facts_v3_system')
+
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
@@ -54,6 +57,8 @@ class TestCvContainerToolsContainers():
     @pytest.mark.dependency(depends=["authentication"], scope='class')
     def test_get_container_name(self, test_container):
         result = self.inventory._CvFactsTools__get_container_name(key=test_container['container_id'])
+        # TODO - use lazy %s for logging
+        # pylint: disable=logging-format-interpolation
         logger.debug('Got response from module: {0}'.format(result))
         if test_container['is_present_expected']:
             assert result == test_container['name_expected']

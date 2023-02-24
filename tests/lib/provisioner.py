@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
+# pylint: skip-file
 # pylint: disable=logging-format-interpolation
 # pylint: disable=dangerous-default-value
 # pylint:disable=duplicate-code

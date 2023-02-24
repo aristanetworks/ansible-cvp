@@ -9,13 +9,16 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
 
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: 'v2.5.0'
+  - repo: https://github.com/pycqa/pylint
+    rev: "v2.16.1"
     hooks:
-    - id: pylint # Use pylintrc file in repository
-      name: Check for Linting error on Python files
-      description: This hook runs pylint.
-      exclude: ^.*(docs|tests).*
+      - id: pylint # Use pylintrc file in repository
+        name: Check for Linting errors on Python files
+        description: This hook runs pylint.
+        types: [python]
+        args:
+          # Suppress duplicate code for modules header
+          - -d duplicate-code
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: 'v1.23.0'

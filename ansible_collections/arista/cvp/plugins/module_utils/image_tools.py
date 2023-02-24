@@ -38,6 +38,9 @@ except ImportError:
 MODULE_LOGGER = logging.getLogger('arista.cvp.image_tools')
 MODULE_LOGGER.info('Start image_tools module execution')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
+
 
 class CvImageTools():
     """

@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 import requests
 import logging
 import pytest
-from datetime import datetime
 from ansible_collections.arista.cvp.plugins.module_utils.configlet_tools import CvConfigletTools, ConfigletInput
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult
 from tests.lib.helpers import time_log, AnsibleModuleMock, setup_custom_logger, to_nice_json
@@ -24,6 +23,8 @@ from tests.lib.provisioner import CloudvisionProvisioner
 # Set specific logging syntax
 logger = setup_custom_logger('configlet_system')
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management

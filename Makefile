@@ -138,8 +138,8 @@ github-configure-ci-python3: ## Configure Python3 environment to run GA (Ubuntu:
 .PHONY: install-requirements
 install-requirements: ## Install python requirements for generic purpose
 	pip3 install --upgrade wheel pip
-	pip3 install -r ansible_collections/arista/cvp/requirements.txt
-	pip3 install -r ansible_collections/arista/cvp/requirements-dev.txt
+	pip3 install -r ansible_collections/arista/cvp/requirements.txt --upgrade
+	pip3 install -r ansible_collections/arista/cvp/requirements-dev.txt --upgrade
 
 .PHONY: install-docker
 install-docker: ## Install docker

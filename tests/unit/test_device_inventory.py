@@ -14,6 +14,8 @@ from ansible_collections.arista.cvp.plugins.module_utils.device_tools import Dev
 from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
 from tests.lib.parametrize import generate_inventory_data
 
+# TODO - use f-strings
+# pylint: disable=consider-using-f-string
 
 @pytest.mark.generic
 class TestDeviceInventory():
