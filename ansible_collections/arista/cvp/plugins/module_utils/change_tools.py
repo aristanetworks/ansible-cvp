@@ -57,7 +57,7 @@ class CvChangeControlInput(object):
         check_schemas Validate schemas for user's input
         """
         if not validate_json_schema(user_json=self.__user_change, schema=self.__schema):
-            MODULE_LOGGER.error("Invalid tags input : \n%s", str(self.__user_change))
+            MODULE_LOGGER.error("Invalid change control input : \n%s", str(self.__user_change))
             return False
         return True
 
