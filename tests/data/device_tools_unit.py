@@ -191,14 +191,44 @@ EXP_WARN = {
     'taskIds': []
 }
 
-# expected output for mode:ignore and warning configlet
-EXP_WARN_IGNORE = {
+# expected output for mode:ignore/mode:error and warning configlet
+EXP_WARN_ERROR_IGNORE = {
     'success': True,
     'changed': True,
     'taskIds': [],
     'diff': None,
     'validate_intf_on_tp-avd-leaf2_validated_count': 1,
-    'validate_intf_on_tp-avd-leaf2_validated_list': ['validate_intf_validated_against_tp-avd-leaf2']
+    'validate_intf_on_tp-avd-leaf2_validated_list': ['validate_intf_validated_against_tp-avd-leaf2'],
+    'warnings': [{
+        'device': 'tp-avd-leaf2',
+        'warnings': [
+            '! Interface does not exist. The configuration will not take effect until the module is inserted. at line 1']
+        }
+    ],
+    'errors': []
+}
+
+# expected output for mode:ignore and error configlet
+EXP_ERROR_IGNORE = {
+    'success': True,
+    'changed': True,
+    'taskIds': [],
+    'diff': None,
+    'validate_ruter_bgp_on_tp-avd-leaf2_validated_count': 1,
+    'validate_ruter_bgp_on_tp-avd-leaf2_validated_list': ['validate_ruter_bgp_validated_against_tp-avd-leaf2'],
+    'warnings': [],
+    'errors': [{
+        'device': 'tp-avd-leaf2',
+        'errors': [
+            {
+                'error': "> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1",
+                'lineNo': ' 1'},
+            {
+                'error': ">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2",
+                'lineNo': ' 2'
+            }
+        ]
+    }]
 }
 
 # expected error output
@@ -225,5 +255,7 @@ EXP_VALID = {
     'taskIds': [],
     'diff': None,
     'validate_test_true_on_tp-avd-leaf2_validated_count': 1,
-    'validate_test_true_on_tp-avd-leaf2_validated_list': ['validate_test_true_validated_against_tp-avd-leaf2']
+    'validate_test_true_on_tp-avd-leaf2_validated_list': ['validate_test_true_validated_against_tp-avd-leaf2'],
+    'warnings': [],
+    'errors': []
 }
