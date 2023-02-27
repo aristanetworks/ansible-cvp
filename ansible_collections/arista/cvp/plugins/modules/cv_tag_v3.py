@@ -111,14 +111,14 @@ EXAMPLES = r'''
         mode: assign
         auto_create: true
 
-# Delete device and interface tags
+# Delete device and interface tags using device_id
 - name: cv_tag_v3 example2
   hosts: cv_server
   connection: local
   gather_facts: no
   vars:
     CVP_TAGS:
-      - device: leaf1
+      - device_id: JPE123435
         device_tags:
           - name: tag1
             value: value1
@@ -133,14 +133,14 @@ EXAMPLES = r'''
         tags: "{{CVP_TAGS}}"
         mode: delete
 
-# Create device and interface tags (without assigning to the devices)
+# Create device and interface tags (without assigning to the devices) using device_id
 - name: cv_tag_v3 example3
   hosts: cv_server
   connection: local
   gather_facts: no
   vars:
     CVP_TAGS:
-      - device: leaf1
+      - device_id: JPE123435
         device_tags:
           - name: tag1
             value: value1
