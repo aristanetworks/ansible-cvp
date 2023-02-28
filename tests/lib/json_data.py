@@ -401,3 +401,218 @@ mook_data['valid']['facts']= {
 mook_data['invalid']['facts']= {
     'device_ids': ['00:00:00:00:00:00']
 }
+
+##############################################
+# Changle control examples                   #
+##############################################
+mook_data["valid"]["changecontrol"] = [
+    {
+        "name": "Ansible playbook test change",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "action": "Switch Healthcheck",
+                "name": "Switch1_healthcheck",
+                "arguments": [
+                    {
+                    "name": "DeviceID",
+                    "value": "<device serial number>"
+                    }
+                ],
+                "stage": "Pre-Checks",
+                "timeout": 10
+            }
+        ],
+        "stages": [
+            {
+                "name": "Leaf1a_upgrade",
+                "mode": "parallel",
+                "parent": "Upgrades"
+            },
+            {
+                "name": "Leaf1b_upgrade",
+                "mode": "series",
+                "parent": "Upgrades"
+            }
+        ]
+    },
+    {
+        "name": "Ansible playbook test change",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "name": "Switch1_healthcheck",
+                "arguments": [
+                    {
+                    "name": "DeviceID",
+                    "value": "<device serial number>"
+                    }
+                ],
+                "stage": "Pre-Checks",
+                "task_id": "20",
+                "timeout": 10
+            }
+        ],
+        "stages": [
+            {
+                "name": "Leaf1a_upgrade",
+                "mode": "parallel",
+                "parent": "Upgrades"
+            },
+            {
+                "name": "Leaf1b_upgrade",
+                "mode": "series",
+                "parent": "Upgrades"
+            }
+        ]
+    },
+    {
+        "name": "Leaf1 Pair Change Control",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "action": "mlaghealthcheck",
+                "name": "Check_Leaf1A_MLAG_Health",
+                "arguments": [
+                    {
+                        "name": "DeviceID",
+                        "value": "SN-DC1-POD1-LEAF1A"
+                    }
+                ],
+                "stage": "Leaf_MLAG_Health"
+            },
+            {
+                "action": "mlaghealthcheck",
+                "name": "Check_Leaf1B_MLAG_Health",
+                "arguments": [
+                    {
+                        "name": "DeviceID",
+                        "value": "SN-DC1-POD1-LEAF1B"
+                    }
+                ],
+                "stage": "Leaf_MLAG_Health"
+            },
+            {
+                "task_id": "50",
+                "stage": "Leaf1A_upgrade"
+            },
+            {
+                "task_id": "51",
+                "stage": "Leaf1B_upgrade"
+            }
+        ],
+        "stages": [
+            {
+                "name": "Leaf_MLAG_Health",
+                "mode": "parallel"
+            },
+            {
+                "name": "Leaf Upgrades",
+                "modes": "series"
+            },
+            {
+                "name": "Leaf1A_upgrade",
+                "parent": "Leaf Upgrades"
+            },
+            {
+                "name": "Leaf1B_upgrade",
+                "parent": "Leaf Upgrades"
+            }
+        ]
+    },
+    {
+        "name": "Leaf 1A Change Control",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "action": "mlaghealthcheck",
+                "name": "Check_LEAF1A_MLAG_Health",
+                "arguments": [
+                    {
+                        "name": "DeviceID",
+                        "value": "SN-DC1-POD1-LEAF1A"
+                    }
+                ],
+                "stage": "LEAF1A_MLAG_Health"
+            }
+        ],
+        "stages": [
+            {
+                "name": "LEAF1A_MLAG_Health",
+                "mode": "parallel"
+            }
+        ]
+    }
+]
+
+mook_data["invalid"]["changecontrol"] = [
+    # action and timeout
+    {
+        "name": "Ansible playbook test change",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "action": "Switch Healthcheck",
+                "name": "Switch1_healthcheck",
+                "arguments": [
+                    {
+                    "name": "DeviceID",
+                    "value": "<device serial number>"
+                    }
+                ],
+                "stage": "Pre-Checks",
+                "task_id": "20",
+                "timeout": 10
+            }
+        ],
+        "stages": [
+            {
+                "name": "Leaf1a_upgrade",
+                "mode": "parallel",
+                "parent": "Upgrades"
+            },
+            {
+                "name": "Leaf1b_upgrade",
+                "mode": "series",
+                "parent": "Upgrades"
+            }
+        ]
+    },
+    # no name in stages
+    {
+        "stages": [
+            {
+                "mode": "parallel",
+                "parent": "Upgrades"
+            }
+        ]
+    },
+    # no name in activities[arguments]
+    {
+        "name": "Ansible playbook test change",
+        "notes": "Created via playbook",
+        "activities": [
+            {
+                "action": "Switch Healthcheck",
+                "arguments": [
+                    {
+                    "value": "<device serial number>"
+                    }
+                ],
+                "timeout": 10
+            }
+        ],
+        "stages": [
+            {
+                "name": "Leaf1a_upgrade",
+                "mode": "parallel",
+                "parent": "Upgrades"
+            },
+            {
+                "name": "Leaf1b_upgrade",
+                "mode": "series",
+                "parent": "Upgrades"
+            }
+        ]
+    }
+]
