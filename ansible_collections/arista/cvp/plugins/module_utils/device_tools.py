@@ -1753,11 +1753,12 @@ class CvDeviceTools(object):
 
                 while status != decomm_success:
                     try:
-                        status = self.__cv_client.api.device_decommissioning_status_get_one(req_id)['value']['status']
+                        decomm_state_fact = self.__cv_client.api.device_decommissioning_status_get_one(req_id)
+                        status = decomm_state_fact['value']['status']
                     except CvpRequestError:
                         continue
                     if status == decomm_failure:
-                        err_msg = status['result']['value']['error']
+                        err_msg = decomm_state_fact['value']['error']
                         msg = f"Device decommissioning failed due to {err_msg}"
                         MODULE_LOGGER.error(msg)
                         self.__ansible.fail_json(msg=msg)
