@@ -1,0 +1,17 @@
+---
+all:
+  children:
+    CVP:
+      hosts:
+        CloudVision:
+          ansible_httpapi_host: # ATD address eg. testvalidateconfig-1-0cdc46b0.topo.testdrive.arista.com
+          ansible_host: # ATD address eg. testvalidateconfig-1-0cdc46b0.topo.testdrive.arista.com
+          ansible_user: # lab credential username
+          ansible_password: # lab credential password
+          ansible_connection: httpapi
+          ansible_httpapi_use_ssl: True
+          ansible_httpapi_validate_certs: False
+          ansible_network_os: eos
+          ansible_httpapi_port: 443
+          # Configuration to get Virtual Env information
+          ansible_python_interpreter: $(which python3)
