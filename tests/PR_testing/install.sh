@@ -1,12 +1,7 @@
 #!/bin/bash
 #
 # Purpose: AVD Installation script
-#          Available using curl -fsSL https://get.avd.sh/atd/install.sh | sh
-# Author: @titom73
-# Date: 2020-09-17
-# Update: 2021-01-13
-# Version: 1.2
-# License: Apache 2.0
+# Author: Arista Ansible Team
 # --------------------------------------
 
 # Update PATH to match ATD Jumphost setting
