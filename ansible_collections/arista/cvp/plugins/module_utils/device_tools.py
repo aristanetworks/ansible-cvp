@@ -441,8 +441,6 @@ class CvDeviceTools(object):
 
         if cv_data is not None and len(cv_data) > 0:
             cv_data[Api.device.BUNDLE] = self.__cv_client.api.get_device_image_info(cv_data['key'])
-        else:
-            cv_data[Api.device.BUNDLE] = None
 
         MODULE_LOGGER.debug('Got following data for %s using %s: %s', str(search_value), str(search_by), str(cv_data))
         return cv_data
