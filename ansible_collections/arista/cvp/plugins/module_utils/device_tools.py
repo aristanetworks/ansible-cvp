@@ -1693,7 +1693,7 @@ class CvDeviceTools(object):
                                 str(catch_error),
                             )
                             self.__ansible.fail_json(
-                                msg="Error removing bundle from device"
+                                msg="Error removing bundle from device "
                                 + device.fqdn
                                 + ": "
                                 + catch_error
