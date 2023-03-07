@@ -75,7 +75,7 @@ class TestDetachBundle():
         Test when current_image_bundle is none
         :param setup: fixture
 
-        if both image bundles are same, nothing to do.
+        if current_image_bundle, returns empty list
         """
         user_topology = DeviceInventory(data=device_data)
         _, mock__get_device, cv_tools, mock_get_container_current = setup
@@ -91,7 +91,7 @@ class TestDetachBundle():
         Test when device.image_bundle is not None
         :param setup: fixture
 
-        if both image bundles are same, nothing to do.
+        if device.image_bundle is not None, result_data have default values
         """
         user_topology = DeviceInventory(data=device_data)
         _, mock__get_device, cv_tools, mock_get_container_current = setup
@@ -108,6 +108,7 @@ class TestDetachBundle():
         Test for CvpApiError.
         :param setup: fixture
 
+        if image_bundle['id'] = 'error_id', raises CvpApiError
         """
         device_data[0]['imageBundle'] = None
         user_topology = DeviceInventory(data=device_data)
@@ -124,3 +125,22 @@ class TestDetachBundle():
 
         # resetting imageBundle
         image_bundle['id'] = 'imagebundle_1658329041200536707'
+
+    def test_detach_bundle_check_mode_true(self, setup):
+        """
+        if cv_tools.check_mode is True, result_data is updated
+        """
+        device_data[0]['imageBundle'] = None
+        user_topology = DeviceInventory(data=device_data)
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current = setup
+        mock_get_container_current.return_value = current_container_info
+        mock__get_device.return_value = cv_data
+        cv_tools.check_mode =True
+
+        result = cv_tools.detach_bundle(user_inventory=user_topology)
+        assert result[0].success == True
+        assert result[0].changed == False
+        assert result[0].taskIds == ['check_mode']
+
+        # resetting imageBundle
+        device_data[0]['imageBundle'] = 'EOS-4.25.4M'
