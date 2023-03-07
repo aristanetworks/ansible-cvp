@@ -6,7 +6,7 @@
   vars:
     CVP_DEVICES:
       - serialNumber: leaf1
-        fqdn: leaf1.atd.lab
+        fqdn: leaf1
         hostname: leaf1
         parentContainerName: Leaf
         configlets: #[]

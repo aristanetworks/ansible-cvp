@@ -6,14 +6,22 @@
   vars:
     CVP_DEVICES:
       - serialNumber: leaf1
-        fqdn: leaf1.atd.lab
+        fqdn: leaf1
         hostname: leaf1
         parentContainerName: Leaf
         configlets: #[]
           - validate_error # error
           - validate_valid # valid
           - validate_warning # warning
+    CVP_CONFIGLET:
+      validate_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
+      validate_valid: "interface Ethernet1\n  description test_validate"
+      validate_warning: "interface Ethernet1\n   spanning-tree portfast"
   tasks:
+  - name: "Push configlet"
+    arista.cvp.cv_configlet_v3:
+      configlets: "{{CVP_CONFIGLET}}"
+      state: present
   - name: Validate configurations
     arista.cvp.cv_device_v3:
       devices: "{{CVP_DEVICES}}"
