@@ -195,7 +195,7 @@ class CvConfigletTools(object):
             cv_data = self.get_configlet_data_cv(
                 configlet_name=configlet[Api.generic.NAME])
             if present:
-                if self.is_present(configlet_name=configlet[Api.generic.NAME]):
+                if cv_data is not None:
                     configlet[Api.generic.KEY] = cv_data[Api.generic.KEY]
                     configlet['diff'] = self._compare(
                         fromText=cv_data[Api.generic.CONFIG], toText=configlet[Api.generic.CONFIG], fromName='CVP', toName='Ansible')
@@ -207,7 +207,7 @@ class CvConfigletTools(object):
 
                 else:
                     to_create.append(configlet)
-            elif self.is_present(configlet_name=configlet[Api.generic.NAME]):
+            elif cv_data is not None:
                 configlet[Api.generic.KEY] = cv_data[Api.generic.KEY]
                 configlet['diff'] = self._compare(
                     fromText=cv_data[Api.generic.CONFIG], toText=configlet[Api.generic.CONFIG], fromName='CVP', toName='Ansible')

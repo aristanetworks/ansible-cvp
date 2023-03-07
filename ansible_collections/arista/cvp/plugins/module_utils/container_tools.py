@@ -22,6 +22,7 @@ __metaclass__ = type
 import traceback
 import logging
 import pprint
+from functools import lru_cache
 from typing import List
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.resources.api.fields import Api
@@ -729,6 +730,7 @@ class CvContainerTools(object):
     #   Boolean & getters functions
     #############################################
 
+    @lru_cache
     def is_empty(self, container_name: str):
         """
         is_empty Test if container has no child AND no devices attached to it
@@ -758,6 +760,7 @@ class CvContainerTools(object):
             return True
         return False
 
+    @lru_cache
     def is_container_exists(self, container_name):
         """
         is_container_exists Test if a given container exists on CV
@@ -846,6 +849,10 @@ class CvContainerTools(object):
                             change_result.success = True
                             change_result.changed = True
                             change_result.count += 1
+
+                            # Invalidate the cached result of is_container_exists
+                            self.is_container_exists.cache_clear()
+
         else:
             message = "Parent container (" + str(
                 parent) + ") is missing for container " + str(container)
@@ -918,6 +925,10 @@ class CvContainerTools(object):
                         change_result.success = True
                         change_result.changed = True
                         change_result.count += 1
+
+                        # Invalidate the cached result of is_container_exists
+                        self.is_container_exists.cache_clear()
+
         return change_result
 
     def configlets_attach(self, container: str, configlets: List[str], strict: bool = False):
