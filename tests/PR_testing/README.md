@@ -4,7 +4,8 @@
 - Wait for your topology to deploy and drop into `Programmability IDE`
 - On the terminal, run the install script to setup the environment for testing:
   - `cd persist`
-  - `curl -fsSL https://github.com/aristanetworks/ansible-cvp/tree/devel/tests/PR_testing/install.sh <PR-number> | sh`
+  - `wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh`
+  - `sh install.sh <pr-number>`
   - This script would place the ansible-cvp PR code base under `persist/arista-ansible` and example playbooks under `persist/PR_testing/examples`
 - Edit `persist/PR_testing/inventory.yaml`
   - Update the `ansible_httpapi_host` and `ansible_host` variables under `CloudVision`
@@ -20,6 +21,8 @@
     ...
     ```
 
-- From `persist` directory, you can run the desired playbook and start testing the PR.
+- `cd persist/PR_testing`
+- Run the desired playbook:
+  - `ansible-playbook cv_device_v3/device_validate_config_valid.yaml -i inventory.yaml`
 
 HAPPY TESTING!
