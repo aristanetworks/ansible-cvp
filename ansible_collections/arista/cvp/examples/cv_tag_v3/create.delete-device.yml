@@ -4,14 +4,14 @@
   gather_facts: no
   vars:
     CVP_TAGS:
-      - device_id: leaf1
-      # - device: leaf1.atd.lab
-        device_tags:
-          - name: d_t2
-            value: 123
+      - device_tags:
+          - name: leaf1DTag1
+            value: leaf1DVal1
+          - name: leaf1DTag2
+            value: leaf1DVal2
   tasks:
-    - name: create tags
+    - name: create/delete device tags
       arista.cvp.cv_tag_v3:
         tags: "{{CVP_TAGS}}"
-        # mode: delete
         mode: create
+        # mode: delete
