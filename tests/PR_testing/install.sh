@@ -14,7 +14,8 @@ _GIT=$(which git)
 
 # Local Installation Path
 _INSTALLATION_PATH="arista-ansible"
-_ROOT_INSTALLATION_DIR="${PWD}/${_INSTALLATION_PATH}"
+_PERSIST="/home/coder/project/persist"
+_ROOT_INSTALLATION_DIR="${_PERSIST}/${_INSTALLATION_PATH}"
 
 # List of Arista Repositories
 _REPO_CVP="https://github.com/aristanetworks/ansible-cvp.git"
@@ -22,7 +23,7 @@ _PR_BRANCH="$1"
 
 # Path for local repositories
 _LOCAL_CVP="${_ROOT_INSTALLATION_DIR}/ansible-cvp"
-_LOCAL_EXAMPLE_PLAYBOOKS="${PWD}/PR_testing"
+_LOCAL_EXAMPLE_PLAYBOOKS="${_PERSIST}/PR_testing"
 
 # Print post-installation instructions
 info_installation_done() {
@@ -56,12 +57,12 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     cd ${_LOCAL_CVP}
     echo "input pr branch is ${_PR_BRANCH}"
     ${_GIT} fetch origin pull/${_PR_BRANCH}/head && ${_GIT} checkout FETCH_HEAD > /dev/null 2>&1
-
+    cd ${_PERSIST}
     echo "copying ansible workspace"
-    cp -r ${_LOCAL_CVP}/tests/PR_testing ../../
+    cp -r ${_LOCAL_CVP}/tests/PR_testing ${_PERSIST}
 
     echo "copying example playbooks from ${_REPO_CVP} to /persist"
-    cp -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/examples ../../PR_testing
+    cp -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/examples/* ${_LOCAL_EXAMPLE_PLAYBOOKS}
 
     echo "ansible collection install"
     cd ${_LOCAL_EXAMPLE_PLAYBOOKS}
@@ -72,5 +73,6 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     info_installation_done
 else
     echo "  ! local installation folder already exists - ${_ROOT_INSTALLATION_DIR}"
+
     exit 1
 fi
