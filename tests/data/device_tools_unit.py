@@ -174,8 +174,11 @@ device_data = [{
     'key': '50:08:00:b1:5b:0b',
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
-    'parentContainerName': 'TP_LEAF1',
-    'configlets': ['']}] # this is dummy device_data that has no effect
+    'parentContainerName': 'TP_LEAF1',  
+    'parentContainerId': 'TP_LEAF1',
+    'configlets': [''],
+    'imageBundle': 'EOS-4.25.4M',
+}] # this is dummy device_data that has no effect
 
 # expected warning output
 EXP_WARN = {
@@ -227,3 +230,29 @@ EXP_VALID = {
     'validate_test_true_on_tp-avd-leaf2_validated_count': 1,
     'validate_test_true_on_tp-avd-leaf2_validated_list': ['validate_test_true_validated_against_tp-avd-leaf2']
 }
+
+current_container_info = {
+    'name': 'TP_LEAF1',
+    'key': 'container_208aadc9-ecc0-4970-b524-6712a0baaade'
+}
+
+cv_data = {
+    'serialNumber': '0123F2E4462997EB155B7C50EC148767',
+    'systemMacAddress': '50:08:00:b1:5b:0b',
+    'key': '50:08:00:b1:5b:0b',
+    'fqdn': 'tp-avd-leaf2',
+    'hostname': 'tp-avd-leaf2',
+    'parentContainerName': 'TP_LEAF1',
+    'configlets': [''],
+    'imageBundle': {
+        'macAddress': '00:1c:73:f1:7b:f6',
+        'serialNumber': '7F75B66299C7E195ECC5DAA490511D47',
+        'eosVersion': '4.28.1F',
+        'fqdn': 'leaf4.atd.lab',
+        'imageBundleMapper': {'imagebundle_1658329041200536707': {'name': '', 'id': '00:1c:73:b8:26:81', 'type': 'netelement'}},
+        'ipAddress': '192.168.0.15',
+        'bundleName': 'EOS-4.26.4M',
+        'imageBundleId': 'imagebundle_1658329041200536707'
+    }
+}
+

@@ -1395,8 +1395,7 @@ class CvDeviceTools(object):
         results = []
         for device in user_inventory.devices:
             result_data = CvApiResult(
-                action_name="{}_to_{}".format(device.fqdn, *device.container)
-            )
+                action_name='{}_to_{}'.format(device.fqdn, device.container))
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(
                     container_name=device.container
@@ -1434,7 +1433,7 @@ class CvDeviceTools(object):
                         except CvpApiError:
                             error_message = (
                                 "Error to move device {} to container {}".format(
-                                    device.fqdn, *device.container
+                                    device.fqdn, device.container
                                 )
                             )
                             MODULE_LOGGER.error(error_message)
@@ -1446,7 +1445,7 @@ class CvDeviceTools(object):
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
 
                     result_data.add_entry(
-                        "{}-{}".format(device.fqdn, *device.container)
+                        "{}-{}".format(device.fqdn, device.container)
                     )
             results.append(result_data)
         return results
