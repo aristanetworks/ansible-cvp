@@ -59,7 +59,9 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     ${_GIT} fetch origin pull/${_PR_BRANCH}/head && ${_GIT} checkout FETCH_HEAD > /dev/null 2>&1
     cd ${_PERSIST}
     echo "copying ansible workspace"
-    cp -r ${_LOCAL_CVP}/tests/PR_testing ${_PERSIST}
+    mkdir -p ${_LOCAL_EXAMPLE_PLAYBOOKS}
+    cp ${_LOCAL_CVP}/tests/PR_testing/ansible.cfg ${_LOCAL_EXAMPLE_PLAYBOOKS}
+    cp ${_LOCAL_CVP}/tests/PR_testing/inventory.yaml ${_LOCAL_EXAMPLE_PLAYBOOKS}
 
     echo "copying example playbooks from ${_REPO_CVP} to /persist"
     cp -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/examples/* ${_LOCAL_EXAMPLE_PLAYBOOKS}
