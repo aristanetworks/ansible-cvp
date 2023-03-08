@@ -1439,7 +1439,7 @@ class CvDeviceTools(object):
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
                         else:
-                            if resp["data"]["status"] == "success":
+                            if resp['data']['status'] == 'success':
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]

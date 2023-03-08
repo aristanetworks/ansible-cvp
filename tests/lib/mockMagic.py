@@ -10,13 +10,13 @@ class MockCvpApi(MagicMock):
             return return_validate_config_for_device['return_validate_intf']
         if config == validate_true['config']:
             return return_validate_config_for_device['return_validate_true']
-        
+
     def fail_json(self, msg, code=1):
         """
         mock method for AnsibleModule fail_json()
         """
         raise SystemExit(code)
-    
+
     def move_device_to_container(self, app_name, device, container, create_task):
 
         if container == "CvpApiError":

@@ -174,7 +174,7 @@ device_data = [{
     'key': '50:08:00:b1:5b:0b',
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
-    'parentContainerName': 'TP_LEAF1',  
+    'parentContainerName': 'TP_LEAF1',
     'parentContainerId': 'TP_LEAF1',
     'configlets': [''],
     'imageBundle': 'EOS-4.25.4M',
@@ -255,4 +255,3 @@ cv_data = {
         'imageBundleId': 'imagebundle_1658329041200536707'
     }
 }
-
