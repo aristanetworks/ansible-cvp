@@ -1,0 +1,57 @@
+=============== LOG =================
+#####################################
+#     WARNING CONFIGLET             #
+#####################################
+
+Output for WARNING CONFIGLET validate_mode=stop_on_error:
+    {{ STOP_ON_ERROR_WARNING_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_WARNING_ASSERT_ERROR }}
+------
+Output for WARNING CONFIGLET validate_mode=stop_on_warning:
+    {{ STOP_ON_WARNING_WARNING_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_WARNING_ASSERT_WARNING }}
+------
+Output for WARNING CONFIGLET validate_mode=ignore:
+    {{ IGNORE_WARNING_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_WARNING_ASSERT_IGNORE }}
+
+#####################################
+#         ERROR CONFIGLET           #
+#####################################
+
+Output for ERROR CONFIGLET validate_mode=stop_on_error:
+    {{ STOP_ON_ERROR_ERROR_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ERROR_ASSERT_ERROR }}
+------
+Output for ERROR CONFIGLET validate_mode=stop_on_warning:
+    {{ STOP_ON_WARNING_ERROR_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ERROR_ASSERT_WARNING }}
+------
+Output for ERROR CONFIGLET validate_mode=ignore:
+    {{ IGNORE_ERROR_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ERROR_ASSERT_IGNORE }}
+
+#####################################
+#         VALID CONFIGLET           #
+#####################################
+
+Output for VALID CONFIGLET validate_mode=stop_on_error:
+    {{ STOP_ON_ERROR_VALID_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_VALID_ASSERT_ERROR }}
+------
+Output for VALID CONFIGLET validate_mode=stop_on_warning:
+    {{ STOP_ON_WARNING_VALID_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_VALID_ASSERT_WARNING }}
+------
+Output for VALID CONFIGLET validate_mode=ignore:
+    {{ IGNORE_VALID_CONFIG }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_VALID_ASSERT_IGNORE }}

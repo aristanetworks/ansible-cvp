@@ -1,0 +1,17 @@
+---
+all:
+  children:
+    CVP:
+      hosts:
+        CloudVision:
+          ansible_httpapi_host: # CVP_IP
+          ansible_host: # CVP_IP
+          ansible_user: # CVP username
+          ansible_password: # CVP password
+          ansible_connection: httpapi
+          ansible_httpapi_use_ssl: True
+          ansible_httpapi_validate_certs: False
+          ansible_network_os: eos
+          ansible_httpapi_port: 443
+          # Configuration to get Virtual Env information
+          ansible_python_interpreter: $(which python3)
