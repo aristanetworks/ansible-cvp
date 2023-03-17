@@ -1,0 +1,30 @@
+- name: Test cv_tag_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_TAGS:
+      - device: leaf1.atd.lab
+      # - device_id: leaf1
+        interface_tags:
+          - tags:
+            - name: leaf1IntfTag1_new
+              value: leaf1IntfVal1_new
+            interface: Ethernet1
+          - tags:
+            - name: leaf1IntfTag2_new
+              value: leaf1IntfVal2_new
+            interface: Ethernet2
+      - device_id: leaf2
+      # - device: leaf2.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf2IntfTag1_new
+              value: leaf2IntfVal1_new
+            interface: Ethernet1
+  tasks:
+    - name: assign/unassign non-existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{CVP_TAGS}}"
+        mode: assign
+        auto_create: true

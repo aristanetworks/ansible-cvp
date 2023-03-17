@@ -287,6 +287,14 @@ SCHEMA_CV_TAG = {
                     "leaf1"
                 ]
             },
+            "device_id": {
+                "title": "The device Schema",
+                "type": "string",
+                "default": "",
+                "examples": [
+                    "JPE19181517"
+                ]
+            },
             "device_tags": {
                 "title": "The device_tags Schema",
                 "type": "array",
