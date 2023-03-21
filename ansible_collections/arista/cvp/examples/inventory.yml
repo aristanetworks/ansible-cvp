@@ -4,10 +4,10 @@ all:
     CVP:
       hosts:
         CloudVision:
-          ansible_httpapi_host: testvalidateconfig-1-0cdc46b0.topo.testdrive.arista.com
-          ansible_host: testvalidateconfig-1-0cdc46b0.topo.testdrive.arista.com
-          ansible_user: arista
-          ansible_password: aristazjvh
+          ansible_httpapi_host: # CVP IP
+          ansible_host: # CVP IP
+          ansible_user: # CVP username
+          ansible_password: # CVP password
           ansible_connection: httpapi
           ansible_httpapi_use_ssl: True
           ansible_httpapi_validate_certs: False
