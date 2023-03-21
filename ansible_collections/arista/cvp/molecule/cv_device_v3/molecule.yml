@@ -21,6 +21,6 @@ provisioner:
     converge: converge.yml
   ansible_args:
     - --inventory
-    - ${MOLECULE_SCENARIO_DIRECTORY}/../../examples/cv_device_v3/inventory.yml
+    - ${MOLECULE_SCENARIO_DIRECTORY}/../../examples/inventory.yml
 verifier:
   name: ansible
