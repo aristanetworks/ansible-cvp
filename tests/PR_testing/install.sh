@@ -72,7 +72,7 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     ansible-galaxy collection install arista.eos
 
     echo "install molecule package"
-    pip install molecule
+    pip install -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/requirements-dev.txt
 
     info_installation_done
 else
