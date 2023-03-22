@@ -7,7 +7,7 @@
   - `wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh`
   - `sh install.sh <pr-number>`
   - This script would place the ansible-cvp PR code base under `persist/arista-ansible` and example playbooks under `persist/PR_testing/examples`
-- Edit `persist/PR_testing/inventory.yaml`
+- Edit `persist/PR_testing/inventory.yml`
   - Update the `ansible_password` variables under `CloudVision`
 
     ```yaml
@@ -21,6 +21,6 @@
 
 - `cd persist/PR_testing`
 - Run the desired playbook:
-  - `ansible-playbook cv_device_v3/device_validate_config_valid.yaml -i inventory.yaml`
+  - `ansible-playbook cv_device_v3/device_validate_config_valid.yaml -i inventory.yml`
 
 HAPPY TESTING!

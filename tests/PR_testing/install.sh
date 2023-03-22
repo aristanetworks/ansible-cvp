@@ -61,7 +61,6 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     echo "copying ansible workspace"
     mkdir -p ${_LOCAL_EXAMPLE_PLAYBOOKS}
     cp ${_LOCAL_CVP}/tests/PR_testing/ansible.cfg ${_LOCAL_EXAMPLE_PLAYBOOKS}
-    cp ${_LOCAL_CVP}/tests/PR_testing/inventory.yaml ${_LOCAL_EXAMPLE_PLAYBOOKS}
 
     echo "copying example playbooks from ${_REPO_CVP} to /persist"
     cp -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/examples/* ${_LOCAL_EXAMPLE_PLAYBOOKS}
@@ -71,6 +70,9 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     ansible-galaxy collection install community.general
     ansible-galaxy collection install ansible.netcommon
     ansible-galaxy collection install arista.eos
+
+    echo "install molecule package"
+    pip install molecule
 
     info_installation_done
 else
