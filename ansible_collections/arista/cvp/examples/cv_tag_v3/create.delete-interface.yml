@@ -1,0 +1,20 @@
+- name: Test cv_tag_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_TAGS:
+      - interface_tags:
+          - tags:
+              - name: leaf1IntfTag1
+                value: leaf1IntfVal1
+              - name: leaf1IntfTag2
+                value: leaf1IntfVal2
+              - name: leaf2IntfTag1
+                value: leaf2IntfVal1
+  tasks:
+    - name: create/delete interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{CVP_TAGS}}"
+        # mode: create
+        mode: delete

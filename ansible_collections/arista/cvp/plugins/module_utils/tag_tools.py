@@ -118,8 +118,11 @@ class CvTagTools(object):
         # create tags and assign tags
         for per_device in tags:
             if mode in ('assign', 'unassign'):
-                device_name = per_device['device']
-                device_id = self.get_serial_num(device_name)
+                if 'device_id' in per_device:
+                    device_id = per_device['device_id']
+                else:
+                    device_name = per_device['device']
+                    device_id = self.get_serial_num(device_name)
             tag_type = per_device.keys()
             MODULE_LOGGER.info('tag_type = %s', tag_type)
             if 'device_tags' in tag_type:

@@ -111,14 +111,14 @@ EXAMPLES = r'''
         mode: assign
         auto_create: true
 
-# Delete device and interface tags
+# Delete device and interface tags using device_id
 - name: cv_tag_v3 example2
   hosts: cv_server
   connection: local
   gather_facts: no
   vars:
     CVP_TAGS:
-      - device: leaf1
+      - device_id: JPE123435
         device_tags:
           - name: tag1
             value: value1
@@ -133,14 +133,14 @@ EXAMPLES = r'''
         tags: "{{CVP_TAGS}}"
         mode: delete
 
-# Create device and interface tags (without assigning to the devices)
+# Create device and interface tags (without assigning to the devices) using device_id
 - name: cv_tag_v3 example3
   hosts: cv_server
   connection: local
   gather_facts: no
   vars:
     CVP_TAGS:
-      - device: leaf1
+      - device_id: JPE123435
         device_tags:
           - name: tag1
             value: value1
@@ -271,14 +271,11 @@ def main():
     # check for incompatible options
     if ansible_module.params['mode'] == 'assign' or ansible_module.params['mode'] == 'unassign':
         for per_device in ansible_module.params['tags']:
-            if 'device_tags' in per_device.keys() and 'device' not in per_device.keys():
-                ansible_module.fail_json(msg="Error, 'device' needed for each 'device_tags"
-                                             " when mode is 'assign' or 'unassign'")
+            if not ('device' in per_device.keys() or 'device_id' in per_device.keys()):
+                error_msg = "Error, either 'device' or 'device_id' needed for each 'device tags/interface tags when mode is 'assign' or 'unassign'"
+                ansible_module.fail_json(msg=error_msg)
             if 'interface_tags' in per_device.keys():
                 MODULE_LOGGER.info('interface tags in keys')
-                if 'device' not in per_device.keys():
-                    ansible_module.fail_json(msg="Error, 'device' needed for each 'interface_tags'"
-                                                 " when mode is 'assign' or 'unassign'")
                 for per_intf in per_device['interface_tags']:
                     MODULE_LOGGER.info('per_intf: %s', per_intf)
                     MODULE_LOGGER.info('keys: %s', per_intf.keys())

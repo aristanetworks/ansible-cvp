@@ -154,7 +154,7 @@ import logging
 from ansible.module_utils.basic import AnsibleModule
 import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils import tools_cv
-from ansible_collections.arista.cvp.plugins.module_utils.change_tools import CvChangeControlTools
+from ansible_collections.arista.cvp.plugins.module_utils.change_tools import CvChangeControlTools, CvChangeControlInput
 
 MODULE_LOGGER = logging.getLogger('arista.cvp.cv_change_control_v3')
 MODULE_LOGGER.info('Start cv_change_control_v3 module execution')
@@ -190,6 +190,11 @@ def main():
     if ansible_module.check_mode:
         MODULE_LOGGER.warning('! check_mode is enable')
         # module.exit_json(changed=True)
+
+    if ansible_module.params['change']:
+        user_change = CvChangeControlInput(ansible_module.params['change'])
+        if user_change.is_valid is False:
+            ansible_module.fail_json(msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['change']}")
 
     if not tools_cv.HAS_CVPRAC:
         ansible_module.fail_json(

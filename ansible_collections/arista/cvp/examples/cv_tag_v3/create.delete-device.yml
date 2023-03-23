@@ -1,0 +1,17 @@
+- name: Test cv_tag_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_TAGS:
+      - device_tags:
+          - name: leaf1DTag1
+            value: leaf1DVal1
+          - name: leaf1DTag2
+            value: leaf1DVal2
+  tasks:
+    - name: create/delete device tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{CVP_TAGS}}"
+        mode: create
+        # mode: delete

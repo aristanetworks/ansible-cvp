@@ -1,0 +1,55 @@
+- name: Playbook to demonstrate cvp modules.
+  hosts: cv_server
+  connection: local
+  gather_facts: no
+  vars:
+    # Container definition
+    containers_provision:
+        ATD_FABRIC:
+          parentContainerName: Tenant
+        ATD_LEAFS:
+          parentContainerName: ATD_FABRIC
+        ATD_SPINES:
+          parentContainerName: ATD_FABRIC
+        ATD_LEAF1:
+          parentContainerName: ATD_LEAFS
+        ATD_LEAF2:
+          parentContainerName: ATD_LEAFS
+
+    # Device definition
+    devices_provision:
+      - fqdn: spine1
+        parentContainerName: 'ATD_SPINES'
+        configlets:
+        - BaseIPv4_Spine1_EVPN_GUIDE
+      - fqdn: spine2
+        parentContainerName: 'ATD_SPINES'
+        configlets:
+        - BaseIPv4_Spine2_EVPN_GUIDE
+      - fqdn: leaf1
+        parentContainerName: 'ATD_LEAF1'
+        configlets:
+        - BaseIPv4_Leaf1_EVPN_GUIDE
+      - fqdn: leaf2
+        parentContainerName: 'ATD_LEAF1'
+        configlets:
+        - BaseIPv4_Leaf2_EVPN_GUIDE
+      - fqdn: leaf3
+        parentContainerName: 'ATD_LEAF2'
+        configlets:
+        - BaseIPv4_Leaf3_EVPN_GUIDE
+      - fqdn: leaf4
+        parentContainerName: 'ATD_LEAF2'
+        configlets:
+        - BaseIPv4_Leaf4_EVPN_GUIDE
+
+
+  tasks:
+    - name: "Build Container topology on {{inventory_hostname}}"
+      arista.cvp.cv_container_v3:
+        topology: '{{containers_provision}}'
+
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{devices_provision}}'
+        apply_mode: loose
