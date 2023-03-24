@@ -1,0 +1,3 @@
+---
+- name: Run tags molecule scenario
+  import_playbook: tags.yml
