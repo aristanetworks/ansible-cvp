@@ -77,6 +77,7 @@ if [ ! -d "${_ROOT_INSTALLATION_DIR}" ]; then
     info_installation_done
 else
     echo "  ! local installation folder already exists - ${_ROOT_INSTALLATION_DIR}"
-
+    echo "install molecule package"
+    pip install -r ${_LOCAL_CVP}/ansible_collections/arista/cvp/requirements-dev.txt
     exit 1
 fi
