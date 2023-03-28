@@ -80,7 +80,7 @@ releases:
       - Fix(cv_device_v3) Fix check for missing devices(#593)
       - Fix(cv_device_v3) Implement device check mode(#571)
       - Fix(cv_tag_v3) Allow tag assignment to serial numbers(#581)
-      release_summary: 'Release 3.7.0 - See documentation on cvp.avd.sh for details.
+      release_summary: 'Release 3.6.1 - See documentation on cvp.avd.sh for details.
 
         '
     fragments:

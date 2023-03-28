@@ -1,5 +1,5 @@
 release_summary: |
-  Release 3.7.0 - See documentation on cvp.avd.sh for details.
+  Release 3.6.1 - See documentation on cvp.avd.sh for details.
 
 bugfixes:
 - Fix(cv_container_v3) check_mode error(#584)

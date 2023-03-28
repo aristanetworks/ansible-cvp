@@ -11,7 +11,7 @@ v3.6.1
 Release Summary
 ---------------
 
-Release 3.7.0 - See documentation on cvp.avd.sh for details.
+Release 3.6.1 - See documentation on cvp.avd.sh for details.
 
 
 Bugfixes
