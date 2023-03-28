@@ -22,5 +22,12 @@
 - `cd persist/PR_testing`
 - Run the desired playbook:
   - `ansible-playbook cv_device_v3/device_validate_config_valid.yaml -i inventory.yml`
+- Run molecule tests:
+  - Edit `persist/arista-ansible/ansible_collection/arista/cvp/examples/inventory.yml`
+    - Update `ansible_password` variable under `CloudVision`
+  - Run:
+    - Navigate to `/home/coder/project/persist/arista-ansible/ansible-cvp/ansible_collections/arista/cvp` and run
+    - `/home/coder/.local/bin/molecule converge -s <molecule-scenario>`
+      - eg: `/home/coder/.local/bin/molecule converge -s cv_device_v3`
 
 HAPPY TESTING!
