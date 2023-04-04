@@ -48,7 +48,11 @@ host {{ client.name }} {
     hardware ethernet {{ client.mac | string }};
 {%     endif %}
     fixed-address {{client.ip4}};
+{%     if client.registration is defined %}
+    option bootfile-name "{{ client.registration }}";
+{%     elif ztp.default.registration is defined %}
     option bootfile-name "{{ ztp.default.registration }}";
+{%     endif %}
 {%     if client.gateway is defined %}
     option routers {{ client.gateway }};
 {%     elif ztp.default.gateway is defined %}
