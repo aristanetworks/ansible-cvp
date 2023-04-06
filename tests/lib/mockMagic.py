@@ -62,8 +62,6 @@ class MockCvpApi(MagicMock):
         else:
             return None
 
-        # TODO: need to write testcase - if create_task returns None, raised issue #585 in ansible-cvp
-
     def delete_device(self, device_mac):
         """
         mock method for cvprac delete_device()
