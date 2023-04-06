@@ -71,14 +71,11 @@ class MockCvpApi(MagicMock):
         device_info = {}
         if not device_mac:
             raise CvpApiError(msg='Error removing device from provisioning')
-        else:
-            if device_mac == device_data[0]['systemMacAddress']:
-                device_info = device_data[0]
-
-            if device_info is not None and 'serialNumber' in device_info:
-                return {'result': 'success'}
-            else:
-                return {'result': 'fail'}
+        if device_mac == device_data[0]['systemMacAddress']:
+            device_info = device_data[0]
+        if device_info and 'serialNumber' in device_info:
+            return {'result': 'success'}
+        return {'result': 'fail'}
 
     def fail_json(self, msg, code=1):
         """
