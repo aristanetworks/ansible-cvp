@@ -29,7 +29,7 @@ def setup(apply_mock, mock_cvpClient):
 
     mock_ansible_module.fail_json.side_effect = mock_cvpClient.api.fail_json
 
-    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module, 'serialNumber')
+    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current
 
@@ -68,6 +68,23 @@ class TestApplyBundle():
 
         # resetting imageBundle id
         image_bundle['id'] = 'imagebundle_1658329041200536707'
+
+    def test_apply_bundle_check_mode_true(self, setup):
+        """
+        Test when check_mode is true
+        :param setup: fixture
+
+        """
+        user_topology = DeviceInventory(data=device_data)
+        _, mock__get_device, cv_tools, mock_get_container_current = setup
+        mock_get_container_current.return_value = current_container_info
+        mock__get_device.return_value = cv_data
+        cv_tools.check_mode = True
+
+        result = cv_tools.apply_bundle(user_inventory=user_topology)
+        assert result[0].success == True
+        assert result[0].changed == False
+        assert result[0].taskIds == ["check_mode"]
 
     def test_apply_bundle_same_image(self, setup):
         """
