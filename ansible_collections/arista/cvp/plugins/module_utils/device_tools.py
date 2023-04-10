@@ -1696,7 +1696,7 @@ class CvDeviceTools(object):
                                 msg="Error removing bundle from device "
                                 + device.fqdn
                                 + ": "
-                                + catch_error
+                                + str(catch_error)
                             )
                         else:
                             if resp["data"]["status"] == "success":

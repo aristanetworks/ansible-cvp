@@ -86,7 +86,7 @@ class TestDetachBundle():
         result = cv_tools.detach_bundle(user_inventory=user_topology)
         assert not result
 
-    def test_detach_bundle_device_image_none(self, setup):
+    def test_detach_bundle_device_image_not_none(self, setup):
         """
         Test when device.image_bundle is not None
         :param setup: fixture
