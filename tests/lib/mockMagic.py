@@ -11,12 +11,6 @@ class MockCvpApi(MagicMock):
         if config == validate_true['config']:
             return return_validate_config_for_device['return_validate_true']
 
-    def get_device_by_serial(self, device_serial):
-        """
-        mock get_device_by_serial to get device_facts
-        """
-        return device_data[0]
-
     def get_image_bundle_by_name(self, name):
         """
         mock to get image_bundle
