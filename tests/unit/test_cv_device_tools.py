@@ -28,7 +28,7 @@ def setup(apply_mock, mock_cvpClient):
 
     mock_ansible_module.fail_json.side_effect = mock_cvpClient.api.fail_json
 
-    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module, 'serialNumber')
+    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current
 
@@ -120,7 +120,7 @@ class TestDetachBundle():
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.detach_bundle(user_inventory=user_topology)
         assert pytest_error.value.code == 1
-        expected_call = [call.fail_json(msg='Error removing bundle from device tp-avd-leaf2 : Image bundle ID is not valid')]
+        expected_call = [call.fail_json(msg='Error removing bundle from device tp-avd-leaf2: Image bundle ID is not valid')]
         assert mock_ansible_module.mock_calls == expected_call
 
         # resetting imageBundle
@@ -132,7 +132,7 @@ class TestDetachBundle():
         """
         device_data[0]['imageBundle'] = None
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current = setup
+        _, mock__get_device, cv_tools, mock_get_container_current = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
         cv_tools.check_mode =True
