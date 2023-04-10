@@ -85,8 +85,8 @@ class TestApplyBundle():
         mock__get_device.return_value = cv_data_same
 
         result = cv_tools.apply_bundle(user_inventory=user_topology)
-        assert result[0].success == False
-        assert result[0].changed == False
+        assert result[0].success is False
+        assert result[0].changed is False
 
     def test_apply_bundle_cvp_api_error(self, setup):
         """
