@@ -63,9 +63,6 @@ class MockCvpApi(MagicMock):
         if 'id' in image_bundle:
             node_id = image_bundle['id']
 
-        elif 'key' in image_bundle:
-            node_id = image_bundle['key']
-
         if create_task:
             if node_id and node_id != "error_id":
                 return {'data': {'taskIds': ['57'], 'status': 'success'}}

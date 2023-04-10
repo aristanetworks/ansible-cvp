@@ -1699,7 +1699,7 @@ class CvDeviceTools(object):
                                 + str(catch_error)
                             )
                         else:
-                            if resp["data"]["status"] == "success":
+                            if resp and resp["data"]["status"] == "success":
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
