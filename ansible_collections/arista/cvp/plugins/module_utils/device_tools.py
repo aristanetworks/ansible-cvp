@@ -1396,7 +1396,7 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             result_data = CvApiResult(
                 action_name="{0}_to_{1}".format(device.fqdn, device.container)
-                )
+            )
             if device.system_mac is not None:
                 new_container_info = self.get_container_info(
                     container_name=device.container
