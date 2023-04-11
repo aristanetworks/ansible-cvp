@@ -29,7 +29,7 @@ def setup(apply_mock, mock_cvpClient):
 
     mock_ansible_module.fail_json.side_effect = mock_cvpClient.api.fail_json
 
-    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module, 'serialNumber')
+    cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, mock_get_container_info
 
