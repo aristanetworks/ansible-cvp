@@ -2,6 +2,13 @@ from tests.data.device_tools_unit import (validate_router_bgp, return_validate_c
 from unittest.mock import MagicMock
 from cvprac.cvp_client_errors import CvpApiError
 
+
+def fail_json(msg, code=1):
+    """
+    mock method for AnsibleModule fail_json()
+    """
+    raise SystemExit(code)
+
 class MockCvpApi(MagicMock):
     def validate_config_for_device(self, device_mac, config):
         if config == validate_router_bgp['config']:
@@ -15,16 +22,20 @@ class MockCvpApi(MagicMock):
         """
         mock method for cvprac device_decommissioning()
         """
-        if device_id == device_data[0]["serialNumber"]:
+
+        if device_id and device_id == device_data[0]["serialNumber"]:
             self.result = {'value': {'key': {'requestId': request_id},
                                      'deviceId': device_id},
                            'time': '2022-02-12T02:58:30.765459650Z'}
-        else:
+        elif device_id and device_id != device_data[0]["serialNumber"]:
             self.result = None
+        else:
+            raise CvpApiError(msg="Error decommissioning device")
 
     def device_decommissioning_status_get_one(self, request_id):
         """
         mock method for cvprac device_decommissioning_status_get_one()
+        the self.result is set by device_decommissioning when called first
         """
         if self.result and self.result["value"]["key"]["requestId"]:
             resp = {"result": {"value": {"key": {"requestId": request_id},
@@ -74,9 +85,3 @@ class MockCvpApi(MagicMock):
         if device_info and 'serialNumber' in device_info:
             return {'result': 'success'}
         return {'result': 'fail'}
-
-    def fail_json(self, msg, code=1):
-        """
-        mock method for AnsibleModule fail_json()
-        """
-        raise SystemExit(code)
