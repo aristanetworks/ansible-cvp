@@ -70,7 +70,7 @@ class TestDecommissionDevice():
         Tests decommission_device() method for state_absent
 
         if device_data['serialNumber'] is None:
-            raise CvpApiError
+            raise CvpApiError and fail_json() raises SystemExit
         """
         device_data[0]['serialNumber'] = None
         user_topology = DeviceInventory(data=device_data)
@@ -79,7 +79,7 @@ class TestDecommissionDevice():
         # mocked for get_device_facts, device_data is in tests/data/device_tools_unit.py
         mock__get_device.return_value = device_data[0]
 
-        #user_topology input with error_serial_number
+        #user_topology input with serial_number None
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.decommission_device(user_inventory=user_topology)
         assert pytest_error.value.code == 1
@@ -98,7 +98,7 @@ class TestDecommissionDevice():
 
         result = cv_tools.decommission_device(user_inventory=user_topology)
         assert result[0].success
-        assert result[0].changed == False
+        assert not result[0].changed
         assert result[0].taskIds == ["check_mode"]
 
 @pytest.mark.state
@@ -131,22 +131,22 @@ class TestResetDevice():
         result = cv_tools.reset_device(user_inventory=user_topology)
         assert result[0].success == expected_result
         assert result[0].changed == expected_result
-        if expected_result:
+        if result[0].taskIds:
             assert result[0].taskIds == task_ids
 
     @pytest.mark.parametrize(
-        "device_data, expected_fail_json_call_msg",
+        "device_data, expected_call",
         [
-            (device_data_invalid, "Error resetting device"),
+            (device_data_invalid, [call.fail_json(msg="Error resetting device")]),
         ],
     )
-    def test_reset_device_cvp_api_error(self, setup, device_data, expected_fail_json_call_msg):
+    def test_reset_device_cvp_api_error(self, setup, device_data, expected_call):
         """
         Tests reset_device method with CvpApiError
 
         device_data: dummy_device_data
         if not device_data['parentContainerName']:
-            fail_json() raises SystemExit
+            raise CvpApiError and fail_json() raises SystemExit
         """
         device_data_error = device_data.copy()
         device_data_error[0]['parentContainerName'] = None
@@ -155,7 +155,6 @@ class TestResetDevice():
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.reset_device(user_inventory=user_topology)
         assert pytest_error.value.code == 1
-        expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
         assert mock_ansible_module.mock_calls == expected_call
 
 
@@ -177,9 +176,9 @@ class TestDeleteDevice():
 
         device_data: dummy_device_data
         if device_data['systemMacAddress'] is correct:
-            expected = true
+            expected_result = true
         elif device_data['systemMacAddress'] is incorrect:
-            expected = false
+            expected_result = false
         """
 
         user_topology = DeviceInventory(data=device_data)
@@ -195,6 +194,12 @@ class TestDeleteDevice():
         ],
     )
     def test_delete_device_cvp_api_error(self, setup, device_data, expected_fail_json_call_msg):
+        """
+
+        device_data: dummy_device_data
+        if device_data['systemMacAddress'] is None:
+            raise CvpApiError and fail_json() raises SystemExit
+        """
         device_data[0]['systemMacAddress'] = None
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, _, cv_tools = setup
@@ -218,5 +223,5 @@ class TestDeleteDevice():
 
         result = cv_tools.delete_device(user_inventory=user_topology)
         assert result[0].success
-        assert result[0].changed == False
+        assert not result[0].changed
         assert result[0].taskIds == ["check_mode"]
