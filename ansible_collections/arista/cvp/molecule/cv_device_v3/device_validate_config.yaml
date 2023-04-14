@@ -25,10 +25,18 @@
         parentContainerName: Leaf
         configlets:
           - validate_valid # valid
+    CVP_DEVICES_MULTILINE:
+        - serialNumber: leaf1
+          fqdn: leaf1
+          hostname: leaf1
+          parentContainerName: Leaf
+          configlets: #[]
+            - validate_error_multiline # error
     CVP_CONFIGLET:
       validate_warning: "interface Ethernet1\n   spanning-tree portfast"
       validate_valid: "interface Ethernet1\n  description test_validate"
       validate_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
+      validate_error_multiline: "interface Ethernet10\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree portfast\n!"
   tasks:
   - name: "Push configlet"
     arista.cvp.cv_configlet_v3:
@@ -53,14 +61,13 @@
         - "STOP_ON_ERROR_WARNING_CONFIG.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_ERROR_WARNING_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_WARNING_ASSERT_ERROR
-    failed_when: false
 
   - name: Validate warning configlet with stop_on_warning
     arista.cvp.cv_device_v3:
       devices: "{{CVP_DEVICES_WARNING}}"
       state: validate
       validate_mode: stop_on_warning
-    ignore_errors: yes
+    ignore_errors: yes # ignoring errors so assertions can be done
     register: STOP_ON_WARNING_WARNING_CONFIG
   - assert:
       that:
@@ -68,7 +75,6 @@
         - "STOP_ON_WARNING_WARNING_CONFIG.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_WARNING_WARNING_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_WARNING_ASSERT_WARNING
-    failed_when: false
 
   - name: Validate warning configlet with ignore
     arista.cvp.cv_device_v3:
@@ -84,24 +90,7 @@
         - "IGNORE_WARNING_CONFIG.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "IGNORE_WARNING_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_WARNING_ASSERT_IGNORE
-    failed_when: false
 
-#   - name: Print reports
-#     debug:
-#       msg: |
-#         Output for stop_on_error:
-#                 {{STOP_ON_ERROR_WARNING_CONFIG}}
-#         The assertion result:
-#                 {{VALIDATE_CONFIG_WARNING_ASSERT_ERROR}}
-#         Output for stop_on_error:
-#                 {{STOP_ON_WARNING_WARNING_CONFIG}}
-#         The assertion result for stop_on_error:
-#                 {{VALIDATE_CONFIG_WARNING_ASSERT_WARNING}}
-#         Output for stop_on_error:
-#                 {{IGNORE_WARNING_CONFIG}}
-#         The assertion result for stop_on_error:
-#                 {{VALIDATE_CONFIG_WARNING_ASSERT_IGNORE}}
-#
 #####################################
 #         ERROR CONFIGLET           #
 #####################################
@@ -119,7 +108,6 @@
         - "STOP_ON_ERROR_ERROR_CONFIG.configlets_validated.warnings == []"
         - "STOP_ON_ERROR_ERROR_CONFIG.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_ASSERT_ERROR
-    failed_when: false
 
   - name: Validate error configlet with stop_on_warning
     arista.cvp.cv_device_v3:
@@ -134,7 +122,6 @@
         - "STOP_ON_WARNING_ERROR_CONFIG.configlets_validated.warnings == []"
         - "STOP_ON_WARNING_ERROR_CONFIG.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_ASSERT_WARNING
-    failed_when: false
 
   - name: Validate error configlet with ignore
     arista.cvp.cv_device_v3:
@@ -150,7 +137,6 @@
         - "IGNORE_ERROR_CONFIG.configlets_validated.warnings == []"
         - "IGNORE_ERROR_CONFIG.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_ASSERT_IGNORE
-    failed_when: false
 
 #####################################
 #         VALID CONFIGLET           #
@@ -161,7 +147,6 @@
       devices: "{{CVP_DEVICES_VALID}}"
       state: validate
       validate_mode: stop_on_error
-    ignore_errors: yes
     register: STOP_ON_ERROR_VALID_CONFIG
   - assert:
       that:
@@ -171,14 +156,12 @@
         - "STOP_ON_ERROR_VALID_CONFIG.configlets_validated.warnings == []"
         - "STOP_ON_ERROR_VALID_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_VALID_ASSERT_ERROR
-    failed_when: false
 
   - name: Validate valid configlet with stop_on_warning
     arista.cvp.cv_device_v3:
       devices: "{{CVP_DEVICES_VALID}}"
       state: validate
       validate_mode: stop_on_warning
-    ignore_errors: yes
     register: STOP_ON_WARNING_VALID_CONFIG
   - assert:
       that:
@@ -188,14 +171,12 @@
         - "STOP_ON_WARNING_VALID_CONFIG.configlets_validated.warnings == []"
         - "STOP_ON_WARNING_VALID_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_VALID_ASSERT_WARNING
-    failed_when: false
 
   - name: Validate valid configlet with ignore
     arista.cvp.cv_device_v3:
       devices: "{{CVP_DEVICES_VALID}}"
       state: validate
       validate_mode: ignore
-    ignore_errors: yes
     register: IGNORE_VALID_CONFIG
   - assert:
       that:
@@ -205,7 +186,51 @@
         - "IGNORE_VALID_CONFIG.configlets_validated.warnings == []"
         - "IGNORE_VALID_CONFIG.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_VALID_ASSERT_IGNORE
-    failed_when: false
+
+#####################################
+#         MULTILINE CONFIGLET       #
+#####################################
+
+  - name: Validate multiline configlet with stop_on_error
+    arista.cvp.cv_device_v3:
+      devices: "{{CVP_DEVICES_MULTILINE}}"
+      state: validate
+      validate_mode: stop_on_error
+    ignore_errors: yes
+    register: MULTIPLE_STOP_ON_ERROR
+  - assert:
+      that:
+        - "MULTIPLE_STOP_ON_ERROR.changed == false"
+        - "MULTIPLE_STOP_ON_ERROR.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+        - "MULTIPLE_STOP_ON_ERROR.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
+    register: VALIDATE_CONFIG_ASSERT_MULTIPLE_ERROR
+
+  - name: Validate multiline configlet with stop_on_warning
+    arista.cvp.cv_device_v3:
+      devices: "{{CVP_DEVICES_MULTILINE}}"
+      state: validate
+      validate_mode: stop_on_warning
+    ignore_errors: yes
+    register: MULTIPLE_STOP_ON_WARNING
+  - assert:
+      that:
+        - "MULTIPLE_STOP_ON_WARNING.changed == false"
+        - "MULTIPLE_STOP_ON_WARNING.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+        - "MULTIPLE_STOP_ON_WARNING.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
+    register: VALIDATE_CONFIG_ASSERT_MULTIPLE_WARNING
+
+  - name: Validate multiline configlet with ignore
+    arista.cvp.cv_device_v3:
+      devices: "{{CVP_DEVICES_MULTILINE}}"
+      state: validate
+      validate_mode: ignore
+    register: MULTIPLE_IGNORE
+  - assert:
+      that:
+        - "MULTIPLE_IGNORE.changed == true"
+        - "MULTIPLE_IGNORE.configlets_validated.warnings == [{'device': 'leaf1', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+        - "MULTIPLE_IGNORE.configlets_validated.errors == [{'device': 'leaf1', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
+    register: VALIDATE_CONFIG_ASSERT_MULTIPLE_IGNORE
 
   - name: write log file
     template:

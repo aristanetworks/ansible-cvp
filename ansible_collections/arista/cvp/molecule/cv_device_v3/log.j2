@@ -55,3 +55,22 @@ Output for VALID CONFIGLET validate_mode=ignore:
     {{ IGNORE_VALID_CONFIG }}
 Assertion Output:
     {{ VALIDATE_CONFIG_VALID_ASSERT_IGNORE }}
+
+#####################################
+#         MULTIPLE CONFIGLET        #
+#####################################
+
+Output for MULTIPLE CONFIGLET validate_mode=stop_on_error:
+    {{ MULTIPLE_STOP_ON_ERROR }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ASSERT_MULTIPLE_ERROR }}
+------
+Output for VALID CONFIGLET validate_mode=stop_on_warning:
+    {{ MULTIPLE_STOP_ON_WARNING }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ASSERT_MULTIPLE_WARNING }}
+------
+Output for VALID CONFIGLET validate_mode=ignore:
+    {{ MULTIPLE_IGNORE }}
+Assertion Output:
+    {{ VALIDATE_CONFIG_ASSERT_MULTIPLE_IGNORE }}
