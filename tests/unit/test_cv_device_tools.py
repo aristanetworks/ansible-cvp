@@ -20,7 +20,6 @@ def setup(apply_mock, mock_cvpClient):
 
     return mock_ansible_module, mock__get_device, cv_tools
 
-@pytest.mark.state
 class TestDecommissionDevice():
     """
     Contains unit tests for decommission_device()
@@ -101,7 +100,6 @@ class TestDecommissionDevice():
         assert not result[0].changed
         assert result[0].taskIds == ["check_mode"]
 
-@pytest.mark.state
 class TestResetDevice():
     """
     Contains unit tests for reset_device()
@@ -157,8 +155,6 @@ class TestResetDevice():
         assert pytest_error.value.code == 1
         assert mock_ansible_module.mock_calls == expected_call
 
-
-@pytest.mark.state
 class TestDeleteDevice():
     """
     Contains unit tests for delete_device()
