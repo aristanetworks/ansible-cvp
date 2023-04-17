@@ -226,7 +226,6 @@ device_data = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'TP_LEAF1',
-    'parentContainerId': 'TP_LEAF1',
     'configlets': [''],
     'imageBundle': 'EOS-4.25.4M',
 }]  # this is dummy device_data that has no effect
@@ -238,7 +237,6 @@ device_data_invalid = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'Undefined',  # undefined parent container name
-    'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 
 # used for apply_bundle()

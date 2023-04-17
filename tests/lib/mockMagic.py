@@ -3,6 +3,14 @@ from tests.data.device_tools_unit import (validate_router_bgp, return_validate_c
 from unittest.mock import MagicMock
 from cvprac.cvp_client_errors import CvpApiError
 
+
+def fail_json(msg, code=1):
+    """
+    mock method for AnsibleModule fail_json()
+    """
+    raise SystemExit(code)
+
+
 class MockCvpApi(MagicMock):
     def validate_config_for_device(self, device_mac, config):
         if config == validate_router_bgp['config']:
@@ -16,7 +24,7 @@ class MockCvpApi(MagicMock):
         """
         mock to get image_bundle
         """
-        if device_data[0]['imageBundle'] != 'Invalid_bundle_name':
+        if name != 'Invalid_bundle_name':
             return image_bundle
         else:
             return None
@@ -42,9 +50,3 @@ class MockCvpApi(MagicMock):
                 return {'data': {'taskIds': [], 'status': 'fail'}}
         else:
             return None
-
-    def fail_json(self, msg, code=1):
-        """
-        mock method for AnsibleModule fail_json()
-        """
-        raise SystemExit(code)

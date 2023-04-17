@@ -1551,11 +1551,7 @@ class CvDeviceTools(object):
                             "Error image bundle %s not found", str(device.image_bundle)
                         )
                         self.__ansible.fail_json(
-                            msg="Error applying bundle to device "
-                            + device.fqdn
-                            + ": "
-                            + str(device.image_bundle)
-                            + " not found"
+                            msg=f"Error applying bundle to device {device.fqdn}: {str(device.image_bundle)} not found"
                         )
 
                     MODULE_LOGGER.debug(
@@ -1587,10 +1583,7 @@ class CvDeviceTools(object):
                                 "Error applying bundle to device: %s", str(catch_error)
                             )
                             self.__ansible.fail_json(
-                                msg="Error applying bundle to device "
-                                + device.fqdn
-                                + ": "
-                                + str(catch_error)
+                                msg=f"Error applying bundle to device {device.fqdn}: {str(catch_error)}"
                             )
                         else:
                             if resp and resp["data"]["status"] == "success":
