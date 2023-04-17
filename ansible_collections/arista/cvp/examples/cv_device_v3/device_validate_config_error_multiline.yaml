@@ -1,0 +1,32 @@
+---
+- name: Device Config Validation in Cloudvision
+  hosts: CloudVision
+  connection: local
+  gather_facts: false
+  vars:
+    CVP_DEVICES:
+      - serialNumber: leaf1
+        fqdn: leaf1
+        hostname: leaf1
+        parentContainerName: Leaf
+        configlets: #[]
+          - validate_error_multiline # error and warning
+    CVP_CONFIGLET:
+      validate_error_multiline: "interface Ethernet10\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree portfast\n!"
+
+  tasks:
+  - name: "Push configlet"
+    arista.cvp.cv_configlet_v3:
+      configlets: "{{CVP_CONFIGLET}}"
+      state: present
+  - name: Validate configurations
+    arista.cvp.cv_device_v3:
+      devices: "{{CVP_DEVICES}}"
+      state: validate
+      validate_mode: stop_on_error
+      # validate_mode: stop_on_warning
+      # validate_mode: ignore
+    register: CVP_DEVICES_RESULTS
+  - name: print result for {{inventory_hostname}}
+    debug:
+      msg: "{{CVP_DEVICES_RESULTS}}"
