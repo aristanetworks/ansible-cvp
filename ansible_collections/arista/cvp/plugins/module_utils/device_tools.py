@@ -1495,6 +1495,9 @@ class CvDeviceTools(object):
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
+                MODULE_LOGGER.debug(
+                    "The device is in undefined container"
+                )
                 continue
 
             # GET IMAGE BUNDLE

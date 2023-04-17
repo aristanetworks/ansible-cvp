@@ -1,5 +1,5 @@
 from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device,
-                                          validate_intf, validate_true, device_data, image_bundle)
+                                          validate_intf, validate_true, image_bundle)
 from unittest.mock import MagicMock
 from cvprac.cvp_client_errors import CvpApiError
 
