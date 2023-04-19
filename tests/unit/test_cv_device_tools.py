@@ -1,12 +1,3 @@
-#!/usr/bin/python
-# coding: utf-8 -*-
-# pylint: disable=logging-format-interpolation
-# pylint: disable=dangerous-default-value
-# pylint:disable=duplicate-code
-# flake8: noqa: W503
-# flake8: noqa: W1202
-# flake8: noqa: R0801
-
 from unittest.mock import call
 import pytest
 from tests.data.device_tools_unit import device_data, current_container_info, cv_data, image_bundle
@@ -33,7 +24,6 @@ def setup(apply_mock, mock_cvpClient):
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current
 
 
-@pytest.mark.state_present
 class TestDetachBundle():
     """
     Contains unit tests for detach_bundle()
@@ -54,7 +44,6 @@ class TestDetachBundle():
 
         """
         device_data[0]['imageBundle'] = None
-        user_topology = DeviceInventory(data=device_data)
         _, mock__get_device, cv_tools, mock_get_container_current = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
@@ -62,6 +51,7 @@ class TestDetachBundle():
             # removing node_id for failure test-case
             image_bundle['id'] = None
 
+        user_topology = DeviceInventory(data=device_data)
         result = cv_tools.detach_bundle(user_inventory=user_topology)
         assert result[0].success == expected
         assert result[0].changed == expected
