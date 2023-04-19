@@ -479,17 +479,16 @@ def build_new_devices_list(module):
             )
             if cvp_device is None:
                 module.fail_json(msg="Device not available on Cloudvision (" + ansible_device_hostname + ")")
-            if len(cvp_device) >= 0:
-                if is_in_container(device=cvp_device, container="undefined_container"):
-                    device_info = {
-                        "name": ansible_device_hostname,
-                        "parentContainerName": ansible_device["parentContainerName"],
-                        "configlets": ansible_device["configlets"],
-                        "cv_configlets": [],
-                        "imageBundle": ansible_device["imageBundle"],
-                        "message": "Device will be provisionned",
-                    }
-                    devices_info.append(device_info)
+            if is_in_container(device=cvp_device, container="undefined_container"):
+                device_info = {
+                    "name": ansible_device_hostname,
+                    "parentContainerName": ansible_device["parentContainerName"],
+                    "configlets": ansible_device["configlets"],
+                    "cv_configlets": [],
+                    "imageBundle": ansible_device["imageBundle"],
+                    "message": "Device will be provisionned",
+                }
+                devices_info.append(device_info)
     return devices_info
 
 
