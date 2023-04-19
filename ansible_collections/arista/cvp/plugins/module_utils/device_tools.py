@@ -1518,6 +1518,7 @@ class CvDeviceTools(object):
 
             if device.image_bundle is not None:
                 if (
+                    current_image_bundle and
                     device.image_bundle
                     == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]
                     and current_image_bundle[Api.image.TYPE] == "netelement"

@@ -4,7 +4,6 @@ from tests.data.device_tools_unit import device_data, current_container_info, cv
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 from tests.lib.mockMagic import fail_json
 
-
 # list of paths to patch
 MOCK_LIST = [
     'ansible_collections.arista.cvp.plugins.module_utils.device_tools.AnsibleModule',
@@ -21,7 +20,6 @@ def setup(apply_mock, mock_cvpClient):
     cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current
 
-@pytest.mark.state_present
 class TestApplyBundle():
     """
     Contains unit tests for apply_bundle()
@@ -84,14 +82,16 @@ class TestApplyBundle():
         :param expected: output expected from apply_bundle
 
         """
-        user_topology = DeviceInventory(data=device_data)
         _, mock__get_device, cv_tools, mock_get_container_current = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
+
         if not expected:
+            # image_bundle is the bundle information we get from api call for get_image_bundle_by_name
             # removing node_id for failure test-case
             image_bundle['id'] = None
 
+        user_topology = DeviceInventory(data=device_data)
         result = cv_tools.apply_bundle(user_inventory=user_topology)
         assert result[0].success == expected
         assert result[0].changed == expected
