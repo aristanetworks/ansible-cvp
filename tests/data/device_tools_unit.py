@@ -218,6 +218,7 @@ EXP_VALID = {
     'validate_test_true_on_tp-avd-leaf2_validated_list': ['validate_test_true_validated_against_tp-avd-leaf2']
 }
 
+# mock data from CVP version 2022.1.1
 # mock device data
 device_data = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148767',
@@ -228,7 +229,7 @@ device_data = [{
     'parentContainerName': 'TP_LEAF1',
     'configlets': [''],
     'imageBundle': 'EOS-4.25.4M',
-}]  # this is dummy device_data that has no effect
+}]
 
 device_data_invalid = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148768', # wrong serial number
