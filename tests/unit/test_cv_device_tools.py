@@ -3,6 +3,8 @@ import pytest
 from tests.data.device_tools_unit import device_data, current_container_info, cv_data, image_bundle
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 from tests.lib.mockMagic import fail_json
+from unittest.mock import MagicMock
+from cvprac.cvp_client_errors import CvpApiError
 
 # list of paths to patch
 MOCK_LIST = [
@@ -116,7 +118,7 @@ class TestApplyBundle():
         assert result[0].changed == False
         assert result[0].taskIds == ["check_mode"]
 
-    def test_apply_bundle_cvp_api_error(self, setup):
+    def test_apply_bundle_cvp_api_error(self, setup, mock_cvpClient):
         """
         Test for CvpApiError.
         :param setup: fixture
@@ -126,8 +128,8 @@ class TestApplyBundle():
         mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
-        image_bundle['id'] = 'error_id'
-
+        mock_cvpClient.api.apply_image_to_element = MagicMock()
+        mock_cvpClient.api.apply_image_to_element.side_effect = CvpApiError(msg='Image bundle ID is not valid')
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.apply_bundle(user_inventory=user_topology)
         assert pytest_error.value.code == 1

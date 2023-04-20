@@ -1,7 +1,6 @@
 from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device,
                                           validate_intf, validate_true, image_bundle)
 from unittest.mock import MagicMock
-from cvprac.cvp_client_errors import CvpApiError
 
 
 def fail_json(msg, code=1):
@@ -42,10 +41,8 @@ class MockCvpApi(MagicMock):
             node_id = image_bundle['id']
 
         if create_task:
-            if node_id and node_id != "error_id":
+            if node_id:
                 return {'data': {'taskIds': ['57'], 'status': 'success'}}
-            elif node_id == "error_id":
-                raise CvpApiError(msg='Image bundle ID is not valid')
             else:
                 return {'data': {'taskIds': [], 'status': 'fail'}}
         else:
