@@ -37,10 +37,12 @@ class TestDecommissionDevice():
         """
         Tests decommission_device() method for state_absent
 
+        flag: used to decide on failure or success of decommission_device
+
         if device_data['serialNumber'] is correct:
-            expected_result = true
+            result = success
         else:
-            expected_result = false and error_msg
+            result = failure with error_msg
         """
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, mock__get_device, cv_tools = setup

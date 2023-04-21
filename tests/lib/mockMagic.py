@@ -37,7 +37,7 @@ class MockCvpApi(MagicMock):
         mock method for cvprac device_decommissioning_status_get_one()
         the self.result is set by device_decommissioning when called first
         """
-        if self.result and self.result["value"]["key"]["requestId"]:
+        if self.result:
             resp = {"result": {"value": {"key": {"requestId": request_id},
                                          "status": 'DECOMMISSIONING_STATUS_SUCCESS',
                                          "statusMessage": "Disabled TerminAttr, "
