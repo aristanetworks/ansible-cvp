@@ -755,3 +755,5 @@ SCHEMA_CV_CHANGE_CONTROL = {
         }
     }
 }
+
+SCHEMA_CV_VALIDATE = {}
