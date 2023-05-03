@@ -21,7 +21,6 @@ __metaclass__ = type
 
 import traceback
 import logging
-import random
 import string
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import (
@@ -32,8 +31,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiRe
 from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
-    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpApiError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
@@ -157,22 +155,23 @@ class CvValidationTools(object):
         }
 
         for device_info in device:
-            # look up system mac address using fqdn or hostname
-            # if source == CVP: get configlet content from CVP using devices.configlet_names
-            # else: configet string in devices.configlets
-            # only one of fqdn, hostname or serialNum needs to be specified!
-            if device_info['search_type'] == 'fqdn':
-                system_mac = self.get_system_mac(device_info['device_name'], search_type='fqdn')
-            elif device_info['search_type'] == 'hostname':
+            # look up system mac address using fqdn, hostname or serialNum. default=hostname
+            if 'search_type' in device_info:
+                if device_info['search_type'] == 'fqdn':
+                    system_mac = self.get_system_mac(device_info['device_name'], search_type='fqdn')
+                elif device_info['search_type'] == 'hostname':
+                    system_mac = self.get_system_mac(device_info['device_name'], search_type='hostname')
+                elif device_info['search_type'] == 'serialNumber':
+                    system_mac = self.get_system_mac(device_info['device_name'], search_type='serialNum')
+            else:
                 system_mac = self.get_system_mac(device_info['device_name'], search_type='hostname')
-            elif device_info['search_type'] == 'serialNumber':
-                system_mac = self.get_system_mac(device_info['device_name'], search_type='serialNum')
-            # XXX:
-            # if system_mac is None:
-            #     continue
+
+            if system_mac is None:
+                continue
+            device_infokeys = device_info.keys()
             configlets = {}
-            if device_info['source'] == 'CVP':
-                for configlet in device_info['configlet_names']:
+            if 'cvp_configlets' in device_infokeys:
+                for configlet in device_info['cvp_configlets']:
                     vc_configlet = self.get_configlet_by_name(configlet)
                     if not vc_configlet:
                         error_message = f"The configlet '{configlet}' defined to be validated \
@@ -181,8 +180,8 @@ class CvValidationTools(object):
                         self.__ansible.fail_json(msg=error_message)
                     configlets.update({vc_configlet['name']: vc_configlet['config']})
 
-            if device_info['source'] == 'local':
-                for configlet_name, data in device_info['configlets'].items():
+            if 'local_configlets' in device_infokeys:
+                for configlet_name, data in device_info['local_configlets'].items():
                     configlets.update({configlet_name: data})
 
             for configlet_name, config in configlets.items():
@@ -230,10 +229,10 @@ class CvValidationTools(object):
                         result_data.success = True
                         MODULE_LOGGER.error(msg)
                         device_data["warnings"].append(
-                            {"device": device_info['device_name'], "warnings": err_msg}
+                            {"device": device_info['device_name'], "configlet_name": configlet_name, "warnings": err_msg}
                         )
                         result_data.add_warning(
-                            {"device": device_info['device_name'], "warnings": err_msg}
+                            {"device": device_info['device_name'], "configlet_name": configlet_name, "warnings": err_msg}
                         )
                     if "errors" in resp:
                         err_msg = resp["errors"]
@@ -241,10 +240,10 @@ class CvValidationTools(object):
                         result_data.success = True
                         MODULE_LOGGER.error(msg)
                         device_data["errors"].append(
-                            {"device": device_info['device_name'], "errors": err_msg}
+                            {"device": device_info['device_name'], "configlet_name": configlet_name, "errors": err_msg}
                         )
                         result_data.add_errors(
-                            {"device": device_info['device_name'], "errors": err_msg}
+                            {"device": device_info['device_name'], "configlet_name": configlet_name, "errors": err_msg}
                         )
                 results.append(result_data)
                 device_data["configlets_validated_count"] += 1

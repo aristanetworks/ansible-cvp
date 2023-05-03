@@ -72,8 +72,7 @@ EXAMPLES = r'''
     CVP_DEVICES:
       - device_name: leaf1
         search_type: serialNumber #[hostname | serialNumber | fqdn]
-        source: local
-        configlets:
+        local_configlets:
           valid: "..."
           error: "..."
 
@@ -92,8 +91,7 @@ EXAMPLES = r'''
     CVP_DEVICES:
       - device_name: leaf1
         search_type: fqdn #[hostname | serialNumber | fqdn]
-        source: CVP
-        configlet_names:
+        cvp_configlets:
           - valid
           - invalid
 
@@ -151,14 +149,9 @@ def main():
     argument_spec = dict(
         # Topology to configure on CV side.
         device=dict(type='list', required=True, elements='dict'),
-        # source=dict(type='str',
-        #           required=True,
-        #           choices=['local', 'CVP']),
         validate_mode=dict(type='str',
                   required=True,
-                  choices=['stop_on_warning', 'stop_on_error', 'ignore']),
-        # configlets=dict(type='dict', required=False),
-        # configlet_names=dict(type='list', required=False, elements='str')
+                  choices=['stop_on_warning', 'stop_on_error', 'ignore'])
     )
 
     # Make module global to use it in all functions when required
@@ -170,24 +163,10 @@ def main():
 
     user_input = CvValidateInput(ansible_module.params['device'])
 
+    # XXX: schema validation
     # if user_input.is_valid is False:
     #     ansible_module.fail_json(msg=
     #     f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}")
-
-    # XXX: check for incompatible options
-    # if ansible_module.params['mode'] == 'assign' or ansible_module.params['mode'] == 'unassign':
-    #     for per_device in ansible_module.params['tags']:
-    #         if not ('device' in per_device.keys() or 'device_id' in per_device.keys()):
-    #             error_msg = "Error, either 'device' or 'device_id' needed for each 'device tags/interface tags when mode is 'assign' or 'unassign'"
-    #             ansible_module.fail_json(msg=error_msg)
-    #         if 'interface_tags' in per_device.keys():
-    #             MODULE_LOGGER.info('interface tags in keys')
-    #             for per_intf in per_device['interface_tags']:
-    #                 MODULE_LOGGER.info('per_intf: %s', per_intf)
-    #                 MODULE_LOGGER.info('keys: %s', per_intf.keys())
-    #                 if 'interface' not in per_intf.keys():
-    #                     ansible_module.fail_json(msg="Error, 'interface' needed for each 'interface_tags'"
-    #                                                  " when mode is 'assign' or 'unassign'")
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
