@@ -2,7 +2,7 @@
 - name: Device Config Validation in Cloudvision
   hosts: CloudVision
   connection: local
-  gather_facts: false    
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - device_name: leaf1
