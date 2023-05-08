@@ -650,15 +650,23 @@ class CvDeviceTools(object):
             Api.device.SERIAL: "serial_number",
         }
 
-        MODULE_LOGGER.debug('Remove missing devices from user_inventory')
+        MODULE_LOGGER.debug("Remove missing devices from user_inventory")
 
         # Loop through devices and record index of missing ones for later removal
         missing_devices_indexes: list = []
         for index, device in enumerate(user_inventory.devices):
-            device_search_key = getattr(device, DEVICE_SEARCH_ATTRIBUTE[self.__search_by], "fqdn")
-            if self.is_device_exist(device_search_key, search_mode=self.__search_by) is False:
-                    missing_devices_indexes.append(index)
-                    MODULE_LOGGER.debug('Device not present in CVP, removing from user_inventory: %s', device_search_key)
+            device_search_key = getattr(
+                device, DEVICE_SEARCH_ATTRIBUTE[self.__search_by], "fqdn"
+            )
+            if (
+                self.is_device_exist(device_search_key, search_mode=self.__search_by)
+                is False
+            ):
+                missing_devices_indexes.append(index)
+                MODULE_LOGGER.debug(
+                    "Device not present in CVP, removing from user_inventory: %s",
+                    device_search_key,
+                )
 
         # Remove missing devices from list - reversed to not change indexes.
         missing_devices_indexes.reverse()
@@ -707,7 +715,9 @@ class CvDeviceTools(object):
 
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
-            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+            user_inventory = self.__remove_missing_devices(
+                user_inventory=user_inventory
+            )
         else:
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
@@ -785,7 +795,11 @@ class CvDeviceTools(object):
 
         return response
 
-    def __state_factory_reset(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
+    def __state_factory_reset(
+        self,
+        user_inventory: DeviceInventory,
+        inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT,
+    ):
         """
         __state_factory_reset Execute actions when user configures state=factory_reset
 
@@ -807,7 +821,9 @@ class CvDeviceTools(object):
 
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
-            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+            user_inventory = self.__remove_missing_devices(
+                user_inventory=user_inventory
+            )
         else:
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
@@ -823,7 +839,11 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_provisioning_reset(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
+    def __state_provisioning_reset(
+        self,
+        user_inventory: DeviceInventory,
+        inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT,
+    ):
         """
         __state_provisioning_reset Execute actions when user configures state=provisioning_reset
 
@@ -846,7 +866,9 @@ class CvDeviceTools(object):
 
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
-            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+            user_inventory = self.__remove_missing_devices(
+                user_inventory=user_inventory
+            )
         else:
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
@@ -862,7 +884,11 @@ class CvDeviceTools(object):
         response.add_manager(cv_reset)
         return response
 
-    def __state_absent(self, user_inventory: DeviceInventory, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
+    def __state_absent(
+        self,
+        user_inventory: DeviceInventory,
+        inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT,
+    ):
         """
         __state_absent Execute actions when user configures state=absent
 
@@ -886,7 +912,9 @@ class CvDeviceTools(object):
 
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
-            user_inventory = self.__remove_missing_devices(user_inventory=user_inventory)
+            user_inventory = self.__remove_missing_devices(
+                user_inventory=user_inventory
+            )
         else:
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
@@ -1411,20 +1439,30 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug("Manager search mode is set to: %s", str(self.__search_by))
 
         if state == ModuleOptionValues.STATE_MODE_PRESENT:
-            MODULE_LOGGER.info('Processing data to create/update devices')
-            response = self.__state_present(user_inventory=user_inventory, apply_mode=apply_mode, inventory_mode=inventory_mode)
+            MODULE_LOGGER.info("Processing data to create/update devices")
+            response = self.__state_present(
+                user_inventory=user_inventory,
+                apply_mode=apply_mode,
+                inventory_mode=inventory_mode,
+            )
 
         elif state == ModuleOptionValues.STATE_MODE_ABSENT:
-            MODULE_LOGGER.info('Processing data to reset devices')
-            response = self.__state_factory_reset(user_inventory=user_inventory, inventory_mode=inventory_mode)
+            MODULE_LOGGER.info("Processing data to reset devices")
+            response = self.__state_factory_reset(
+                user_inventory=user_inventory, inventory_mode=inventory_mode
+            )
 
         elif state == ModuleOptionValues.STATE_MODE_REMOVE:
-            MODULE_LOGGER.info('Processing data to reset devices')
-            response = self.__state_provisioning_reset(user_inventory=user_inventory, inventory_mode=inventory_mode)
+            MODULE_LOGGER.info("Processing data to reset devices")
+            response = self.__state_provisioning_reset(
+                user_inventory=user_inventory, inventory_mode=inventory_mode
+            )
 
         elif state == ModuleOptionValues.STATE_MODE_DECOMM:
-            MODULE_LOGGER.info('Processing data to decommission devices')
-            response = self.__state_absent(user_inventory=user_inventory, inventory_mode=inventory_mode)
+            MODULE_LOGGER.info("Processing data to decommission devices")
+            response = self.__state_absent(
+                user_inventory=user_inventory, inventory_mode=inventory_mode
+            )
 
         return response.content
 
