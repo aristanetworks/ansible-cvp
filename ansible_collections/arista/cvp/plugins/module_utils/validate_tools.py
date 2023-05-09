@@ -67,7 +67,7 @@ class CvValidationTools(object):
         self.__cv_client = cv_connection
         self.__ansible = ansible_module
 
-    def get_system_mac(self, search_value: str, search_type: str='fqdn'):
+    def get_system_mac(self, search_value: str, search_type: str = 'fqdn'):
         """
         get_system_mac Get serial number from FQDN or hostname or serialNumber
 
@@ -100,8 +100,7 @@ class CvValidationTools(object):
             device_details = self.__cv_client.api.get_device_by_serial(device_serial=search_value)
             if "systemMacAddress" in device_details.keys():
                 return device_details["systemMacAddress"]
-        self.__ansible.fail_json(msg=
-            f"Error, Device {search_value} doesn't exists on CV. Check the hostname/fqdn")
+        self.__ansible.fail_json(msg=f"Error, Device {search_value} doesn't exists on CV. Check the hostname/fqdn")
 
     def get_configlet_by_name(self, configlet_name):
         """
@@ -202,8 +201,7 @@ class CvValidationTools(object):
                             configlet_name), str(device_info['device_name']))
                     MODULE_LOGGER.debug(
                         "queryParams are deviceMac: %s and configuration: %s", str(
-                            system_mac), str(config)
-                        )
+                            system_mac), str(config))
                     resp = self.__cv_client.api.validate_config_for_device(
                         device_mac=system_mac,
                         config=config)

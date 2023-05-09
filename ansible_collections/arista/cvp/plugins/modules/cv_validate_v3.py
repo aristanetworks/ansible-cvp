@@ -150,8 +150,8 @@ def main():
         # Topology to configure on CV side.
         device=dict(type='list', required=True, elements='dict'),
         validate_mode=dict(type='str',
-                  required=True,
-                  choices=['stop_on_warning', 'stop_on_error', 'ignore'])
+                           required=True,
+                           choices=['stop_on_warning', 'stop_on_error', 'ignore'])
     )
 
     # Make module global to use it in all functions when required
@@ -172,11 +172,12 @@ def main():
     cv_client = tools_cv.cv_connect(ansible_module)
     cv_validation = CvValidationTools(cv_connection=cv_client, ansible_module=ansible_module)
     ansible_response: CvAnsibleResponse = cv_validation.manager(
-      device=ansible_module.params['device'],
-      validate_mode=ansible_module.params['validate_mode'])
+        device=ansible_module.params['device'],
+        validate_mode=ansible_module.params['validate_mode'])
 
     result = ansible_response.content
     ansible_module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()
