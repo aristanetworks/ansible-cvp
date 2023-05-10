@@ -31,35 +31,17 @@ description:
 options:
   device:
     description: CVP device information
-    required: True
+    required: true
     type: list
     elements: dict
-  source:
-    description: location of the configlet to validate
-                 local - configlet is present locally
-                 CVP - configlet is on CVP
-    required: True
-    type: str
-    choices:
-      - local
-      - CVP
-  validation_mode:
+  validate_mode:
     description: validation mode
-    required: True
+    required: true
     type: str
     choices:
       - stop_on_error
       - stop_on_warning
-      - valid
-  configlets:
-    description: List of configlets for offline validation .
-    required: False
-    type: dict
-  configlet_names:
-    description: Names of configlets on CVP
-    required: False
-    type: list
-    elements: str
+      - ignore
 '''
 
 EXAMPLES = r'''
@@ -80,7 +62,7 @@ EXAMPLES = r'''
     - name: validate module
       arista.cvp.cv_validate_v3:
         device: "{{CVP_DEVICES}}"
-        validation_mode: stop_on_error # | stop_on_warning | valid
+        validate_mode: stop_on_error # | stop_on_warning | valid
 
 # online validation
 - name: Online configlet validation
@@ -99,7 +81,7 @@ EXAMPLES = r'''
     - name: validate module
       arista.cvp.cv_validate_v3:
         device: "{{CVP_DEVICES}}"
-        validation_mode: stop_on_error # | stop_on_warning | valid
+        validate_mode: stop_on_error # | stop_on_warning | valid
 '''
 
 import logging
