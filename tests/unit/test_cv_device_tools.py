@@ -3,6 +3,7 @@ import pytest
 from tests.data.device_tools_unit import device_data, device_data_invalid
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
 from tests.lib.mockMagic import fail_json
+from cvprac.cvp_client_errors import CvpApiError
 
 # list of paths to patch
 MOCK_LIST = [
@@ -60,34 +61,25 @@ class TestDecommissionDevice():
             assert pytest_error.value.code == 1
             assert mock_ansible_module.mock_calls == expected_call
 
-    @pytest.mark.parametrize(
-        "device_data, expected_call",
-        [
-            (device_data_invalid, [call.fail_json(msg="Error decommissioning device")])
-        ],
-    )
-    def test_decommission_device_cvp_api_error(self, setup, device_data, expected_call):
+    def test_decommission_device_cvp_api_error(self, setup, mock_cvpClient):
         """
         Tests decommission_device() method for state_absent
 
         if device_data['serialNumber'] is None:
             raise CvpApiError and fail_json() raises SystemExit
         """
-        device_data[0]['serialNumber'] = None
-        user_topology = DeviceInventory(data=device_data)
+        user_topology = DeviceInventory(data=device_data_invalid)
         mock_ansible_module, mock__get_device, cv_tools = setup
 
         # mocked for get_device_facts, device_data is in tests/data/device_tools_unit.py
         mock__get_device.return_value = device_data[0]
-
+        mock_cvpClient.api.device_decommissioning.side_effect = CvpApiError("Error decommissioning device")
         #user_topology input with serial_number None
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.decommission_device(user_inventory=user_topology)
         assert pytest_error.value.code == 1
+        expected_call = [call.fail_json(msg="Error decommissioning device")]
         assert mock_ansible_module.mock_calls == expected_call
-
-        # resetting serialNumber
-        device_data[0]['serialNumber'] = '0123F2E4462997EB155B7C50EC148768'
 
     def test_decommission_device_check_mode_true(self, setup):
         """
@@ -134,27 +126,21 @@ class TestResetDevice():
         if result[0].taskIds:
             assert result[0].taskIds == task_ids
 
-    @pytest.mark.parametrize(
-        "device_data, expected_call",
-        [
-            (device_data_invalid, [call.fail_json(msg="Error resetting device")]),
-        ],
-    )
-    def test_reset_device_cvp_api_error(self, setup, device_data, expected_call):
+
+    def test_reset_device_cvp_api_error(self, setup, mock_cvpClient):
         """
         Tests reset_device method with CvpApiError
 
         device_data: dummy_device_data
-        if not device_data['parentContainerName']:
-            raise CvpApiError and fail_json() raises SystemExit
         """
-        device_data_error = device_data.copy()
-        device_data_error[0]['parentContainerName'] = None
-        user_topology = DeviceInventory(data=device_data_error)
+        user_topology = DeviceInventory(data=device_data_invalid)
         mock_ansible_module, _, cv_tools = setup
+        mock_cvpClient.api.reset_device.side_effect = CvpApiError("Error decommissioning device")
+
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.reset_device(user_inventory=user_topology)
         assert pytest_error.value.code == 1
+        expected_call = [call.fail_json(msg="Error resetting device")]
         assert mock_ansible_module.mock_calls == expected_call
 
 class TestDeleteDevice():
@@ -185,31 +171,19 @@ class TestDeleteDevice():
         assert result[0].success == expected_result
         assert result[0].changed == expected_result
 
-    @pytest.mark.parametrize(
-        "device_data, expected_fail_json_call_msg",
-        [
-            (device_data_invalid, "Error removing device from provisioning")
-        ],
-    )
-    def test_delete_device_cvp_api_error(self, setup, device_data, expected_fail_json_call_msg):
+    def test_delete_device_cvp_api_error(self, setup, mock_cvpClient):
         """
-
         device_data: dummy_device_data
-        if device_data['systemMacAddress'] is None:
-            raise CvpApiError and fail_json() raises SystemExit
         """
-        device_data[0]['systemMacAddress'] = None
-        user_topology = DeviceInventory(data=device_data)
+        user_topology = DeviceInventory(data=device_data_invalid)
         mock_ansible_module, _, cv_tools = setup
+        mock_cvpClient.api.delete_device.side_effect = CvpApiError("Error decommissioning device")
 
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.delete_device(user_inventory=user_topology)
         assert pytest_error.value.code == 1
-        expected_call = [call.fail_json(msg=expected_fail_json_call_msg)]
+        expected_call = [call.fail_json(msg="Error removing device from provisioning")]
         assert mock_ansible_module.mock_calls == expected_call
-
-        # resetting systemMacAddress
-        device_data[0]['serialNumber'] = '50:08:00:b1:5b:0b'
 
     def test_delete_device_check_mode_true(self, setup):
         """

@@ -1,5 +1,6 @@
 from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device, validate_intf, validate_true, device_data)
-from cvprac.cvp_client_errors import CvpApiError
+
+device_decommissioning_result = {}
 
 
 def fail_json(msg, code=1):
@@ -8,7 +9,8 @@ def fail_json(msg, code=1):
     """
     raise SystemExit(code)
 
-def validate_config_for_device(self, device_mac, config):
+
+def validate_config_for_device(device_mac, config):
     if config == validate_router_bgp['config']:
         return return_validate_config_for_device['return_validate_ruter_bgp']
     if config == validate_intf['config']:
@@ -16,26 +18,26 @@ def validate_config_for_device(self, device_mac, config):
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 
-def device_decommissioning(self, device_id, request_id):
+
+def device_decommissioning(device_id, request_id):
     """
     mock method for cvprac device_decommissioning()
     """
-
+    global device_decommissioning_result
     if device_id and device_id == device_data[0]["serialNumber"]:
-        self.result = {'value': {'key': {'requestId': request_id},
+        device_decommissioning_result = {'value': {'key': {'requestId': request_id},
                                  'deviceId': device_id},
                        'time': '2022-02-12T02:58:30.765459650Z'}
-    elif device_id and device_id != device_data[0]["serialNumber"]:
-        self.result = None
     else:
-        raise CvpApiError(msg="Error decommissioning device")
+        device_decommissioning_result = None
 
-def device_decommissioning_status_get_one(self, request_id):
+
+def device_decommissioning_status_get_one(request_id):
     """
     mock method for cvprac device_decommissioning_status_get_one()
     the self.result is set by device_decommissioning when called first
     """
-    if self.result:
+    if device_decommissioning_result:
         resp = {"result": {"value": {"key": {"requestId": request_id},
                                      "status": 'DECOMMISSIONING_STATUS_SUCCESS',
                                      "statusMessage": "Disabled TerminAttr, "
@@ -49,7 +51,8 @@ def device_decommissioning_status_get_one(self, request_id):
 
     return resp["result"]
 
-def reset_device(self, app_name, device, create_task=True):
+
+def reset_device(app_name, device, create_task=True):
     """
     mock method for cvprac reset_device()
     """
@@ -62,24 +65,22 @@ def reset_device(self, app_name, device, create_task=True):
             from_id = ''
 
     if create_task:
-        if from_id and from_id == "Undefined":
-            return {'data': {'status': 'fail', 'taskIds': []}}
-        elif from_id and from_id != "Undefined":
+        if from_id and from_id != "Undefined":
             return {'data': {'taskIds': ['57'], 'status': 'success'}}
         else:
-            raise CvpApiError(msg="Error resetting device")
+            return {'data': {'status': 'fail', 'taskIds': []}}
     else:
         return None
 
-def delete_device(self, device_mac):
+
+def delete_device(device_mac):
     """
     mock method for cvprac delete_device()
     """
     device_info = {}
-    if not device_mac:
-        raise CvpApiError(msg='Error removing device from provisioning')
     if device_mac == device_data[0]['systemMacAddress']:
         device_info = device_data[0]
     if device_info and 'serialNumber' in device_info:
         return {'result': 'success'}
-    return {'result': 'fail'}
+    else:
+        return {'result': 'fail'}
