@@ -62,11 +62,12 @@ class TestApplyBundle():
         mock__get_device.return_value = cv_data
 
         result = cv_tools.apply_bundle(user_inventory=user_topology)
-        assert result[0].success is False
-        assert result[0].changed is False
 
         # re-setting image_bundle name in cv_data
         cv_data['imageBundle']['bundleName'] = 'EOS-4.26.4M'
+
+        assert result[0].success is False
+        assert result[0].changed is False
 
     @pytest.mark.parametrize(
         "expected",
@@ -94,11 +95,12 @@ class TestApplyBundle():
 
         user_topology = DeviceInventory(data=device_data)
         result = cv_tools.apply_bundle(user_inventory=user_topology)
-        assert result[0].success == expected
-        assert result[0].changed == expected
 
         # resetting imageBundle id
         image_bundle['id'] = 'imagebundle_1658329041200536707'
+
+        assert result[0].success == expected
+        assert result[0].changed == expected
 
     def test_apply_bundle_check_mode_true(self, setup):
         """
@@ -134,7 +136,6 @@ class TestApplyBundle():
         assert pytest_error.value.code == 1
         expected_call = [call.fail_json(msg='Error applying bundle to device tp-avd-leaf2: Image bundle ID is not valid')]
         assert mock_ansible_module.mock_calls == expected_call
-
 
     def test_apply_bundle_with_image_bundle_invalid(self, setup):
         """
