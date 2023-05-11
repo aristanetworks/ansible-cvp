@@ -1,5 +1,4 @@
 from tests.data.device_tools_unit import validate_router_bgp, return_validate_config_for_device, validate_intf, validate_true
-from cvprac.cvp_client_errors import CvpApiError
 
 def validate_config_for_device(device_mac, config):
     if config == validate_router_bgp['config']:
