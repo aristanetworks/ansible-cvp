@@ -9,7 +9,7 @@ def fail_json(msg, code=1):
     raise SystemExit(code)
 
 
-def validate_config_for_device(self, device_mac, config):
+def validate_config_for_device(device_mac, config):
     if config == validate_router_bgp['config']:
         return return_validate_config_for_device['return_validate_ruter_bgp']
     if config == validate_intf['config']:
@@ -17,7 +17,7 @@ def validate_config_for_device(self, device_mac, config):
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 
-def get_image_bundle_by_name(self, name):
+def get_image_bundle_by_name(name):
     """
     mock to get image_bundle
     """
@@ -26,7 +26,7 @@ def get_image_bundle_by_name(self, name):
     else:
         return None
 
-def apply_image_to_element(self, image, element, name, id_type,
+def apply_image_to_element(image, element, name, id_type,
                            create_task=True):
     """
     mock for apply_image_to_element
