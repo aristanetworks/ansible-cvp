@@ -1,17 +1,9 @@
-#!/usr/bin/python
-# coding: utf-8 -*-
-# pylint: disable=logging-format-interpolation
-# pylint: disable=dangerous-default-value
-# pylint:disable=duplicate-code
-# flake8: noqa: W503
-# flake8: noqa: W1202
-# flake8: noqa: R0801
-
 from unittest.mock import call
 import pytest
 from tests.data.device_tools_unit import device_data, current_container_info, cv_data
 from ansible_collections.arista.cvp.plugins.module_utils.device_tools import DeviceInventory, CvDeviceTools
-# from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
+from cvprac.cvp_client_errors import CvpApiError
+from tests.lib.mockMagic import fail_json
 
 # list of paths to patch
 MOCK_LIST = [
@@ -27,14 +19,12 @@ def setup(apply_mock, mock_cvpClient):
     """
     mock_ansible_module, mock__get_device, mock_get_container_current, mock_get_container_info = apply_mock(MOCK_LIST)
 
-    mock_ansible_module.fail_json.side_effect = mock_cvpClient.api.fail_json
+    mock_ansible_module.fail_json.side_effect = fail_json
 
     cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
 
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, mock_get_container_info
 
-
-@pytest.mark.state_present
 class TestMoveDevice():
     """
     Contains unit tests for move_device()
@@ -60,7 +50,7 @@ class TestMoveDevice():
             if check_mode == True.
         :param expected: output expected from move_device,
         :param setup: fixture,
-        :param test_falg: conditions
+        :param test_flag: different conditions for success and failure.
         """
 
         if expected:
@@ -81,32 +71,32 @@ class TestMoveDevice():
             cv_tools.check_mode = "True"
 
         result = cv_tools.move_device(user_inventory=user_topology)
-        assert result[0].success == expected
-        assert result[0].changed == expected
-
         device_data[0]["systemMacAddress"] = '50:08:00:b1:5b:0b'
         device_data[0]["parentContainerName"] = "TP_LEAF1"
 
+        assert result[0].success == expected
+        assert result[0].changed == expected
 
-    def test_move_device_cvp_api_error(self, setup):
+
+    def test_move_device_cvp_api_error(self, setup, mock_cvpClient):
         """
         Test for CvpApiError.
         :param setup: fixture
         """
 
-        device_data[0]["parentContainerName"] = "TP_LEAF2"
+        device_data[0]["parentContainerName"] = "TP_LEAF2" # newContainerName and currentContainerName should be different.
         user_topology = DeviceInventory(data=device_data)
         mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, mock_get_container_info = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
+        mock_cvpClient.api.move_device_to_container.side_effect = CvpApiError(msg="")
 
-        mock_get_container_info.return_value = "CvpApiError"
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.move_device(user_inventory=user_topology)
+        device_data[0]["parentContainerName"] = "TP_LEAF1"
         assert pytest_error.value.code == 1
         expected_call = [call.fail_json(msg='Error to move device tp-avd-leaf2 to container TP_LEAF2')]
         assert mock_ansible_module.mock_calls == expected_call
-        device_data[0]["parentContainerName"] = "TP_LEAF1"
 
     def test_move_device_target_container_error(self, setup):
         """

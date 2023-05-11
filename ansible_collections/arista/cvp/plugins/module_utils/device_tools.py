@@ -1402,9 +1402,7 @@ class CvDeviceTools(object):
                     container_name=device.container
                 )
                 if new_container_info is None:
-                    error_message = "The target container '{0}' for the device '{1}' does not exist on CVP.".format(
-                        device.container, device.fqdn
-                    )
+                    error_message = f"The target container '{device.container}' for the device '{device.fqdn}' does not exist on CVP."
                     MODULE_LOGGER.error(error_message)
                     self.__ansible.fail_json(msg=error_message)
 
@@ -1432,11 +1430,7 @@ class CvDeviceTools(object):
                                 create_task=True,
                             )
                         except CvpApiError:
-                            error_message = (
-                                "Error to move device {0} to container {1}".format(
-                                    device.fqdn, device.container
-                                )
-                            )
+                            error_message = f"Error to move device {device.fqdn} to container {device.container}"
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
                         else:
