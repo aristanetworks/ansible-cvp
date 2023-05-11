@@ -9,6 +9,7 @@ def validate_config_for_device(device_mac, config):
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 
+
 def get_image_bundle_by_name(self, name):
     """
     mock to get image_bundle
@@ -18,33 +19,8 @@ def get_image_bundle_by_name(self, name):
     else:
         return None
 
-def apply_image_to_element(image, element, name, id_type,
-                           create_task=True):
-    """
-    mock for apply_image_to_element
-    """
-    if 'imageBundleKeys' in image_bundle:
-        if image_bundle['imageBundleKeys']:
-            node_id = image_bundle['imageBundleKeys'][0]
 
-    if 'id' in image_bundle:
-        node_id = image_bundle['id']
-
-    elif 'key' in image_bundle:
-        node_id = image_bundle['key']
-
-    if create_task:
-        if node_id and node_id != "error_id":
-            return {'data': {'taskIds': ['57'], 'status': 'success'}}
-        elif node_id == "error_id":
-            raise CvpApiError(msg='Image bundle ID is not valid')
-        else:
-            return {'data': {'taskIds': [], 'status': 'fail'}}
-    else:
-        return None
-
-def remove_image_from_element(image, element, name, id_type,
-                           create_task=True):
+def remove_image_from_element(image, element, name, id_type):
     """
     mock for remove_image_from_element
     """
@@ -55,15 +31,11 @@ def remove_image_from_element(image, element, name, id_type,
     if 'id' in image_bundle:
         node_id = image_bundle['id']
 
-    if create_task:
-        if node_id and node_id != "error_id":
-            return {'data': {'taskIds': ['57'], 'status': 'success'}}
-        elif node_id == "error_id":
-            raise CvpApiError(msg='Image bundle ID is not valid')
-        else:
-            return {'data': {'taskIds': [], 'status': 'fail'}}
+    if node_id:
+        return {'data': {'taskIds': ['57'], 'status': 'success'}}
     else:
-        return None
+        return {'data': {'taskIds': [], 'status': 'fail'}}
+
 
 def fail_json(msg, code=1):
     """
