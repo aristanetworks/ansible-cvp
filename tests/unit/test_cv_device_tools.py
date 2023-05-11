@@ -153,10 +153,10 @@ class TestApplyBundle():
         with pytest.raises(SystemExit) as pytest_error:
             _ = cv_tools.apply_bundle(user_inventory=user_topology)
         assert pytest_error.value.code == 1
+        
+        # resetting imageBundle
+        device_data[0]['imageBundle'] = 'EOS-4.25.4M'
 
         expected_call = [call.fail_json(msg='Error applying bundle to device tp-avd-leaf2:'
                                             ' Invalid_bundle_name not found')]
         assert mock_ansible_module.mock_calls == expected_call
-
-        # resetting imageBundle
-        device_data[0]['imageBundle'] = 'EOS-4.25.4M'
