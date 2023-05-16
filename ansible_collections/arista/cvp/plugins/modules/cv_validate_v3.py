@@ -145,10 +145,10 @@ def main():
 
     user_input = CvValidateInput(ansible_module.params['device'])
 
-    # XXX: schema validation
-    # if user_input.is_valid is False:
-    #     ansible_module.fail_json(msg=
-    #     f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}")
+    # Schema validation
+    if user_input.is_valid is False:
+        ansible_module.fail_json(msg=
+        f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}")
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)

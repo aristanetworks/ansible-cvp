@@ -756,4 +756,100 @@ SCHEMA_CV_CHANGE_CONTROL = {
     }
 }
 
-SCHEMA_CV_VALIDATE = {}
+SCHEMA_CV_VALIDATE = {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$id": "http://example.com/example.json",
+    "type": "array",
+    "default": [],
+    "title": "Root Schema",
+    "additionalProperties": False,
+    "items": {
+        "type": "object",
+        "default": {},
+        "title": "A Schema",
+        "required": ["device_name", "search_type", "local_configlets", "cvp_configlets"],
+        "properties": {
+            "device_name": {
+                "type": "string",
+                "default": "",
+                "title": "The device_name Schema",
+                "description": "The name of the device based on the search type (hostname, fqdn or serialNumber).",
+                "examples": [
+                    "leaf1"
+                ]
+            },
+            "search_type": {
+                "type": "string",
+                "default": "hostname",
+                "title": "The search_type Schema",
+                "description": "Device search type. Possible choices: fqdn, hostname, serialNumber",
+                "examples": [
+                    "serialNumber",
+                    "fqdn",
+                    "hostname"
+                ]
+            },
+            "local_configlets": {
+                "type": "object",
+                "default": {},
+                "title": "The local_configlets Schema",
+                "description": "Configlets loaded from the local machine either read from file or cleartext in the playbook",
+                "required": [
+                    "configlet1"
+                ],
+                "properties": {
+                    "configlet1": {
+                        "type": "string",
+                        "default": "",
+                        "title": "The configlet1 Schema",
+                        "examples": [
+                            "{{lookup('file', 'configlet1.cfg')}}"
+                        ]
+                    }
+                },
+                "examples": [{
+                    "configlet1": "{{lookup('file', 'configlet1.cfg')}}"
+                }]
+            },
+            "cvp_configlets": {
+                "type": "array",
+                "default": [],
+                "title": "The cvp_configlets Schema",
+                "description": "List of configlets from CloudVision's database to validate against devices.",
+                "items": {
+                    "type": "string",
+                    "default": "",
+                    "title": "A Schema",
+                    "examples": [
+                        "configlet5"
+                    ]
+                },
+                "examples": [
+                    ["configlet5", "leaf_mlag"]
+                ]
+            }
+        },
+        "examples": [{
+            "device_name": "AVD1234567",
+            "search_type": "serialNumber",
+            "local_configlets": {
+                "configlet1": "{{lookup('file', 'configlet1.cfg')}}"
+            },
+            "cvp_configlets": [
+                "configlet5"
+            ]
+        }]
+    },
+    "examples": [
+        [{
+            "device_name": "leaf1",
+            "search_type": "serialNumber",
+            "local_configlets": {
+                "configlet1": "{{lookup('file', 'configlet1.cfg')}}"
+            },
+            "cvp_configlets": [
+                "configlet5"
+            ]
+        }]
+    ]
+}
