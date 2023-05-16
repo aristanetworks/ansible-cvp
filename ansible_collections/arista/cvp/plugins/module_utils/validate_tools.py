@@ -248,7 +248,6 @@ class CvValidationTools(object):
                 device_data["configlets_validated_list"].append(
                     configlet_name + "_on_" + device_info['device_name'] + "_validated"
                 )
-
         if len(device_data["errors"]) > 0:
             message = (
                 f"Encountered {len(device_data['errors'])} errors during"
