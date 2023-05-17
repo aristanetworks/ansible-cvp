@@ -2208,7 +2208,7 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error("Error resetting device")
                     self.__ansible.fail_json(msg="Error resetting device")
                 else:
-                    if resp["data"]["status"] == "success":
+                    if resp and resp["data"]["status"] == "success":
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = resp["data"][Api.task.TASK_IDS]

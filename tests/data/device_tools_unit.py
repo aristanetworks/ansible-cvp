@@ -66,7 +66,8 @@ return_validate_true = {'id': 'Arista-3-4135109651348942',
                        'Copy completed successfully.\n'},
             {'output': '! Command: show session-configuration named '
                        'capiVerify-2101-4e2f8652701311eda2d2020000000000\n'
-                       '! device: tp-avd-leaf1 (vEOS-lab, EOS-4.28.3M)\n'
+                       '! 
+             : tp-avd-leaf1 (vEOS-lab, EOS-4.28.3M)\n'
                        '!\n'
                        '! boot system flash:/vEOS-lab-4.28.3M.swi\n'
                        '!\n'
@@ -219,7 +220,6 @@ EXP_VALID = {
 }
 
 # mock data from CVP version 2022.1.1
-# mock device data
 device_data = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148767',
     'systemMacAddress': '50:08:00:b1:5b:0b',
@@ -227,9 +227,11 @@ device_data = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'TP_LEAF1',
+    'parentContainerId': 'TP_LEAF1',
     'configlets': [''],
     'imageBundle': 'EOS-4.25.4M',
-}]
+}]  # this is dummy device_data that has no effect
+
 
 device_data_invalid = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148768', # wrong serial number
@@ -238,6 +240,7 @@ device_data_invalid = [{
     'fqdn': 'tp-avd-leaf2',
     'hostname': 'tp-avd-leaf2',
     'parentContainerName': 'Undefined',  # undefined parent container name
+    'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 
 # used for apply_bundle()
