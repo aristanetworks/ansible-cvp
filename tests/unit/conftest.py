@@ -23,6 +23,8 @@ def mock_cvpClient():
     mock_cvpClient = create_autospec(CvpClient)
     mock_cvpClient.api = create_autospec(spec=CvpApi)
     mock_cvpClient.api.validate_config_for_device.side_effect = mockMagic.validate_config_for_device
+    mock_cvpClient.api.apply_image_to_element.side_effect = mockMagic.apply_image_to_element
+    mock_cvpClient.api.get_image_bundle_by_name.side_effect = mockMagic.get_image_bundle_by_name
     mock_cvpClient.api.device_decommissioning.side_effect = mockMagic.device_decommissioning
     mock_cvpClient.api.device_decommissioning_status_get_one.side_effect = mockMagic.device_decommissioning_status_get_one
     mock_cvpClient.api.reset_device.side_effect = mockMagic.reset_device
