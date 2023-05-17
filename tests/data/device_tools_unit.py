@@ -66,8 +66,7 @@ return_validate_true = {'id': 'Arista-3-4135109651348942',
                        'Copy completed successfully.\n'},
             {'output': '! Command: show session-configuration named '
                        'capiVerify-2101-4e2f8652701311eda2d2020000000000\n'
-                       '! 
-             : tp-avd-leaf1 (vEOS-lab, EOS-4.28.3M)\n'
+                       '! device: tp-avd-leaf1 (vEOS-lab, EOS-4.28.3M)\n'
                        '!\n'
                        '! boot system flash:/vEOS-lab-4.28.3M.swi\n'
                        '!\n'
