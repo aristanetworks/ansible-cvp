@@ -10,7 +10,7 @@ def validate_config_for_device(device_mac, config):
         return return_validate_config_for_device['return_validate_true']
 
 
-def get_image_bundle_by_name(self, name):
+def get_image_bundle_by_name(name):
     """
     mock to get image_bundle
     """

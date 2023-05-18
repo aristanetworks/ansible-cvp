@@ -25,4 +25,5 @@ def mock_cvpClient():
     mock_cvpClient.api = create_autospec(spec=CvpApi)
     mock_cvpClient.api.validate_config_for_device.side_effect = mockMagic.validate_config_for_device
     mock_cvpClient.api.remove_image_from_element.side_effect = mockMagic.remove_image_from_element
+    mock_cvpClient.api.get_image_bundle_by_name.side_effect = mockMagic.get_image_bundle_by_name
     return mock_cvpClient
