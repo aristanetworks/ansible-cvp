@@ -231,7 +231,6 @@ device_data = [{
     'imageBundle': 'EOS-4.25.4M',
 }]  # this is dummy device_data that has no effect
 
-
 device_data_invalid = [{
     'serialNumber': '0123F2E4462997EB155B7C50EC148768', # wrong serial number
     'systemMacAddress': '50:08:00:b1:5b:0a',  # wrong mac address

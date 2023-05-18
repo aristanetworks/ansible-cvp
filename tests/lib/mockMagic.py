@@ -4,7 +4,6 @@ from tests.data.device_tools_unit import (validate_router_bgp, return_validate_c
 device_decommissioning_result = {}
 
 
-
 def fail_json(msg, code=1):
     """
     mock method for AnsibleModule fail_json()
@@ -20,6 +19,7 @@ def validate_config_for_device(device_mac, config):
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 
+
 def get_image_bundle_by_name(name):
     """
     mock to get image_bundle
@@ -28,6 +28,7 @@ def get_image_bundle_by_name(name):
         return image_bundle
     else:
         return None
+
 
 def apply_image_to_element(image, element, name, id_type,
                            create_task=True):
@@ -48,6 +49,24 @@ def apply_image_to_element(image, element, name, id_type,
             return {'data': {'taskIds': [], 'status': 'fail'}}
     else:
         return None
+
+
+def remove_image_from_element(image, element, name, id_type):
+    """
+    mock for remove_image_from_element
+    """
+    if 'imageBundleKeys' in image_bundle:
+        if image_bundle['imageBundleKeys']:
+            node_id = image_bundle['imageBundleKeys'][0]
+
+    if 'id' in image_bundle:
+        node_id = image_bundle['id']
+
+    if node_id:
+        return {'data': {'taskIds': ['57'], 'status': 'success'}}
+    else:
+        return {'data': {'taskIds': [], 'status': 'fail'}}
+
 
 def device_decommissioning(device_id, request_id):
     """
