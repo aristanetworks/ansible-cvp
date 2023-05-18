@@ -17,11 +17,8 @@ def setup(apply_mock, mock_cvpClient):
     setup - setup method to apply mocks and patches
     """
     mock_ansible_module, mock__get_device, mock_get_container_current = apply_mock(MOCK_LIST)
-
     mock_ansible_module.fail_json.side_effect = fail_json
-
     cv_tools = CvDeviceTools(mock_cvpClient, mock_ansible_module)
-
     return mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current
 
 
@@ -164,8 +161,8 @@ class TestApplyBundle():
         expected_call = [call.fail_json(msg='Error applying bundle to device tp-avd-leaf2:'
                                             ' Invalid_bundle_name not found')]
         assert mock_ansible_module.mock_calls == expected_call
-       
-      
+
+
 class TestDetachBundle():
     """
     Contains unit tests for detach_bundle()
