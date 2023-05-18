@@ -1489,6 +1489,9 @@ class CvDeviceTools(object):
                 or current_container_info[Api.generic.NAME]
                 == Api.container.UNDEFINED_CONTAINER_ID
             ):
+                MODULE_LOGGER.debug(
+                    "The device is in undefined container"
+                )
                 continue
 
             # GET IMAGE BUNDLE
@@ -1509,6 +1512,7 @@ class CvDeviceTools(object):
 
             if device.image_bundle is not None:
                 if (
+                    current_image_bundle and
                     device.image_bundle
                     == current_image_bundle[Api.generic.IMAGE_BUNDLE_NAME]
                     and current_image_bundle[Api.image.TYPE] == "netelement"
@@ -1545,11 +1549,7 @@ class CvDeviceTools(object):
                             "Error image bundle %s not found", str(device.image_bundle)
                         )
                         self.__ansible.fail_json(
-                            msg="Error applying bundle to device"
-                            + device.fqdn
-                            + ": "
-                            + str(device.image_bundle)
-                            + "not found"
+                            msg=f"Error applying bundle to device {device.fqdn}: {str(device.image_bundle)} not found"
                         )
 
                     MODULE_LOGGER.debug(
@@ -1581,13 +1581,10 @@ class CvDeviceTools(object):
                                 "Error applying bundle to device: %s", str(catch_error)
                             )
                             self.__ansible.fail_json(
-                                msg="Error applying bundle to device"
-                                + device.fqdn
-                                + ": "
-                                + catch_error
+                                msg=f"Error applying bundle to device {device.fqdn}: {str(catch_error)}"
                             )
                         else:
-                            if resp["data"]["status"] == "success":
+                            if resp and resp["data"]["status"] == "success":
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
@@ -2205,7 +2202,7 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error("Error resetting device")
                     self.__ansible.fail_json(msg="Error resetting device")
                 else:
-                    if resp["data"]["status"] == "success":
+                    if resp and resp["data"]["status"] == "success":
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = resp["data"][Api.task.TASK_IDS]
