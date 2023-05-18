@@ -71,8 +71,8 @@ class TestMoveDevice():
         result = cv_tools.move_device(user_inventory=user_topology)
         device_data[0]["systemMacAddress"] = '50:08:00:b1:5b:0b'
         device_data[0]["parentContainerName"] = "TP_LEAF1"
-        
-   def test_move_device_cvp_api_error(self, setup, mock_cvpClient):
+
+    def test_move_device_cvp_api_error(self, setup, mock_cvpClient):
         """
         Test for CvpApiError.
         :param setup: fixture
@@ -80,7 +80,7 @@ class TestMoveDevice():
 
         device_data[0]["parentContainerName"] = "TP_LEAF2" # newContainerName and currentContainerName should be different.
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, mock_get_container_info = setup
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
         mock_cvpClient.api.move_device_to_container.side_effect = CvpApiError(msg="")
@@ -129,7 +129,7 @@ class TestApplyBundle():
         Test when the device is in the undefined container
         """
         user_topology = DeviceInventory(data=device_data)
-        _, _, cv_tools, mock_get_container_current = setup
+        _, _, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
 
         result = cv_tools.apply_bundle(user_inventory=user_topology)
@@ -143,7 +143,7 @@ class TestApplyBundle():
         if both image bundles are same, nothing to do.
         """
         user_topology = DeviceInventory(data=device_data)
-        _, mock__get_device, cv_tools, mock_get_container_current = setup
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
 
         #setting same image_bundle names
@@ -173,7 +173,7 @@ class TestApplyBundle():
         :param expected: output expected from apply_bundle
 
         """
-        _, mock__get_device, cv_tools, mock_get_container_current = setup
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
 
@@ -199,7 +199,7 @@ class TestApplyBundle():
 
         """
         user_topology = DeviceInventory(data=device_data)
-        _, mock__get_device, cv_tools, mock_get_container_current = setup
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
         cv_tools.check_mode = True
@@ -216,7 +216,7 @@ class TestApplyBundle():
 
         """
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current = setup
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, _ = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
         mock_cvpClient.api.apply_image_to_element.side_effect = CvpApiError(msg='Image bundle ID is not valid')
@@ -235,7 +235,7 @@ class TestApplyBundle():
         """
         device_data[0]['imageBundle'] = 'Invalid_bundle_name'
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current = setup
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, _ = setup
 
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
@@ -276,7 +276,7 @@ class TestDecommissionDevice():
             result = failure with error_msg
         """
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, _ = setup
+        mock_ansible_module, mock__get_device, cv_tools, _, _ = setup
         mock__get_device.return_value = device_data[0]  # mocked for get_device_facts, device_data is in tests/data/device_tools_unit.py
 
         if flag:
@@ -299,7 +299,7 @@ class TestDecommissionDevice():
             raise CvpApiError and fail_json() raises SystemExit
         """
         user_topology = DeviceInventory(data=device_data_invalid)
-        mock_ansible_module, mock__get_device, cv_tools, _ = setup
+        mock_ansible_module, mock__get_device, cv_tools, _, _ = setup
 
         # mocked for get_device_facts, device_data is in tests/data/device_tools_unit.py
         mock__get_device.return_value = device_data[0]
@@ -316,7 +316,7 @@ class TestDecommissionDevice():
         Tests decommission_device() method with check_mode true
         """
         user_topology = DeviceInventory(data=device_data)
-        _, _, cv_tools, _ = setup
+        _, _, cv_tools, _, _ = setup
         cv_tools.check_mode = True
 
         result = cv_tools.decommission_device(user_inventory=user_topology)
@@ -349,7 +349,7 @@ class TestResetDevice():
             task_ids = ['57']
         """
         user_topology = DeviceInventory(data=device_data)
-        _, _, cv_tools, _ = setup
+        _, _, cv_tools, _, _ = setup
         result = cv_tools.reset_device(user_inventory=user_topology)
         assert result[0].success == expected_result
         assert result[0].changed == expected_result
@@ -364,7 +364,7 @@ class TestResetDevice():
         device_data: dummy_device_data
         """
         user_topology = DeviceInventory(data=device_data_invalid)
-        mock_ansible_module, _, cv_tools, _ = setup
+        mock_ansible_module, _, cv_tools, _, _ = setup
         mock_cvpClient.api.reset_device.side_effect = CvpApiError("Error decommissioning device")
 
         with pytest.raises(SystemExit) as pytest_error:
@@ -396,7 +396,7 @@ class TestDeleteDevice():
         """
 
         user_topology = DeviceInventory(data=device_data)
-        _, _, cv_tools, _ = setup
+        _, _, cv_tools, _, _ = setup
         result = cv_tools.delete_device(user_inventory=user_topology)
         assert result[0].success == expected_result
         assert result[0].changed == expected_result
@@ -406,7 +406,7 @@ class TestDeleteDevice():
         device_data: dummy_device_data
         """
         user_topology = DeviceInventory(data=device_data_invalid)
-        mock_ansible_module, _, cv_tools, _ = setup
+        mock_ansible_module, _, cv_tools, _, _ = setup
         mock_cvpClient.api.delete_device.side_effect = CvpApiError("Error decommissioning device")
 
         with pytest.raises(SystemExit) as pytest_error:
@@ -420,7 +420,7 @@ class TestDeleteDevice():
         Tests delete_device() method with check_mode true
         """
         user_topology = DeviceInventory(data=device_data)
-        _, _, cv_tools, _ = setup
+        _, _, cv_tools, _, _ = setup
         cv_tools.check_mode = True
 
         result = cv_tools.delete_device(user_inventory=user_topology)
