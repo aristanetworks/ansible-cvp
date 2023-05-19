@@ -19,6 +19,12 @@ def validate_config_for_device(device_mac, config):
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 
+def move_device_to_container(app_name, device, container, create_task):
+
+    if container == "InvalidContainer":
+        return {'data': {'status': 'failed', 'taskIds': []}}
+    else:
+        return {'data': {'status': 'success', 'taskIds': []}}
 
 def get_image_bundle_by_name(name):
     """

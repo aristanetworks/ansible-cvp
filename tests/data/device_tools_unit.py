@@ -241,13 +241,11 @@ device_data_invalid = [{
     'parentContainerId': 'Undefined',  # undefined parent container id
     'configlets': ['']}]
 
-# used for apply_bundle()
 current_container_info = {
     'name': 'TP_LEAF1',
     'key': 'container_208aadc9-ecc0-4970-b524-6712a0baaade'
 }
 
-# current_image_bundle
 cv_data = {
      'modelName': '',
      'internalVersion': '4.28.1F',
