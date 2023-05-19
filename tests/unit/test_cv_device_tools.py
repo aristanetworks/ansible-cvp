@@ -32,6 +32,8 @@ class TestMoveDevice():
         [
             (True, None), # success
             (False, 0),   # failure for same device and current container name
+            (False, "current_container_none"), #current_container_info == None
+            (False, "current_container_undefined"), #current_container_info == "undefined_container"
             (False, 1),   # failure for systemMacAddress = None
             (False, "InvalidContainer"), # failure when move_device_to_container method returns fail.
             (True, "check_mode"), # success if check_mode == True
@@ -67,6 +69,11 @@ class TestMoveDevice():
 
         if test_flag == "check_mode":
             cv_tools.check_mode = "True"
+
+        if test_flag == "current_container_none":
+            mock_get_container_current.return_value = None
+        elif test_flag == "current_container_undefined":
+            mock_get_container_current.return_value = "undefined_container"
 
         result = cv_tools.move_device(user_inventory=user_topology)
         device_data[0]["systemMacAddress"] = '50:08:00:b1:5b:0b'
