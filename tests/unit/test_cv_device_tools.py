@@ -72,6 +72,10 @@ class TestMoveDevice():
         device_data[0]["systemMacAddress"] = '50:08:00:b1:5b:0b'
         device_data[0]["parentContainerName"] = "TP_LEAF1"
 
+        assert result[0].success == expected
+        assert result[0].changed == expected
+
+
     def test_move_device_cvp_api_error(self, setup, mock_cvpClient):
         """
         Test for CvpApiError.
@@ -80,7 +84,7 @@ class TestMoveDevice():
 
         device_data[0]["parentContainerName"] = "TP_LEAF2" # newContainerName and currentContainerName should be different.
         user_topology = DeviceInventory(data=device_data)
-        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, mock_get_container_info = setup
         mock_get_container_current.return_value = current_container_info
         mock__get_device.return_value = cv_data
         mock_cvpClient.api.move_device_to_container.side_effect = CvpApiError(msg="")
@@ -250,6 +254,119 @@ class TestApplyBundle():
         expected_call = [call.fail_json(msg='Error applying bundle to device tp-avd-leaf2:'
                                             ' Invalid_bundle_name not found')]
         assert mock_ansible_module.mock_calls == expected_call
+
+
+class TestDetachBundle():
+    """
+    Contains unit tests for detach_bundle()
+    """
+    @pytest.mark.parametrize(
+        "expected_result",
+        [
+            (True),    #  success
+            (False),   # failure
+        ],
+    )
+    def test_detach_bundle(self, setup, expected_result):
+        """
+        Test device.image_bundle is None and check_mode is false
+
+        :param setup: fixture
+        :param expected: output expected from detach_bundle()
+
+        """
+        device_data[0]['imageBundle'] = None
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_get_container_current.return_value = current_container_info
+        mock__get_device.return_value = cv_data
+        if not expected_result:
+            # removing node_id for failure test-case
+            image_bundle['id'] = None
+
+        user_topology = DeviceInventory(data=device_data)
+        result = cv_tools.detach_bundle(user_inventory=user_topology)
+
+        # resetting imageBundle id
+        image_bundle['id'] = 'imagebundle_1658329041200536707'
+        device_data[0]['imageBundle'] = 'EOS-4.25.4M'
+
+        assert result[0].success == expected_result
+        assert result[0].changed == expected_result
+
+
+    def test_detach_bundle_curent_image_none(self, setup):
+        """
+        Test when current_image_bundle is none
+        :param setup: fixture
+
+        if current_image_bundle, returns empty list
+        """
+        user_topology = DeviceInventory(data=device_data)
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_get_container_current.return_value = current_container_info
+
+        mock__get_device.return_value = None
+
+        result = cv_tools.detach_bundle(user_inventory=user_topology)
+        assert not result
+
+    def test_detach_bundle_device_image_not_none(self, setup):
+        """
+        Test when device.image_bundle is not None
+        :param setup: fixture
+
+        if device.image_bundle is not None, result_data have default values
+        """
+        user_topology = DeviceInventory(data=device_data)
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_get_container_current.return_value = current_container_info
+
+        mock__get_device.return_value = cv_data
+
+        result = cv_tools.detach_bundle(user_inventory=user_topology)
+        assert result[0].success == False
+        assert result[0].changed == False
+
+    def test_detach_bundle_cvp_api_error(self, setup, mock_cvpClient):
+        """
+        Test for CvpApiError.
+        :param setup: fixture
+        """
+        device_data[0]['imageBundle'] = None
+        user_topology = DeviceInventory(data=device_data)
+        mock_ansible_module, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_get_container_current.return_value = current_container_info
+        mock__get_device.return_value = cv_data
+        mock_cvpClient.api.remove_image_from_element.side_effect = CvpApiError(msg="Image bundle ID is not valid")
+
+        with pytest.raises(SystemExit) as pytest_error:
+            _ = cv_tools.detach_bundle(user_inventory=user_topology)
+
+        assert pytest_error.value.code == 1
+        expected_call = [call.fail_json(msg='Error removing bundle from device tp-avd-leaf2: Image bundle ID is not valid')]
+        assert mock_ansible_module.mock_calls == expected_call
+
+
+    def test_detach_bundle_check_mode_true(self, setup):
+        """
+        if cv_tools.check_mode is True, result_data is updated
+        """
+        device_data[0]['imageBundle'] = None
+        user_topology = DeviceInventory(data=device_data)
+        _, mock__get_device, cv_tools, mock_get_container_current, _ = setup
+        mock_get_container_current.return_value = current_container_info
+        mock__get_device.return_value = cv_data
+        cv_tools.check_mode =True
+
+        result = cv_tools.detach_bundle(user_inventory=user_topology)
+
+        # resetting imageBundle
+        device_data[0]['imageBundle'] = 'EOS-4.25.4M'
+
+        assert result[0].success == True
+        assert result[0].changed == False
+        assert result[0].taskIds == ['check_mode']
+
 
 class TestDecommissionDevice():
     """
