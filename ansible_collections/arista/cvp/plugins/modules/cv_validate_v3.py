@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 #
-# Copyright 2019 Arista Networks
+# Copyright 2023 Arista Networks
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-DOCUMENTATION = r'''
+DOCUMENTATION = r"""
 ---
 module: cv_validate_v3
 version_added: "3.7.0"
@@ -42,9 +42,9 @@ options:
       - stop_on_error
       - stop_on_warning
       - ignore
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 # offline validation
 - name: offline configlet validation
   hosts: cv_server
@@ -82,7 +82,7 @@ EXAMPLES = r'''
       arista.cvp.cv_validate_v3:
         device: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error # | stop_on_warning | valid
-'''
+"""
 
 import logging
 import traceback
@@ -109,11 +109,13 @@ def check_import(ansible_module: AnsibleModule):
     """
     if HAS_CVPRAC is False:
         ansible_module.fail_json(
-            msg='cvprac required for this module. Please install using pip install cvprac')
+            msg="cvprac required for this module. Please install using pip install cvprac"
+        )
 
     if not tools_schema.HAS_JSONSCHEMA:
         ansible_module.fail_json(
-            msg="JSONSCHEMA is required. Please install using pip install jsonschema")
+            msg="JSONSCHEMA is required. Please install using pip install jsonschema"
+        )
 
 # ------------------------------------------------------------ #
 #               MAIN section -- starting point                 #
@@ -127,39 +129,46 @@ def main():
     # TODO - ansible module prefers constructor over literal
     #        for dict
     # pylint: disable=use-dict-literal
-    MODULE_LOGGER.info('Start cv_validate_v3 module execution')
+    MODULE_LOGGER.info("Start cv_validate_v3 module execution")
     argument_spec = dict(
         # Topology to configure on CV side.
-        device=dict(type='list', required=True, elements='dict'),
-        validate_mode=dict(type='str',
-                           required=True,
-                           choices=['stop_on_warning', 'stop_on_error', 'ignore'])
+        device=dict(type="list", required=True, elements="dict"),
+        validate_mode=dict(
+            type="str",
+            required=True,
+            choices=["stop_on_warning", "stop_on_error", "ignore"],
+        ),
     )
 
     # Make module global to use it in all functions when required
-    ansible_module = AnsibleModule(argument_spec=argument_spec,
-                                   supports_check_mode=True)
+    ansible_module = AnsibleModule(
+        argument_spec=argument_spec, supports_check_mode=True
+    )
 
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
-    user_input = CvValidateInput(ansible_module.params['device'])
+    user_input = CvValidateInput(ansible_module.params["device"])
 
     # Schema validation
     if user_input.is_valid is False:
-        ansible_module.fail_json(msg=
-        f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}")
+        ansible_module.fail_json(
+            msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}"
+        )
 
     # Create CVPRAC client
     cv_client = tools_cv.cv_connect(ansible_module)
-    cv_validation = CvValidationTools(cv_connection=cv_client, ansible_module=ansible_module)
+    cv_validation = CvValidationTools(
+        cv_connection=cv_client, ansible_module=ansible_module
+    )
     ansible_response: CvAnsibleResponse = cv_validation.manager(
-        device=ansible_module.params['device'],
-        validate_mode=ansible_module.params['validate_mode'])
+        device=ansible_module.params["device"],
+        validate_mode=ansible_module.params["validate_mode"],
+    )
 
     result = ansible_response.content
     ansible_module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
