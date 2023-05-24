@@ -767,7 +767,7 @@ SCHEMA_CV_VALIDATE = {
         "type": "object",
         "default": {},
         "title": "A Schema",
-        "required": ["device_name", "search_type", "local_configlets", "cvp_configlets"],
+        "required": ["device_name"],
         "properties": {
             "device_name": {
                 "type": "string",
@@ -794,19 +794,12 @@ SCHEMA_CV_VALIDATE = {
                 "default": {},
                 "title": "The local_configlets Schema",
                 "description": "Configlets loaded from the local machine either read from file or cleartext in the playbook",
-                "required": [
-                    "configlet1"
-                ],
-                "properties": {
-                    "configlet1": {
-                        "type": "string",
-                        "default": "",
-                        "title": "The configlet1 Schema",
-                        "examples": [
-                            "{{lookup('file', 'configlet1.cfg')}}"
-                        ]
-                    }
-                },
+                "required": [],
+                # "patternProperties": {
+                #     "^[A-Za-z0-9\\s\\._%\\+-]+$": {
+                #         "type": "string"
+                #     }
+                # },
                 "examples": [{
                     "configlet1": "{{lookup('file', 'configlet1.cfg')}}"
                 }]
