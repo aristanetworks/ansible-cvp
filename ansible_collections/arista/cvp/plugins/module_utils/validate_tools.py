@@ -90,7 +90,7 @@ class CvValidationTools(object):
             if "systemMacAddress" in device_details.keys():
                 return device_details["systemMacAddress"]
         # lookup by hostname(by splitting fqdn filed on dots and taking the first split as hostname)
-        if search_type == 'hostnmae':
+        if search_type == 'hostname':
             device_details = self.__cv_client.api.get_device_by_name(
                 fqdn=search_value, search_by_hostname=True)
             if "systemMacAddress" in device_details.keys():

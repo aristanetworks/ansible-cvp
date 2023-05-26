@@ -6,58 +6,58 @@
   vars:
     CVP_DEVICES_WARNING_CVP:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_warning
     CVP_DEVICES_WARNING_LOCAL:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           validate_warning_local: "interface Ethernet1\n   spanning-tree portfast"
 
     CVP_DEVICES_ERROR_CVP:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_error
     CVP_DEVICES_ERROR_LOCAL:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           validate_error_local: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
 
     CVP_DEVICES_VALID_CVP:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_valid
     CVP_DEVICES_VALID_LOCAL:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           validate_valid_local: "interface Ethernet1\n  description test_validate"
 
     CVP_DEVICES_MULTILINE_CVP:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_error_multiline
     CVP_DEVICES_MULTILINE_LOCAL:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           validate_error_multiline_LOCAL: "interface Ethernet10\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree portfast\n!"
 
     CVP_DEVICES_MULTIPLE_CVP:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         cvp_configlets:
         - validate_error
         - validate_valid
         - validate_warning
     CVP_DEVICES_MULTIPLE_LOCAL:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           validate_warning_local: "interface Ethernet1\n   spanning-tree portfast"
           validate_valid_local: "interface Ethernet1\n  description test_validate"
