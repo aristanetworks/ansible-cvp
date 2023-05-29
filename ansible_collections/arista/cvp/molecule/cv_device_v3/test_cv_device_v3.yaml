@@ -1,0 +1,62 @@
+---
+- name: Test cv_device_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES_MOVE_DEVICE:
+      - fqdn: leaf1
+        parentContainerName: "Spine"
+
+    CVP_DEVICES_PARENT_CONTAINER_NONE:
+      - fqdn: leaf1
+        parentContainerName: None
+
+    CVP_DEVICES_PARENT_CONTAINER_SAME:
+      - fqdn: leaf1
+        parentContainerName: "Spine"
+  tasks:
+
+#####################################
+#         MOVE DEVICE               #
+#####################################
+
+  - name: Run CV_DEVICE_V3 To Move Device
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
+        state: present
+    register: MOVE_DEVICE_RUN
+  - assert:
+      that:
+        - "MOVE_DEVICE_RUN.devices_moved.changed == true"
+        - "MOVE_DEVICE_RUN.devices_moved.devices_moved_count == 1"
+        - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['leaf1_to_Spine']"
+        - "MOVE_DEVICE_RUN.devices_moved.success == true"
+        - "MOVE_DEVICE_RUN.failed == false"
+
+  - name: Run CV_DEVICE_V3 To Move Device With Parent Container None
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_PARENT_CONTAINER_NONE}}'
+        state: present
+    ignore_errors: yes # ignoring errors so assertions can be done
+    register: MOVE_DEVICE_NONE
+  - assert:
+      that:
+        - MOVE_DEVICE_NONE.msg == "The target container 'None' for the device 'leaf1' does not exist on CVP."
+        - MOVE_DEVICE_NONE.changed == false
+        - MOVE_DEVICE_NONE.failed == true
+
+  - name: Run CV_DEVICE_V3 To Move Device With Parent Container Same
+    arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_PARENT_CONTAINER_SAME}}'
+        state: present
+    ignore_errors: yes # ignoring errors so assertions can be done
+    register: MOVE_DEVICE
+  - assert:
+      that:
+        - MOVE_DEVICE.devices_moved.changed == false
+        - MOVE_DEVICE.devices_moved.devices_moved_count == 0
+        - MOVE_DEVICE.devices_moved.devices_moved_list == []
+        - MOVE_DEVICE.devices_moved.success == false
+        - MOVE_DEVICE.failed == false
+        - MOVE_DEVICE.taskIds: []
