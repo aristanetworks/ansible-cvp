@@ -619,7 +619,7 @@ class CvDeviceTools(object):
         )
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
             error_message = "Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
-                \nMake sure that the devices are provisioned and defined with the full fqdn name \
+                Make sure that the devices are provisioned and defined with the full fqdn name \
                 (including the domain name) if needed.".format(
                 str(list_non_existing_devices)
             )

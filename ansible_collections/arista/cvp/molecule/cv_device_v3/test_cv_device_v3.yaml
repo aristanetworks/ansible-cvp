@@ -15,8 +15,11 @@
     CVP_DEVICES_PARENT_CONTAINER_SAME:
       - fqdn: leaf1
         parentContainerName: "Spine"
-  tasks:
+    CVP_DEVICES_STATE_ABSENT:
+      - fqdn: leaf2
+        parentContainerName: ""
 
+  tasks:
 #####################################
 #         MOVE DEVICE               #
 #####################################
@@ -60,3 +63,33 @@
         - MOVE_DEVICE.devices_moved.success == false
         - MOVE_DEVICE.failed == false
         - MOVE_DEVICE.taskIds: []
+
+#####################################
+#         STATE ABSENT              #
+#####################################
+  - name: Run CV_DEVICE_V3 With State Absent
+    arista.cvp.cv_device_v3:
+      devices: '{{CVP_DEVICES_STATE_ABSENT}}'
+      state: absent
+    #    ignore_errors: yes # ignoring errors so assertions can be done
+    register: DECOMMISSION_DEVICE
+  - assert:
+      that:
+        - DECOMMISSION_DEVICE.devices_decommissioned.changed == true
+        - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 0
+        - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['leaf2_delete']
+        - DECOMMISSION_DEVICE.devices_decommissioned.success == true
+        - DECOMMISSION_DEVICE.devices_decommissioned.taskIds == []
+        - DECOMMISSION_DEVICE.failed == false
+
+  - name: Run CV_DEVICE_V3 With State Absent
+    arista.cvp.cv_device_v3:
+      devices: '{{CVP_DEVICES_STATE_ABSENT}}'
+      state: absent
+    ignore_errors: yes # ignoring errors so assertions can be done
+    register: DECOMMISSION_DEVICE_ABSENT
+  - assert:
+      that:
+        - DECOMMISSION_DEVICE_ABSENT.changed == false
+        - DECOMMISSION_DEVICE_ABSENT.failed == true
+        - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['leaf2'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."
