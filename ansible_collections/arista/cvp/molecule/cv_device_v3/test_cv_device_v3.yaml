@@ -6,7 +6,7 @@
   vars:
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: leaf1
-        parentContainerName: "Spine"
+        parentContainerName: "Leaf"
 
     CVP_DEVICES_PARENT_CONTAINER_NONE:
       - fqdn: leaf1
@@ -14,7 +14,8 @@
 
     CVP_DEVICES_PARENT_CONTAINER_SAME:
       - fqdn: leaf1
-        parentContainerName: "Spine"
+        parentContainerName: "Leaf"
+
     CVP_DEVICES_STATE_ABSENT:
       - fqdn: leaf2
         parentContainerName: ""
@@ -33,7 +34,7 @@
       that:
         - "MOVE_DEVICE_RUN.devices_moved.changed == true"
         - "MOVE_DEVICE_RUN.devices_moved.devices_moved_count == 1"
-        - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['leaf1_to_Spine']"
+        - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['leaf1_to_Leaf']"
         - "MOVE_DEVICE_RUN.devices_moved.success == true"
         - "MOVE_DEVICE_RUN.failed == false"
 
@@ -71,7 +72,6 @@
     arista.cvp.cv_device_v3:
       devices: '{{CVP_DEVICES_STATE_ABSENT}}'
       state: absent
-    #    ignore_errors: yes # ignoring errors so assertions can be done
     register: DECOMMISSION_DEVICE
   - assert:
       that:
