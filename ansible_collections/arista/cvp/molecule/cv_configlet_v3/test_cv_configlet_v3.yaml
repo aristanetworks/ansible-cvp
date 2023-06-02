@@ -1,0 +1,65 @@
+---
+- name: cv_device_v3 benchmarking
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_CONFIGLETS:
+      configlet1: 'alias a{{ 999 | random }} show lldp'
+      configlet2: 'alias c{{ 999 | random }} show version'
+  tasks:
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: present
+      register: CV_CONFIGLET_V3_RESULT
+
+    - name: "Check configlet creation process"
+      assert:
+        that:
+          - CV_CONFIGLET_V3_RESULT.changed == true
+          - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_count == 2
+          - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_list == ['configlet1', 'configlet2']
+          - CV_CONFIGLET_V3_RESULT.configlets_created.success == true
+
+    - name: 'Collect devices facts from {{inventory_hostname}}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets
+        regexp_filter: "configlet"
+      register: FACTS_CONFIGLET
+
+    - name: "Check device facts"
+      assert:
+        that:
+          - FACTS_CONFIGLET.changed == false
+          - FACTS_CONFIGLET.data.cvp_configlets.configlet1 is defined
+          - FACTS_CONFIGLET.data.cvp_configlets.configlet2 is defined
+          - FACTS_CONFIGLET.failed == false
+
+    - name: "Delete config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
+      register: DELETE_CONFIGLET_RESULT
+
+    - name: "Check configlet deletion process"
+      assert:
+        that:
+          - DELETE_CONFIGLET_RESULT.changed == true
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_count == 2
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == ['configlet1', 'configlet2']
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.success == true
+
+    - name: 'Collect devices facts from {{inventory_hostname}}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets
+        regexp_filter: "configlet"
+      register: FACTS_CONFIGLET
+
+    - name: "Check device facts"
+      assert:
+        that:
+          - FACTS_CONFIGLET.changed == false
+          - FACTS_CONFIGLET.data.cvp_configlets == {}
