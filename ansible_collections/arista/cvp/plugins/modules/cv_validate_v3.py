@@ -55,8 +55,8 @@ EXAMPLES = r"""
       - device_name: leaf1
         search_type: serialNumber #[hostname | serialNumber | fqdn]
         local_configlets:
-          valid: "..."
-          error: "..."
+          valid: "interface Ethernet1\n  description test_validate"
+          error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
 
   tasks:
     - name: validate module
