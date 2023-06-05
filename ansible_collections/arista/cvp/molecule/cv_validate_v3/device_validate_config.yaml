@@ -84,7 +84,6 @@
     register: STOP_ON_ERROR_WARNING_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_ERROR_WARNING_CONFIG_CVP.changed == true"
         - "STOP_ON_ERROR_WARNING_CONFIG_CVP.failed == false"
         - "STOP_ON_ERROR_WARNING_CONFIG_CVP.success == true"
         - "STOP_ON_ERROR_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
@@ -98,7 +97,6 @@
     register: STOP_ON_ERROR_WARNING_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.changed == true"
         - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.failed == false"
         - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.success == true"
         - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
@@ -113,7 +111,6 @@
     register: STOP_ON_WARNING_WARNING_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_WARNING_WARNING_CONFIG_CVP.changed == false"
         - "STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_WARNING
@@ -126,7 +123,6 @@
     register: STOP_ON_WARNING_WARNING_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.changed == false"
         - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.errors == []"
     register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_WARNING
@@ -138,7 +134,6 @@
     register: IGNORE_WARNING_CONFIG_CVP
   - assert:
       that:
-        - "IGNORE_WARNING_CONFIG_CVP.changed == true"
         - "IGNORE_WARNING_CONFIG_CVP.failed == false"
         - "IGNORE_WARNING_CONFIG_CVP.success == true"
         - "IGNORE_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
@@ -152,7 +147,6 @@
     register: IGNORE_WARNING_CONFIG_LOCAL
   - assert:
       that:
-        - "IGNORE_WARNING_CONFIG_LOCAL.changed == true"
         - "IGNORE_WARNING_CONFIG_LOCAL.failed == false"
         - "IGNORE_WARNING_CONFIG_LOCAL.success == true"
         - "IGNORE_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
@@ -171,7 +165,6 @@
     register: STOP_ON_ERROR_ERROR_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_ERROR_ERROR_CONFIG_CVP.changed == false"
         - "STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
         - "STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_ERROR
@@ -184,7 +177,6 @@
     register: STOP_ON_ERROR_ERROR_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.changed == false"
         - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
         - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_ERROR
@@ -197,7 +189,6 @@
     register: STOP_ON_WARNING_ERROR_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_WARNING_ERROR_CONFIG_CVP.changed == false"
         - "STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
         - "STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_WARNING
@@ -210,7 +201,6 @@
     register: STOP_ON_WARNING_ERROR_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.changed == false"
         - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
         - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_WARNING
@@ -222,7 +212,6 @@
     register: IGNORE_ERROR_CONFIG_CVP
   - assert:
       that:
-        - "IGNORE_ERROR_CONFIG_CVP.changed == true"
         - "IGNORE_ERROR_CONFIG_CVP.failed == false"
         - "IGNORE_ERROR_CONFIG_CVP.success == true"
         - "IGNORE_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
@@ -236,7 +225,6 @@
     register: IGNORE_ERROR_CONFIG_LOCAL
   - assert:
       that:
-        - "IGNORE_ERROR_CONFIG_LOCAL.changed == true"
         - "IGNORE_ERROR_CONFIG_LOCAL.failed == false"
         - "IGNORE_ERROR_CONFIG_LOCAL.success == true"
         - "IGNORE_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
@@ -254,7 +242,6 @@
     register: STOP_ON_ERROR_VALID_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_ERROR_VALID_CONFIG_CVP.changed == true"
         - "STOP_ON_ERROR_VALID_CONFIG_CVP.failed == false"
         - "STOP_ON_ERROR_VALID_CONFIG_CVP.success == true"
         - "STOP_ON_ERROR_VALID_CONFIG_CVP.configlets_validated.warnings == []"
@@ -268,7 +255,6 @@
     register: STOP_ON_ERROR_VALID_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.changed == true"
         - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.failed == false"
         - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.success == true"
         - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
@@ -282,7 +268,6 @@
     register: STOP_ON_WARNING_VALID_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_WARNING_VALID_CONFIG_CVP.changed == true"
         - "STOP_ON_WARNING_VALID_CONFIG_CVP.failed == false"
         - "STOP_ON_WARNING_VALID_CONFIG_CVP.success == true"
         - "STOP_ON_WARNING_VALID_CONFIG_CVP.configlets_validated.warnings == []"
@@ -296,7 +281,6 @@
     register: STOP_ON_WARNING_VALID_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.changed == true"
         - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.failed == false"
         - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.success == true"
         - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
@@ -310,7 +294,6 @@
     register: IGNORE_VALID_CONFIG_CVP
   - assert:
       that:
-        - "IGNORE_VALID_CONFIG_CVP.changed == true"
         - "IGNORE_VALID_CONFIG_CVP.failed == false"
         - "IGNORE_VALID_CONFIG_CVP.success == true"
         - "IGNORE_VALID_CONFIG_CVP.configlets_validated.warnings == []"
@@ -324,7 +307,6 @@
     register: IGNORE_VALID_CONFIG_LOCAL
   - assert:
       that:
-        - "IGNORE_VALID_CONFIG_LOCAL.changed == true"
         - "IGNORE_VALID_CONFIG_LOCAL.failed == false"
         - "IGNORE_VALID_CONFIG_LOCAL.success == true"
         - "IGNORE_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
@@ -343,7 +325,6 @@
     register: STOP_ON_ERROR_MULTILINE_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.changed == false"
         - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_ERROR
@@ -356,7 +337,6 @@
     register: STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.changed == false"
         - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_ERROR
@@ -369,7 +349,6 @@
     register: STOP_ON_WARNING_MULTILINE_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.changed == false"
         - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_WARNING
@@ -382,7 +361,6 @@
     register: STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.changed == false"
         - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_WARNING
@@ -394,7 +372,6 @@
     register: IGNORE_MULTILINE_CONFIG_CVP
   - assert:
       that:
-        - "IGNORE_MULTILINE_CONFIG_CVP.changed == true"
         - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_IGNORE
@@ -406,7 +383,6 @@
     register: IGNORE_MULTILINE_CONFIG_LOCAL
   - assert:
       that:
-        - "IGNORE_MULTILINE_CONFIG_LOCAL.changed == true"
         - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
         - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> interface Ethernet10% Invalid input (at token 1: 'Ethernet10') at line 1\", 'lineNo': ' 1'}, {'error': \">   description test% Invalid input (at token 0: 'description') at line 2\", 'lineNo': ' 2'}, {'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 1: '1.1.1.1') at line 6\", 'lineNo': ' 6'}]}]"
     register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_IGNORE
@@ -422,7 +398,6 @@
     register: STOP_ON_ERROR_MULTIPLE_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.changed == false"
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_ERROR
@@ -435,7 +410,6 @@
     register: STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.changed == false"
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_ERROR
@@ -448,7 +422,6 @@
     register: STOP_ON_WARNING_MULTIPLE_CONFIG_CVP
   - assert:
       that:
-        - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.changed == false"
         - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_WARNING
@@ -461,7 +434,6 @@
     register: STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL
   - assert:
       that:
-        - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.changed == false"
         - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_WARNING
@@ -473,7 +445,6 @@
     register: IGNORE_MULTIPLE_CONFIG_CVP
   - assert:
       that:
-        - "IGNORE_MULTIPLE_CONFIG_CVP.changed == true"
         - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_IGNORE
@@ -485,7 +456,6 @@
     register: IGNORE_MULTIPLE_CONFIG_LOCAL
   - assert:
       that:
-        - "IGNORE_MULTIPLE_CONFIG_LOCAL.changed == true"
         - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 'leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
         - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_IGNORE

@@ -208,7 +208,7 @@ class CvValidationTools(object):
                     result_data.add_entry(
                         configlet_name + "_validated_against_" + device_info['device_name']
                     )
-                    result_data.changed = True
+                    result_data.changed = False
                     result_data.success = True
 
                 except CvpApiError:
@@ -219,7 +219,7 @@ class CvValidationTools(object):
                         msg=f"Error validation failed on device {device_info['device_name']}")
                 else:
                     if "result" in resp:
-                        result_data.changed = True
+                        result_data.changed = False
                         result_data.success = True
                     if "warnings" in resp and resp["warningCount"] > 0:
                         err_msg = resp["warnings"]

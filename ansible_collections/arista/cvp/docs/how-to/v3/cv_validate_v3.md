@@ -79,9 +79,9 @@ The documentation is available in the [module section](../../modules/cv_validate
 
 ```yaml
 msg:
-  changed: true
+  changed: false
   configlets_validated:
-    changed: true
+    changed: false
     configlets_validated_count: 1
     configlets_validated_list:
     - validate_valid_on_serialNumber_validated
