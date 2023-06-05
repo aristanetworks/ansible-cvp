@@ -1,5 +1,5 @@
 ---
-- name: cv_device_v3 benchmarking
+- name: Test cv_configlet_v3
   hosts: CloudVision
   connection: local
   gather_facts: no
