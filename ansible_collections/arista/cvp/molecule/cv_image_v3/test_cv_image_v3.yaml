@@ -1,0 +1,138 @@
+---
+- name: Test cv_image_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    # Make sure given image does not exist on CVP
+    image_name: "EOS-4.25.4M.swi"
+  tasks:
+
+  ### Run all the tasks sequentially ###
+
+    - name: "Create bundle {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: add
+        bundle_name: Test_bundle
+        image_list:
+          - "{{image_name}}"
+      register: CREATE_BUNDLE_DATA
+    - assert:
+        that:
+          - CREATE_BUNDLE_DATA.changed == true
+          - CREATE_BUNDLE_DATA.data.data == "Bundle : Test_bundle successfully created"
+          - CREATE_BUNDLE_DATA.failed == false
+
+    - name: "Update bundle {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: add
+        bundle_name: Test_bundle
+        image_list:
+          - "{{image_name}}"
+      register: UPDATE_BUNDLE_DATA
+    - assert:
+        that:
+          - UPDATE_BUNDLE_DATA.changed == true
+          - UPDATE_BUNDLE_DATA.data.data == "Image bundle updated successfully."
+          - UPDATE_BUNDLE_DATA.failed == false
+
+    - name: "Gather CVP bundle information facts {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: get
+      register: BUNDLE_DATA
+    - assert:
+        that:
+          - BUNDLE_DATA.changed == false
+          - BUNDLE_DATA.data.bundles[0].name == "Test_bundle"
+          - BUNDLE_DATA.data.bundles[0].imageIds == ["{{image_name}}"]
+
+    - name: "Delete bundle {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: remove
+        bundle_name: Test_bundle
+        image_list:
+          - "{{image_name}}"
+      register: DELETE_BUNDLE
+    - assert:
+        that:
+          - DELETE_BUNDLE.changed == true
+          - DELETE_BUNDLE.data.data == "success"
+          - DELETE_BUNDLE.failed == false
+
+    - name: "Add an image {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{image_name}}"
+      register: ADD_IMAGE
+    - assert:
+        that:
+          - ADD_IMAGE.changed == true
+          - ADD_IMAGE.data.result == "success"
+          - ADD_IMAGE.data.imageId == "{{image_name}}"
+          - ADD_IMAGE.data.name == "{{image_name}}"
+          - ADD_IMAGE.failed == false
+
+    - name: "Negative test: Add image already exists {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{image_name}}"
+      ignore_errors: yes
+      register: NEGATIVE_ADD_IMAGE
+    - assert:
+        that:
+          - NEGATIVE_ADD_IMAGE.changed == false
+          - NEGATIVE_ADD_IMAGE.data == {}
+          - NEGATIVE_ADD_IMAGE.failed == false
+
+    - name: "Gather CVP image information facts {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: get
+      register: IMAGE_DATA
+    - assert:
+        that:
+          - IMAGE_DATA.changed == false
+          - IMAGE_DATA.data.images[0].imageFileName == "{{image_name}}"
+          - IMAGE_DATA.data.images[0].imageId == "{{image_name}}"
+          - IMAGE_DATA.data.images[0].name == "{{image_name}}"
+
+#####################################################################
+##### Deletion of images through API is not currently supported #####
+#####################################################################
+
+    # - name: "Delete an image {{inventory_hostname}}"
+    #   vars:
+    #     ansible_command_timeout: 1200
+    #     ansible_connect_timeout: 600
+    #   arista.cvp.cv_image_v3:
+    #     mode: image
+    #     action: remove
+    #     image: temp_04.swi
+    #   register: DELETE_IMAGE

@@ -1,0 +1,3 @@
+---
+- name: Run cv_image_v3
+  import_playbook: test_cv_image_v3.yaml
