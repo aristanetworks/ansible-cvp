@@ -146,8 +146,8 @@ EXP_WARN = {'configlets_validated_count': 1,
                                 'line 2']}]}
 
 # expected output for warning and error configlet for validate_mode=ignore
-EXP_WARN_ERROR_IGNORE = {'changed': True,
- 'configlets_validated': {'changed': True,
+EXP_WARN_ERROR_IGNORE = {'changed': False,
+ 'configlets_validated': {'changed': False,
                           'configlets_validated_count': 1,
                           'configlets_validated_list': ['validate_warning_on_serialNumber_validated'],
                           'diff': {},
@@ -171,8 +171,8 @@ EXP_WARN_ERROR_IGNORE = {'changed': True,
  'taskIds': []}
 
 # expected output for error configlet for validate_mode=ignore
-EXP_ERROR_IGNORE = {'changed': True,
- 'configlets_validated': {'changed': True,
+EXP_ERROR_IGNORE = {'changed': False,
+ 'configlets_validated': {'changed': False,
                           'configlets_validated_count': 1,
                           'configlets_validated_list': ['validate_error_on_serialNumber_validated'],
                           'diff': {},

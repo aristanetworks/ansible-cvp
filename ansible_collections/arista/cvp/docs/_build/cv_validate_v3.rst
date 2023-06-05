@@ -1,59 +1,75 @@
-# cv_validate_v3
+.. _cv_validate_v3:
 
+cv_validate_v3
+++++++++++++++
 Online/Offline configlet validation
 
 Module added in version 3.7.0
 
-<div class="contents" local="" depth="2">
 
-</div>
 
-## Synopsis
+.. contents::
+   :local:
+   :depth: 2
 
-CloudVision Portal Validate module to Validate configlets against a
-device on CVP
 
-## Module-specific Options
+Synopsis
+--------
 
+
+CloudVision Portal Validate module to Validate configlets against a device on CVP
+
+
+.. _module-specific-options-label:
+
+Module-specific Options
+-----------------------
 The following options may be specified for this module:
 
-<table border=1 cellpadding=4>
+.. raw:: html
 
-<tr>
-<th class="head">parameter</th>
-<th class="head">type</th>
-<th class="head">required</th>
-<th class="head">default</th>
-<th class="head">choices</th>
-<th class="head">comments</th>
-</tr>
+    <table border=1 cellpadding=4>
 
-<tr>
-<td>device<br/><div style="font-size: small;"></div></td>
-<td>list</td>
-<td>yes</td>
-<td></td>
-<td></td>
-<td>
-    <div>CVP device information</div>
-</td>
-</tr>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">type</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
 
-<tr>
-<td>validate_mode<br/><div style="font-size: small;"></div></td>
-<td>str</td>
-<td>yes</td>
-<td></td>
-<td><ul><li>stop_on_error</li><li>stop_on_warning</li><li>ignore</li></ul></td>
-<td>
-    <div>validation mode</div>
-</td>
-</tr>
+    <tr>
+    <td>device<br/><div style="font-size: small;"></div></td>
+    <td>list</td>
+    <td>yes</td>
+    <td></td>
+    <td></td>
+    <td>
+        <div>CVP device information</div>
+    </td>
+    </tr>
 
-</table>
-</br>
+    <tr>
+    <td>validate_mode<br/><div style="font-size: small;"></div></td>
+    <td>str</td>
+    <td>yes</td>
+    <td></td>
+    <td><ul><li>stop_on_error</li><li>stop_on_warning</li><li>ignore</li></ul></td>
+    <td>
+        <div>validation mode</div>
+    </td>
+    </tr>
 
-## Examples:
+    </table>
+    </br>
+
+.. _cv_validate_v3-examples-label:
+
+Examples:
+---------
+
+::
 
     # offline validation
     - name: offline configlet validation
@@ -93,6 +109,9 @@ The following options may be specified for this module:
             device: "{{CVP_DEVICES}}"
             validate_mode: stop_on_error # | stop_on_warning | valid
 
-### Author
 
--   Ansible Arista Team (@aristanetworks)
+
+Author
+~~~~~~
+
+* Ansible Arista Team (@aristanetworks)
