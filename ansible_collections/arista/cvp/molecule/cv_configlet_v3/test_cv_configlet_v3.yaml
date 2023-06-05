@@ -22,6 +22,20 @@
           - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_list == ['configlet1', 'configlet2']
           - CV_CONFIGLET_V3_RESULT.configlets_created.success == true
 
+    - name: "Push already existing config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: present
+      register: CV_CONFIGLET_V3_RESULT
+
+    - name: "Check configlet updation process"
+      assert:
+        that:
+          - CV_CONFIGLET_V3_RESULT.changed == true
+          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_count == 2
+          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_list == ['configlet1', 'configlet2']
+          - CV_CONFIGLET_V3_RESULT.configlets_updated.success == true
+
     - name: 'Collect devices facts from {{inventory_hostname}}'
       arista.cvp.cv_facts_v3:
         facts:
@@ -50,6 +64,20 @@
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_count == 2
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == ['configlet1', 'configlet2']
           - DELETE_CONFIGLET_RESULT.configlets_deleted.success == true
+
+    - name: "Delete non-existing config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
+      register: DELETE_CONFIGLET_RESULT
+
+    - name: "Check configlet deletion process"
+      assert:
+        that:
+          - DELETE_CONFIGLET_RESULT.changed == false
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_count == 0
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == []
+          - DELETE_CONFIGLET_RESULT.configlets_deleted.success == false
 
     - name: 'Collect devices facts from {{inventory_hostname}}'
       arista.cvp.cv_facts_v3:
