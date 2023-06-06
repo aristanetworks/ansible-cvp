@@ -2107,8 +2107,8 @@ class CvDeviceTools(object):
                         result_data.changed = True
                         result_data.success = True
                         result_data.add_entry(
-                        "{0} has been successfully deleted". format(device.fqdn)
-                    )
+                            "{0} has been successfully deleted". format(device.fqdn)
+                        )
             results.append(result_data)
         return results
 
