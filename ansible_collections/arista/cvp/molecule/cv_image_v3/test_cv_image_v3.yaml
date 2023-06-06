@@ -99,7 +99,7 @@
         that:
           - NEGATIVE_BUNDLE_DATA.changed == false
           - NEGATIVE_BUNDLE_DATA.msg == "Request Error: Failure - Only one swi image can be uploaded per bundle."
-   
+
     - name: "Add an image {{inventory_hostname}}"
       vars:
         ansible_command_timeout: 1200
