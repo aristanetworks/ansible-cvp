@@ -5,6 +5,24 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.6.1
+======
+
+Release Summary
+---------------
+
+Release 3.6.1 - See documentation on cvp.avd.sh for details.
+
+
+Bugfixes
+--------
+
+- Fix(cv_container_v3) check_mode error(#584)
+- Fix(cv_device_v3) Device decommission failure scenario(#577)
+- Fix(cv_device_v3) Fix check for missing devices(#593)
+- Fix(cv_device_v3) Implement device check mode(#571)
+- Fix(cv_tag_v3) Allow tag assignment to serial numbers(#581)
+
 v3.6.0
 ======
 
