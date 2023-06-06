@@ -2209,9 +2209,7 @@ class CvDeviceTools(object):
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                        result_data.add_entry(
-                            "{} resets {}".format(device.fqdn, *device.configlets)
-                        )
+                        result_data.add_entry(f"{device.fqdn} resets {device.configlets}")
             results.append(result_data)
         return results
 
