@@ -2107,7 +2107,7 @@ class CvDeviceTools(object):
                         result_data.changed = True
                         result_data.success = True
                         result_data.add_entry(
-                        "{} has been successfully deleted". format(device.fqdn)
+                        "{0} has been successfully deleted". format(device.fqdn)
                     )
             results.append(result_data)
         return results
@@ -2170,7 +2170,7 @@ class CvDeviceTools(object):
                 if not self.__check_mode:
                     result_data.changed = True
                     result_data.add_entry(
-                        "{} has been successfully decommissioned". format(device.fqdn)
+                        "{0} has been successfully decommissioned". format(device.fqdn)
                     )
                 result_data.success = True
 
