@@ -47,7 +47,7 @@ class CvApiResult():
     -------
 
     >>> my_change = CvApiResult(action_name='create_container')
-    >>> my_change.add_event('configlet-x-attached-to-container')
+    >>> my_change.add_entry('configlet-x-attached-to-container')
     >>> my_change.success = True
     >>> print(str(my_change.results))
     {
@@ -281,7 +281,7 @@ class CvManagerResult():
     Example
     -------
     >>> my_change = CvApiResult(action_name='create_container')
-    >>> my_change.add_event('configlet-x-attached-to-container')
+    >>> my_change.add_entry('configlet-x-attached-to-container')
     >>> my_change.success = True
     >>>
     >>> my_manager = CvManagerResult(builder_name = 'TEST_BUILDER')
