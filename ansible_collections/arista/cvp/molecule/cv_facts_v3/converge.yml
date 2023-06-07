@@ -1,0 +1,98 @@
+---
+- name: Test cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_containers != []
+          - CV_FACTS_V3_RESULT.data.cvp_devices != []
+          - CV_FACTS_V3_RESULT.data.cvp_configlets != []
+
+    - name: Collect facts for a specific configlet from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets
+        regexp_filter: "AVD_leaf1" # using regexp_filter
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for a specific configlet
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_configlets.AVD_leaf1 is defined
+
+    - name: Collect facts for containers from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - containers
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for containers
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers != []
+
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for devices
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices != []
+
+    - name:  Collect devices facts from {{inventory_hostname}} with verbose short
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "spine1"
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for device spine1 with verbose short
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
+
+    - name: Collect devices facts from {{inventory_hostname}} with verbose long
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "spine1"
+        verbose: long
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for device spine1 with verbose long
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].deviceStatus == "Registered"
