@@ -5,12 +5,12 @@
   gather_facts: false
   collections:
     - arista.cvp
-    
+
   vars:
     CVP_DEVICES_MOVE_DEVICE_EXECUTE:
       - fqdn: leaf1
         parentContainerName: "Spine"
-    
+
     CVP_DEVICES_MOVE_DEVICE_CANCEL:
       - fqdn: leaf2
         parentContainerName: "Spine"
