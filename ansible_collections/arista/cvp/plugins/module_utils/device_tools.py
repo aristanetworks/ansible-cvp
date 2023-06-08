@@ -1588,6 +1588,7 @@ class CvDeviceTools(object):
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
+                                result_data.add_entry(f"{device.image_bundle} apply to {device.fqdn}")
 
                 results.append(result_data)
 
@@ -1691,6 +1692,7 @@ class CvDeviceTools(object):
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
+                                result_data.add_entry(f"{device.image_bundle} detach from {device.fqdn}")
 
                 results.append(result_data)
 
