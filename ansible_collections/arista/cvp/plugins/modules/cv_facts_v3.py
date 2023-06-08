@@ -28,20 +28,20 @@ version_added: "3.3.0"
 author: Ansible Arista Team (@aristanetworks)
 short_description: Collect facts from CloudVision
 description:
-- Returns list of devices, configlets, containers and images from CloudVision
+- Returns list of devices, configlets, containers, images and tasks from CloudVision
 options:
   facts:
     description:
       - List of facts to retrieve from CVP.
-      - By default, cv_facts returns facts for devices/configlets/containers/tasks
+      - By default, cv_facts returns facts for devices/configlets/containers/images/tasks
       - Using this parameter allows user to limit scope to a subset of information.
     required: false
-    default: ['configlets', 'containers', 'devices', 'images']
+    default: ['configlets', 'containers', 'devices', 'images', 'tasks']
     type: list
     elements: str
-    choices: ['configlets', 'containers', 'devices', 'images']
+    choices: ['configlets', 'containers', 'devices', 'images', 'tasks']
   regexp_filter:
-    description: Regular Expression to filter configlets and devices in facts
+    description: Regular Expression to filter configlets, devices and tasks in facts
     required: false
     default: '.*'
     type: str
@@ -77,6 +77,28 @@ EXAMPLES = r'''
         - devices
       regexp_filter: "spine1"
       verbose: long
+    register: FACTS_DEVICES
+
+  - name: '#05 - Collect images facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - images
+    register: FACTS_DEVICES
+
+  - name: '#06 - Collect images facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - tasks
+      regexp_filter: 'Pending' # get facts filtered by task status - 'Failed', 'Pending', 'Completed', 'Cancelled'
+      verbose: 'long'
+    register: FACTS_DEVICES
+
+  - name: '#07 - Collect images facts from {{inventory_hostname}}'
+    arista.cvp.cv_facts_v3:
+      facts:
+        - tasks
+      regexp_filter: 95 # get facts filtered by task_Id (int)
+      verbose: 'long'
     register: FACTS_DEVICES
 '''
 
@@ -131,9 +153,10 @@ def main():
                 'configlets',
                 'containers',
                 'devices',
-                'images'
+                'images',
+                'tasks',
             ],
-            default=['configlets', 'containers', 'devices', 'images']),
+            default=['configlets', 'containers', 'devices', 'images', 'tasks']),
         regexp_filter=dict(
             type='str',
             required=False,

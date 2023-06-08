@@ -88,6 +88,36 @@ class CvFactResource():
         fact[Api.generic.PARENT_CONTAINER_NAME] = device_fact[Api.device.CONTAINER_NAME]
         return fact
 
+    def __shorten_task_facts(self, task_fact: dict):
+        """
+        __shorten_task_facts Filter content to return for task type resource
+
+        Parameters
+        ----------
+        task_fact : dict
+            Dictionary of data provided by Cloudvision
+
+        Returns
+        -------
+        dict
+            Dict with only expected fields to be compliant with resource schema
+        """
+
+        fact = {
+            key: task_fact[key]
+            for key in [
+                Api.generic.TASK_ID,
+                Api.device.AUTHOR,
+                Api.device.DESCRIPTION,
+                Api.device.STATUS,
+                Api.device.STATE,
+                Api.device.CCID,
+                Api.device.CCIDV2,
+                Api.device.TASK_DETAILS,
+            ]
+        }
+        return fact
+
     def _get_configlet(self):
         """
         _get_configlets Generate facts for configlets resource type
@@ -177,6 +207,53 @@ class CvFactResource():
             return [self.__shorten_device_facts(
                 device_fact=device) for device in self._cache]
 
+    def _get_image(self):
+        """
+        _get_image Generate facts for images resource type
+
+        EXAMPLE:
+        --------
+        >>> CvFactsResource()._get_image()
+        {
+            EOS-4.25.4M.swi:
+                {
+                    imageBundleKeys: ['imagebundle_1658329041200536707']
+                    imageFile: ''
+                    imageFileName: EOS-4.25.4M.swi
+                    imageId: EOS-4.25.4M.swi
+                    imageSize: 931.9 MB
+                    isHotFix: 'false'
+                    isRebootRequired: 'true'
+                    key: EOS-4.25.4M.swi
+                    md5: ''
+                    name: EOS-4.25.4M.swi
+                    sha512: 54e6874984a3a46b1371bd6c53196bbd622c922606b65d59ed3fa23e918a43d174d468ac9179146a4d1b00e7094c4755ea90c2df4ab94c562e745c14a402b491
+                    swiMaxHwepoch: '2'
+                    swiVarient: US
+                    uploadedDateinLongFormat: 1658329024667
+                    user: cvp system
+                    version: 4.25.4M-22402993.4254M
+                }
+        }
+
+        """
+        if isinstance(self._cache, list):
+            return {image[Api.generic.NAME]: image for image in self._cache}
+
+    def _get_task(self, verbose: str = 'short'):
+        """
+        _get_image Generate facts for tasks resource type
+
+        EXAMPLE:
+        --------
+        >>> CvFactsResource()._get_task()
+        """
+        if isinstance(self._cache, list):
+            if verbose == 'long':
+                return {task[Api.generic.TASK_ID]: task for task in self._cache}
+            else:
+                return {task[Api.generic.TASK_ID]: self.__shorten_task_facts(task_fact=task) for task in self._cache}
+
     def add(self, data):
         """
         add Add an entry in the list of facts
@@ -214,6 +291,10 @@ class CvFactResource():
             return self._get_container()
         elif resource_model == 'device':
             return self._get_device(verbose=verbose)
+        elif resource_model == 'image':
+            return self._get_image()
+        elif resource_model == 'task':
+            return self._get_task(verbose=verbose)
 
 
 class CvFactsTools():
@@ -228,7 +309,7 @@ class CvFactsTools():
         self.__init_facts()
 
     def __init_facts(self):
-        self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [], FactsResponseFields.CONTAINER: []}
+        self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [], FactsResponseFields.CONTAINER: [], FactsResponseFields.IMAGE: [], FactsResponseFields.TASK: []}
 
     def facts(self, scope: List[str], regex_filter: str = '.*', verbose: str = 'short'):
         """
@@ -259,7 +340,7 @@ class CvFactsTools():
         Parameters
         ----------
         scope : List[str]
-            List of elements to get from Cloudvision server, by default ['devices', 'containers']
+            List of elements to get from Cloudvision server, by default ['configlets', 'containers', 'devices', 'images', 'tasks']
 
         regex_filter: str
             Regular expression to filter devices and configlets. Only element with filter in their name will be exported
@@ -277,6 +358,10 @@ class CvFactsTools():
             self.__fact_containers()
         if 'configlets' in scope:
             self.__fact_configlets(filter=regex_filter)
+        if 'images' in scope:
+            self.__fact_images(filter=regex_filter)
+        if 'tasks' in scope:
+            self.__fact_tasks(filter=regex_filter, verbose=verbose)
         return self._facts
 
     def __get_container_name(self, key: str = Api.container.UNDEFINED_CONTAINER_ID):
@@ -561,3 +646,74 @@ class CvFactsTools():
             str(facts_builder.get(resource_model='configlet').keys())
         )
         self._facts[FactsResponseFields.CONFIGLET] = facts_builder.get(resource_model='configlet')
+
+    def __fact_images(self, filter: str = '.*'):
+        """
+        __fact_images Collect facts related to images
+        """
+        try:
+            cv_images = self.__cv_client.api.get_images()
+        except CvpApiError as error_msg:
+            MODULE_LOGGER.error('Error when collecting images facts: %s', str(error_msg))
+
+        facts_builder = CvFactResource()
+        for image in cv_images['data']:
+            # filter by image name
+            if re.match(filter, image[Api.generic.NAME]):
+                MODULE_LOGGER.debug('Got following information for image: %s', str(image))
+                facts_builder.add(image)
+
+        MODULE_LOGGER.debug(
+            'Final results for images: %s',
+            str(facts_builder.get(resource_model='image').keys())
+        )
+        self._facts[FactsResponseFields.IMAGE] = facts_builder.get(resource_model='image')
+
+    def __fact_tasks(self, filter: str = '.*', verbose: str = 'short' ):
+        """
+        __fact_images Collect facts related to images
+
+        Parameters
+        ----------
+        filter : str, optional
+            Regular Expression to filter tasks - <task_id>,'Failed', 'Pending', 'Completed', 'Cancelled', by default '.*'
+        """
+        facts_builder = CvFactResource()
+        total_tasks = 0
+        if filter == '.*':
+            try:
+                cv_tasks = self.__cv_client.api.get_tasks()
+                total_tasks = cv_tasks['total']
+                cv_tasks = cv_tasks['data']
+            except CvpApiError as error_msg:
+                MODULE_LOGGER.error('Error when collecting task facts: %s', str(error_msg))
+        elif isinstance(filter, str):
+            # filter by task status
+            try:
+                cv_tasks = self.__cv_client.api.get_tasks_by_status(filter)
+            except CvpApiError as error_msg:
+                MODULE_LOGGER.error('Error when collecting %s task facts: %s', filter, str(error_msg))
+        elif isinstance(filter, int):
+            # filter by task_id
+            try:
+                cv_tasks = self.__cv_client.api.get_task_by_id(filter)
+            except CvpApiError as error_msg:
+                MODULE_LOGGER.error('Error when collecting %s task facts: %s', filter, str(error_msg))
+
+        for task in cv_tasks:
+            MODULE_LOGGER.debug('Got following information for task: %s', str(task))
+            facts_builder.add(task)
+
+        final_result = facts_builder.get(resource_model='task', verbose=verbose)
+
+        if not total_tasks:
+            total_tasks = len(final_result)
+
+        final_result.update({'total_tasks': total_tasks})
+
+        MODULE_LOGGER.debug(
+            'Final results for task: %s',
+            str(final_result)
+        )
+
+        self._facts[FactsResponseFields.TASK] = final_result
