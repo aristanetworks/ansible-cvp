@@ -25,17 +25,17 @@ DOCUMENTATION = r"""
 module: cv_validate_v3
 version_added: "3.7.0"
 author: Ansible Arista Team (@aristanetworks)
-short_description: Online/Offline configlet validation
+short_description: CVP/Local configlet Validation
 description:
-  - CloudVision Portal Validate module to Validate configlets against a device on CVP
+  - CloudVision Portal Validate module to Validate configlets against a device on CVP.
 options:
-  device:
-    description: CVP device information
+  devices:
+    description: CVP devices and configlet information.
     required: true
     type: list
     elements: dict
   validate_mode:
-    description: validation mode
+    description: Indicate how cv_validate_v3 should behave on finding errors and/or warnings.
     required: true
     type: str
     choices:
@@ -53,7 +53,7 @@ EXAMPLES = r"""
   vars:
     CVP_DEVICES:
       - device_name: leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: hostname #[hostname | serialNumber | fqdn]
         local_configlets:
           valid: "interface Ethernet1\n  description test_validate"
           error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
@@ -61,7 +61,7 @@ EXAMPLES = r"""
   tasks:
     - name: validate module
       arista.cvp.cv_validate_v3:
-        device: "{{CVP_DEVICES}}"
+        devices: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 
 # online validation
@@ -71,7 +71,7 @@ EXAMPLES = r"""
   gather_facts: no
   vars:
     CVP_DEVICES:
-      - device_name: leaf1
+      - device_name: leaf1.aristanetworks.com
         search_type: fqdn #[hostname | serialNumber | fqdn]
         cvp_configlets:
           - valid
@@ -80,7 +80,7 @@ EXAMPLES = r"""
   tasks:
     - name: validate module
       arista.cvp.cv_validate_v3:
-        device: "{{CVP_DEVICES}}"
+        devices: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 """
 
@@ -132,7 +132,7 @@ def main():
     MODULE_LOGGER.info("Start cv_validate_v3 module execution")
     argument_spec = dict(
         # Topology to configure on CV side.
-        device=dict(type="list", required=True, elements="dict"),
+        devices=dict(type="list", required=True, elements="dict"),
         validate_mode=dict(
             type="str",
             required=True,
@@ -148,12 +148,12 @@ def main():
     # Test all libs are correctly installed
     check_import(ansible_module=ansible_module)
 
-    user_input = CvValidateInput(ansible_module.params["device"])
+    user_input = CvValidateInput(ansible_module.params["devices"])
 
     # Schema validation
     if user_input.is_valid is False:
         ansible_module.fail_json(
-            msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['device']}"
+            msg=f"Error, your input is not valid against current schema:\n {ansible_module.params['devices']}"
         )
 
     # Create CVPRAC client
@@ -162,7 +162,7 @@ def main():
         cv_connection=cv_client, ansible_module=ansible_module
     )
     ansible_response: CvAnsibleResponse = cv_validation.manager(
-        device=ansible_module.params["device"],
+        devices=ansible_module.params["devices"],
         validate_mode=ansible_module.params["validate_mode"],
     )
 

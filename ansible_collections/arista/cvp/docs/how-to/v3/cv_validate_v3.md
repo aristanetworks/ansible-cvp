@@ -11,7 +11,7 @@ The documentation is available in the [module section](../../modules/cv_validate
 
 ### Input variables
 
-- device information
+- devices information
 - validate_mode (`stop_on_error`, `stop_on_warning`, `ignore`)
 
 ### Example
@@ -19,7 +19,7 @@ The documentation is available in the [module section](../../modules/cv_validate
 ```yaml
   - name: validate module
       arista.cvp.cv_validate_v3:
-        device: "{{CVP_DEVICES}}"
+        devices: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error
 ```
 
@@ -41,7 +41,7 @@ The documentation is available in the [module section](../../modules/cv_validate
   tasks:
     - name: validate module
       arista.cvp.cv_validate_v3:
-        device: "{{CVP_DEVICES}}"
+        devices: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 ```
 
@@ -63,7 +63,7 @@ The documentation is available in the [module section](../../modules/cv_validate
   tasks:
     - name: validate module
       arista.cvp.cv_validate_v3:
-        device: "{{CVP_DEVICES}}"
+        devices: "{{CVP_DEVICES}}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 ```
 

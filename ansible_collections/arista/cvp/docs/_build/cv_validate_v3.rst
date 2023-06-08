@@ -2,7 +2,7 @@
 
 cv_validate_v3
 ++++++++++++++
-Online/Offline configlet validation
+CVP/Local configlet Validation
 
 Module added in version 3.7.0
 
@@ -17,7 +17,7 @@ Synopsis
 --------
 
 
-CloudVision Portal Validate module to Validate configlets against a device on CVP
+CloudVision Portal Validate module to Validate configlets against a device on CVP.
 
 
 .. _module-specific-options-label:
@@ -40,13 +40,13 @@ The following options may be specified for this module:
     </tr>
 
     <tr>
-    <td>device<br/><div style="font-size: small;"></div></td>
+    <td>devices<br/><div style="font-size: small;"></div></td>
     <td>list</td>
     <td>yes</td>
     <td></td>
     <td></td>
     <td>
-        <div>CVP device information</div>
+        <div>CVP devices and configlet information.</div>
     </td>
     </tr>
 
@@ -57,7 +57,7 @@ The following options may be specified for this module:
     <td></td>
     <td><ul><li>stop_on_error</li><li>stop_on_warning</li><li>ignore</li></ul></td>
     <td>
-        <div>validation mode</div>
+        <div>Indicate how cv_validate_v3 should behave on finding errors and/or warnings.</div>
     </td>
     </tr>
 
@@ -70,7 +70,7 @@ Examples:
 ---------
 
 ::
-
+    
     # offline validation
     - name: offline configlet validation
       hosts: cv_server
@@ -79,7 +79,7 @@ Examples:
       vars:
         CVP_DEVICES:
           - device_name: leaf1
-            search_type: serialNumber #[hostname | serialNumber | fqdn]
+            search_type: hostname #[hostname | serialNumber | fqdn]
             local_configlets:
               valid: "interface Ethernet1\n  description test_validate"
               error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
@@ -87,7 +87,7 @@ Examples:
       tasks:
         - name: validate module
           arista.cvp.cv_validate_v3:
-            device: "{{CVP_DEVICES}}"
+            devices: "{{CVP_DEVICES}}"
             validate_mode: stop_on_error # | stop_on_warning | valid
 
     # online validation
@@ -97,7 +97,7 @@ Examples:
       gather_facts: no
       vars:
         CVP_DEVICES:
-          - device_name: leaf1
+          - device_name: leaf1.aristanetworks.com
             search_type: fqdn #[hostname | serialNumber | fqdn]
             cvp_configlets:
               - valid
@@ -106,7 +106,7 @@ Examples:
       tasks:
         - name: validate module
           arista.cvp.cv_validate_v3:
-            device: "{{CVP_DEVICES}}"
+            devices: "{{CVP_DEVICES}}"
             validate_mode: stop_on_error # | stop_on_warning | valid
 
 
@@ -115,3 +115,6 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
+
+
+

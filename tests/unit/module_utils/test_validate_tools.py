@@ -26,7 +26,7 @@ class TestValidateConfig():
         'ansible_collections.arista.cvp.plugins.module_utils.validate_tools.CvValidationTools.get_configlet_by_name']
     # user_topology = DeviceInventory(data=device_data)
 
-    @pytest.mark.parametrize("validate_mode, device, expected_calls",
+    @pytest.mark.parametrize("validate_mode, devices, expected_calls",
         [pytest.param(
             ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
             [{
@@ -94,7 +94,7 @@ class TestValidateConfig():
             EXP_WARN_ERROR_IGNORE,
             id="warning_ignore_local"
         )])
-    def test_validate_config_warning(self, setup, validate_mode, device, expected_calls):
+    def test_validate_config_warning(self, setup, validate_mode, devices, expected_calls):
         """
         warning case with
         mode=[stop_on_warning, stop_on_error, ignore]
@@ -107,7 +107,7 @@ class TestValidateConfig():
         mock_get_configlet_by_name.return_value = {
             'name': 'validate_warning',
             'config': 'interface Ethernet1\n   spanning-tree portfast'}
-        result = cv_validation.manager(device=device,
+        result = cv_validation.manager(devices=devices,
             validate_mode=validate_mode)
         if validate_mode in [
             ModuleOptionValues.VALIDATE_MODE_IGNORE,
@@ -116,7 +116,7 @@ class TestValidateConfig():
         else:
             assert cv_validation._CvValidationTools__ansible.mock_calls == expected_calls
 
-    @pytest.mark.parametrize("validate_mode, device, expected_calls",
+    @pytest.mark.parametrize("validate_mode, devices, expected_calls",
         [pytest.param(
             ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
             [{
@@ -189,7 +189,7 @@ class TestValidateConfig():
             id="error_ignore_local"
         )
         ])
-    def test_validate_config_error(self, setup, validate_mode, device, expected_calls):
+    def test_validate_config_error(self, setup, validate_mode, devices, expected_calls):
         """
         error case with
         mode=[stop_on_warning, stop_on_error, ignore]
@@ -202,7 +202,7 @@ class TestValidateConfig():
         mock_get_configlet_by_name.return_value = {
             'name': 'validate_error',
             'config': 'ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111'}
-        result = cv_validation.manager(device=device,
+        result = cv_validation.manager(devices=devices,
             validate_mode=validate_mode)
         if validate_mode in [
             ModuleOptionValues.VALIDATE_MODE_IGNORE ]:
@@ -210,7 +210,7 @@ class TestValidateConfig():
         else:
             assert cv_validation._CvValidationTools__ansible.mock_calls == expected_calls
 
-    @pytest.mark.parametrize("validate_mode, device, expected_calls",
+    @pytest.mark.parametrize("validate_mode, devices, expected_calls",
         [pytest.param(
             ModuleOptionValues.VALIDATE_MODE_STOP_ON_WARNING,
             [{
@@ -275,7 +275,7 @@ class TestValidateConfig():
             id="valid_ignore_local"
         )
         ])
-    def test_validate_config_valid(self, setup, validate_mode, device, expected_calls):
+    def test_validate_config_valid(self, setup, validate_mode, devices, expected_calls):
         """
         error case with
         mode=[stop_on_warning, stop_on_error, ignore]
@@ -288,6 +288,6 @@ class TestValidateConfig():
         mock_get_configlet_by_name.return_value = {
             'name': 'validate_valid',
             'config': 'interface Ethernet1\n  description test_validate'}
-        result = cv_validation.manager(device=device,
+        result = cv_validation.manager(devices=devices,
             validate_mode=validate_mode)
         assert result.content == expected_calls

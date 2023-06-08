@@ -121,14 +121,14 @@ class CvValidationTools(object):
             return {}
         return resp
 
-    def manager(self, device: list, validate_mode: string):
+    def manager(self, devices: list, validate_mode: string):
         """
         manager Generic entry point to manage configlet validation related tasks
 
         Parameters
         ----------
-        device: list
-            device information to validate configlet against
+        devices: list
+            devices information to validate configlet against
         validation_mode: string
             validation mode
         source: string
@@ -153,7 +153,7 @@ class CvValidationTools(object):
             "taskIds": [],
         }
 
-        for device_info in device:
+        for device_info in devices:
             # look up system mac address using fqdn, hostname or serialNum. default=hostname
             if 'search_type' in device_info:
                 if device_info['search_type'] == 'fqdn':

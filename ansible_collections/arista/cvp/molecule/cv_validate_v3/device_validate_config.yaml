@@ -79,7 +79,7 @@
 
   - name: Validate CVP warning configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_CVP}}"
+      devices: "{{CVP_DEVICES_WARNING_CVP}}"
       validate_mode: stop_on_error
     register: STOP_ON_ERROR_WARNING_CONFIG_CVP
   - assert:
@@ -92,7 +92,7 @@
 
   - name: Validate LOCAL warning configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_LOCAL}}"
+      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
       validate_mode: stop_on_error
     register: STOP_ON_ERROR_WARNING_CONFIG_LOCAL
   - assert:
@@ -105,7 +105,7 @@
 
   - name: Validate CVP warning configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_CVP}}"
+      devices: "{{CVP_DEVICES_WARNING_CVP}}"
       validate_mode: stop_on_warning
     ignore_errors: yes # ignoring errors so assertions can be done
     register: STOP_ON_WARNING_WARNING_CONFIG_CVP
@@ -117,7 +117,7 @@
 
   - name: Validate LOCAL warning configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_LOCAL}}"
+      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
       validate_mode: stop_on_warning
     ignore_errors: yes # ignoring errors so assertions can be done
     register: STOP_ON_WARNING_WARNING_CONFIG_LOCAL
@@ -129,7 +129,7 @@
 
   - name: Validate CVP warning configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_CVP}}"
+      devices: "{{CVP_DEVICES_WARNING_CVP}}"
       validate_mode: ignore
     register: IGNORE_WARNING_CONFIG_CVP
   - assert:
@@ -142,7 +142,7 @@
 
   - name: Validate LOCAL warning configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_WARNING_LOCAL}}"
+      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
       validate_mode: ignore
     register: IGNORE_WARNING_CONFIG_LOCAL
   - assert:
@@ -159,7 +159,7 @@
 
   - name: Validate CVP error configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_CVP}}"
+      devices: "{{CVP_DEVICES_ERROR_CVP}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_ERROR_CONFIG_CVP
@@ -171,7 +171,7 @@
 
   - name: Validate LOCAL error configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_LOCAL}}"
+      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_ERROR_CONFIG_LOCAL
@@ -183,7 +183,7 @@
 
   - name: Validate CVP error configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_CVP}}"
+      devices: "{{CVP_DEVICES_ERROR_CVP}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNING_ERROR_CONFIG_CVP
@@ -195,7 +195,7 @@
 
   - name: Validate LOCAL error configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_LOCAL}}"
+      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNING_ERROR_CONFIG_LOCAL
@@ -207,7 +207,7 @@
 
   - name: Validate CVP error configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_CVP}}"
+      devices: "{{CVP_DEVICES_ERROR_CVP}}"
       validate_mode: ignore
     register: IGNORE_ERROR_CONFIG_CVP
   - assert:
@@ -220,7 +220,7 @@
 
   - name: Validate LOCAL error configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_ERROR_LOCAL}}"
+      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
       validate_mode: ignore
     register: IGNORE_ERROR_CONFIG_LOCAL
   - assert:
@@ -237,7 +237,7 @@
 
   - name: Validate CVP valid configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_CVP}}"
+      devices: "{{CVP_DEVICES_VALID_CVP}}"
       validate_mode: stop_on_error
     register: STOP_ON_ERROR_VALID_CONFIG_CVP
   - assert:
@@ -250,7 +250,7 @@
 
   - name: Validate LOCAL valid configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_LOCAL}}"
+      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
       validate_mode: stop_on_error
     register: STOP_ON_ERROR_VALID_CONFIG_LOCAL
   - assert:
@@ -263,7 +263,7 @@
 
   - name: Validate CVP valid configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_CVP}}"
+      devices: "{{CVP_DEVICES_VALID_CVP}}"
       validate_mode: stop_on_warning
     register: STOP_ON_WARNING_VALID_CONFIG_CVP
   - assert:
@@ -276,7 +276,7 @@
 
   - name: Validate LOCAL valid configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_LOCAL}}"
+      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
       validate_mode: stop_on_warning
     register: STOP_ON_WARNING_VALID_CONFIG_LOCAL
   - assert:
@@ -289,7 +289,7 @@
 
   - name: Validate CVP valid configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_CVP}}"
+      devices: "{{CVP_DEVICES_VALID_CVP}}"
       validate_mode: ignore
     register: IGNORE_VALID_CONFIG_CVP
   - assert:
@@ -302,7 +302,7 @@
 
   - name: Validate LOCAL valid configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_VALID_LOCAL}}"
+      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
       validate_mode: ignore
     register: IGNORE_VALID_CONFIG_LOCAL
   - assert:
@@ -319,7 +319,7 @@
 
   - name: Validate CVP multiline configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_MULTILINE_CONFIG_CVP
@@ -331,7 +331,7 @@
 
   - name: Validate LOCAL multiline configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL
@@ -343,7 +343,7 @@
 
   - name: Validate CVP multiline configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNING_MULTILINE_CONFIG_CVP
@@ -355,7 +355,7 @@
 
   - name: Validate LOCAL multiline configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL
@@ -367,7 +367,7 @@
 
   - name: Validate CVP multiline configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
       validate_mode: ignore
     register: IGNORE_MULTILINE_CONFIG_CVP
   - assert:
@@ -378,7 +378,7 @@
 
   - name: Validate LOCAL multiline configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
       validate_mode: ignore
     register: IGNORE_MULTILINE_CONFIG_LOCAL
   - assert:
@@ -392,7 +392,7 @@
 #####################################
   - name: Validate CVP multiline configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_MULTIPLE_CONFIG_CVP
@@ -404,7 +404,7 @@
 
   - name: Validate LOCAL multiline configlet with stop_on_error
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: stop_on_error
     ignore_errors: yes
     register: STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL
@@ -416,7 +416,7 @@
 
   - name: Validate CVP multiline configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNING_MULTIPLE_CONFIG_CVP
@@ -428,7 +428,7 @@
 
   - name: Validate LOCAL multiline configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: stop_on_warning
     ignore_errors: yes
     register: STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL
@@ -440,7 +440,7 @@
 
   - name: Validate CVP multiline configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_CVP}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: ignore
     register: IGNORE_MULTIPLE_CONFIG_CVP
   - assert:
@@ -451,7 +451,7 @@
 
   - name: Validate LOCAL multiline configlet with ignore
     arista.cvp.cv_validate_v3:
-      device: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
+      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: ignore
     register: IGNORE_MULTIPLE_CONFIG_LOCAL
   - assert:
