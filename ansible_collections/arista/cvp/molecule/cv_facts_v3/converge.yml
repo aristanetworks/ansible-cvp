@@ -3,6 +3,12 @@
   hosts: CloudVision
   connection: local
   gather_facts: no
+  vars:
+    image_name: "TerminAttr-1.15.3-1.swix"
+    task_status: "Pending"
+    task_id: 93
+    configlet_name: "AVD_leaf1"
+    device_name: "spine1"
   tasks:
     - name: Collect devices facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
@@ -16,12 +22,14 @@
           - CV_FACTS_V3_RESULT.data.cvp_containers != []
           - CV_FACTS_V3_RESULT.data.cvp_devices != []
           - CV_FACTS_V3_RESULT.data.cvp_configlets != []
+          - CV_FACTS_V3_RESULT.data.cvp_images != []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks != []
 
     - name: Collect facts for a specific configlet from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "AVD_leaf1" # using regexp_filter
+        regexp_filter: "{{configlet_name}}" # using regexp_filter
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for a specific configlet
@@ -31,6 +39,8 @@
           - CV_FACTS_V3_RESULT.failed == false
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_configlets.AVD_leaf1 is defined
 
     - name: Collect facts for containers from {{inventory_hostname}}
@@ -46,6 +56,8 @@
           - CV_FACTS_V3_RESULT.failed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_containers != []
 
     - name: Collect devices facts from {{inventory_hostname}}
@@ -61,13 +73,15 @@
           - CV_FACTS_V3_RESULT.failed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_devices != []
 
     - name:  Collect devices facts from {{inventory_hostname}} with verbose short
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "spine1"
+        regexp_filter: "{{device_name}}"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for device spine1 with verbose short
@@ -77,13 +91,15 @@
           - CV_FACTS_V3_RESULT.failed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
 
     - name: Collect devices facts from {{inventory_hostname}} with verbose long
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "spine1"
+        regexp_filter: "{{device_name}}"
         verbose: long
       register: CV_FACTS_V3_RESULT
 
@@ -94,5 +110,94 @@
           - CV_FACTS_V3_RESULT.failed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
-          - CV_FACTS_V3_RESULT.data.cvp_devices[0].deviceStatus == "Registered"
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].deviceStatus == "Registered" # we get this key only with verbose long
+
+    - name: Collect images facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - images  # collects all images facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3 result
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
+          - CV_FACTS_V3_RESULT.data.cvp_images != []
+
+    - name: Collect images facts from {{inventory_hostname}} filtered by name
+      arista.cvp.cv_facts_v3:
+        facts:
+          - images
+        regexp_filter: "{{image_name}}" # collects specific image facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3 result
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
+          - CV_FACTS_V3_RESULT.data.cvp_images != []
+
+    - name: Collect task facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3 result
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks != []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
+
+    - name: Collect task facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: "{{task_status}}" # filtered by status
+        verbose: long
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3 result
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks != []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
+
+    - name: Collect task facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: "{{task_id}}" # filtered by status
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts_v3 result
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
+          - CV_FACTS_V3_RESULT.data.cvp_containers == []
+          - CV_FACTS_V3_RESULT.data.cvp_devices == []
+          - CV_FACTS_V3_RESULT.data.cvp_images == []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks != []
+          - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
