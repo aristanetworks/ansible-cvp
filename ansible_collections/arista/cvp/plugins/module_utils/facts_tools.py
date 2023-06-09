@@ -247,6 +247,26 @@ class CvFactResource():
         EXAMPLE:
         --------
         >>> CvFactsResource()._get_task()
+        {
+            "95": {
+                    "ccId": "",
+                    "ccIdV2": "",
+                    "createdBy": "arista",
+                    "description": "Device Add: leaf3.atd.lab - To be added to Container pod1",
+                    "workOrderDetails": {
+                        "ipAddress": "192.168.0.14",
+                        "netElementHostName": "leaf3.atd.lab",
+                        "netElementId": "00:1c:73:b8:26:81",
+                        "serialNumber": "787EDD0A49B06189A8B4810C2982AAEC",
+                        "workOrderDetailsId": "",
+                        "workOrderId": ""
+                    },
+                    "workOrderId": "95",
+                    "workOrderState": "ACTIVE",
+                    "workOrderUserDefinedStatus": "Pending"
+                },
+
+        }
         """
         if isinstance(self._cache, list):
             if verbose == 'long':
@@ -309,7 +329,9 @@ class CvFactsTools():
         self.__init_facts()
 
     def __init_facts(self):
-        self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [], FactsResponseFields.CONTAINER: [], FactsResponseFields.IMAGE: [], FactsResponseFields.TASK: []}
+        self._facts = {FactsResponseFields.DEVICE: [], FactsResponseFields.CONFIGLET: [],
+                       FactsResponseFields.CONTAINER: [], FactsResponseFields.IMAGE: [],
+                       FactsResponseFields.TASK: []}
 
     def facts(self, scope: List[str], regex_filter: str = '.*', verbose: str = 'short'):
         """
@@ -669,7 +691,7 @@ class CvFactsTools():
         )
         self._facts[FactsResponseFields.IMAGE] = facts_builder.get(resource_model='image')
 
-    def __fact_tasks(self, filter: str = '.*', verbose: str = 'short' ):
+    def __fact_tasks(self, filter: str = '.*', verbose: str = 'short'):
         """
         __fact_images Collect facts related to images
 
