@@ -226,6 +226,7 @@ class CvTagTools(object):
         api_result = CvApiResult(action_name='tag_' + str(workspace_id))
         api_result.changed = True
         api_result.success = True
+        api_result.add_entry(f"Changes for 'tag_' + {str(workspace_id)}")
 
         # Submit workspace
         # XXX: Timeout after 3s and display msg to user to check status on cvp

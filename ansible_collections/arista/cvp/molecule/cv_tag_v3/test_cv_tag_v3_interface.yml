@@ -1,0 +1,161 @@
+---
+- name: Test cv_tag_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    ASSIGN_TAGS_AUTO_CREATE:
+      - device: leaf1.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf1AutoAssignEth1
+              value: leaf1AutoAssignEth1
+            interface: Ethernet1
+          - tags:
+            - name: leaf1AutoAssignEth2
+              value: leaf1AutoAssignEth2
+            interface: Ethernet2
+      - device: leaf2.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf2IntfAutoAssignEth1
+              value: leaf2IntfAutoAssignEth1
+            interface: Ethernet1
+
+    CREATE_TAGS:
+      - interface_tags:
+          - tags:
+              - name: leaf1CreateTagEth1
+                value: leaf1CreateTagEth1
+              - name: leaf1CreateTagEth2
+                value: leaf1CreateTagEth2
+              - name: leaf2CreateTagEth1
+                value: leaf2CreateTagEth1
+
+    ASSIGN_UNASSIGN_EXISTING_TAGS:
+      - device: leaf1.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf1CreateTagEth1
+              value: leaf1CreateTagEth1
+            interface: Ethernet1
+          - tags:
+            - name: leaf1CreateTagEth2
+              value: leaf1CreateTagEth2
+            interface: Ethernet2
+      - device: leaf2.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf2CreateTagEth1
+              value: leaf2CreateTagEth1
+            interface: Ethernet1
+
+    DELETE_TAGS:
+      - interface_tags:
+          - tags:
+              - name: leaf1AutoAssignEth1
+                value: leaf1AutoAssignEth1
+              - name: leaf1AutoAssignEth2
+                value: leaf1AutoAssignEth2
+              - name: leaf2IntfAutoAssignEth1
+                value: leaf2IntfAutoAssignEth1
+              - name: leaf1CreateTagEth1
+                value: leaf1CreateTagEth1
+              - name: leaf1CreateTagEth2
+                value: leaf1CreateTagEth2
+              - name: leaf2CreateTagEth1
+                value: leaf2CreateTagEth1
+              - name: leaf2IntfTag1_new
+                value: leaf2IntfVal1_new
+              - name: leaf1AutoAssign
+                value: leaf1AutoAssign
+              - name: leaf2IntfAutoAssign
+                value: leaf2IntfAutoAssign
+              - name: leaf1CreateTag
+                value: leaf1CreateTag
+              - name: leaf2CreateTag
+                value: leaf2CreateTag
+              - name: leaf1AutoAssignEth1
+                value: leaf1AutoAssignEth1
+              - name: leaf1AutoAssignEth2
+                value: leaf1AutoAssignEth2
+              - name: leaf2IntfAutoAssignEth1
+                value: leaf2IntfAutoAssignEth1
+
+
+  tasks:
+    - name: Assign non-existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_TAGS_AUTO_CREATE}}"
+        mode: assign
+        auto_create: true
+      register: AUTO_CREATE_ASSIGN_TAGS
+
+    - name: Check assign non-existing interface tags
+      assert:
+        that:
+          - AUTO_CREATE_ASSIGN_TAGS.changed == true
+          - AUTO_CREATE_ASSIGN_TAGS.failed == false
+          - AUTO_CREATE_ASSIGN_TAGS.success == true
+          - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_count == 1
+
+    - name: Create interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{CREATE_TAGS}}"
+        mode: create
+      register: TAGS_CREATE
+
+    - name: Check create interface tags
+      assert:
+        that:
+          - TAGS_CREATE.changed == true
+          - TAGS_CREATE.failed == false
+          - TAGS_CREATE.success == true
+          - TAGS_CREATE.tags_manager.tags_manager_list != []
+          - TAGS_CREATE.tags_manager.tags_manager_count == 1
+
+    - name: Assign existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_EXISTING_TAGS}}"
+        mode: assign
+      register: ASSIGN_EXISTING
+
+    - name: Check assign existing interface tags
+      assert:
+        that:
+          - ASSIGN_EXISTING.changed == true
+          - ASSIGN_EXISTING.failed == false
+          - ASSIGN_EXISTING.success == true
+          - ASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - ASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Unassign existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_EXISTING_TAGS}}"
+        mode: unassign
+      register: UNASSIGN_EXISTING
+
+    - name: Check unassign existing interface tags
+      assert:
+        that:
+          - UNASSIGN_EXISTING.changed == true
+          - UNASSIGN_EXISTING.failed == false
+          - UNASSIGN_EXISTING.success == true
+          - UNASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - UNASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Delete interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{DELETE_TAGS}}"
+        mode: delete
+      register: TAGS_DELETE
+
+    - name: Check delete interface tags
+      assert:
+        that:
+          - TAGS_DELETE.changed == true
+          - TAGS_DELETE.failed == false
+          - TAGS_DELETE.success == true
+          - TAGS_DELETE.tags_manager.tags_manager_list != []
+          - TAGS_DELETE.tags_manager.tags_manager_count == 1
