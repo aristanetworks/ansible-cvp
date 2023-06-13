@@ -2,7 +2,7 @@ from unittest.mock import call
 import pytest
 from ansible_collections.arista.cvp.plugins.module_utils.validate_tools import CvValidationTools
 from ansible_collections.arista.cvp.plugins.module_utils.resources.modules.fields import ModuleOptionValues
-from tests.data.device_tools_unit import (
+from tests.data.validate_tools_unit import (
     EXP_WARN, EXP_WARN_ERROR_IGNORE, EXP_ERROR, EXP_ERROR_IGNORE, EXP_VALID)
 
 @pytest.fixture

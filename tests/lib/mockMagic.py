@@ -1,5 +1,6 @@
-from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device,
-                                          validate_intf, validate_true, image_bundle, device_data)
+from tests.data.device_tools_unit import (image_bundle, device_data)
+from tests.data.validate_tools_unit import (validate_router_bgp, return_validate_config_for_device,
+                                          validate_warning, validate_true)
 
 device_decommissioning_result = {}
 
