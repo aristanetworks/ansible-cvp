@@ -29,7 +29,7 @@
       - device: leaf2.atd.lab
         device_tags:
           - name: leaf2DCreate_New
-            value: leaf2DCreate_New    
+            value: leaf2DCreate_New
 
     DELETE_TAGS:
       - device_tags:
@@ -41,7 +41,7 @@
             value: leaf1DCreate_New
           - name: leaf2DCreate_New
             value: leaf2DCreate_New
-    
+
   tasks:
     - name: Assign non-existing device tags
       arista.cvp.cv_tag_v3:
@@ -73,7 +73,7 @@
           - TAGS_CREATE.success == true
           - TAGS_CREATE.tags_manager.tags_manager_list != []
           - TAGS_CREATE.tags_manager.tags_manager_count == 1
-    
+
     - name: Assign existing device tags
       arista.cvp.cv_tag_v3:
         tags: "{{ASSIGN_UNASSIGN_EXISTING_TAGS}}"
