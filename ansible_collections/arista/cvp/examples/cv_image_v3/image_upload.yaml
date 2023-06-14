@@ -1,0 +1,24 @@
+---
+- name: CVP Image Tests
+  hosts: CVP
+  gather_facts: no
+  vars:
+  tasks:
+    - name: "Add an image {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: TerminAttr64-1.19.0-1.swix
+
+    - name: "Gather CVP image information facts {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: get
+      register: image_data
+
+    - name: "Print out facts from {{inventory_hostname}}"
+      debug:
+        msg: "{{image_data}}"
