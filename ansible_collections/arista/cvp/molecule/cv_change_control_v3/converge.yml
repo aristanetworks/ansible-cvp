@@ -1,0 +1,11 @@
+- name: Test Create, Approve and Execute Change Control
+  import_playbook: test_create_approve_execute_cc.yml
+
+- name: Test Show and Remove Change Control
+  import_playbook: test_show_and_remove_cc.yml
+
+- name: Test Unapprove and Execute Change Control
+  import_playbook: test_unapprove_and_execute_cc.yml
+
+- name: Test Schedule and Approve Change Control
+  import_playbook: test_schedule_and_approve_cc.yml

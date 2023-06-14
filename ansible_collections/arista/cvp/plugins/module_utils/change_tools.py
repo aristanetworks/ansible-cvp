@@ -642,7 +642,7 @@ class CvChangeControlTools():
                         MODULE_LOGGER.debug('Found change for search: %s with ID: %s', name, change)
                         cc_list.append(self.get_change_control(change))
 
-                return changed, {'change_controls:': cc_list}, warnings
+                return changed, {'change_controls': cc_list}, warnings
 
         elif state == "remove" and self.__check_mode is False:
             MODULE_LOGGER.debug("Deleting change control")
