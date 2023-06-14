@@ -4,12 +4,29 @@
   connection: local
   gather_facts: no
   vars:
-    image_name: "TerminAttr-1.15.3-1.swix"
-    task_status: "Pending"
-    task_id: 93
-    configlet_name: "AVD_leaf1"
-    device_name: "spine1"
+    CVP_CONFIGLETS:
+      configlet1: 'alias a{{ 999 | random }} show lldp'
+    CVP_DEVICES_MOVE_DEVICE:
+      - fqdn: leaf3
+        parentContainerName: "ATD_SPINES"
+    IMAGE_NAME: "EOS-4.25.4M.swi"
+    TASK_STATUS: "Pending"
+    CONFIGLET_NAME: "configlet1"
+    DEVICE_NAME: "spine1"
   tasks:
+    # push configlet to be used in verifying configlet facts
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: present
+
+    # Running move_device to create a task
+    - name: Run Move Device to create a task
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
+        state: present
+      register: MOVE_DEVICE_RESULT
+
     - name: Collect devices facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
       register: CV_FACTS_V3_RESULT
@@ -29,7 +46,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "{{configlet_name}}" # using regexp_filter
+        regexp_filter: "{{CONFIGLET_NAME}}" # using regexp_filter
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for a specific configlet
@@ -41,7 +58,7 @@
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
           - CV_FACTS_V3_RESULT.data.cvp_images == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_configlets.AVD_leaf1 is defined
+          - CV_FACTS_V3_RESULT.data.cvp_configlets.configlet1 is defined
 
     - name: Collect facts for containers from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
@@ -81,7 +98,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{device_name}}"
+        regexp_filter: "{{DEVICE_NAME}}"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for device spine1 with verbose short
@@ -99,7 +116,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{device_name}}"
+        regexp_filter: "{{DEVICE_NAME}}"
         verbose: long
       register: CV_FACTS_V3_RESULT
 
@@ -135,7 +152,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - images
-        regexp_filter: "{{image_name}}" # collects specific image facts
+        regexp_filter: "{{IMAGE_NAME}}" # collects specific image facts
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
@@ -169,7 +186,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{task_status}}" # filtered by status
+        regexp_filter: "{{TASK_STATUS}}" # filtered by status
         verbose: long
       register: CV_FACTS_V3_RESULT
 
@@ -188,7 +205,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{task_id}}" # filtered by status
+        regexp_filter: "{{MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0]}}" # filtered by task id
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
@@ -201,3 +218,13 @@
           - CV_FACTS_V3_RESULT.data.cvp_images == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks != []
           - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
+
+    - name: "Delete config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
+
+    - name: Cancel Pending Tasks
+      arista.cvp.cv_task_v3:
+        tasks: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}"
+        state: cancelled
