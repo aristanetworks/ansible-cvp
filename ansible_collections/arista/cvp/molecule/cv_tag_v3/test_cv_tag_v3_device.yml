@@ -1,10 +1,10 @@
 ---
-- name: Test cv_tag_v3
+- name: Test cv_tag_v3 for device tags
   hosts: CloudVision
   connection: local
   gather_facts: no
   vars:
-    ASSIGN_TAGS_AUTO_CREATE:
+    ASSIGN_DELETE_TAGS_AUTO_CREATE:
       - device: leaf1.atd.lab
         device_tags:
           - name: leaf1DAutoAssign
@@ -21,7 +21,7 @@
           - name: leaf2DCreate_New
             value: leaf2DCreate_New
 
-    ASSIGN_UNASSIGN_EXISTING_TAGS:
+    ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS:
       - device: leaf1.atd.lab
         device_tags:
           - name: leaf1DCreate_New
@@ -31,21 +31,17 @@
           - name: leaf2DCreate_New
             value: leaf2DCreate_New
 
-    DELETE_TAGS:
-      - device_tags:
-          - name: leaf1DAutoAssign
-            value: leaf1DAutoAssign
-          - name: leaf2DAutoAssign
-            value: leaf2DAutoAssign
-          - name: leaf1DCreate_New
-            value: leaf1DCreate_New
-          - name: leaf2DCreate_New
-            value: leaf2DCreate_New
+    # ASSIGN_DELETE_NON_EXISTING_TAGS:
+    #   - device: leaf1.atd.lab
+    #     device_tags:
+    #       - name: leaf1DNegative_Test
+    #         value: leaf1DNegative_Test
+
 
   tasks:
     - name: Assign non-existing device tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_TAGS_AUTO_CREATE}}"
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
         mode: assign
         auto_create: true
       register: AUTO_CREATE_ASSIGN_TAGS
@@ -59,7 +55,24 @@
           - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_list != []
           - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_count == 1
 
-    - name: Create device tags
+    - name: Delete auto_create device tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        mode: delete
+      register: AUTO_CREATE_TAGS_DELETE
+
+    - name: Check delete auto_create device tags
+      assert:
+        that:
+          - AUTO_CREATE_TAGS_DELETE.changed == true
+          - AUTO_CREATE_TAGS_DELETE.failed == false
+          - AUTO_CREATE_TAGS_DELETE.success == true
+          - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_count == 1
+
+# Create -> assign -> unassign -> delete
+
+    - name: Create device tags (part of CREATE -> assign -> unassign -> delete)
       arista.cvp.cv_tag_v3:
         tags: "{{CREATE_TAGS}}"
         mode: create
@@ -74,9 +87,9 @@
           - TAGS_CREATE.tags_manager.tags_manager_list != []
           - TAGS_CREATE.tags_manager.tags_manager_count == 1
 
-    - name: Assign existing device tags
+    - name: Assign existing device tags (part of create -> ASSIGN -> unassign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_EXISTING_TAGS}}"
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
         mode: assign
       register: ASSIGN_EXISTING
 
@@ -89,9 +102,9 @@
           - ASSIGN_EXISTING.tags_manager.tags_manager_list != []
           - ASSIGN_EXISTING.tags_manager.tags_manager_count == 1
 
-    - name: Unassign existing device tags
+    - name: Unassign existing device tags (part of create -> assign -> UNASSIGN -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_EXISTING_TAGS}}"
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
         mode: unassign
       register: UNASSIGN_EXISTING
 
@@ -104,9 +117,9 @@
           - UNASSIGN_EXISTING.tags_manager.tags_manager_list != []
           - UNASSIGN_EXISTING.tags_manager.tags_manager_count == 1
 
-    - name: Delete device tags
+    - name: Delete device tags (part of create -> assign -> unassign -> DELETE)
       arista.cvp.cv_tag_v3:
-        tags: "{{DELETE_TAGS}}"
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
         mode: delete
       register: TAGS_DELETE
 
@@ -119,6 +132,86 @@
           - TAGS_DELETE.tags_manager.tags_manager_list != []
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-    - name: print
-      debug:
-        msg: "{{TAGS_DELETE}}"
+# Create -> assign -> delete
+
+    - name: Create device tags (part of CREATE -> assign -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{CREATE_TAGS}}"
+        mode: create
+      register: TAGS_CREATE
+
+    - name: Check create device tags
+      assert:
+        that:
+          - TAGS_CREATE.changed == true
+          - TAGS_CREATE.failed == false
+          - TAGS_CREATE.success == true
+          - TAGS_CREATE.tags_manager.tags_manager_list != []
+          - TAGS_CREATE.tags_manager.tags_manager_count == 1
+
+    - name: Assign existing device tags (part of create -> ASSIGN -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: assign
+      register: ASSIGN_EXISTING
+
+    - name: Check assign existing device tags
+      assert:
+        that:
+          - ASSIGN_EXISTING.changed == true
+          - ASSIGN_EXISTING.failed == false
+          - ASSIGN_EXISTING.success == true
+          - ASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - ASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Delete device tags (part of create -> assign -> DELETE)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: delete
+      register: TAGS_DELETE
+
+    - name: Check delete device tags
+      assert:
+        that:
+          - TAGS_DELETE.changed == true
+          - TAGS_DELETE.failed == false
+          - TAGS_DELETE.success == true
+          - TAGS_DELETE.tags_manager.tags_manager_list != []
+          - TAGS_DELETE.tags_manager.tags_manager_count == 1
+
+# Negative Test
+# Commenting negative testcases since its failing currently
+# Tags on auto_create: false gets created on System Tags
+
+    # - name: Negative Test assign non-existing device
+    #   arista.cvp.cv_tag_v3:
+    #     tags: "{{ASSIGN_NON_EXISTING_TAGS}}"
+    #     mode: assign
+    #     auto_create: false
+    #   register: ASSIGN_NON_EXISTING
+    #   ignore_errors: yes
+
+    # - name: Check assign non-existing device tags
+    #   assert:
+    #     that:
+    #       - ASSIGN_NON_EXISTING.changed == false
+    #       - ASSIGN_NON_EXISTING.failed == true
+    #       - ASSIGN_NON_EXISTING.success == false
+    #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_list == []
+    #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_count == 0
+
+    # - name: Negative Test delete non-existing device tags
+    #   arista.cvp.cv_tag_v3:
+    #     tags: "{{ASSIGN_DELETE_NON_EXISTING_TAGS}}"
+    #     mode: delete
+    #   register: NON_EXISTING_TAGS_DELETE
+    #   ignore_errors: yes
+
+    # - name: Check non-existing delete device tags
+    #   assert:
+    #     that:
+    #       - NON_EXISTING_TAGS_DELETE.changed == false
+    #       - NON_EXISTING_TAGS_DELETE.failed == true
+    #       - NON_EXISTING_TAGS_DELETE.success == false
+    #       - NON_EXISTING_TAGS_DELETE.tags_manager.tags_manager_list == []
+    #       - NON_EXISTING_TAGS_DELETE.tags_manager.tags_manager_count == 0

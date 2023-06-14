@@ -112,12 +112,14 @@ class CvTagTools(object):
         # create workspace
         workspace_name_id = "AnsibleWorkspace" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
         workspace_id = workspace_name_id
+
         workspace_name = workspace_name_id
         self.__cv_client.api.workspace_config(workspace_id, workspace_name)
 
         # create tags and assign tags
         for per_device in tags:
-            if mode in ('assign', 'unassign'):
+
+            if mode in ('assign', 'unassign', 'delete'):
                 if 'device_id' in per_device:
                     device_id = per_device['device_id']
                 else:
@@ -136,6 +138,13 @@ class CvTagTools(object):
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
                     if mode == 'delete':
+                        #unassign tags first
+                        self.__cv_client.api.tag_assignment_config(element_type,
+                                                                   workspace_id,
+                                                                   tag_name,
+                                                                   tag_val,
+                                                                   device_id,
+                                                                   "")
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val,
                                                         remove=True)
@@ -160,7 +169,7 @@ class CvTagTools(object):
             if 'interface_tags' in tag_type:
                 element_type = "ELEMENT_TYPE_INTERFACE"
                 for intf_tags in per_device['interface_tags']:
-                    if mode in ('assign', 'unassign'):
+                    if mode in ('assign', 'unassign', 'delete'):
                         interface_id = intf_tags['interface']
                     for tag in intf_tags['tags']:
                         tag_name = tag['name']
@@ -169,6 +178,15 @@ class CvTagTools(object):
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
                         if mode == 'delete':
+                            #unassign tags first
+                            self.__cv_client.api.tag_assignment_config(element_type,
+                                                                       workspace_id,
+                                                                       tag_name,
+                                                                       tag_val,
+                                                                       device_id,
+                                                                       interface_id,
+                                                                       remove=True)
+
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val,
                                                             remove=True)
