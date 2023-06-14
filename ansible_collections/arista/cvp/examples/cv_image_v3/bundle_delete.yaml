@@ -1,0 +1,24 @@
+---
+- name: CVP Image Tests
+  hosts: CVP
+  gather_facts: no
+  vars:
+  tasks:
+    - name: "Remove an image bundle {{inventory_hostname}}"
+      vars:
+        ansible_command_timeout: 1200
+        ansible_connect_timeout: 600
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: remove
+        bundle_name: Test_bundle
+
+    - name: "Gather CVP image information facts {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: get
+      register: bundle_data
+
+    - name: "Print out facts from {{inventory_hostname}}"
+      debug:
+        msg: "{{bundle_data}}"
