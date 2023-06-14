@@ -4,7 +4,7 @@
   gather_facts: no
   vars:
   tasks:
-    - name: "Remove an image {{inventory_hostname}}"
+    - name: "Remove an image bundle {{inventory_hostname}}"
       vars:
         ansible_command_timeout: 1200
         ansible_connect_timeout: 600
@@ -12,8 +12,6 @@
         mode: bundle
         action: remove
         bundle_name: Test_bundle
-        image_list:
-          - EOS-4.25.4M.swi
 
     - name: "Gather CVP image information facts {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
