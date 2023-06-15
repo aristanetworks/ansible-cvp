@@ -6,7 +6,7 @@
   vars:
     CVP_CONFIGLETS:
       configlet1: 'alias a{{ 999 | random }} show lldp'
-      configlet2: 'This is second configlet'
+      configlet2: '! This is second configlet'
 
   tasks:
     - name: "Push config"
