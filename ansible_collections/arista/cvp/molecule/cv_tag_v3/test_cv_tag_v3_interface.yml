@@ -75,6 +75,21 @@
           - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_list != []
           - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_count == 1
 
+    - name: Unassign non-existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        mode: unassign
+      register: AUTO_CREATE_UNASSIGN_TAGS
+
+    - name: Check unassign non-existing interface tags
+      assert:
+        that:
+          - AUTO_CREATE_UNASSIGN_TAGS.changed == true
+          - AUTO_CREATE_UNASSIGN_TAGS.failed == false
+          - AUTO_CREATE_UNASSIGN_TAGS.success == true
+          - AUTO_CREATE_UNASSIGN_TAGS.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_UNASSIGN_TAGS.tags_manager.tags_manager_count == 1
+
     - name: Delete auto_create interface tags
       arista.cvp.cv_tag_v3:
         tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
