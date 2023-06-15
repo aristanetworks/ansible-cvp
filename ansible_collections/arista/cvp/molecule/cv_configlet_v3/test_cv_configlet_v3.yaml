@@ -6,7 +6,8 @@
   vars:
     CVP_CONFIGLETS:
       configlet1: 'alias a{{ 999 | random }} show lldp'
-      configlet2: 'alias c{{ 999 | random }} show version'
+      configlet2: 'This is second configlet'
+
   tasks:
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
@@ -22,9 +23,10 @@
           - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_list == ['configlet1', 'configlet2']
           - CV_CONFIGLET_V3_RESULT.configlets_created.success == true
 
-    - name: "Push already existing config"
+    - name: "Update configlets"
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets:
+          configlet1: "{{CVP_CONFIGLETS.configlet1}}"
         state: present
       register: CV_CONFIGLET_V3_RESULT
 
@@ -32,9 +34,23 @@
       assert:
         that:
           - CV_CONFIGLET_V3_RESULT.changed == true
-          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_count == 2
-          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_list == ['configlet1', 'configlet2']
+          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_count == 1
+          - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_list == ['configlet1']
           - CV_CONFIGLET_V3_RESULT.configlets_updated.success == true
+
+    - name: "Push same config again"
+      arista.cvp.cv_configlet_v3:
+        configlets:
+          configlet2: "{{CVP_CONFIGLETS.configlet2}}"
+        state: present
+      register: CV_CONFIGLET_V3_RESULT
+
+    - name: "Check same config push"
+      assert:
+        that:
+          - CV_CONFIGLET_V3_RESULT.changed == false
+          - CV_CONFIGLET_V3_RESULT.success == false
+          - CV_CONFIGLET_V3_RESULT.failed == false
 
     - name: 'Collect devices facts from {{inventory_hostname}}'
       arista.cvp.cv_facts_v3:
