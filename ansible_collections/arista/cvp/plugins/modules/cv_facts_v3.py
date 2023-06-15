@@ -85,7 +85,7 @@ EXAMPLES = r'''
         - images
     register: FACTS_DEVICES
 
-  - name: '#06 - Collect images facts from {{inventory_hostname}}'
+  - name: '#06 - Collect task facts from {{inventory_hostname}}'
     arista.cvp.cv_facts_v3:
       facts:
         - tasks
@@ -93,7 +93,7 @@ EXAMPLES = r'''
       verbose: 'long'
     register: FACTS_DEVICES
 
-  - name: '#07 - Collect images facts from {{inventory_hostname}}'
+  - name: '#07 - Collect task facts from {{inventory_hostname}}'
     arista.cvp.cv_facts_v3:
       facts:
         - tasks
