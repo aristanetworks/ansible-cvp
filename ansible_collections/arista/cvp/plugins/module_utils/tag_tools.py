@@ -138,7 +138,7 @@ class CvTagTools(object):
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val)
                     if mode == 'delete':
-                        #unassign tags first
+                        # unassign tags first
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
@@ -178,7 +178,7 @@ class CvTagTools(object):
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
                         if mode == 'delete':
-                            #unassign tags first
+                            # unassign tags first
                             self.__cv_client.api.tag_assignment_config(element_type,
                                                                        workspace_id,
                                                                        tag_name,
