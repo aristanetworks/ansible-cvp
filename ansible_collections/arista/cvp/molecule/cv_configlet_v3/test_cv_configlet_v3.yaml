@@ -99,7 +99,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "configlet"
+        regexp_filter: "configlet[1-2]"
       register: FACTS_CONFIGLET
 
     - name: "Check device facts"
