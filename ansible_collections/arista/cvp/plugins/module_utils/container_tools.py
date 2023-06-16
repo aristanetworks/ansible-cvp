@@ -367,6 +367,9 @@ class CvContainerTools(object):
                         change_response.taskIds = resp['data'][Api.task.TASK_IDS]
                         change_response.success = True
                         change_response.changed = True
+                        change_response.add_entry(
+                    f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names)
+                )
         return change_response
 
     def __configlet_del(self, container: dict, configlets: list, save_topology: bool = True):
@@ -435,7 +438,9 @@ class CvContainerTools(object):
                     # resp = {'data': {'taskIds': [], 'status': 'success'}}
                     change_response.success = True
                     change_response.changed = True
-
+                    change_response.add_entry(
+                f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names)
+            )
         return change_response
 
     def __image_bundle_add(self, container: dict, image_bundle: str):
@@ -1093,7 +1098,7 @@ class CvContainerTools(object):
         cv_configlets_attach = CvManagerResult(
             builder_name=ContainerResponseFields.CONFIGLETS_ATTACHED)
         cv_configlets_detach = CvManagerResult(
-            builder_name=ContainerResponseFields.CONFIGLETS_DETACHED, default_success=True)
+            builder_name=ContainerResponseFields.CONFIGLETS_DETACHED)
         cv_image_bundle_attach = CvManagerResult(
             builder_name=ContainerResponseFields.BUNDLE_ATTACHED)
         cv_image_bundle_detach = CvManagerResult(
