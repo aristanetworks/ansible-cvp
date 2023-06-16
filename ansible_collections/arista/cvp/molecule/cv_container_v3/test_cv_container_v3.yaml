@@ -17,15 +17,15 @@
         parentContainerName: TEAM01
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
-        configlets: 
+        configlets:
           - ATD-INFRA
-    
+
     CHANGE_CONFIGLET:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         configlets:
           - BaseIPv4_Leaf4
-    
+
     REMOVE_CONFIGLET:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
@@ -41,7 +41,7 @@
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         imageBundle: Test_bundle
-    
+
     CHANGE_IMAGE_CONTAINER_DEFAULT:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
@@ -82,7 +82,7 @@
           - REMOVE_TOPO_3_TIER.container_deleted.success == true
 
     # TC2 - Create a 3 tier topology and attach configlet to one of the containers and remove it.
-    # Testing: 
+    # Testing:
     #       1. Adding configlet
     #       2. Change in configlet with apply_mode: loose
     #       3. Only configlet removal with apply_mode: strict
@@ -152,7 +152,7 @@
           - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.success == true
 
     # TC3 - Create a 3 tier topology and attach image bundles to one of the containers and remove it.
-    # Testing: 
+    # Testing:
     #       1. Creating Test_bundle
     #       2. Adding image bundles
     #       3. Change in image bundles with apply_mode: loose
@@ -273,4 +273,3 @@
           - DELETE_TOPOLOGY.container_deleted.container_deleted_list == ["TEAM01_LEAFS", "TEAM01_DC", "TEAM01"]
           - DELETE_TOPOLOGY.container_deleted.success == true
           - DELETE_BUNDLE.data.data == "success"
-    
