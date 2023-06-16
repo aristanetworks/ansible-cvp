@@ -41,7 +41,7 @@ options:
     elements: str
     choices: ['configlets', 'containers', 'devices', 'images', 'tasks']
   regexp_filter:
-    description: Regular Expression to filter configlets, devices and tasks in facts
+    description: Regular Expression to filter containers, configlets, devices and tasks in facts
     required: false
     default: '.*'
     type: str

@@ -377,7 +377,7 @@ class CvFactsTools():
         if 'devices' in scope:
             self.__fact_devices(filter=regex_filter, verbose=verbose)
         if 'containers' in scope:
-            self.__fact_containers()
+            self.__fact_containers(filter=regex_filter)
         if 'configlets' in scope:
             self.__fact_configlets(filter=regex_filter)
         if 'images' in scope:
@@ -606,7 +606,7 @@ class CvFactsTools():
                     facts_builder.add(device)
         self._facts[FactsResponseFields.DEVICE] = facts_builder.get(resource_model='device', verbose=verbose)
 
-    def __fact_containers(self):
+    def __fact_containers(self, filter: str = '.*'):
         """
         __fact_containers Collect facts related to container structure
         """
@@ -617,10 +617,11 @@ class CvFactsTools():
         facts_builder = CvFactResource()
         for container in cv_containers['data']:
             if container[Api.generic.NAME] != 'Tenant':
-                MODULE_LOGGER.debug('Got following information for container: %s', str(container))
-                container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
-                container[Api.generic.IMAGE_BUNDLE_NAME] = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
-                facts_builder.add(container)
+                if re.match(filter, container[Api.generic.NAME]):
+                    MODULE_LOGGER.debug('Got following information for container: %s', str(container))
+                    container[Api.generic.CONFIGLETS] = self.__containers_get_configlets(container_id=container[Api.container.KEY])
+                    container[Api.generic.IMAGE_BUNDLE_NAME] = self.__container_get_image_bundle_name(container_id=container[Api.container.KEY])
+                    facts_builder.add(container)
         self._facts[FactsResponseFields.CONTAINER] = facts_builder.get(resource_model='container')
 
     def __fact_configlets(self, filter: str = '.*', configlets_per_call: int = 10):
