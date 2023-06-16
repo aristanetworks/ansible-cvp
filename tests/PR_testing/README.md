@@ -13,7 +13,7 @@
   sh install.sh <pr-number>
   ```
 
-  - This script would place the ansible-cvp PR code base under `persist/arista-ansible` and example playbooks under `persist/PR_testing/examples`
+  - This script would place the ansible-cvp PR code base under `persist/arista-ansible` and example playbooks under `persist/PR_testing`
 
 ## Run Example Playbooks
 
