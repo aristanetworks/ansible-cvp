@@ -70,7 +70,7 @@ Examples:
 ---------
 
 ::
-    
+
     # offline validation
     - name: offline configlet validation
       hosts: cv_server
@@ -115,6 +115,3 @@ Author
 ~~~~~~
 
 * Ansible Arista Team (@aristanetworks)
-
-
-
