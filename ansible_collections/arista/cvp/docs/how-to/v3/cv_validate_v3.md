@@ -71,8 +71,8 @@ The documentation is available in the [module section](../../modules/cv_validate
 
 | Mode              |   Description   |
 |-------------------|-----------------------|
-| stop_on_error     | Stop playbook execution when validation throws a error or warning |
-| stop_on_warning   | Stop playbook execution when validation throws a warning |
+| stop_on_error     | Stop playbook execution when validation throws an error |
+| stop_on_warning   | Stop playbook execution when validation throws a warning or error |
 | ignore            | Ignore errors and warnings. Playbook execution does not stop |
 
 ## Module output
