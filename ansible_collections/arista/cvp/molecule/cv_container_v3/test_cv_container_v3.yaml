@@ -56,9 +56,6 @@
         topology: '{{TOPOLOGY_3_TIER}}'
       register: Build_TOPO_3_TIER
 
-    - debug:
-        msg: "{{Build_TOPO_3_TIER}}"
-
     - name: "Testing Build Container"
       assert:
         that:
@@ -179,9 +176,6 @@
         topology: '{{IMAGE_CONTAINER}}'
       register: IMAGE_CONTAINER_ADD
 
-    - debug:
-        msg: "{{IMAGE_CONTAINER_ADD}}"
-
     - name: Collect facts for containers from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
         facts:
@@ -261,9 +255,6 @@
         image_list:
           - "{{image_name}}"
       register: DELETE_BUNDLE
-
-    - debug:
-        msg: "{{DELETE_BUNDLE}}"
 
     - name: "Testing Clean-up"
       assert:
