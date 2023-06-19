@@ -1816,16 +1816,14 @@ class CvDeviceTools(object):
                             result_data.changed = True
                             result_data.success = True
                             result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                            result_data.add_entry(
-                                "{0} adds {1}".format(device.fqdn, *device.configlets)
-                            )
+                            for configlet in device.configlets:
+                                result_data.add_entry(
+                                    "{0} adds {1}".format(device.fqdn, configlet)
+                                )
                             MODULE_LOGGER.debug("CVP response is: %s", str(resp))
                             MODULE_LOGGER.info(
                                 "Reponse data is: %s", str(result_data.results)
                             )
-                    result_data.add_entry(
-                        "{0} to {1}".format(device.fqdn, *device.container)
-                    )
             else:
                 result_data.name = result_data.name + " - nothing attached"
             results.append(result_data)
@@ -1900,21 +1898,19 @@ class CvDeviceTools(object):
                                 str(catch_error),
                             )
                             self.__ansible.fail_json(
-                                msg="Error detaching configlets from device "
-                                + device.fqdn
-                                + ": "
-                                + catch_error
+                                msg=f"Error detaching configlets from device {device.fqdn}: {catch_error}"
                             )
                         else:
                             if resp["data"]["status"] == "success":
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                                result_data.add_entry(
-                                    "{} removes {}".format(
-                                        device.fqdn, *device.configlets
+                                for configlet in configlets_to_remove:
+                                    result_data.add_entry(
+                                        "{} removes {}".format(
+                                            device.fqdn, configlet
+                                        )
                                     )
-                                )
                 else:
                     result_data.name = result_data.name + " - nothing detached"
                 results.append(result_data)
