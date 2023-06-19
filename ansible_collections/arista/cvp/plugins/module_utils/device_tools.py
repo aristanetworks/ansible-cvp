@@ -2053,12 +2053,12 @@ class CvDeviceTools(object):
                         except CvpApiError as error:
                             self.__ansible.fail_json(
                                 msg="Error to deploy device {} to container {}".format(
-                                    device.fqdn, *device.container
+                                    device.fqdn, device.container
                                 )
                             )
                             MODULE_LOGGER.critical(
                                 "Error deploying device {} : {}".format(
-                                    device.fqdn, *error
+                                    device.fqdn, error
                                 )
                             )
                         else:
