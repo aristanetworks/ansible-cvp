@@ -1907,7 +1907,7 @@ class CvDeviceTools(object):
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
                                 for configlet in configlets_to_remove:
                                     result_data.add_entry(
-                                        "{} removes {}".format(
+                                        "{0} removes {1}".format(
                                             device.fqdn, configlet
                                         )
                                     )
@@ -2052,12 +2052,10 @@ class CvDeviceTools(object):
                             )
                         except CvpApiError as error:
                             self.__ansible.fail_json(
-                                msg="Error to deploy device {} to container {}".format(
-                                    device.fqdn, device.container
-                                )
+                                msg=f"Error to deploy device {device.fqdn} to container {device.container}"
                             )
                             MODULE_LOGGER.critical(
-                                "Error deploying device {} : {}".format(
+                                "Error deploying device {0} : {1}".format(
                                     device.fqdn, error
                                 )
                             )
