@@ -535,7 +535,7 @@ class CvContainerTools(object):
                 API call result
         """
 
-        container["imageBundle"] = "" if container["imageBundle"] == None else container["imageBundle"]
+        container["imageBundle"] = "" if container["imageBundle"] is None else container["imageBundle"]
         change_response = CvApiResult(action_name=container["imageBundle"])
         change_response.changed = False
 

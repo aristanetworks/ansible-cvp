@@ -56,6 +56,20 @@ USER_TOPOLOGY = [
                         'Site 1 Leaves': {'parentContainerName': 'Site 1'}
                         }),
         {
+            'bundle_attached': {
+                'bundle_attached_count': 0,
+                'bundle_attached_list': [],
+                'changed': False,
+                'diff': {},
+                'success': False,
+                'taskIds': []},
+            'bundle_detached': {
+                'bundle_detached_count': 0,
+                'bundle_detached_list': [],
+                'changed': False,
+                'diff': {},
+                'success': False,
+                'taskIds': []},
             'container_added': {
                 'container_added_list': ['Global', 'Site 1', 'Site 1 Leaves'],
                 'warnings': [],
@@ -117,6 +131,20 @@ USER_TOPOLOGY = [
                         'Site 2 Leaves': {'parentContainerName': 'Site 2'}
                         }),
         {
+            'bundle_attached': {
+                'bundle_attached_count': 0,
+                'bundle_attached_list': [],
+                'changed': False,
+                'diff': {},
+                'success': False,
+                'taskIds': []},
+            'bundle_detached': {
+                'bundle_detached_count': 0,
+                'bundle_detached_list': [],
+                'changed': False,
+                'diff': {},
+                'success': False,
+                'taskIds': []},
             'container_added': {
                 'container_added_list': [],
                 'warnings': [],
