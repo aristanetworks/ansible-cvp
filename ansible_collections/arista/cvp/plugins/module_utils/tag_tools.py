@@ -144,13 +144,12 @@ class CvTagTools(object):
                                                                    tag_name,
                                                                    tag_val,
                                                                    device_id,
-                                                                   "")
+                                                                   "", remove=True)
                         self.__cv_client.api.tag_config(element_type, workspace_id,
                                                         tag_name, tag_val,
                                                         remove=True)
-                    if mode == 'assign':
-                        if auto_create:
-                            self.__cv_client.api.tag_config(element_type, workspace_id,
+                    if mode == 'assign' and auto_create:
+                        self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val)
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
@@ -190,9 +189,8 @@ class CvTagTools(object):
                             self.__cv_client.api.tag_config(element_type, workspace_id,
                                                             tag_name, tag_val,
                                                             remove=True)
-                        if mode == 'assign':
-                            if auto_create:
-                                self.__cv_client.api.tag_config(element_type, workspace_id,
+                        if mode == 'assign' and auto_create:
+                            self.__cv_client.api.tag_config(element_type, workspace_id,
                                                                 tag_name, tag_val)
                             self.__cv_client.api.tag_assignment_config(element_type,
                                                                        workspace_id,

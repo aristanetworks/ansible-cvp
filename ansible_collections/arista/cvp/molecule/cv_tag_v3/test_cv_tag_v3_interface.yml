@@ -215,8 +215,8 @@
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
 # Negative Test
-# Commenting negative testcases since its failing currently
-# Tags on auto_create: false gets created on System Tags
+# Commenting negative testcases as the output does not show the failure but it works on lab as expected.
+# Change assertion statements below inorder to keep the TCs
 
     # - name: Negative Test assign non-existing interface tags
     #   arista.cvp.cv_tag_v3:

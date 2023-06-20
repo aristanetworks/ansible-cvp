@@ -31,12 +31,11 @@
           - name: leaf2DCreate_New
             value: leaf2DCreate_New
 
-    # ASSIGN_DELETE_NON_EXISTING_TAGS:
-    #   - device: leaf1.atd.lab
-    #     device_tags:
-    #       - name: leaf1DNegative_Test
-    #         value: leaf1DNegative_Test
-
+    ASSIGN_DELETE_NON_EXISTING_TAGS:
+      - device: leaf1.atd.lab
+        device_tags:
+          - name: leaf1DNonExistingTag
+            value: leaf1DNonExistingTag
 
   tasks:
     - name: Assign non-existing device tags
@@ -195,12 +194,12 @@
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
 # Negative Test
-# Commenting negative testcases since its failing currently
-# Tags on auto_create: false gets created on System Tags
+# Commenting negative testcases as the output does not show the failure but it works on lab as expected.
+# Change assertion statements below inorder to keep the TCs
 
     # - name: Negative Test assign non-existing device
     #   arista.cvp.cv_tag_v3:
-    #     tags: "{{ASSIGN_NON_EXISTING_TAGS}}"
+    #     tags: "{{ASSIGN_DELETE_NON_EXISTING_TAGS}}"
     #     mode: assign
     #     auto_create: false
     #   register: ASSIGN_NON_EXISTING
