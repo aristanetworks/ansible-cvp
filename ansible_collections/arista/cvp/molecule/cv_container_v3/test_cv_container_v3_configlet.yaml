@@ -1,0 +1,149 @@
+---
+- name: Test cv_container_v3 for configlet
+  hosts: CloudVision
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+
+    ansible_command_timeout: 1200
+    ansible_connect_timeout: 600
+
+    TOPOLOGY_3_TIER:
+      TEAM01:
+        parentContainerName: Tenant
+      TEAM01_DC:
+        parentContainerName: TEAM01
+      TEAM01_LEAFS:
+        parentContainerName: TEAM01_DC
+        configlets:
+          - ATD-INFRA
+
+    CHANGE_CONFIGLET:
+      TEAM01_LEAFS:
+        parentContainerName: TEAM01_DC
+        configlets:
+          - BaseIPv4_Leaf4
+
+    REMOVE_CONFIGLET:
+      TEAM01_LEAFS:
+        parentContainerName: TEAM01_DC
+
+  tasks:
+    # TC1 - Create and delete 3 tier topology.
+    # Testing: Removal of entire topology.
+
+    - name: Build Container Topology On {{inventory_hostname}}
+      arista.cvp.cv_container_v3:
+        topology: '{{TOPOLOGY_3_TIER}}'
+      register: Build_TOPO_3_TIER
+
+    - name: Testing Build Container
+      assert:
+        that:
+          - Build_TOPO_3_TIER.container_added.changed == true
+          - Build_TOPO_3_TIER.container_added.container_added_count == 3
+          - Build_TOPO_3_TIER.container_added.container_added_list == ["TEAM01", "TEAM01_DC", "TEAM01_LEAFS"]
+          - Build_TOPO_3_TIER.container_added.success == true
+
+    - name: Remove Container Topology On {{inventory_hostname}}
+      arista.cvp.cv_container_v3:
+        topology: '{{TOPOLOGY_3_TIER}}'
+        state: absent
+      register: REMOVE_TOPO_3_TIER
+
+    - name: Testing Remove Container
+      assert:
+        that:
+          - REMOVE_TOPO_3_TIER.container_deleted.changed == true
+          - REMOVE_TOPO_3_TIER.container_deleted.container_deleted_count == 3
+          - REMOVE_TOPO_3_TIER.container_deleted.container_deleted_list == ["TEAM01_LEAFS", "TEAM01_DC", "TEAM01"]
+          - REMOVE_TOPO_3_TIER.container_deleted.success == true
+
+    # TC2 - Create a 3 tier topology and attach configlet to one of the containers and remove it.
+    # Testing:
+    #       1. Adding configlet
+    #       2. Change in configlet with apply_mode: loose
+    #       3. Only configlet removal with apply_mode: strict
+    #       4. Removal of container which contains configlet.
+
+    - name: Build Container Topology On {{inventory_hostname}} With Configlet
+      arista.cvp.cv_container_v3:
+        topology: '{{TOPOLOGY_3_TIER}}'
+      register: CONFIGLET_ADD
+
+    - name: Testing Added Configlet
+      assert:
+        that:
+          - CONFIGLET_ADD.configlets_attached.changed == true
+          - CONFIGLET_ADD.configlets_attached.configlets_attached_count == 1
+          - CONFIGLET_ADD.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:ATD-INFRA"]
+          - CONFIGLET_ADD.configlets_attached.success == true
+
+    - name: Change Configlet With apply_mode loose
+      arista.cvp.cv_container_v3:
+        topology: '{{CHANGE_CONFIGLET}}'
+        apply_mode: loose
+      register: CONFIGLET_CHANGE
+
+    - name: Testing Changed Configlet with apply_mode loose
+      assert:
+        that:
+          - CONFIGLET_CHANGE.configlets_attached.changed == true
+          - CONFIGLET_CHANGE.configlets_attached.configlets_attached_count == 1
+          - CONFIGLET_CHANGE.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:BaseIPv4_Leaf4"]
+          - CONFIGLET_CHANGE.configlets_attached.success == true
+          - CONFIGLET_CHANGE.configlets_detached.changed == false
+          - CONFIGLET_CHANGE.configlets_detached.configlets_detached_count == 0
+          - CONFIGLET_CHANGE.configlets_detached.configlets_detached_list == []
+          - CONFIGLET_CHANGE.configlets_detached.success == false
+
+    - name: Remove Configlet with apply_mode strict
+      arista.cvp.cv_container_v3:
+        topology: '{{REMOVE_CONFIGLET}}'
+        apply_mode: strict
+      register: CONFIGLET_REMOVE
+
+    - name: Testing Remove Configlet with apply_mode strict
+      assert:
+        that:
+          - CONFIGLET_REMOVE.configlets_detached.changed == true
+          - CONFIGLET_REMOVE.configlets_detached.configlets_detached_count == 1
+          - CONFIGLET_REMOVE.configlets_detached.configlets_detached_list != []
+          - CONFIGLET_REMOVE.configlets_detached.success == true
+
+    - name: Add Configlet
+      arista.cvp.cv_container_v3:
+        topology: '{{CHANGE_CONFIGLET}}'
+
+    - name: Remove Container With Configlet
+      arista.cvp.cv_container_v3:
+        topology: '{{REMOVE_CONFIGLET}}'
+        state: absent
+      register: REMOVE_CONTAINER_WITH_CONFIGLET
+
+    - name: Testing Remove Container With Configlet
+      assert:
+        that:
+          - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.changed == true
+          - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.container_deleted_count == 1
+          - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.container_deleted_list == ["TEAM01_LEAFS"]
+          - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.success == true
+
+    - arista.cvp.cv_container_v3:
+        topology: '{{REMOVE_CONFIGLET}}'
+
+    - name: Clean-up Topology for CONFIGLET
+      arista.cvp.cv_container_v3:
+        topology: '{{TOPOLOGY_3_TIER}}'
+        state: absent
+      register: DELETE_TOPOLOGY
+
+    - name: Testing Clean-up for CONFIGLET
+      assert:
+        that:
+          - DELETE_TOPOLOGY.container_deleted.changed == true
+          - DELETE_TOPOLOGY.container_deleted.container_deleted_count == 3
+          - DELETE_TOPOLOGY.container_deleted.container_deleted_list == ["TEAM01_LEAFS", "TEAM01_DC", "TEAM01"]
+          - DELETE_TOPOLOGY.container_deleted.success == true
