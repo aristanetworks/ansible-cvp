@@ -152,7 +152,6 @@ class CvValidationTools(object):
             "success": True,
             "taskIds": [],
         }
-
         for device_info in devices:
             # look up system mac address using fqdn, hostname or serialNum. default=hostname
             if 'search_type' in device_info:

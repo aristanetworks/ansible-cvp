@@ -370,9 +370,11 @@ class CvManagerResult():
             if change.diff is not None:
                 self.__diffs[change.name] = change.diff
             if change.warnings:
-                self.__changes['warnings'] = list(change.warnings)
+                for warn in list(change.warnings):
+                    self.__changes['warnings'].append(warn)
             if change.errors:
-                self.__changes['errors'] = list(change.errors)
+                for err in list(change.errors):
+                    self.__changes['errors'].append(err)
 
     @property
     def changed(self):
