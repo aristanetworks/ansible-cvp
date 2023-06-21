@@ -10,6 +10,10 @@
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
+    CVP_CONFIGLETS:
+      configlet1: '! This is first configlet'
+      configlet2: '! This is second configlet'
+
     TOPOLOGY_3_TIER:
       TEAM01:
         parentContainerName: Tenant
@@ -18,19 +22,33 @@
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         configlets:
-          - ATD-INFRA
+          - configlet1
 
-    CHANGE_CONFIGLET:
+    CHANGE_CONFIGLET_LOOSE:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         configlets:
-          - BaseIPv4_Leaf4
+          - configlet2
+
+    CHANGE_CONFIGLET_STRICT:
+      TEAM01_LEAFS:
+        parentContainerName: TEAM01_DC
+        configlets:
+          - configlet1
 
     REMOVE_CONFIGLET:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
 
   tasks:
+    # Create configlet
+
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+          configlets: "{{CVP_CONFIGLETS}}"
+          state: present
+      register: CV_CONFIGLET
+
     # TC1 - Create and delete 3 tier topology.
     # Testing: Removal of entire topology.
 
@@ -65,8 +83,9 @@
     # Testing:
     #       1. Adding configlet
     #       2. Change in configlet with apply_mode: loose
-    #       3. Only configlet removal with apply_mode: strict
-    #       4. Removal of container which contains configlet.
+    #       3. Change in configlet with apply_mode: strict
+    #       4. Remove configlet using apply_mode: strict
+    #       5. Removal of container which contains configlet.
 
     - name: Build Container Topology On {{inventory_hostname}} With Configlet
       arista.cvp.cv_container_v3:
@@ -78,26 +97,44 @@
         that:
           - CONFIGLET_ADD.configlets_attached.changed == true
           - CONFIGLET_ADD.configlets_attached.configlets_attached_count == 1
-          - CONFIGLET_ADD.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:ATD-INFRA"]
+          - CONFIGLET_ADD.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:configlet1"]
           - CONFIGLET_ADD.configlets_attached.success == true
 
     - name: Change Configlet With apply_mode loose
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_CONFIGLET}}'
+        topology: '{{CHANGE_CONFIGLET_LOOSE}}'
         apply_mode: loose
-      register: CONFIGLET_CHANGE
+      register: CONFIGLET_CHANGE_LOOSE
 
     - name: Testing Changed Configlet with apply_mode loose
       assert:
         that:
-          - CONFIGLET_CHANGE.configlets_attached.changed == true
-          - CONFIGLET_CHANGE.configlets_attached.configlets_attached_count == 1
-          - CONFIGLET_CHANGE.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:BaseIPv4_Leaf4"]
-          - CONFIGLET_CHANGE.configlets_attached.success == true
-          - CONFIGLET_CHANGE.configlets_detached.changed == false
-          - CONFIGLET_CHANGE.configlets_detached.configlets_detached_count == 0
-          - CONFIGLET_CHANGE.configlets_detached.configlets_detached_list == []
-          - CONFIGLET_CHANGE.configlets_detached.success == false
+          - CONFIGLET_CHANGE_LOOSE.configlets_attached.changed == true
+          - CONFIGLET_CHANGE_LOOSE.configlets_attached.configlets_attached_count == 1
+          - CONFIGLET_CHANGE_LOOSE.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:configlet2"]
+          - CONFIGLET_CHANGE_LOOSE.configlets_attached.success == true
+          - CONFIGLET_CHANGE_LOOSE.configlets_detached.changed == false
+          - CONFIGLET_CHANGE_LOOSE.configlets_detached.configlets_detached_count == 0
+          - CONFIGLET_CHANGE_LOOSE.configlets_detached.configlets_detached_list == []
+          - CONFIGLET_CHANGE_LOOSE.configlets_detached.success == false
+
+    - name: Change Configlet With apply_mode strict
+      arista.cvp.cv_container_v3:
+        topology: '{{CHANGE_CONFIGLET_STRICT}}'
+        apply_mode: strict
+      register: CONFIGLET_CHANGE_STRICT
+
+    - name: Testing Changed Configlet with apply_mode strict
+      assert:
+        that:
+          - CONFIGLET_CHANGE_STRICT.configlets_attached.changed == true
+          - CONFIGLET_CHANGE_STRICT.configlets_attached.configlets_attached_count == 1
+          - CONFIGLET_CHANGE_STRICT.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:configlet1"]
+          - CONFIGLET_CHANGE_STRICT.configlets_attached.success == true
+          - CONFIGLET_CHANGE_STRICT.configlets_detached.changed == true
+          - CONFIGLET_CHANGE_STRICT.configlets_detached.configlets_detached_count == 1
+          - CONFIGLET_CHANGE_STRICT.configlets_detached.configlets_detached_list == ["TEAM01_LEAFS:configlet2"]
+          - CONFIGLET_CHANGE_STRICT.configlets_detached.success == true
 
     - name: Remove Configlet with apply_mode strict
       arista.cvp.cv_container_v3:
@@ -115,7 +152,7 @@
 
     - name: Add Configlet
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_CONFIGLET}}'
+        topology: '{{CHANGE_CONFIGLET_LOOSE}}'
 
     - name: Remove Container With Configlet
       arista.cvp.cv_container_v3:
@@ -133,6 +170,11 @@
 
     - arista.cvp.cv_container_v3:
         topology: '{{REMOVE_CONFIGLET}}'
+
+    - name: "Delete configlet"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
 
     - name: Clean-up Topology for CONFIGLET
       arista.cvp.cv_container_v3:
