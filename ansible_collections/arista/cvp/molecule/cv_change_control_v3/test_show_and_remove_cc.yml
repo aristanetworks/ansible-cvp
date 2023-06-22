@@ -37,8 +37,8 @@
       assert:
         that:
           - cv_show_cc_by_id.changed == false
-          - cv_show_cc_by_id.data.change_controls[0].value.change.name == "Leaf 2A Change Control"
-          - cv_show_cc_by_id.data.change_controls[0].value.change.notes == "Initiated from Ansible Playbook"
+          - cv_show_cc_by_id.data.change_controls[0].value.change.name == "{{ change.name }}"
+          - cv_show_cc_by_id.data.change_controls[0].value.change.notes == "{{ change.notes }}"
           - cv_show_cc_by_id.data.change_controls[0].value.key.id == "{{cv_change_control_test.data.id}}"
           - cv_show_cc_by_id.data.change_controls[0].value.change.stages.values != {}
 
@@ -49,14 +49,16 @@
       register: cv_show_cc_by_name
 
     - name: Check change control
+      vars:
+        query: "[?value.change.name=='{{ change.name }}']"
       set_fact:
-        show_cc_by_name: "{{ cv_show_cc_by_name.data.change_controls | json_query('[?value.change.name==`Leaf 2A Change Control`]') | first }}"
+        show_cc_by_name: "{{ cv_show_cc_by_name.data.change_controls | json_query(query) | first }}"
 
     - assert:
         that:
           - cv_show_cc_by_name.changed == false
-          - show_cc_by_name.value.change.name == "Leaf 2A Change Control"
-          - show_cc_by_name.value.change.notes == "Initiated from Ansible Playbook"
+          - show_cc_by_name.value.change.name == "{{ change.name }}"
+          - show_cc_by_name.value.change.notes == "{{ change.notes }}"
           - show_cc_by_name.value.change.stages.values != {}
 
     - name: "Show an unknown change control on {{inventory_hostname}} using CC name"
