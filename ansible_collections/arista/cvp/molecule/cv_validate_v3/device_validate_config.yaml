@@ -414,7 +414,7 @@
 #####################################
 #         MULTIPLE CONFIGLET        #
 #####################################
-  - name: Validate CVP multiline configlet with stop_on_error
+  - name: Validate CVP multiple configlet with stop_on_error
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: stop_on_error
@@ -426,7 +426,7 @@
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL multiline configlet with stop_on_error
+  - name: Validate LOCAL multiple configlet with stop_on_error
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: stop_on_error
@@ -438,7 +438,7 @@
         - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP multiline configlet with stop_on_warning
+  - name: Validate CVP multiple configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: stop_on_warning
@@ -450,7 +450,7 @@
         - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL multiline configlet with stop_on_warning
+  - name: Validate LOCAL multiple configlet with stop_on_warning
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: stop_on_warning
@@ -462,7 +462,7 @@
         - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP multiline configlet with ignore
+  - name: Validate CVP multiple configlet with ignore
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
       validate_mode: ignore
@@ -473,7 +473,7 @@
         - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 'leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
     register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL multiline configlet with ignore
+  - name: Validate LOCAL multiple configlet with ignore
     arista.cvp.cv_validate_v3:
       devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
       validate_mode: ignore
