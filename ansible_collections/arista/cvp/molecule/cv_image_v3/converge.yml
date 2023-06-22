@@ -1,3 +1,6 @@
 ---
-- name: Run cv_image_v3
-  import_playbook: test_cv_image_v3.yaml
+- name: Run cv_image_v3_bundle_upload
+  import_playbook: test_cv_image_v3_bundle_upload.yml
+
+- name: Run cv_image_v3_image_upload
+  import_playbook: test_cv_image_v3_image_upload.yml
