@@ -13,7 +13,7 @@
     ansible_connect_timeout: 600
     bundle_query: "[?name=='{{bundle_name}}']"
     delete_bundle_query: "[?name!='{{bundle_name}}']"
-    
+
   tasks:
 
     #Upload image and extension
