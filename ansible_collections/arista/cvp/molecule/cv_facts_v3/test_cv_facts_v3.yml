@@ -77,6 +77,20 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_containers != []
 
+    - name: Collect facts for specific container from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - containers
+        regexp_filter: "ATD_FABRIC"
+      register: CV_FACTS_V3_RESULT
+
+    - name: Check cv_facts for containers
+      assert:
+        that:
+          - CV_FACTS_V3_RESULT.data.cvp_containers.ATD_FABRIC is defined
+          - CV_FACTS_V3_RESULT.changed == false
+          - CV_FACTS_V3_RESULT.failed == false
+
     - name: Collect devices facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
         facts:
