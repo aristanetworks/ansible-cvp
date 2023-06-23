@@ -150,7 +150,7 @@ class CvTagTools(object):
                                                         remove=True)
                     if mode == 'assign' and auto_create:
                         self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                            tag_name, tag_val)
+                                                        tag_name, tag_val)
                         self.__cv_client.api.tag_assignment_config(element_type,
                                                                    workspace_id,
                                                                    tag_name,
@@ -191,7 +191,7 @@ class CvTagTools(object):
                                                             remove=True)
                         if mode == 'assign' and auto_create:
                             self.__cv_client.api.tag_config(element_type, workspace_id,
-                                                                tag_name, tag_val)
+                                                            tag_name, tag_val)
                             self.__cv_client.api.tag_assignment_config(element_type,
                                                                        workspace_id,
                                                                        tag_name,

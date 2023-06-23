@@ -193,9 +193,12 @@
           - TAGS_DELETE.tags_manager.tags_manager_list != []
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-# Negative Test
-# Commenting negative testcases as the output does not show the failure but it works on lab as expected.
-# Change assertion statements below inorder to keep the TCs
+# Negative Tests
+# Uncomment and fix the test-case once cvp output gets fixed for tags.
+# Currently we get the output for workspace creation, need to get for tags operations.
+
+# "mode: assign", "auto_create: false" creates a tag in system_tags,
+# Known issue in CloudVision version 2022.1.1, fixed in CloudVision version 2023.x.x.
 
     # - name: Negative Test assign non-existing device
     #   arista.cvp.cv_tag_v3:
@@ -213,6 +216,9 @@
     #       - ASSIGN_NON_EXISTING.success == false
     #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_list == []
     #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_count == 0
+
+# "mode: delete" of non-existing device tags creates a tag in system_tags,
+# Known issue in CloudVision version 2022.1.1, fixed in CloudVision version 2023.x.x.
 
     # - name: Negative Test delete non-existing device tags
     #   arista.cvp.cv_tag_v3:
