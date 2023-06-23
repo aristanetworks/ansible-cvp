@@ -24,6 +24,8 @@
         configlets:
           - configlet1
 
+    CONTAINER_NAME: "TEAM01_LEAFS"
+
     CHANGE_CONFIGLET_LOOSE:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
@@ -92,6 +94,12 @@
         topology: '{{TOPOLOGY_3_TIER}}'
       register: CONFIGLET_ADD
 
+    - name: Collect containers facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - containers
+      register: CONTAINER_RESULT
+
     - name: Testing Added Configlet
       assert:
         that:
@@ -99,6 +107,7 @@
           - CONFIGLET_ADD.configlets_attached.configlets_attached_count == 1
           - CONFIGLET_ADD.configlets_attached.configlets_attached_list == ["TEAM01_LEAFS:configlet1"]
           - CONFIGLET_ADD.configlets_attached.success == true
+          - CONTAINER_RESULT.data.cvp_containers.TEAM01_LEAFS.configlets == ["configlet1"]
 
     - name: Change Configlet With apply_mode loose
       arista.cvp.cv_container_v3:
