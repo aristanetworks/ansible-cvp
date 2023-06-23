@@ -53,7 +53,7 @@ The following options may be specified for this module:
 </table>
 </br>
 
-## Examples
+## Examples:
 
     # offline validation
     - name: offline configlet validation
