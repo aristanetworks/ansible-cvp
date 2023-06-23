@@ -2,8 +2,8 @@
 
 **cv_validate_v3** Online and Offline configlet validation:
 
-- Validate configlet on CloudVision against a device(online validation)
-- Validate local configlet against a device(offline validation)
+- Validate configlet on CloudVision against a device (online validation)
+- Validate local configlet against a device (offline validation)
 
 ## Inputs
 
@@ -18,9 +18,9 @@ The documentation is available in the [module section](../../modules/cv_validate
 
 ```yaml
   - name: validate module
-      arista.cvp.cv_validate_v3:
-        devices: "{{CVP_DEVICES}}"
-        validate_mode: stop_on_error
+    arista.cvp.cv_validate_v3:
+      devices: "{{CVP_DEVICES}}"
+      validate_mode: stop_on_error
 ```
 
 ### Example of offline configlet validation
