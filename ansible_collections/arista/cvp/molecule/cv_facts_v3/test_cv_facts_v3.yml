@@ -8,17 +8,25 @@
       configlet1: 'alias a{{ 999 | random }} show lldp'
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: leaf3
-        parentContainerName: "ATD_SPINES"
+        parentContainerName: "Leafs"
     IMAGE_NAME: "EOS-4.25.4M.swi"
     TASK_STATUS: "Pending"
     CONFIGLET_NAME: "configlet1"
     DEVICE_NAME: "spine1"
+    CONTAINER:
+      Leafs:
+        parentContainerName: Tenant
   tasks:
     # push configlet to be used in verifying configlet facts
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
         state: present
+
+    # Creating a container
+    - name: Build Container On {{inventory_hostname}}
+      arista.cvp.cv_container_v3:
+        topology: '{{CONTAINER}}'
 
     # Running move_device to create a task
     - name: Run Move Device to create a task
@@ -81,13 +89,13 @@
       arista.cvp.cv_facts_v3:
         facts:
           - containers
-        regexp_filter: "ATD_FABRIC"
+        regexp_filter: "Leafs"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for containers
       assert:
         that:
-          - CV_FACTS_V3_RESULT.data.cvp_containers.ATD_FABRIC is defined
+          - CV_FACTS_V3_RESULT.data.cvp_containers.Leafs is defined
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
 
@@ -177,7 +185,7 @@
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_images != []
+          - CV_FACTS_V3_RESULT.data.cvp_images['EOS-4.25.4M.swi'] is defined
 
     - name: Collect task facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
@@ -233,9 +241,14 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks != []
           - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
 
-    - name: "Delete config"
+    - name: Delete config
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
+
+    - name: Remove Container
+      arista.cvp.cv_container_v3:
+        topology: '{{CONTAINER}}'
         state: absent
 
     - name: Cancel Pending Tasks
