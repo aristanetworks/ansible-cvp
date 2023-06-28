@@ -10,7 +10,7 @@
     - name: Collect configlet facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
         facts:
-          - configlet    # collects all configlet facts
+          - configlets    # collects all configlets facts
       register: CV_FACTS_V3_RESULT
 
     - name: Display configlet facts
@@ -20,7 +20,7 @@
     - name: Collect configlet facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
         facts:
-          - configlet
+          - configlets
         regexp_filter: 'configlet1' # collects specific configlet facts
       register: CV_FACTS_V3_RESULT
 

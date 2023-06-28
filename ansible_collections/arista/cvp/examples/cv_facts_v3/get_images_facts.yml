@@ -18,7 +18,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - images
-        regexp_filter: 'TerminAttr-1.15.3-1.swix' # collects specific image facts
+        regexp_filter: 'EOS-4.25.4M.swi' # collects specific image facts
       register: CV_FACTS_V3_RESULT
 
     - name: Display image facts
