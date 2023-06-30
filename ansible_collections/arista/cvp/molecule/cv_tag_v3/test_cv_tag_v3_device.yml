@@ -194,8 +194,8 @@
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
 # Negative Tests
-# Uncomment and fix the test-case once cvp output gets fixed for tags.
-# Currently we get the output for workspace creation, need to get for tags operations.
+# There is no way to retrieve to tags from CVP.
+# Uncomment and fix the test-case once the above feature is added.
 
 # "mode: assign", "auto_create: false" creates a tag in system_tags,
 # Known issue in CloudVision version 2022.1.1, fixed in CloudVision version 2023.x.x.
