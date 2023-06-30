@@ -66,7 +66,7 @@ jobs:
 
   pre_commit:
     name: Run pre-commit validation hooks
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: avdteam/base:3.8-v2.0
     needs: file-changes
     if: needs.file-changes.outputs.dhcp_module == 'true' || needs.file-changes.outputs.code_v3 == 'true' || needs.file-changes.outputs.code_v1 == 'true'
