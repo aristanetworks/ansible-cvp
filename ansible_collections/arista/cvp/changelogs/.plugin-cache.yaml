@@ -76,9 +76,14 @@ plugins:
       name: cv_task_v3
       namespace: ''
       version_added: 3.0.0
+    cv_validate_v3:
+      description: CVP/Local configlet Validation
+      name: cv_validate_v3
+      namespace: ''
+      version_added: 3.7.0
   netconf: {}
   shell: {}
   strategy: {}
   test: {}
   vars: {}
-version: 3.6.1
+version: 3.7.0

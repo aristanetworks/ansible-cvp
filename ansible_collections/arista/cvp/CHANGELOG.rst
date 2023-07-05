@@ -5,6 +5,30 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.7.0
+======
+
+Release Summary
+---------------
+
+Release 3.7.0 - See documentation on cvp.avd.sh for details.
+
+
+Minor Changes
+-------------
+
+- Feat(cv_device_v3) Configlet Validation support (#615)
+
+Bugfixes
+--------
+
+- Fix(cv_device_v3) Increment counter when we remove devices (#629)
+
+New Modules
+-----------
+
+- arista.cvp.cv_validate_v3 - CVP/Local configlet Validation
+
 v3.6.1
 ======
 
