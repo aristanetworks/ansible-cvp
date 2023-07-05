@@ -1,0 +1,26 @@
+---
+- name: Device Config Validation in Cloudvision
+  hosts: CloudVision
+  connection: local
+  gather_facts: false
+  vars:
+    CVP_DEVICES:
+      - device_name: leaf1
+        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        cvp_configlets:
+          - validate_error
+    CVP_CONFIGLET:
+      validate_error: "{{lookup('file', 'configlet4.cfg')}}"
+  tasks:
+  - name: "Push configlet"
+    arista.cvp.cv_configlet_v3:
+      configlets: "{{CVP_CONFIGLET}}"
+      state: present
+  - name: Validate configurations
+    arista.cvp.cv_validate_v3:
+      devices: "{{CVP_DEVICES}}"
+      validate_mode: stop_on_error
+    register: CVP_DEVICES_RESULTS
+  - name: print result for {{inventory_hostname}}
+    debug:
+      msg: "{{CVP_DEVICES_RESULTS}}"

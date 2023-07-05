@@ -26,6 +26,9 @@ class ModuleOptionValues():
     """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
     APPLY_MODE_STRICT: str = 'strict'
+    VALIDATE_MODE_IGNORE: str = 'ignore'
+    VALIDATE_MODE_STOP_ON_WARNING: str = 'stop_on_warning'
+    VALIDATE_MODE_STOP_ON_ERROR: str = 'stop_on_error'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
     STATE_MODE_DECOMM: str = 'absent'
@@ -59,6 +62,7 @@ class DeviceResponseFields():
     """Fields to build output of cv_device_v3 module"""
     CONFIGLET_ATTACHED: str = 'configlets_attached'
     CONFIGLET_DETACHED: str = 'configlets_detached'
+    CONFIGLET_VALIDATED: str = 'configlets_validated'
     DEVICE_DEPLOYED: str = 'devices_deployed'
     DEVICE_MOVED: str = 'devices_moved'
     DEVICE_RESET: str = 'devices_reset'
