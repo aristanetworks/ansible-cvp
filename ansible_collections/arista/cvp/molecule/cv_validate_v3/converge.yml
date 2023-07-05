@@ -1,0 +1,3 @@
+---
+- name: Run validate config valid_case
+  import_playbook: device_validate_config.yaml

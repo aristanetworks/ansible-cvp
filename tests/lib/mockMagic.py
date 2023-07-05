@@ -1,5 +1,6 @@
-from tests.data.device_tools_unit import (validate_router_bgp, return_validate_config_for_device,
-                                          validate_intf, validate_true, image_bundle, device_data)
+from tests.data.device_tools_unit import (image_bundle, device_data)
+from tests.data.validate_tools_unit import (validate_router_bgp, return_validate_config_for_device,
+                                          validate_warning, validate_true)
 
 device_decommissioning_result = {}
 
@@ -14,8 +15,8 @@ def fail_json(msg, code=1):
 def validate_config_for_device(device_mac, config):
     if config == validate_router_bgp['config']:
         return return_validate_config_for_device['return_validate_ruter_bgp']
-    if config == validate_intf['config']:
-        return return_validate_config_for_device['return_validate_intf']
+    if config == validate_warning['config']:
+        return return_validate_config_for_device['return_validate_warning']
     if config == validate_true['config']:
         return return_validate_config_for_device['return_validate_true']
 

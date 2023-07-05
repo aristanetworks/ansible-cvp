@@ -58,6 +58,8 @@ USER_TOPOLOGY = [
         {
             'container_added': {
                 'container_added_list': ['Global', 'Site 1', 'Site 1 Leaves'],
+                'warnings': [],
+                'errors': [],
                 'success': True,
                 'changed': True,
                 'taskIds': [0, 1, 2],
@@ -65,6 +67,8 @@ USER_TOPOLOGY = [
                 'container_added_count': 3},
             'container_deleted': {
                 'container_deleted_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': False,
                 'changed': False,
                 'taskIds': [],
@@ -72,6 +76,8 @@ USER_TOPOLOGY = [
                 'container_deleted_count': 0},
             'configlets_attached': {
                 'configlets_attached_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': False,
                 'changed': False,
                 'taskIds': [],
@@ -79,6 +85,8 @@ USER_TOPOLOGY = [
                 'configlets_attached_count': 0},
             'configlets_detached': {
                 'configlets_detached_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': True,
                 'changed': False,
                 'taskIds': [],
@@ -111,6 +119,8 @@ USER_TOPOLOGY = [
         {
             'container_added': {
                 'container_added_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': False,
                 'changed': False,
                 'taskIds': [],
@@ -118,6 +128,8 @@ USER_TOPOLOGY = [
                 'container_added_count': 0},
             'container_deleted': {
                 'container_deleted_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': False,
                 'changed': False,
                 'taskIds': [],
@@ -125,6 +137,8 @@ USER_TOPOLOGY = [
                 'container_deleted_count': 0},
             'configlets_attached': {
                 'configlets_attached_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': False,
                 'changed': False,
                 'taskIds': [],
@@ -132,6 +146,8 @@ USER_TOPOLOGY = [
                 'configlets_attached_count': 0},
             'configlets_detached': {
                 'configlets_detached_list': [],
+                'warnings': [],
+                'errors': [],
                 'success': True,
                 'changed': False,
                 'taskIds': [],

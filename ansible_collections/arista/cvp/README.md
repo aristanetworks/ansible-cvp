@@ -86,6 +86,7 @@ This repository provides content for Ansible's collection **arista.cvp** with fo
 - [**arista.cvp.cv_facts_v3**](docs/modules/cv_facts_v3.rst/) - Collect information from CloudVision.
 - [**arista.cvp.cv_image_v3**](docs/modules/cv_image_v3.rst/) - Create EOS images and bundles on CloudVision.
 - [**arista.cvp.cv_tag_v3**](docs/modules/cv_tag_v3.rst/) - Create, delete, assign and unassign tags on CloudVision.
+- [**arista.cvp.cv_validate_v3**](docs/modules/cv_validate_v3.rst/) - Configlet validation
 - [**arista.cvp.cv_change_control_v3**](docs/modules/cv_change_control_v3.rst/) - Manage change controls on CloudVision.
 
 ### List of available roles
