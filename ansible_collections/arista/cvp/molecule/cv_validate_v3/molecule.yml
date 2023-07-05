@@ -1,0 +1,27 @@
+
+---
+scenario:
+  test_sequence:
+    - converge
+    # - verify
+driver:
+  name: delegated
+platforms:
+  - name: dummy
+    managed: false
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      jinja2_extensions: 'jinja2.ext.loopcontrols,jinja2.ext.do,jinja2.ext.i18n'
+      gathering: explicit
+      command_warnings: False
+      remote_tmp: /tmp/.ansible-${USER}/tmp
+      stdout_callback: yaml
+  playbooks:
+    converge: converge.yml
+  ansible_args:
+    - --inventory
+    - ${MOLECULE_SCENARIO_DIRECTORY}/../../examples/inventory.yml
+verifier:
+  name: ansible

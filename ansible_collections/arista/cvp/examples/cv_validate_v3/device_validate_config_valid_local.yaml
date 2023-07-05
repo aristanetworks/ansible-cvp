@@ -1,0 +1,20 @@
+---
+- name: Device Config Validation in Cloudvision
+  hosts: CloudVision
+  connection: local
+  gather_facts: false
+  vars:
+    CVP_DEVICES:
+      - device_name: leaf1
+        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        local_configlets:
+          validate_valid: "interface Ethernet1\n description test_validate"
+  tasks:
+  - name: Validate configurations
+    arista.cvp.cv_validate_v3:
+      devices: "{{CVP_DEVICES}}"
+      validate_mode: stop_on_warning
+    register: CVP_DEVICES_RESULTS
+  - name: print result for {{inventory_hostname}}
+    debug:
+      msg: "{{CVP_DEVICES_RESULTS}}"
