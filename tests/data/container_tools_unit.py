@@ -61,6 +61,8 @@ USER_TOPOLOGY = [
                 'bundle_attached_list': [],
                 'changed': False,
                 'diff': {},
+                'errors': [],
+                'warnings': [],
                 'success': False,
                 'taskIds': []},
             'bundle_detached': {
@@ -68,6 +70,8 @@ USER_TOPOLOGY = [
                 'bundle_detached_list': [],
                 'changed': False,
                 'diff': {},
+                'errors': [],
+                'warnings': [],
                 'success': False,
                 'taskIds': []},
             'container_added': {
@@ -136,6 +140,8 @@ USER_TOPOLOGY = [
                 'bundle_attached_list': [],
                 'changed': False,
                 'diff': {},
+                'errors': [],
+                'warnings': [],
                 'success': False,
                 'taskIds': []},
             'bundle_detached': {
@@ -143,6 +149,8 @@ USER_TOPOLOGY = [
                 'bundle_detached_list': [],
                 'changed': False,
                 'diff': {},
+                'errors': [],
+                'warnings': [],
                 'success': False,
                 'taskIds': []},
             'container_added': {
