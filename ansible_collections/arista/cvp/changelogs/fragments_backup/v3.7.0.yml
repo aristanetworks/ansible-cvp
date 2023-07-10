@@ -1,0 +1,8 @@
+release_summary: |
+  Release 3.7.0 - See documentation on cvp.avd.sh for details.
+
+minor_changes:
+- Feat(cv_device_v3) Configlet Validation support (#615)
+
+bugfixes:
+- Fix(cv_device_v3) Increment counter when we remove devices (#629)
