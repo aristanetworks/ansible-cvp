@@ -1,0 +1,5 @@
+- name: Run cv_tag_v3 device
+  import_playbook: test_cv_tag_v3_device.yml
+
+- name: Run cv_tag_v3 interface
+  import_playbook: test_cv_tag_v3_interface.yml
