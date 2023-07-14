@@ -1,0 +1,26 @@
+---
+- name: Run cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Collect images facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - images  # collects all images facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display image facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect images facts from {{inventory_hostname}} filtered by name
+      arista.cvp.cv_facts_v3:
+        facts:
+          - images
+        regexp_filter: 'EOS-4.25.4M.swi' # collects specific image facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display image facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"

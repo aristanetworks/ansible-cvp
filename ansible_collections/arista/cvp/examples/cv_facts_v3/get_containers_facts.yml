@@ -1,0 +1,29 @@
+---
+- name: Run cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    ansible_command_timeout: 1200
+    ansible_connect_timeout: 600
+  tasks:
+    - name: Collect containers facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - containers    # collects all containers facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display containers facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect containers facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - containers
+        regexp_filter: 'ATD_SPINES' # collects specific container facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display container facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"

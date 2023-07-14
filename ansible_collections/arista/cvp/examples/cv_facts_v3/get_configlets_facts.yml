@@ -1,0 +1,29 @@
+---
+- name: Run cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    ansible_command_timeout: 1200
+    ansible_connect_timeout: 600
+  tasks:
+    - name: Collect configlet facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets    # collects all configlets facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display configlet facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect configlet facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets
+        regexp_filter: 'configlet1' # collects specific configlet facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display configlet facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"

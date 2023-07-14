@@ -1,0 +1,38 @@
+---
+- name: Run cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Collect task facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display task facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect task facts from {{inventory_hostname}} filtered by status
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: 'Pending' # filtered by status
+        verbose: long
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display task facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect task facts from {{inventory_hostname}} filtered by task_id
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: 93 # filtered by task_id
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display task facts filtered by task_id
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"

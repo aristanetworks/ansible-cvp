@@ -44,6 +44,8 @@ class FactsResponseFields():
     CONTAINER: str = 'cvp_containers'
     DEVICE: str = 'cvp_devices'
     IMAGE_BUNDLE: str = 'cvp_image_bundle'
+    IMAGE: str = 'cvp_images'
+    TASK: str = 'cvp_tasks'
 
 
 # @dataclass

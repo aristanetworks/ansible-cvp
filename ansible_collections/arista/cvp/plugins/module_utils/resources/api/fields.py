@@ -45,6 +45,7 @@ class ApiGeneric():
     CONFIGLETS: str = 'configlets'
     KEY: str = 'key'
     NAME: str = 'name'
+    TASK_ID: str = 'workOrderId'
     PARENT_CONTAINER_ID: str = 'parentContainerId'
     PARENT_CONTAINER_NAME: str = 'parentContainerName'
     IMAGE_BUNDLE_NAME: str = 'imageBundle'
@@ -77,6 +78,13 @@ class ApiDevice():
     PARENT_CONTAINER_KEY: str = 'parentContainerKey'
     MGMTIP: str = 'ipAddress'
     BUNDLE: str = 'imageBundle'
+    AUTHOR: str = 'createdBy'
+    DESCRIPTION: str = 'description'
+    STATUS: str = 'workOrderUserDefinedStatus'
+    STATE: str = 'workOrderState'
+    TASK_DETAILS: str = 'workOrderDetails'
+    CCID: str = 'ccId'
+    CCIDV2: str = 'ccIdV2'
 
 
 # @dataclass
