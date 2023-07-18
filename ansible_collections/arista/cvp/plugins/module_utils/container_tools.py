@@ -367,6 +367,7 @@ class CvContainerTools(object):
                         change_response.taskIds = resp['data'][Api.task.TASK_IDS]
                         change_response.success = True
                         change_response.changed = True
+                        change_response.add_entry(f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names))
         return change_response
 
     def __configlet_del(self, container: dict, configlets: list, save_topology: bool = True):
@@ -435,7 +436,7 @@ class CvContainerTools(object):
                     # resp = {'data': {'taskIds': [], 'status': 'success'}}
                     change_response.success = True
                     change_response.changed = True
-
+                    change_response.add_entry(f'{container[Api.generic.NAME]}:' + ':'.join(configlet_names))
         return change_response
 
     def __image_bundle_add(self, container: dict, image_bundle: str):
@@ -451,8 +452,8 @@ class CvContainerTools(object):
             dict
                 API call result
         """
-        container_name = 'Undefined'
-        change_response = CvApiResult(action_name=container_name)
+
+        change_response = CvApiResult(action_name=image_bundle)
         change_response.changed = False
 
         if container is not None:
@@ -460,7 +461,7 @@ class CvContainerTools(object):
                 if self.__cvp_client.api.get_image_bundle_by_name(image_bundle):
                     change_response.success = True
                     change_response.taskIds = ['check_mode']
-                    change_response.add_entries(
+                    change_response.add_entry(
                         f'{container[Api.generic.NAME]}: {image_bundle}'
                     )
                 else:
@@ -514,6 +515,7 @@ class CvContainerTools(object):
                                 change_response.changed = True
                                 change_response.success = True
                                 change_response.taskIds = resp['data'][Api.task.TASK_IDS]
+                                change_response.add_entry(f'{container[Api.generic.NAME]}: {image_bundle}')
                 else:
                     message = "Error - assigned image bundle: " + str(image_bundle) + "does not exist."
                     MODULE_LOGGER.error(message)
@@ -528,21 +530,20 @@ class CvContainerTools(object):
         Args:
             container : dict
                 Container information to use in API call. Format: {key:'', name:''}
-            image_bundle : str
-                The name of the image bundle to be applied
         Returns:
             dict
                 API call result
         """
-        container_name = 'Undefined'
-        change_response = CvApiResult(action_name=container_name)
+
+        container["imageBundle"] = "" if container["imageBundle"] is None else container["imageBundle"]
+        change_response = CvApiResult(action_name=container["imageBundle"])
         change_response.changed = False
 
         if container is not None:
             if self.__check_mode:
                 change_response.success = True
                 change_response.taskIds = ['check_mode']
-                change_response.add_entries(
+                change_response.add_entry(
                     f'{container[Api.generic.NAME]}: Image removed'
                 )
 
@@ -574,7 +575,7 @@ class CvContainerTools(object):
                             change_response.changed = True
                             change_response.success = True
                             change_response.taskIds = resp['data'][Api.task.TASK_IDS]
-
+                            change_response.add_entry(f'{container[Api.generic.NAME]}: Image removed')
                 else:
                     # No image assigned, so nothing to do
                     change_response.success = True
@@ -1093,7 +1094,7 @@ class CvContainerTools(object):
         cv_configlets_attach = CvManagerResult(
             builder_name=ContainerResponseFields.CONFIGLETS_ATTACHED)
         cv_configlets_detach = CvManagerResult(
-            builder_name=ContainerResponseFields.CONFIGLETS_DETACHED, default_success=True)
+            builder_name=ContainerResponseFields.CONFIGLETS_DETACHED)
         cv_image_bundle_attach = CvManagerResult(
             builder_name=ContainerResponseFields.BUNDLE_ATTACHED)
         cv_image_bundle_detach = CvManagerResult(
@@ -1156,6 +1157,8 @@ class CvContainerTools(object):
         response.add_manager(container_delete_manager)
         response.add_manager(cv_configlets_attach)
         response.add_manager(cv_configlets_detach)
+        response.add_manager(cv_image_bundle_attach)
+        response.add_manager(cv_image_bundle_detach)
         MODULE_LOGGER.debug(
             'Container manager is sending result data: %s', str(response))
         return response

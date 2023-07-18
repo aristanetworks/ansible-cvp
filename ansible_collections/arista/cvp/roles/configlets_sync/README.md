@@ -6,8 +6,6 @@ This role synchronize a designated set of CVP Configlets across multiple CVP ins
 
 ![CVP Sync](files/ansible-cvp-sync.png)
 
-This role is implementation of example describe on [EOS Central blog](https://eos.arista.com/synchronising-cloudvision-portal-configlets-with-ansible/) by @Hugh-Adams.
-
 ## Requirements
 
 No specific requirements to use this role.

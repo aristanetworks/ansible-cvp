@@ -1,0 +1,5 @@
+- name: Run cv_container_v3
+  import_playbook: test_cv_container_v3_configlet.yaml
+
+- name: Run cv_container_v3
+  import_playbook: test_cv_container_v3_image_bundle.yaml

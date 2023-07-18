@@ -80,6 +80,7 @@ jobs:
             cv_image_v3
             cv_facts_v3
             cv_change_control_v3
+            cv_tag_v3
             cv_facts
             cv_device
             cv_container
