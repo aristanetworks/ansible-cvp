@@ -227,7 +227,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0]}}" # filtered by task id
+        regexp_filter: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}" # filtered by task id
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
