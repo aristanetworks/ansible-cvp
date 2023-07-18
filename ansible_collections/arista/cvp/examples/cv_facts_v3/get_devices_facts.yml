@@ -1,0 +1,41 @@
+---
+- name: Run cv_facts_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    ansible_command_timeout: 1200
+    ansible_connect_timeout: 600
+  tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices    # collects all devices facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display devices facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: 'leaf3' # collects specific device facts
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display devices facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"
+
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: 'leaf3' # collects specific device facts
+        verbose: long          # using verbose long
+      register: CV_FACTS_V3_RESULT
+
+    - name: Display devices facts
+      debug:
+        msg: "{{CV_FACTS_V3_RESULT}}"

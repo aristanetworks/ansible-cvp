@@ -1,0 +1,3 @@
+---
+- name: Run cv_configlet_v3
+  import_playbook: test_cv_configlet_v3.yaml

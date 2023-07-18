@@ -135,6 +135,7 @@ nav:
       - Manage tasks: docs/how-to/v3/cv_task_v3.md
       - Manage tags: docs/how-to/v3/cv_tag_v3.md
       - Manage change control: docs/how-to/v3/cv_change_control_v3.md
+      - Validate Configlets: docs/how-to/v3/cv_validate_v3.md
       - Get facts from CloudVision: docs/how-to/v3/cv_facts_v3.md
     - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
@@ -148,6 +149,7 @@ nav:
       # - cv_image_v3: docs/schema/cv_image_v3.md
       - cv_tag_v3: docs/schema/cv_tag_v3.md
       - cv_change_control_v3: docs/schema/cv_change_control_v3.md
+      - cv_validate_v3: docs/schema/cv_validate_v3.md
   - Frequently Asked Questions:
     - Error Messages: docs/faq/errors.md
     - Ansible Execution Environment: docs/faq/containers.md
@@ -170,6 +172,7 @@ nav:
       - cv_image_v3: docs/modules/cv_image_v3.rst.md
       - cv_tag_v3: docs/modules/cv_tag_v3.rst.md
       - cv_change_control_v3: docs/modules/cv_change_control_v3.rst.md
+      - cv_validate_v3: docs/modules/cv_validate_v3.rst.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

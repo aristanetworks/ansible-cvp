@@ -5,6 +5,8 @@
 - Support static configlets
 - Support List of containers
 - Support list of devices
+- Support list of images
+- Support list of tasks
 
 ## Inputs
 
@@ -12,10 +14,10 @@ This module does not support input data except module options.
 
 ### Optional module inputs
 
-- `facts`: List of facts to get from CloudVision. It can be any of the following entries: [`devices`, `configlets`, `container`]
-- `regexp_filter`: [Regualr expression](https://docs.python.org/3/howto/regex.html) to filter `configlets` and `devices` to only collect facts for interesting entries.
+- `facts`: List of facts to get from CloudVision. It can be any of the following entries: [`devices`, `configlets`, `container`, `images`, `tasks`]
+- `regexp_filter`: [Regualr expression](https://docs.python.org/3/howto/regex.html) to filter `configlets`, `devices`, `images`, and `tasks` to only collect facts for interesting entries.
 - `verbose`: Facts Verbosity.
-  - `full` -  get all data from CV.
+  - `long` -  get all data from CV.
   - `short` -  get only cv_modules data.
   - Default is `short`
 
@@ -44,6 +46,28 @@ tasks:
     - containers
     regexp_filter: '.*LEAF|BORDER.*'
     verbose: long
+  register: FACTS_DEVICES
+
+- name: '#05 - Collect images facts from {{inventory_hostname}}'
+  arista.cvp.cv_facts_v3:
+    facts:
+      - images
+  register: FACTS_DEVICES
+
+- name: '#06 - Collect task facts from {{inventory_hostname}}'
+  arista.cvp.cv_facts_v3:
+    facts:
+      - tasks
+    regexp_filter: 'Pending' # get facts filtered by task status - 'Failed', 'Pending', 'Completed', 'Cancelled'
+    verbose: 'long'
+  register: FACTS_DEVICES
+
+- name: '#07 - Collect task facts from {{inventory_hostname}}'
+  arista.cvp.cv_facts_v3:
+    facts:
+      - tasks
+    regexp_filter: 95 # get facts filtered by task_Id (int)
+    verbose: 'long'
   register: FACTS_DEVICES
 ```
 
@@ -107,6 +131,42 @@ ok: [CloudVision] =>
         serialNumber: 24666013EF2271599935B4A894F356E1
         systemMacAddress: 50:00:00:03:37:66
         imageBundle: ""
+      cvp_images:
+        EOS-4.25.4M.swi:
+          imageBundleKeys:
+            - "imagebundle_1658329041200536707"
+          imageFile": ""
+          imageFileName: "EOS-4.25.4M.swi"
+          imageId: "EOS-4.25.4M.swi"
+          imageSize: "931.9 MB"
+          isHotFix: "false"
+          isRebootRequire": "true"
+          key: "EOS-4.25.4M.swi"
+          md5: ""
+          name: "EOS-4.25.4M.swi"
+          sha512: "54e6874984a3a46b1371bd6c53196bbd622c922606b65d59ed3fa23e918a43d174d468ac9179146a4d1b00e7094c4755ea90c2df4ab94c562e745c14a402b491"
+          swiMaxHwepoch: "2"
+          swiVarient: "US"
+          uploadedDateinLongFormat: 1658329024667
+          user: "cvp system"
+          version: "4.25.4M-22402993.4254M"
+      cvp_tasks:
+        93:
+          ccId: ""
+          ccIdV2: "g75iPnnZuWccGj1M4X2FR"
+          createdBy: "arista"
+          description: "Device Add: leaf2.atd.lab - To be added to Container pod1"
+          workOrderDetails:
+            ipAddress: "192.168.0.13",
+            netElementHostName: "leaf2.atd.lab",
+            netElementId: "00:1c:73:fd:a9:d8",
+            serialNumber: "56789EBC8E00D7BDB3E6BBFBEB9B4FC4",
+            workOrderDetailsId: "",
+            workOrderId: ""
+          workOrderId: "93",
+          workOrderState: "ACTIVE",
+          workOrderUserDefinedStatus: "Cancelled"
+        total_tasks": 1
     failed: false
 ```
 

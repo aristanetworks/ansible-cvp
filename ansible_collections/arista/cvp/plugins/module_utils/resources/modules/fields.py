@@ -26,6 +26,9 @@ class ModuleOptionValues():
     """Values for modules options"""
     APPLY_MODE_LOOSE: str = 'loose'
     APPLY_MODE_STRICT: str = 'strict'
+    VALIDATE_MODE_IGNORE: str = 'ignore'
+    VALIDATE_MODE_STOP_ON_WARNING: str = 'stop_on_warning'
+    VALIDATE_MODE_STOP_ON_ERROR: str = 'stop_on_error'
     STATE_MODE_ABSENT: str = 'factory_reset'
     STATE_MODE_PRESENT: str = 'present'
     STATE_MODE_DECOMM: str = 'absent'
@@ -42,6 +45,8 @@ class FactsResponseFields():
     CONTAINER: str = 'cvp_containers'
     DEVICE: str = 'cvp_devices'
     IMAGE_BUNDLE: str = 'cvp_image_bundle'
+    IMAGE: str = 'cvp_images'
+    TASK: str = 'cvp_tasks'
 
 
 # @dataclass

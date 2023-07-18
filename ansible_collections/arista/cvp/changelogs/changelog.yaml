@@ -86,3 +86,19 @@ releases:
     fragments:
     - v3.6.1.yml
     release_date: '2023-03-28'
+  3.7.0:
+    changes:
+      bugfixes:
+      - Fix(cv_device_v3) Increment counter when we remove devices (#629)
+      minor_changes:
+      - Feat(cv_device_v3) Configlet Validation support (#615)
+      release_summary: 'Release 3.7.0 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.7.0.yml
+    modules:
+    - description: CVP/Local configlet Validation
+      name: cv_validate_v3
+      namespace: ''
+    release_date: '2023-07-05'

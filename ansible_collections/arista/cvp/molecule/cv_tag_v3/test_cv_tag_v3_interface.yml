@@ -1,0 +1,253 @@
+---
+- name: Test cv_tag_v3 for interface tags
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    ASSIGN_DELETE_TAGS_AUTO_CREATE:
+      - device: leaf1.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf1AutoAssignEth1
+              value: leaf1AutoAssignEth1
+            interface: Ethernet1
+          - tags:
+            - name: leaf1AutoAssignEth2
+              value: leaf1AutoAssignEth2
+            interface: Ethernet2
+      - device: leaf2.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf2IntfAutoAssignEth1
+              value: leaf2IntfAutoAssignEth1
+            interface: Ethernet1
+
+    CREATE_TAGS:
+      - interface_tags:
+          - tags:
+              - name: leaf1CreateTagEth1
+                value: leaf1CreateTagEth1
+              - name: leaf1CreateTagEth2
+                value: leaf1CreateTagEth2
+              - name: leaf2CreateTagEth1
+                value: leaf2CreateTagEth1
+
+    ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS:
+      - device: leaf1.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf1CreateTagEth1
+              value: leaf1CreateTagEth1
+            interface: Ethernet1
+          - tags:
+            - name: leaf1CreateTagEth2
+              value: leaf1CreateTagEth2
+            interface: Ethernet2
+      - device: leaf2.atd.lab
+        interface_tags:
+          - tags:
+            - name: leaf2CreateTagEth1
+              value: leaf2CreateTagEth1
+            interface: Ethernet1
+
+    # ASSIGN_DELETE_NON_EXISTING_TAGS:
+    #   - device: leaf1.atd.lab
+    #     interface_tags:
+    #       - tags:
+    #         - name: leaf1NegativeEth1
+    #           value: leaf1NegativeEth1
+    #         interface: Ethernet1
+
+  tasks:
+    - name: Assign non-existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        mode: assign
+        auto_create: true
+      register: AUTO_CREATE_ASSIGN_TAGS
+
+    - name: Check assign non-existing interface tags
+      assert:
+        that:
+          - AUTO_CREATE_ASSIGN_TAGS.changed == true
+          - AUTO_CREATE_ASSIGN_TAGS.failed == false
+          - AUTO_CREATE_ASSIGN_TAGS.success == true
+          - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_ASSIGN_TAGS.tags_manager.tags_manager_count == 1
+
+    - name: Unassign non-existing interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        mode: unassign
+      register: AUTO_CREATE_UNASSIGN_TAGS
+
+    - name: Check unassign non-existing interface tags
+      assert:
+        that:
+          - AUTO_CREATE_UNASSIGN_TAGS.changed == true
+          - AUTO_CREATE_UNASSIGN_TAGS.failed == false
+          - AUTO_CREATE_UNASSIGN_TAGS.success == true
+          - AUTO_CREATE_UNASSIGN_TAGS.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_UNASSIGN_TAGS.tags_manager.tags_manager_count == 1
+
+    - name: Delete auto_create interface tags
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        mode: delete
+      register: AUTO_CREATE_TAGS_DELETE
+
+    - name: Check auto_create delete interface tags
+      assert:
+        that:
+          - AUTO_CREATE_TAGS_DELETE.changed == true
+          - AUTO_CREATE_TAGS_DELETE.failed == false
+          - AUTO_CREATE_TAGS_DELETE.success == true
+          - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_list != []
+          - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_count == 1
+
+# Create -> assign -> unassign -> delete
+
+    - name: Create interface tags (part of CREATE -> assign -> unassign -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{CREATE_TAGS}}"
+        mode: create
+      register: TAGS_CREATE
+
+    - name: Check create interface tags
+      assert:
+        that:
+          - TAGS_CREATE.changed == true
+          - TAGS_CREATE.failed == false
+          - TAGS_CREATE.success == true
+          - TAGS_CREATE.tags_manager.tags_manager_list != []
+          - TAGS_CREATE.tags_manager.tags_manager_count == 1
+
+    - name: Assign existing interface tags (part of create -> ASSIGN -> unassign -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: assign
+      register: ASSIGN_EXISTING
+
+    - name: Check assign existing interface tags
+      assert:
+        that:
+          - ASSIGN_EXISTING.changed == true
+          - ASSIGN_EXISTING.failed == false
+          - ASSIGN_EXISTING.success == true
+          - ASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - ASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Unassign existing interface tags (part of create -> assign -> UNASSIGN -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: unassign
+      register: UNASSIGN_EXISTING
+
+    - name: Check unassign existing interface tags
+      assert:
+        that:
+          - UNASSIGN_EXISTING.changed == true
+          - UNASSIGN_EXISTING.failed == false
+          - UNASSIGN_EXISTING.success == true
+          - UNASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - UNASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Delete interface tags (part of create -> assign -> unassign -> DELETE)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: delete
+      register: TAGS_DELETE
+
+    - name: Check delete interface tags
+      assert:
+        that:
+          - TAGS_DELETE.changed == true
+          - TAGS_DELETE.failed == false
+          - TAGS_DELETE.success == true
+          - TAGS_DELETE.tags_manager.tags_manager_list != []
+          - TAGS_DELETE.tags_manager.tags_manager_count == 1
+
+# Create -> assign -> delete
+
+    - name: Create interface tags (part of CREATE -> assign -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{CREATE_TAGS}}"
+        mode: create
+      register: TAGS_CREATE
+
+    - name: Check create interface tags
+      assert:
+        that:
+          - TAGS_CREATE.changed == true
+          - TAGS_CREATE.failed == false
+          - TAGS_CREATE.success == true
+          - TAGS_CREATE.tags_manager.tags_manager_list != []
+          - TAGS_CREATE.tags_manager.tags_manager_count == 1
+
+    - name: Assign existing interface tags (part of create -> ASSIGN -> delete)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: assign
+      register: ASSIGN_EXISTING
+
+    - name: Check assign existing interface tags
+      assert:
+        that:
+          - ASSIGN_EXISTING.changed == true
+          - ASSIGN_EXISTING.failed == false
+          - ASSIGN_EXISTING.success == true
+          - ASSIGN_EXISTING.tags_manager.tags_manager_list != []
+          - ASSIGN_EXISTING.tags_manager.tags_manager_count == 1
+
+    - name: Delete interface tags (part of create -> assign -> DELETE)
+      arista.cvp.cv_tag_v3:
+        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        mode: delete
+      register: TAGS_DELETE
+
+    - name: Check delete interface tags
+      assert:
+        that:
+          - TAGS_DELETE.changed == true
+          - TAGS_DELETE.failed == false
+          - TAGS_DELETE.success == true
+          - TAGS_DELETE.tags_manager.tags_manager_list != []
+          - TAGS_DELETE.tags_manager.tags_manager_count == 1
+
+# Negative Test
+# There is no way to retrieve to tags from CVP.
+# Uncomment and fix the test-case once the above feature is added.
+# Change assertion statements below inorder to keep the TCs
+
+    # - name: Negative Test assign non-existing interface tags
+    #   arista.cvp.cv_tag_v3:
+    #     tags: "{{ASSIGN_DELETE_NON_EXISTING_TAGS}}"
+    #     mode: assign
+    #     auto_create: false
+    #   register: ASSIGN_NON_EXISTING
+    #   ignore_errors: yes
+
+    # - name: Check assign non-existing interface tags
+    #   assert:
+    #     that:
+    #       - ASSIGN_NON_EXISTING.changed == false
+    #       - ASSIGN_NON_EXISTING.failed == true
+    #       - ASSIGN_NON_EXISTING.success == false
+    #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_list == []
+    #       - ASSIGN_NON_EXISTING.tags_manager.tags_manager_count == 0
+
+    # - name: Negative Test delete non-existing interface tags
+    #   arista.cvp.cv_tag_v3:
+    #     tags: "{{ASSIGN_DELETE_NON_EXISTING_TAGS}}"
+    #     mode: delete
+    #   register: NON_EXISTING_TAGS_DELETE
+    #   ignore_errors: yes
+
+    # - name: Check non-existing delete interface tags
+    #   assert:
+    #     that:
+    #       - NON_EXISTING_TAGS_DELETE.changed == false
+    #       - NON_EXISTING_TAGS_DELETE.failed == true
+    #       - NON_EXISTING_TAGS_DELETE.success == false
+    #       - NON_EXISTING_TAGS_DELETE.tags_manager.tags_manager_list == []
+    #       - NON_EXISTING_TAGS_DELETE.tags_manager.tags_manager_count == 0

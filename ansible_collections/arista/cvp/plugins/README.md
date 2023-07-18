@@ -4,7 +4,7 @@
 
 ## List of available modules
 
-- **arista.cvp.cv_facts** - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- **arista.cvp.cv_facts** - Collect CVP facts from server like list of containers, devices, configlet , images and tasks.
 - **arista.cvp.cv_configlet**:  Manage configlet configured on CVP.
 - **arista.cvp.cv_container**:  Manage container topology and attach configlet and devices to containers.
 - **arista.cvp.cv_device**: Manage devices configured on CVP
