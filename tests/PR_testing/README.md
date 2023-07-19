@@ -11,7 +11,8 @@
     ```
 
   - ```shell
-    wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh```
+    wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh
+    ```
 
   - ```shell
     sh install.sh <pr-number>
