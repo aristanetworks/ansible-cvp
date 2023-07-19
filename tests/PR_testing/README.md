@@ -26,7 +26,7 @@
   export LABPASSPHRASE=`cat /home/coder/.config/code-server/config.yaml| grep "password:" | awk '{print $2}'`
   ```
 
-  > NOTE: This has to be exported everytime a new terminal session is created (including lab reboot).
+  > NOTE: This has to be exported every time a new terminal session is created (including lab reboot).
 
 ## Run Example Playbooks
 
