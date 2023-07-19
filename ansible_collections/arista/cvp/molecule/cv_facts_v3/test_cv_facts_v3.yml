@@ -9,6 +9,9 @@
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: leaf3
         parentContainerName: "Leafs"
+    CVP_DEVICES_MOVE_DEVICE_BACK:
+      - fqdn: leaf3
+        parentContainerName: "pod2"
     IMAGE_NAME: "EOS-4.25.4M.swi"
     TASK_STATUS: "Pending"
     CONFIGLET_NAME: "configlet1"
@@ -245,6 +248,18 @@
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
         state: absent
+
+    - name: Cancel Pending Tasks
+      arista.cvp.cv_task_v3:
+        tasks: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}"
+        state: cancelled
+
+    # Running move_device to empty the container
+    - name: Run Move Device to empty the container
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_MOVE_DEVICE_BACK}}'
+        state: present
+      register: MOVE_DEVICE_RESULT
 
     - name: Remove Container
       arista.cvp.cv_container_v3:
