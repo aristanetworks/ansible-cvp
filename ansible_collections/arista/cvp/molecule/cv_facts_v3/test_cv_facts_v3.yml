@@ -8,16 +8,16 @@
       configlet1: 'alias a{{ 999 | random }} show lldp'
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: leaf3
-        parentContainerName: "Leafs"
+        parentContainerName: "Test_Leafs"
     CVP_DEVICES_MOVE_DEVICE_BACK:
       - fqdn: leaf3
-        parentContainerName: "pod2"
+        parentContainerName: "Leaf"
     IMAGE_NAME: "EOS-4.25.4M.swi"
     TASK_STATUS: "Pending"
     CONFIGLET_NAME: "configlet1"
     DEVICE_NAME: "spine1"
     CONTAINER:
-      Leafs:
+      Test_Leafs:
         parentContainerName: Tenant
   tasks:
     # push configlet to be used in verifying configlet facts
@@ -92,13 +92,13 @@
       arista.cvp.cv_facts_v3:
         facts:
           - containers
-        regexp_filter: "Leafs"
+        regexp_filter: "Test_Leafs"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for containers
       assert:
         that:
-          - CV_FACTS_V3_RESULT.data.cvp_containers.Leafs is defined
+          - CV_FACTS_V3_RESULT.data.cvp_containers.Test_Leafs is defined
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
 
