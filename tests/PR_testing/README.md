@@ -5,10 +5,20 @@
 - Deploy an [ATD](http://testdrive.arista.com) instance with `Datacenter` topology and `ceos` image
 - Wait for your topology to deploy and drop into `Programmability IDE`
 - On the terminal, run the install script to setup the environment for testing:
-  - `cd persist`
-  - `wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh`
-  - `sh install.sh <pr-number>`
+
+  - ```shell
+    cd persist
+    ```
+
+  - ```shell
+    wget https://raw.githubusercontent.com/aristanetworks/ansible-cvp/devel/tests/PR_testing/install.sh```
+
+  - ```shell
+    sh install.sh <pr-number>
+    ```
+
   - This script would place the ansible-cvp PR code base under `persist/arista-ansible` and example playbooks under `persist/PR_testing/examples`
+
 - Export the ATD lab password using:
 
   ```shell
