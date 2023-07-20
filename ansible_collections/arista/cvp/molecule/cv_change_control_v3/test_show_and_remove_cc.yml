@@ -95,7 +95,6 @@
       arista.cvp.cv_change_control_v3:
         state: remove
         change_id: [ "{{ cv_change_control_test.data.id }}" ]
-      ignore_errors: yes
       register: cv_remove_change_control
 
     - name: Check remove change control
