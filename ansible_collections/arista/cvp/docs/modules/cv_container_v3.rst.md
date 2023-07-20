@@ -12,16 +12,14 @@ Module added in version 3.0.0
 
 CloudVision Portal Configlet configuration requires a dictionary of
 containers with their parent, to create and delete containers on CVP
-side. Module also supports to configure configlets at container level.
-Returns number of created and/or deleted containers
-
-The module doesn't merge the existing container structure with the one
-specified in your playbook's topology; instead, it will try to remove
-unspecified containers from CVP. Existing containers are removed under
-two circumstances:
-
--   The container has no confliglets attached to it.
--   Strict apply_mode is set (see below).
+side The Module also supports assigning configlets at the container
+level Returns number of created and/or deleted containers With the
+argument <span class="title-ref">apply_mode</span> set to <span
+class="title-ref">loose</span> the module will only add new containers
+When <span class="title-ref">apply_mode</span> is set to <span
+class="title-ref">strict</span> the module will try to remove
+unspecified containers from CloudVision. This will fail if the container
+has configlets attached to it or devices are placed in the container.
 
 ## Module-specific Options
 
@@ -90,11 +88,10 @@ The following options may be specified for this module:
                 parentContainerName: Fabric
                 configlets:
                     - container_configlet
-                imageBundle: EOS-4.25.4M
       tasks:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:
-            topology: "{{ containers }}"
+            topology: "{{containers}}"
 
     # task in strict mode
     - name: Create container topology on CVP
@@ -113,12 +110,12 @@ The following options may be specified for this module:
       tasks:
         - name: 'running cv_container'
           arista.cvp.cv_container_v3:
-            topology: "{{ containers }}"
+            topology: "{{containers}}"
             apply_mode: strict
 
 ### Author
 
--   Ansible Arista Team (@aristanetworks)
+- Ansible Arista Team (@aristanetworks)
 
 ### Full Schema
 

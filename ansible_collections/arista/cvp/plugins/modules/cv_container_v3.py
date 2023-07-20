@@ -34,9 +34,12 @@ author: Ansible Arista Team (@aristanetworks)
 short_description: Manage Provisioning topology.
 description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
-    to create and delete containers on CVP side.
-  - Module also supports to configure configlets at container level.
+    to create and delete containers on CVP side
+  - The Module also supports assigning configlets at the container level
   - Returns number of created and/or deleted containers
+  - With the argument `apply_mode` set to `loose` the module will only add new containers
+  - When `apply_mode` is set to `strict` the module will try to remove unspecified containers from CloudVision.
+    This will fail if the container has configlets attached to it or devices are placed in the container.
 options:
   topology:
     description: YAML dictionary to describe intended containers
@@ -74,7 +77,7 @@ EXAMPLES = r'''
   tasks:
     - name: 'running cv_container'
       arista.cvp.cv_container_v3:
-        topology: "{{CVP_CONTAINERS}}"
+        topology: "{{containers}}"
 
 # task in strict mode
 - name: Create container topology on CVP
@@ -93,7 +96,7 @@ EXAMPLES = r'''
   tasks:
     - name: 'running cv_container'
       arista.cvp.cv_container_v3:
-        topology: "{{CVP_CONTAINERS}}"
+        topology: "{{containers}}"
         apply_mode: strict
 '''
 
