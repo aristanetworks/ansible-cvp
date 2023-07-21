@@ -1,3 +1,0 @@
----
-- name: Run cv_task_v3
-  import_playbook: test_cv_task_v3.yml
