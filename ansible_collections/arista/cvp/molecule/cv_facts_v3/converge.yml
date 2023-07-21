@@ -1,0 +1,3 @@
+---
+- name: Test cv_facts_v3 module
+  import_playbook: test_cv_facts_v3.yml
