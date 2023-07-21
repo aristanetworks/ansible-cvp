@@ -56,11 +56,11 @@ The following options may be specified for this module:
 
     ---
     - name: Execute all tasks registered in cvp_configlets variable
-      arista.cvp.cv_task:
+      arista.cvp.cv_task_v3:
         tasks: "{{ cvp_configlets.taskIds }}"
 
     - name: Cancel a list of pending tasks
-      arista.cvp.cv_task:
+      arista.cvp.cv_task_v3:
         tasks: ['666', '667']
         state: cancelled
 
