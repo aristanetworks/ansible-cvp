@@ -17,9 +17,9 @@
 
     CVP_DEVICES_MOVE_ORIGINAL_LOCATION:
       - fqdn: leaf1
-        parentContainerName: "Leafs"
+        parentContainerName: "Leaf"
       - fqdn: leaf2
-        parentContainerName: "Leafs"
+        parentContainerName: "Leaf"
 
     containers:
       Temp_Leafs:
