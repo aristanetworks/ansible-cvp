@@ -6,7 +6,7 @@
   vars:
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: leaf1
-        parentContainerName: "Spine"
+        parentContainerName: "Leaf"
 
     CVP_DEVICES_PARENT_CONTAINER_NONE:
       - fqdn: leaf1
@@ -14,7 +14,7 @@
 
     CVP_DEVICES_PARENT_CONTAINER_SAME:
       - fqdn: leaf1
-        parentContainerName: "Spine"
+        parentContainerName: "Leaf"
     CVP_DEVICES_STATE_ABSENT:
       - fqdn: leaf2
         parentContainerName: ""
