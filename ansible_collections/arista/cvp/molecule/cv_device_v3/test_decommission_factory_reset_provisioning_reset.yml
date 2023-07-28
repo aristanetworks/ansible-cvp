@@ -1,0 +1,89 @@
+---
+- name: Test cv_device_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_DEVICES_STATE_ABSENT:
+      - fqdn: leaf1
+        parentContainerName: ""
+    CVP_DEVICES_FACT0RY_RESET:
+      - fqdn: leaf1
+        parentContainerName: ""
+    CVP_DEVICES_PROVISIONING_RESET:
+      - fqdn: leaf2
+        parentContainerName: ""
+  tasks:
+    ######################################
+    ##  STATE ABSENT (DECOMMISSION)     ##
+    ######################################
+    - name: Run CV_DEVICE_V3 With State Absent
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_STATE_ABSENT}}'
+        state: absent
+      register: DECOMMISSION_DEVICE
+    - assert:
+        that:
+          - DECOMMISSION_DEVICE.devices_decommissioned.changed == true
+          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 0
+          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['leaf2_delete']
+          - DECOMMISSION_DEVICE.devices_decommissioned.success == true
+          - DECOMMISSION_DEVICE.devices_decommissioned.taskIds == []
+          - DECOMMISSION_DEVICE.failed == false
+
+    - name: Run CV_DEVICE_V3 With State Absent  # when device does not exist in CVP
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_STATE_ABSENT}}'
+        state: absent
+      ignore_errors: yes
+      register: DECOMMISSION_DEVICE_ABSENT
+    - assert:
+        that:
+          - DECOMMISSION_DEVICE_ABSENT.changed == false
+          - DECOMMISSION_DEVICE_ABSENT.failed == true
+          - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['leaf2'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."
+
+    ######################################
+    ##        STATE FACTORY RESET       ##
+    ######################################
+    - name: Run CV_DEVICE_V3 With State Factory reset
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_FACT0RY_RESET}}'
+        state: factory_reset
+      register: FACTORY_RESET_RESULT
+
+    # it does not move device to undefined container, just creates a task on CVP
+
+    - name: Check State Factory reset
+      assert:
+        that:
+          - FACTORY_RESET_RESULT.devices_reset.changed == true
+          - FACTORY_RESET_RESULT.devices_reset.devices_reset_count == 1
+          - FACTORY_RESET_RESULT.devices_reset.devices_reset_list == ['leaf2_reset']
+          - FACTORY_RESET_RESULT.devices_reset.success == true
+          - FACTORY_RESET_RESULT.devices_reset.taskIds is defined
+          - FACTORY_RESET_RESULT.failed == false
+          - FACTORY_RESET_RESULT.success == true
+
+    ######################################
+    ##     STATE PROVISIONING RESET     ##
+    ######################################
+
+    - name: Run CV_DEVICE_V3 With State Provisioning Reset
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_PROVISIONING_RESET}}'
+        state: provisioning_reset
+      register: PROVISIONING_RESET_RESULT
+
+    # if we try to delete the same device again(already in undefined container), it does not raise any error and gives the same result
+
+    - name: check provisioning reset
+      assert:
+        that:
+          - PROVISIONING_RESET_RESULT.devices_removed.changed == true
+          - PROVISIONING_RESET_RESULT.devices_removed.devices_removed_count == 1
+          - PROVISIONING_RESET_RESULT.devices_removed. devices_removed_list == ['leaf3_delete']
+          - PROVISIONING_RESET_RESULT.devices_removed.success == true
+          - PROVISIONING_RESET_RESULT.devices_removed.taskIds is defined
+          - PROVISIONING_RESET_RESULT.failed == false
+          - PROVISIONING_RESET_RESULT.success == true

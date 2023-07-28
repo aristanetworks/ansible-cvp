@@ -1,0 +1,83 @@
+---
+- name: Test cv_device_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_CONFIGLETS:
+      configlet1: '! This is first configlet'
+      configlet2: '! This is second configlet'
+
+    CVP_DEVICES_APPLY_CONFIGLET:
+      - fqdn: leaf1.atd.lab
+        parentContainerName: "pod1"
+        configlets:
+          - 'configlet1'
+          - 'configlet2'
+
+    CVP_DEVICES_DETACH_CONFIGLET:
+      - fqdn: leaf1.atd.lab
+        parentContainerName: "pod1"
+
+  tasks:
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: present
+      register: CV_CONFIGLET
+
+    - name: "Apply configlet on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_APPLY_CONFIGLET}}'
+        state: present
+        search_key: fqdn
+      register: CV_DEVICE_V3_RESULT
+
+    - name: "Check apply_configlet with apply_mode loose"
+      assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_count == 2
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == ["leaf1_configlet_attached"]
+          - CV_DEVICE_V3_RESULT.configlets_attached.success == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.taskIds != []
+
+    - name: "Apply same configlet again on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_APPLY_CONFIGLET}}'
+        state: present
+      register: CV_DEVICE_V3_RESULT
+
+    - name: "Check apply_configlet with same configlets"
+      assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == false
+          - CV_DEVICE_V3_RESULT.configlets_attached.changed == false
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_count == 0
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == []
+          - CV_DEVICE_V3_RESULT.configlets_attached.success == false
+          - CV_DEVICE_V3_RESULT.configlets_attached.taskIds == []
+
+    - name: "Detach configlet from {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_DETACH_CONFIGLET}}'
+        state: present
+        apply_mode: strict
+      register: CV_DEVICE_V3_RESULT
+
+    - name: "Check detach_configlet with apply_mode strict"
+      assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_detached.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_detached.configlets_detached_count == 2
+          - CV_DEVICE_V3_RESULT.configlets_detached.configlets_detached_list == ["leaf1_configlet_removed - configlet1 - configlet2"]
+          - CV_DEVICE_V3_RESULT.configlets_detached.success == true
+          - CV_DEVICE_V3_RESULT.configlets_detached.taskIds != []
+
+    - name: "Delete config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
+      register: DELETE_CONFIGLET_RESULT

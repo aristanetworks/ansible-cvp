@@ -1,0 +1,59 @@
+---
+- name: Test cv_device_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    CVP_CONFIGLETS:
+      configlet1: '! This is first configlet'
+
+    CVP_DEVICES_BUNDLE_ATTACHED:
+      - serialNumber: JPE504a004ea054
+        parentContainerName: L2_Leaf
+        configlets:
+          - 'AVD_Ipmi3'
+        imageBundle: leaf_bundle
+
+    CVP_DEVICES_BUNDLE_DETACHED:
+      - serialNumber: JPE504a004ea054
+        parentContainerName: L2_Leaf
+        configlets:
+          - 'AVD_Ipmi3'
+  tasks:
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: present
+
+    - name: "Attach bundle on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_BUNDLE_ATTACHED}}'
+        state: present
+        search_key: serialNumber
+        apply_mode: strict
+      register: ATTACH_BUNDLE
+
+    - name: "Check attach bundle"
+      assert:
+        that:
+          - ATTACH_BUNDLE.bundle_attached.changed == true
+          - ATTACH_BUNDLE.bundle_attached.bundle_attached_count == 1
+          - ATTACH_BUNDLE.bundle_attached.bundle_attached_list != []
+          - ATTACH_BUNDLE.bundle_attached.success == true
+          - ATTACH_BUNDLE.bundle_attached.taskIds != []
+
+    - name: "Detach bundle on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_BUNDLE_DETACHED}}'
+        state: present
+        search_key: serialNumber
+        apply_mode: strict
+      register: DETACH_BUNDLE
+
+    - name: "Check detach bundle"
+      assert:
+        that:
+          - DETACH_BUNDLE.bundle_detached.changed == true
+          - DETACH_BUNDLE.bundle_detached.bundle_detached_count == 1
+          - DETACH_BUNDLE.bundle_detached.bundle_detached_list != []
+          - DETACH_BUNDLE.bundle_detached.success == true
