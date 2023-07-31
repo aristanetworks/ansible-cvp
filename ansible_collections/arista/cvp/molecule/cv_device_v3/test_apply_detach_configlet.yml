@@ -9,14 +9,14 @@
       configlet2: '! This is second configlet'
 
     CVP_DEVICES_APPLY_CONFIGLET:
-      - fqdn: leaf1.atd.lab
+      - fqdn: leaf1
         parentContainerName: "pod1"
         configlets:
           - 'configlet1'
           - 'configlet2'
 
     CVP_DEVICES_DETACH_CONFIGLET:
-      - fqdn: leaf1.atd.lab
+      - fqdn: leaf1
         parentContainerName: "pod1"
 
   tasks:
@@ -24,13 +24,11 @@
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
         state: present
-      register: CV_CONFIGLET
 
     - name: "Apply configlet on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_APPLY_CONFIGLET}}'
         state: present
-        search_key: fqdn
       register: CV_DEVICE_V3_RESULT
 
     - name: "Check apply_configlet with apply_mode loose"
@@ -80,4 +78,3 @@
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
         state: absent
-      register: DELETE_CONFIGLET_RESULT

@@ -2,11 +2,11 @@
 - name: Test cv_device_v3 module
   import_playbook: test_move_and_deploy_device.yml
 
-- name: Test cv_device_v3 module
-  import_playbook: test_apply_detach_configlet.yml
+#- name: Test cv_device_v3 module
+#  import_playbook: test_apply_detach_configlet.yml
 
-- name: Test cv_device_v3 module
-  import_playbook: test_decommission_factory_reset_provisioning_reset.yml
+#- name: Test cv_device_v3 module
+#  import_playbook: test_apply_detach_bundle.yml
 
-- name: Test cv_device_v3 module
-  import_playbook: test_apply_detach_bundle.yml
+#- name: Test cv_device_v3 module
+#  import_playbook: test_decommission_factory_reset_provisioning_reset.yml

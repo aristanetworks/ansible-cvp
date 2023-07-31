@@ -4,32 +4,59 @@
   connection: local
   gather_facts: no
   vars:
+    ansible_command_timeout: 1200
+    ansible_connect_timeout: 600
+
+    DEVICE_NAME: leaf3
+
     CVP_CONFIGLETS:
       configlet1: '! This is first configlet'
 
+    IMAGE_NAME: "vEOS-lab.swi"
+
+    BUNDLE_NAME: "Test_bundle"
+
     CVP_DEVICES_BUNDLE_ATTACHED:
-      - serialNumber: JPE504a004ea054
-        parentContainerName: L2_Leaf
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "pod2"
         configlets:
-          - 'AVD_Ipmi3'
-        imageBundle: leaf_bundle
+          - 'configlet1'
+        imageBundle: Test_bundle
 
     CVP_DEVICES_BUNDLE_DETACHED:
-      - serialNumber: JPE504a004ea054
-        parentContainerName: L2_Leaf
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "pod2"
         configlets:
-          - 'AVD_Ipmi3'
+          - 'configlet1'
+
+    CVP_DEVICES_DETACH_CONFIGLET:
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "pod2"
+
   tasks:
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
         state: present
 
+    - name: "Upload EOS image to {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{IMAGE_NAME}}"
+
+    - name: "Create bundle {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: add
+        bundle_name: "{{BUNDLE_NAME}}"
+        image_list:
+          - "{{IMAGE_NAME}}"
+
     - name: "Attach bundle on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_BUNDLE_ATTACHED}}'
         state: present
-        search_key: serialNumber
         apply_mode: strict
       register: ATTACH_BUNDLE
 
@@ -42,11 +69,16 @@
           - ATTACH_BUNDLE.bundle_attached.success == true
           - ATTACH_BUNDLE.bundle_attached.taskIds != []
 
+    - name: Execute Task for attach_bundle
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{item}}"
+      loop: "{{ATTACH_BUNDLE.taskIds}}"
+
     - name: "Detach bundle on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_BUNDLE_DETACHED}}'
         state: present
-        search_key: serialNumber
         apply_mode: strict
       register: DETACH_BUNDLE
 
@@ -57,3 +89,28 @@
           - DETACH_BUNDLE.bundle_detached.bundle_detached_count == 1
           - DETACH_BUNDLE.bundle_detached.bundle_detached_list != []
           - DETACH_BUNDLE.bundle_detached.success == true
+
+    - name: "Delete bundle {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: remove
+        bundle_name: "{{BUNDLE_NAME}}"
+        image_list:
+          - "{{IMAGE_NAME}}"
+
+    - name: "Detach configlet from {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_DETACH_CONFIGLET}}'
+        state: present
+        apply_mode: strict
+      register: DETACH_CONFIGLET
+
+    - name: Execute Task for attach_bundle
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{DETACH_CONFIGLET.taskIds[0]}}"
+
+    - name: "Delete configlet"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{CVP_CONFIGLETS}}"
+        state: absent
