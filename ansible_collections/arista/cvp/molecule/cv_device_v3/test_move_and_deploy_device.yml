@@ -25,19 +25,24 @@
       - fqdn: "{{DEVICE_NAME}}"
         parentContainerName: "Test_Leaf"
 
+    CVP_DEVICES_APPLY_CONFIGLET:
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "Undefined"
+        configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
+
     CVP_DEVICES_VALIDATE_CONFIG:
       - device_name: "{{DEVICE_NAME}}"
         search_type: serialNumber
-        cvp_configlets: ['ATD-INFRA', 'BaseIPv4_Leaf4'] #"{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
+        cvp_configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
     CVP_DEVICES_DEPLOY:
       - fqdn: "{{DEVICE_NAME}}"    # device must be in undefined container
-        parentContainerName: "pod1" #"{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
     CVP_DEVICES_DETACH_CONFIGLET:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "pod1"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
 
   tasks:
     # Creating a container
@@ -57,6 +62,14 @@
         devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
         state: present
       register: MOVE_DEVICE_RUN
+
+    - name: Pause for 10 seconds to Execute Task
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Execute Task for deploy_Device
+      arista.cvp.cv_task_v3:
+        tasks: "{{MOVE_DEVICE_RUN.taskIds}}"
 
     - name: Check Move Device
       assert:
@@ -108,6 +121,10 @@
         devices: '{{CVP_DEVICES_PROVISIONING_RESET}}'
         state: provisioning_reset
       register: PROVISIONING_RESET_RESULT
+
+    - name: Pause for 10 seconds to Execute Task
+      ansible.builtin.pause:
+        seconds: 10
 
     - name: Validate configurations
       arista.cvp.cv_validate_v3:

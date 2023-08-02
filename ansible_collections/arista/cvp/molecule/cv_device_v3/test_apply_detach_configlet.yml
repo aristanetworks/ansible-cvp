@@ -4,22 +4,32 @@
   connection: local
   gather_facts: no
   vars:
+    DEVICE_NAME: leaf1
+
     CVP_CONFIGLETS:
       configlet1: '! This is first configlet'
       configlet2: '! This is second configlet'
 
     CVP_DEVICES_APPLY_CONFIGLET:
-      - fqdn: leaf1
-        parentContainerName: "pod1"
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets:
           - 'configlet1'
           - 'configlet2'
 
     CVP_DEVICES_DETACH_CONFIGLET:
-      - fqdn: leaf1
-        parentContainerName: "pod1"
+      - fqdn: "{{DEVICE_NAME}}"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+        configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
   tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{DEVICE_NAME}}"
+      register: CV_FACTS_V3_RESULT
+
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
@@ -63,6 +73,11 @@
         state: present
         apply_mode: strict
       register: CV_DEVICE_V3_RESULT
+
+    - name: Execute Task for detach configlet
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{CV_DEVICE_V3_RESULT.taskIds[0]}}"
 
     - name: "Check detach_configlet with apply_mode strict"
       assert:

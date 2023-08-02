@@ -7,7 +7,7 @@
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
-    DEVICE_NAME: leaf3
+    DEVICE_NAME: leaf1
 
     CVP_CONFIGLETS:
       configlet1: '! This is first configlet'
@@ -18,22 +18,30 @@
 
     CVP_DEVICES_BUNDLE_ATTACHED:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "pod2"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets:
           - 'configlet1'
         imageBundle: Test_bundle
 
     CVP_DEVICES_BUNDLE_DETACHED:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "pod2"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets:
           - 'configlet1'
 
     CVP_DEVICES_DETACH_CONFIGLET:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "pod2"
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+        configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
   tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{DEVICE_NAME}}"
+      register: CV_FACTS_V3_RESULT
+
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
         configlets: "{{CVP_CONFIGLETS}}"
@@ -105,7 +113,7 @@
         apply_mode: strict
       register: DETACH_CONFIGLET
 
-    - name: Execute Task for attach_bundle
+    - name: Execute Task for detach configlet
       arista.cvp.cv_task_v3:
         tasks:
           - "{{DETACH_CONFIGLET.taskIds[0]}}"
