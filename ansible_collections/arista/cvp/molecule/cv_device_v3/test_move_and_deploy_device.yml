@@ -115,7 +115,7 @@
     #        DEPLOY DEVICE        ##
     ################################
 
-     # moving device to undefined container
+    # moving device to undefined container
     - name: Run CV_DEVICE_V3 With State Provisioning Reset
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_PROVISIONING_RESET}}'
