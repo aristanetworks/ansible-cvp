@@ -7,7 +7,7 @@
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
-    DEVICE_NAME: leaf1
+    DEVICE_NAME: s1-leaf1
 
     CVP_CONFIGLETS:
       configlet1: '! This is first configlet'

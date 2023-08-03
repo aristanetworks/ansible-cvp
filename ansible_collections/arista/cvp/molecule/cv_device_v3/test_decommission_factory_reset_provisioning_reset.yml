@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   vars:
-    DEVICE_NAME: leaf1
+    DEVICE_NAME: s1-leaf1
 
     CVP_DEVICES_STATE_ABSENT:
       - fqdn: "{{DEVICE_NAME}}"
@@ -52,7 +52,7 @@
         that:
           - PROVISIONING_RESET_RESULT.devices_removed.changed == true
           - PROVISIONING_RESET_RESULT.devices_removed.devices_removed_count == 1
-          - PROVISIONING_RESET_RESULT.devices_removed. devices_removed_list == ['leaf1_delete']
+          - PROVISIONING_RESET_RESULT.devices_removed. devices_removed_list == ['s1-leaf1_delete']
           - PROVISIONING_RESET_RESULT.devices_removed.success == true
           - PROVISIONING_RESET_RESULT.devices_removed.taskIds is defined
           - PROVISIONING_RESET_RESULT.failed == false
@@ -92,11 +92,17 @@
         that:
           - FACTORY_RESET_RESULT.devices_reset.changed == true
           - FACTORY_RESET_RESULT.devices_reset.devices_reset_count == 1
-          - FACTORY_RESET_RESULT.devices_reset.devices_reset_list == ['leaf1_reset']
+          - FACTORY_RESET_RESULT.devices_reset.devices_reset_list == ['s1-leaf1_reset']
           - FACTORY_RESET_RESULT.devices_reset.success == true
           - FACTORY_RESET_RESULT.devices_reset.taskIds is defined
           - FACTORY_RESET_RESULT.failed == false
           - FACTORY_RESET_RESULT.success == true
+
+    - name: Execute Task for deploy_Device
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{FACTORY_RESET_RESULT.taskIds[0]}}"
+        state: cancelled
 
     ######################################
     ##  STATE ABSENT (DECOMMISSION)     ##
@@ -110,7 +116,7 @@
         that:
           - DECOMMISSION_DEVICE.devices_decommissioned.changed == true
           - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 0
-          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['leaf1_delete']
+          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['s1-leaf1_delete']
           - DECOMMISSION_DEVICE.devices_decommissioned.success == true
           - DECOMMISSION_DEVICE.devices_decommissioned.taskIds == []
           - DECOMMISSION_DEVICE.failed == false
@@ -125,4 +131,4 @@
         that:
           - DECOMMISSION_DEVICE_ABSENT.changed == false
           - DECOMMISSION_DEVICE_ABSENT.failed == true
-          - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['leaf1'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."
+          - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['s1-leaf1'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."

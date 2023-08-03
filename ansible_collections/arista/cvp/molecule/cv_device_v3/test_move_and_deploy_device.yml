@@ -7,7 +7,7 @@
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
-    DEVICE_NAME: leaf1
+    DEVICE_NAME: s1-leaf1
 
     CONTAINER:
       Test_Leaf:
@@ -76,7 +76,7 @@
         that:
           - "MOVE_DEVICE_RUN.devices_moved.changed == true"
           - "MOVE_DEVICE_RUN.devices_moved.devices_moved_count == 1"
-          - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['leaf1_to_Test_Leaf']"
+          - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['s1-leaf1_to_Test_Leaf']"
           - "MOVE_DEVICE_RUN.devices_moved.success == true"
           - "MOVE_DEVICE_RUN.failed == false"
 
@@ -90,7 +90,7 @@
     - name: Negative Test Check Move Device With Parent Container None
       assert:
         that:
-          - MOVE_DEVICE_NONE.msg == "The target container 'None' for the device 'leaf1' does not exist on CVP."
+          - MOVE_DEVICE_NONE.msg == "The target container 'None' for the device 's1-leaf1' does not exist on CVP."
           - MOVE_DEVICE_NONE.changed == false
           - MOVE_DEVICE_NONE.failed == true
 
@@ -144,7 +144,7 @@
           - CV_DEVICE_V3_RESULT.changed == true
           - CV_DEVICE_V3_RESULT.devices_deployed.changed == true
           - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_count == 1
-          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_list == ["leaf1_deployed"]
+          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_list == ["s1-leaf1_deployed"]
           - CV_DEVICE_V3_RESULT.devices_deployed.success == true
           - CV_DEVICE_V3_RESULT.devices_deployed.taskIds != []
 

@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   vars:
-    DEVICE_NAME: leaf1
+    DEVICE_NAME: s1-leaf1
 
     CVP_CONFIGLETS:
       configlet1: '! This is first configlet'
@@ -47,7 +47,7 @@
           - CV_DEVICE_V3_RESULT.changed == true
           - CV_DEVICE_V3_RESULT.configlets_attached.changed == true
           - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_count == 2
-          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == ["leaf1_configlet_attached"]
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == ["s1-leaf1_configlet_attached"]
           - CV_DEVICE_V3_RESULT.configlets_attached.success == true
           - CV_DEVICE_V3_RESULT.configlets_attached.taskIds != []
 
@@ -85,7 +85,7 @@
           - CV_DEVICE_V3_RESULT.changed == true
           - CV_DEVICE_V3_RESULT.configlets_detached.changed == true
           - CV_DEVICE_V3_RESULT.configlets_detached.configlets_detached_count == 2
-          - CV_DEVICE_V3_RESULT.configlets_detached.configlets_detached_list == ["leaf1_configlet_removed - configlet1 - configlet2"]
+          - CV_DEVICE_V3_RESULT.configlets_detached.configlets_detached_list == ["s1-leaf1_configlet_removed - configlet1 - configlet2"]
           - CV_DEVICE_V3_RESULT.configlets_detached.success == true
           - CV_DEVICE_V3_RESULT.configlets_detached.taskIds != []
 
