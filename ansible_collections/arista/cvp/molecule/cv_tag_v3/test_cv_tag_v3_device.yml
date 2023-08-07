@@ -4,38 +4,42 @@
   connection: local
   gather_facts: no
   vars:
+    DEVICE1: s1-leaf3
+
+    DEVICE2: s1-leaf4
+
     ASSIGN_DELETE_TAGS_AUTO_CREATE:
-      - device: leaf1.atd.lab
+      - device: "{{DEVICE1}}"
         device_tags:
-          - name: leaf1DAutoAssign
-            value: leaf1DAutoAssign
-      - device: leaf2.atd.lab
+          - name: s1-leaf3DAutoAssign
+            value: s1-leaf3DAutoAssign
+      - device: "{{DEVICE2}}"
         device_tags:
-          - name: leaf2DAutoAssign
-            value: leaf2DAutoAssign
+          - name: s1-leaf4DAutoAssign
+            value: s1-leaf4DAutoAssign
 
     CREATE_TAGS:
       - device_tags:
-          - name: leaf1DCreate_New
-            value: leaf1DCreate_New
-          - name: leaf2DCreate_New
-            value: leaf2DCreate_New
+          - name: s1-leaf3DCreate_New
+            value: s1-leaf3DCreate_New
+          - name: s1-leaf4DCreate_New
+            value: s1-leaf4DCreate_New
 
     ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS:
-      - device: leaf1.atd.lab
+      - device: "{{DEVICE1}}"
         device_tags:
-          - name: leaf1DCreate_New
-            value: leaf1DCreate_New
-      - device: leaf2.atd.lab
+          - name: s1-leaf3DCreate_New
+            value: s1-leaf3DCreate_New
+      - device: "{{DEVICE2}}"
         device_tags:
-          - name: leaf2DCreate_New
-            value: leaf2DCreate_New
+          - name: s1-leaf4DCreate_New
+            value: s1-leaf4DCreate_New
 
     ASSIGN_DELETE_NON_EXISTING_TAGS:
-      - device: leaf1.atd.lab
+      - device: "{{DEVICE1}}"
         device_tags:
-          - name: leaf1DNonExistingTag
-            value: leaf1DNonExistingTag
+          - name: s1-leaf3DNonExistingTag
+            value: s1-leaf3DNonExistingTag
 
   tasks:
     - name: Assign non-existing device tags

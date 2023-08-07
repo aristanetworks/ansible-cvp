@@ -52,7 +52,7 @@
           - CV_CONFIGLET_V3_RESULT.success == false
           - CV_CONFIGLET_V3_RESULT.failed == false
 
-    - name: 'Collect devices facts from {{inventory_hostname}}'
+    - name: 'Collect configlets facts from {{inventory_hostname}}'
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
@@ -95,14 +95,14 @@
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == []
           - DELETE_CONFIGLET_RESULT.configlets_deleted.success == false
 
-    - name: 'Collect devices facts from {{inventory_hostname}}'
+    - name: 'Collect configlets facts from {{inventory_hostname}}'
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
         regexp_filter: "configlet[1-2]"
       register: FACTS_CONFIGLET
 
-    - name: "Check device facts"
+    - name: "Check configlets facts"
       assert:
         that:
           - FACTS_CONFIGLET.changed == false

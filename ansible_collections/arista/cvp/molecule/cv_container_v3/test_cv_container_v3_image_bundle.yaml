@@ -1,5 +1,5 @@
 ---
-- name: Test cv_container_v3 for configlet
+- name: Test cv_container_v3 for image bundle
   hosts: CloudVision
   connection: local
   gather_facts: false
@@ -19,7 +19,7 @@
         parentContainerName: TEAM01_DC
         imageBundle: EOS-4.25.4M
 
-    image_name: "EOS-4.25.4M.swi"
+    image_name: "EOS-4.25.4M.swi" # image file should be present
 
     IMAGE_CONTAINER:
       TEAM01_LEAFS:

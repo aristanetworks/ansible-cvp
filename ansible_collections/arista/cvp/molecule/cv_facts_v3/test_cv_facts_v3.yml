@@ -4,22 +4,41 @@
   connection: local
   gather_facts: no
   vars:
-    CVP_CONFIGLETS:
-      configlet1: 'alias a{{ 999 | random }} show lldp'
-    CVP_DEVICES_MOVE_DEVICE:
-      - fqdn: leaf3
-        parentContainerName: "Test_Leafs"
-    CVP_DEVICES_MOVE_DEVICE_BACK:
-      - fqdn: leaf3
-        parentContainerName: "Leaf"
-    IMAGE_NAME: "EOS-4.25.4M.swi"
-    TASK_STATUS: "Pending"
-    CONFIGLET_NAME: "configlet1"
-    DEVICE_NAME: "spine1"
+    DEVICE_NAME: "s1-leaf1"
+
     CONTAINER:
       Test_Leafs:
         parentContainerName: Tenant
+
+    CONTAINER_NAME: "Test_Leafs"
+
+    CVP_CONFIGLETS:
+      configlet1: 'alias a{{ 999 | random }} show lldp'
+
+    CVP_DEVICES_MOVE_DEVICE:
+      - fqdn: s1-leaf1
+        parentContainerName: "{{CONTAINER_NAME}}"
+
+    CVP_DEVICES_MOVE_DEVICE_BACK:
+      - fqdn: s1-leaf1
+        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+
+    IMAGE_NAME: "EOS-4.27.4M.swi"   # file should be present
+
+    EXTENSION_NAME: "TerminAttr-1.25.1-1.swix" # file should be present
+
+    TASK_STATUS: "Pending"
+
+    CONFIGLET_NAME: "configlet1"
+
   tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{DEVICE_NAME}}"
+      register: CV_FACTS_V3_RESULT
+
     # push configlet to be used in verifying configlet facts
     - name: "Push config"
       arista.cvp.cv_configlet_v3:
@@ -38,7 +57,7 @@
         state: present
       register: MOVE_DEVICE_RESULT
 
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
       register: CV_FACTS_V3_RESULT
 
@@ -92,7 +111,7 @@
       arista.cvp.cv_facts_v3:
         facts:
           - containers
-        regexp_filter: "Test_Leafs"
+        regexp_filter: "{{CONTAINER_NAME}}"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for containers
@@ -126,7 +145,7 @@
         regexp_filter: "{{DEVICE_NAME}}"
       register: CV_FACTS_V3_RESULT
 
-    - name: Check cv_facts for device spine1 with verbose short
+    - name: Check cv_facts for device with verbose short
       assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
@@ -135,7 +154,7 @@
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
           - CV_FACTS_V3_RESULT.data.cvp_images == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "s1-leaf1"
 
     - name: Collect devices facts from {{inventory_hostname}} with verbose long
       arista.cvp.cv_facts_v3:
@@ -145,7 +164,7 @@
         verbose: long
       register: CV_FACTS_V3_RESULT
 
-    - name: Check cv_facts for device spine1 with verbose long
+    - name: Check cv_facts for device with verbose long
       assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
@@ -154,7 +173,7 @@
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
           - CV_FACTS_V3_RESULT.data.cvp_images == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "spine1"
+          - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "s1-leaf1"
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].deviceStatus == "Registered" # we get this key only with verbose long
 
     - name: Collect images facts from {{inventory_hostname}}
@@ -173,6 +192,29 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_images != []
 
+    #Upload image and extension
+    - name: "Upload EOS image to {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{IMAGE_NAME}}"
+
+    - name: "Upload TerminAttr image to {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{EXTENSION_NAME}}"
+
+    #Create bundle
+    - name: "Create bundle {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: add
+        bundle_name: "{{bundle_name}}"
+        image_list:
+          - "{{IMAGE_NAME}}"
+          - "{{EXTENSION_NAME}}"
+
     - name: Collect images facts from {{inventory_hostname}} filtered by name
       arista.cvp.cv_facts_v3:
         facts:
@@ -188,7 +230,16 @@
           - CV_FACTS_V3_RESULT.data.cvp_containers == []
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_images['EOS-4.25.4M.swi'] is defined
+          - CV_FACTS_V3_RESULT.data.cvp_images['EOS-4.27.4M.swi'] is defined
+
+    - name: "Delete bundle {{inventory_hostname}}"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: remove
+        bundle_name: "{{bundle_name}}"
+        image_list:
+          - "{{IMAGE_NAME}}"
+          - "{{EXTENSION_NAME}}"
 
     - name: Collect task facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
