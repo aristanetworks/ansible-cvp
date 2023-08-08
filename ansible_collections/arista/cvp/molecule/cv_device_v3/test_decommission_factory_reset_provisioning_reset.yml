@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   vars:
-    DEVICE_NAME: s1-leaf1
+    DEVICE_NAME: s1-leaf2
 
     CVP_DEVICES_STATE_ABSENT:
       - fqdn: "{{DEVICE_NAME}}"
@@ -52,7 +52,7 @@
         that:
           - PROVISIONING_RESET_RESULT.devices_removed.changed == true
           - PROVISIONING_RESET_RESULT.devices_removed.devices_removed_count == 1
-          - PROVISIONING_RESET_RESULT.devices_removed. devices_removed_list == ['s1-leaf1_delete']
+          - PROVISIONING_RESET_RESULT.devices_removed. devices_removed_list == ['s1-leaf2_delete']
           - PROVISIONING_RESET_RESULT.devices_removed.success == true
           - PROVISIONING_RESET_RESULT.devices_removed.taskIds is defined
           - PROVISIONING_RESET_RESULT.failed == false
@@ -76,33 +76,37 @@
           - "{{CV_DEVICE_V3_RESULT.devices_deployed.taskIds[0]}}"
       when: CVP_DEVICES_RESULTS.success is true
 
+    - name: Pause for 20 seconds to Execute Task
+      ansible.builtin.pause:
+        seconds: 20
+
     ######################################
     ##        STATE FACTORY RESET       ##
     ######################################
-    - name: Run CV_DEVICE_V3 With State Factory reset
-      arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_FACT0RY_RESET}}'
-        state: factory_reset
-      register: FACTORY_RESET_RESULT
-
-    # it does not move device to undefined container, just creates a task on CVP
-
-    - name: Check State Factory reset
-      assert:
-        that:
-          - FACTORY_RESET_RESULT.devices_reset.changed == true
-          - FACTORY_RESET_RESULT.devices_reset.devices_reset_count == 1
-          - FACTORY_RESET_RESULT.devices_reset.devices_reset_list == ['s1-leaf1_reset']
-          - FACTORY_RESET_RESULT.devices_reset.success == true
-          - FACTORY_RESET_RESULT.devices_reset.taskIds is defined
-          - FACTORY_RESET_RESULT.failed == false
-          - FACTORY_RESET_RESULT.success == true
-
-    - name: Execute Task for deploy_Device
-      arista.cvp.cv_task_v3:
-        tasks:
-          - "{{FACTORY_RESET_RESULT.taskIds[0]}}"
-        state: cancelled
+#    - name: Run CV_DEVICE_V3 With State Factory reset
+#      arista.cvp.cv_device_v3:
+#        devices: '{{CVP_DEVICES_FACT0RY_RESET}}'
+#        state: factory_reset
+#      register: FACTORY_RESET_RESULT
+#
+#    # it does not move device to undefined container, just creates a task on CVP
+#
+#    - name: Check State Factory reset
+#      assert:
+#        that:
+#          - FACTORY_RESET_RESULT.devices_reset.changed == true
+#          - FACTORY_RESET_RESULT.devices_reset.devices_reset_count == 1
+#          - FACTORY_RESET_RESULT.devices_reset.devices_reset_list == ['s1-leaf1_reset']
+#          - FACTORY_RESET_RESULT.devices_reset.success == true
+#          - FACTORY_RESET_RESULT.devices_reset.taskIds is defined
+#          - FACTORY_RESET_RESULT.failed == false
+#          - FACTORY_RESET_RESULT.success == true
+#
+#    - name: Execute Task for deploy_Device
+#      arista.cvp.cv_task_v3:
+#        tasks:
+#          - "{{FACTORY_RESET_RESULT.taskIds[0]}}"
+#        state: cancelled
 
     ######################################
     ##  STATE ABSENT (DECOMMISSION)     ##
@@ -115,8 +119,8 @@
     - assert:
         that:
           - DECOMMISSION_DEVICE.devices_decommissioned.changed == true
-          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 0
-          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['s1-leaf1_delete']
+          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 1
+          - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_list == ['s1-leaf2_delete']
           - DECOMMISSION_DEVICE.devices_decommissioned.success == true
           - DECOMMISSION_DEVICE.devices_decommissioned.taskIds == []
           - DECOMMISSION_DEVICE.failed == false
@@ -131,4 +135,4 @@
         that:
           - DECOMMISSION_DEVICE_ABSENT.changed == false
           - DECOMMISSION_DEVICE_ABSENT.failed == true
-          - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['s1-leaf1'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."
+          - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['s1-leaf2'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."

@@ -92,6 +92,10 @@
           - "{{item}}"
       loop: "{{ATTACH_BUNDLE.taskIds}}"
 
+    - name: Pause for 20 seconds to Execute Task
+      ansible.builtin.pause:
+        seconds: 20
+
     - name: "Detach bundle on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_BUNDLE_DETACHED}}'
@@ -127,6 +131,10 @@
       arista.cvp.cv_task_v3:
         tasks:
           - "{{DETACH_CONFIGLET.taskIds[0]}}"
+
+    - name: Pause for 20 seconds to Execute Task
+      ansible.builtin.pause:
+        seconds: 20
 
     - name: "Delete configlet"
       arista.cvp.cv_configlet_v3:
