@@ -83,6 +83,7 @@
     ######################################
     ##        STATE FACTORY RESET       ##
     ######################################
+#   XXX: This test will fail with cEOS devices. Uncomment if running on vEOS devices
 #    - name: Run CV_DEVICE_V3 With State Factory reset
 #      arista.cvp.cv_device_v3:
 #        devices: '{{CVP_DEVICES_FACT0RY_RESET}}'
