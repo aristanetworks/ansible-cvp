@@ -9,9 +9,6 @@
 
     DEVICE_NAME: s1-leaf1
 
-    CVP_CONFIGLETS:
-      configlet1: '! This is first configlet'
-
     IMAGE_NAME: "vEOS-lab.swi"
 
     EXTENSION_NAME: "TerminAttr-1.25.1-1.swix"
@@ -21,20 +18,11 @@
     CVP_DEVICES_BUNDLE_ATTACHED:
       - fqdn: "{{DEVICE_NAME}}"
         parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
-        configlets:
-          - 'configlet1'
         imageBundle: Test_bundle
 
     CVP_DEVICES_BUNDLE_DETACHED:
       - fqdn: "{{DEVICE_NAME}}"
         parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
-        configlets:
-          - 'configlet1'
-
-    CVP_DEVICES_DETACH_CONFIGLET:
-      - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
-        configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
   tasks:
     - name: Collect devices facts from {{inventory_hostname}}
@@ -43,11 +31,6 @@
           - devices
         regexp_filter: "{{DEVICE_NAME}}"
       register: CV_FACTS_V3_RESULT
-
-    - name: "Push config"
-      arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
-        state: present
 
     - name: "Upload EOS image to {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
@@ -119,24 +102,3 @@
         image_list:
           - "{{IMAGE_NAME}}"
           - "{{EXTENSION_NAME}}"
-
-    - name: "Detach configlet from {{inventory_hostname}}"
-      arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_DETACH_CONFIGLET}}'
-        state: present
-        apply_mode: strict
-      register: DETACH_CONFIGLET
-
-    - name: Execute Task for detach configlet
-      arista.cvp.cv_task_v3:
-        tasks:
-          - "{{DETACH_CONFIGLET.taskIds[0]}}"
-
-    - name: Pause for 20 seconds to Execute Task
-      ansible.builtin.pause:
-        seconds: 20
-
-    - name: "Delete configlet"
-      arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
-        state: absent
