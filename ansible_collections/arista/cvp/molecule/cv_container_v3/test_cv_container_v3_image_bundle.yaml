@@ -10,28 +10,28 @@
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
-    TOPOLOGY_3_TIER:
+    topology_3_tier:
       TEAM01:
         parentContainerName: Tenant
       TEAM01_DC:
         parentContainerName: TEAM01
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
-        imageBundle: EOS-4.25.4M
+        imageBundle: vEOS-lab-4.30.1F
 
-    image_name: "EOS-4.25.4M.swi" # image file should be present
+    image_name: "vEOS-lab-4.30.1F.swi" # image file should be present
 
-    IMAGE_CONTAINER:
+    image_container:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
-        imageBundle: EOS-4.25.4M
+        imageBundle: vEOS-lab-4.30.1F
 
-    CHANGE_IMAGE_CONTAINER_Test_bundle:
+    change_image_container_test_bundle:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         imageBundle: Test_bundle
 
-    REMOVE_IMAGE:
+    remove_image:
       TEAM01_LEAFS:
         parentContainerName: TEAM01_DC
         imageBundle: ''
@@ -47,88 +47,101 @@
   #       5. Removal of container which contains image bundles.
   #       6. Remove entire 3 tier topology in which image bundles is attached to one of the containers
 
-    - name: Build Container Topology On {{inventory_hostname}} with image bundle
-      arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
-      register: Build_TOPO_3_TIER
-
-    - name: Testing Build Container
-      assert:
-        that:
-          - Build_TOPO_3_TIER.container_added.changed == true
-          - Build_TOPO_3_TIER.container_added.container_added_count == 3
-          - Build_TOPO_3_TIER.container_added.container_added_list == ["TEAM01", "TEAM01_DC", "TEAM01_LEAFS"]
-          - Build_TOPO_3_TIER.container_added.success == true
-          - Build_TOPO_3_TIER.bundle_attached.changed == true
-          - Build_TOPO_3_TIER.bundle_attached.bundle_attached_count == 1
-          - Build_TOPO_3_TIER.bundle_attached.bundle_attached_list == ["EOS-4.25.4M"]
-          - Build_TOPO_3_TIER.bundle_attached.success == true
-
     - name: "Create a bundle for test"
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
         bundle_name: Test_bundle
         image_list:
-          - "{{image_name}}"
-      register: CREATE_BUNDLE_DATA
+          - "{{ image_name }}"
+      register: create_bundle_data
 
     - name: "Testing create bundle"
-      assert:
+      ansible.builtin.assert:
         that:
-          - CREATE_BUNDLE_DATA.data.data == "Bundle : Test_bundle successfully created"
+          - create_bundle_data.data.data == "Bundle : Test_bundle successfully created"
+
+    - name: "Create second bundle for test"
+      arista.cvp.cv_image_v3:
+        mode: bundle
+        action: add
+        bundle_name: vEOS-lab-4.30.1F
+        image_list:
+          - "{{ image_name }}"
+      register: create_bundle_data_2
+
+    - name: "Testing create bundle"
+      ansible.builtin.assert:
+        that:
+          - create_bundle_data_2.data.data == "Bundle : vEOS-lab-4.30.1F successfully created"
+
+    - name: Build Container Topology with image bundle On {{ inventory_hostname }}
+      arista.cvp.cv_container_v3:
+        topology: "{{ topology_3_tier }}"
+      register: build_topo_3_tier
+
+    - name: Testing Build Container
+      ansible.builtin.assert:
+        that:
+          - build_topo_3_tier.container_added.changed == true
+          - build_topo_3_tier.container_added.container_added_count == 3
+          - build_topo_3_tier.container_added.container_added_list == ["TEAM01", "TEAM01_DC", "TEAM01_LEAFS"]
+          - build_topo_3_tier.container_added.success == true
+          - build_topo_3_tier.bundle_attached.changed == true
+          - build_topo_3_tier.bundle_attached.bundle_attached_count == 1
+          - build_topo_3_tier.bundle_attached.bundle_attached_list == ["vEOS-lab-4.30.1F"]
+          - build_topo_3_tier.bundle_attached.success == true
 
     - name: "Change Image"
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_IMAGE_CONTAINER_Test_bundle}}'
-      register: CHANGE_IMAGE_Test_bundle
+        topology: '{{ change_image_container_test_bundle }}'
+      register: change_image_test_bundle
 
     - name: "Testing Change Image"
-      assert:
+      ansible.builtin.assert:
         that:
-            - CHANGE_IMAGE_Test_bundle.bundle_attached.changed == true
-            - CHANGE_IMAGE_Test_bundle.bundle_attached.bundle_attached_count == 1
-            - CHANGE_IMAGE_Test_bundle.bundle_attached.bundle_attached_list == ["Test_bundle"]
-            - CHANGE_IMAGE_Test_bundle.bundle_attached.success == true
+          - change_image_test_bundle.bundle_attached.changed == true
+          - change_image_test_bundle.bundle_attached.bundle_attached_count == 1
+          - change_image_test_bundle.bundle_attached.bundle_attached_list == ["Test_bundle"]
+          - change_image_test_bundle.bundle_attached.success == true
 
     - name: "Remove Image"
       arista.cvp.cv_container_v3:
-        topology: '{{REMOVE_IMAGE}}'
+        topology: '{{ remove_image }}'
         apply_mode: strict
-      register: IMAGE_REMOVE
+      register: image_remove
 
     - name: "Testing Remove Image"
-      assert:
+      ansible.builtin.assert:
         that:
-            - IMAGE_REMOVE.bundle_detached.changed == true
-            - IMAGE_REMOVE.bundle_detached.bundle_detached_count == 1
-            - IMAGE_REMOVE.bundle_detached.bundle_detached_list == ["Test_bundle"]
-            - IMAGE_REMOVE.bundle_detached.success == true
+          - image_remove.bundle_detached.changed == true
+          - image_remove.bundle_detached.bundle_detached_count == 1
+          - image_remove.bundle_detached.bundle_detached_list == ["Test_bundle"]
+          - image_remove.bundle_detached.success == true
 
-
-    - name: "Remove Container Topology On {{inventory_hostname}} With Image"
+    - name: "Remove Container Topology With Image On {{ inventory_hostname }}"
       arista.cvp.cv_container_v3:
-        topology: '{{IMAGE_CONTAINER}}'
+        topology: '{{ image_container }}'
         state: absent
-      register: IMAGE_CONTAINER_REMOVE
+      register: image_container_remove
 
     - name: "Testing Remove Container With Image"
-      assert:
+      ansible.builtin.assert:
         that:
-          - IMAGE_CONTAINER_REMOVE.container_deleted.changed == true
-          - IMAGE_CONTAINER_REMOVE.container_deleted.container_deleted_count == 1
-          - IMAGE_CONTAINER_REMOVE.container_deleted.container_deleted_list == ["TEAM01_LEAFS"]
-          - IMAGE_CONTAINER_REMOVE.container_deleted.success == true
+          - image_container_remove.container_deleted.changed == true
+          - image_container_remove.container_deleted.container_deleted_count == 1
+          - image_container_remove.container_deleted.container_deleted_list == ["TEAM01_LEAFS"]
+          - image_container_remove.container_deleted.success == true
 
-    - name: "Add Container Topology On {{inventory_hostname}} With Image"
+    - name: "Add Container Topology With Image On {{ inventory_hostname }}"
       arista.cvp.cv_container_v3:
-        topology: '{{IMAGE_CONTAINER}}'
+        topology: '{{ image_container }}'
 
     - name: Clean-up Topology
       arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
+        topology: '{{ topology_3_tier }}'
         state: absent
-      register: DELETE_TOPOLOGY
+      register: delete_topology
 
     - name: Clean-up Bundle
       arista.cvp.cv_image_v3:
@@ -136,14 +149,14 @@
         action: remove
         bundle_name: Test_bundle
         image_list:
-          - "{{image_name}}"
-      register: DELETE_BUNDLE
+          - "{{ image_name }}"
+      register: delete_bundle
 
     - name: "Testing Clean-up"
-      assert:
+      ansible.builtin.assert:
         that:
-          - DELETE_TOPOLOGY.container_deleted.changed == true
-          - DELETE_TOPOLOGY.container_deleted.container_deleted_count == 3
-          - DELETE_TOPOLOGY.container_deleted.container_deleted_list == ["TEAM01_LEAFS", "TEAM01_DC", "TEAM01"]
-          - DELETE_TOPOLOGY.container_deleted.success == true
-          - DELETE_BUNDLE.data.data == "success"
+          - delete_topology.container_deleted.changed == true
+          - delete_topology.container_deleted.container_deleted_count == 3
+          - delete_topology.container_deleted.container_deleted_list == ["TEAM01_LEAFS", "TEAM01_DC", "TEAM01"]
+          - delete_topology.container_deleted.success == true
+          - delete_bundle.data.data == "success"
