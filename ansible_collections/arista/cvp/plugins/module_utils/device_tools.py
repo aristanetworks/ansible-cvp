@@ -619,7 +619,7 @@ class CvDeviceTools(object):
         )
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
             error_message = "Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
-                \nMake sure that the devices are provisioned and defined with the full fqdn name \
+                Make sure that the devices are provisioned and defined with the full fqdn name \
                 (including the domain name) if needed.".format(
                 str(list_non_existing_devices)
             )
@@ -1588,6 +1588,7 @@ class CvDeviceTools(object):
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
+                                result_data.add_entry(f"{device.image_bundle} apply to {device.fqdn}")
 
                 results.append(result_data)
 
@@ -1691,6 +1692,7 @@ class CvDeviceTools(object):
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
+                                result_data.add_entry(f"{device.image_bundle} detach from {device.fqdn}")
 
                 results.append(result_data)
 
@@ -1814,16 +1816,14 @@ class CvDeviceTools(object):
                             result_data.changed = True
                             result_data.success = True
                             result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                            result_data.add_entry(
-                                "{0} adds {1}".format(device.fqdn, *device.configlets)
-                            )
+                            for configlet in device.configlets:
+                                result_data.add_entry(
+                                    "{0} adds {1}".format(device.fqdn, configlet)
+                                )
                             MODULE_LOGGER.debug("CVP response is: %s", str(resp))
                             MODULE_LOGGER.info(
                                 "Reponse data is: %s", str(result_data.results)
                             )
-                    result_data.add_entry(
-                        "{0} to {1}".format(device.fqdn, *device.container)
-                    )
             else:
                 result_data.name = result_data.name + " - nothing attached"
             results.append(result_data)
@@ -1898,21 +1898,19 @@ class CvDeviceTools(object):
                                 str(catch_error),
                             )
                             self.__ansible.fail_json(
-                                msg="Error detaching configlets from device "
-                                + device.fqdn
-                                + ": "
-                                + catch_error
+                                msg=f"Error detaching configlets from device {device.fqdn}: {catch_error}"
                             )
                         else:
                             if resp["data"]["status"] == "success":
                                 result_data.changed = True
                                 result_data.success = True
                                 result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                                result_data.add_entry(
-                                    "{} removes {}".format(
-                                        device.fqdn, *device.configlets
+                                for configlet in configlets_to_remove:
+                                    result_data.add_entry(
+                                        "{0} removes {1}".format(
+                                            device.fqdn, configlet
+                                        )
                                     )
-                                )
                 else:
                     result_data.name = result_data.name + " - nothing detached"
                 results.append(result_data)
@@ -2054,13 +2052,11 @@ class CvDeviceTools(object):
                             )
                         except CvpApiError as error:
                             self.__ansible.fail_json(
-                                msg="Error to deploy device {} to container {}".format(
-                                    device.fqdn, *device.container
-                                )
+                                msg=f"Error to deploy device {device.fqdn} to container {device.container}"
                             )
                             MODULE_LOGGER.critical(
-                                "Error deploying device {} : {}".format(
-                                    device.fqdn, *error
+                                "Error deploying device {0} : {1}".format(
+                                    device.fqdn, error
                                 )
                             )
                         else:
@@ -2209,9 +2205,7 @@ class CvDeviceTools(object):
                         result_data.changed = True
                         result_data.success = True
                         result_data.taskIds = resp["data"][Api.task.TASK_IDS]
-                        result_data.add_entry(
-                            "{} resets {}".format(device.fqdn, *device.configlets)
-                        )
+                        result_data.add_entry(f"{device.fqdn} resets {device.configlets}")
             results.append(result_data)
         return results
 
