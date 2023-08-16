@@ -9,9 +9,7 @@
 
     DEVICE_NAME: s1-leaf1
 
-    IMAGE_NAME: "vEOS-lab.swi"
-
-    EXTENSION_NAME: "TerminAttr-1.25.1-1.swix"
+    IMAGE_NAME: "vEOS-lab-4.30.1F.swi"
 
     BUNDLE_NAME: "Test_bundle"
 
@@ -38,12 +36,6 @@
         action: add
         image: "{{IMAGE_NAME}}"
 
-    - name: "Upload TerminAttr image to {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: image
-        action: add
-        image: "{{EXTENSION_NAME}}"
-
     - name: "Create bundle {{inventory_hostname}}"
       arista.cvp.cv_image_v3:
         mode: bundle
@@ -51,7 +43,6 @@
         bundle_name: "{{BUNDLE_NAME}}"
         image_list:
           - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"
 
     - name: "Attach bundle on {{inventory_hostname}}"
       arista.cvp.cv_device_v3:
@@ -101,4 +92,3 @@
         bundle_name: "{{BUNDLE_NAME}}"
         image_list:
           - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"

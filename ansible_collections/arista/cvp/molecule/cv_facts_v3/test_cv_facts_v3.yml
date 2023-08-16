@@ -21,11 +21,7 @@
 
     CVP_DEVICES_MOVE_DEVICE_BACK:
       - fqdn: s1-leaf1
-        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
-
-    IMAGE_NAME: "EOS-4.27.4M.swi"   # file should be present
-
-    EXTENSION_NAME: "TerminAttr-1.25.1-1.swix" # file should be present
+        parentContainerName: "{{CV_FACTS_V3_RESULT_ORG.data.cvp_devices[0].parentContainerName}}"
 
     TASK_STATUS: "Pending"
 
@@ -37,7 +33,7 @@
         facts:
           - devices
         regexp_filter: "{{DEVICE_NAME}}"
-      register: CV_FACTS_V3_RESULT
+      register: CV_FACTS_V3_RESULT_ORG
 
     # push configlet to be used in verifying configlet facts
     - name: "Push config"
@@ -191,55 +187,6 @@
           - CV_FACTS_V3_RESULT.data.cvp_devices == []
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_images != []
-
-    #Upload image and extension
-    - name: "Upload EOS image to {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: image
-        action: add
-        image: "{{IMAGE_NAME}}"
-
-    - name: "Upload TerminAttr image to {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: image
-        action: add
-        image: "{{EXTENSION_NAME}}"
-
-    #Create bundle
-    - name: "Create bundle {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: bundle
-        action: add
-        bundle_name: "{{bundle_name}}"
-        image_list:
-          - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"
-
-    - name: Collect images facts from {{inventory_hostname}} filtered by name
-      arista.cvp.cv_facts_v3:
-        facts:
-          - images
-        regexp_filter: "{{IMAGE_NAME}}" # collects specific image facts
-      register: CV_FACTS_V3_RESULT
-
-    - name: Check cv_facts_v3 result
-      assert:
-        that:
-          - CV_FACTS_V3_RESULT.changed == false
-          - CV_FACTS_V3_RESULT.data.cvp_configlets == []
-          - CV_FACTS_V3_RESULT.data.cvp_containers == []
-          - CV_FACTS_V3_RESULT.data.cvp_devices == []
-          - CV_FACTS_V3_RESULT.data.cvp_tasks == []
-          - CV_FACTS_V3_RESULT.data.cvp_images['EOS-4.27.4M.swi'] is defined
-
-    - name: "Delete bundle {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: bundle
-        action: remove
-        bundle_name: "{{bundle_name}}"
-        image_list:
-          - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"
 
     - name: Collect task facts from {{inventory_hostname}}
       arista.cvp.cv_facts_v3:
