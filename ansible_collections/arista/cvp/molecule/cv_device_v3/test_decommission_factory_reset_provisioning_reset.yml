@@ -4,6 +4,9 @@
   connection: local
   gather_facts: no
   vars:
+    cvp_device_api: https://{{ ansible_host }}/api/resources/inventory/v1/DeviceOnboardingConfig
+    onboarding_status_api: "https://{{ ansible_host }}/api/resources/inventory/v1/DeviceOnboarding?key.requestId={{ generated_uuid }}"
+    cvp_login_api: https://{{ ansible_host }}/cvpservice/login/authenticate.do
     DEVICE_NAME: s1-leaf2
 
     CVP_DEVICES_STATE_ABSENT:
@@ -32,7 +35,7 @@
     ######################################
     ##     STATE PROVISIONING RESET     ##
     ######################################
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
@@ -48,7 +51,7 @@
     # if we try to delete the same device again(already in undefined container), it does not raise any error and gives the same result
 
     - name: check provisioning reset
-      assert:
+      ansible.builtin.assert:
         that:
           - PROVISIONING_RESET_RESULT.devices_removed.changed == true
           - PROVISIONING_RESET_RESULT.devices_removed.devices_removed_count == 1
@@ -64,7 +67,7 @@
         validate_mode: stop_on_error
       register: CVP_DEVICES_RESULTS
 
-    - name: "Deploy device on {{inventory_hostname}}"
+    - name: "Deploy device on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_DEPLOY}}'
         state: present
@@ -74,7 +77,7 @@
       arista.cvp.cv_task_v3:
         tasks:
           - "{{CV_DEVICE_V3_RESULT.devices_deployed.taskIds[0]}}"
-      when: CVP_DEVICES_RESULTS.success is true
+      when: CV_DEVICE_V3_RESULT.success is true
 
     - name: Pause for 20 seconds to Execute Task
       ansible.builtin.pause:
@@ -93,7 +96,7 @@
 #    # it does not move device to undefined container, just creates a task on CVP
 #
 #    - name: Check State Factory reset
-#      assert:
+#      ansible.builtin.assert:
 #        that:
 #          - FACTORY_RESET_RESULT.devices_reset.changed == true
 #          - FACTORY_RESET_RESULT.devices_reset.devices_reset_count == 1
@@ -117,7 +120,7 @@
         devices: '{{CVP_DEVICES_STATE_ABSENT}}'
         state: absent
       register: DECOMMISSION_DEVICE
-    - assert:
+    - ansible.builtin.assert:
         that:
           - DECOMMISSION_DEVICE.devices_decommissioned.changed == true
           - DECOMMISSION_DEVICE.devices_decommissioned.devices_decommissioned_count == 1
@@ -132,8 +135,85 @@
         state: absent
       ignore_errors: yes
       register: DECOMMISSION_DEVICE_ABSENT
-    - assert:
+    - ansible.builtin.assert:
         that:
           - DECOMMISSION_DEVICE_ABSENT.changed == false
           - DECOMMISSION_DEVICE_ABSENT.failed == true
           - DECOMMISSION_DEVICE_ABSENT.msg == "Error - the following devices do not exist in CVP ['s1-leaf2'] but are defined in the playbook.                 Make sure that the devices are provisioned and defined with the full fqdn name                 (including the domain name) if needed."
+
+    - name: get session cookie
+      ansible.builtin.uri:
+        url: "{{ cvp_login_api }}"
+        method: POST
+        headers:
+          Accept: "application/json"
+          Content-Type: "application/json"
+        validate_certs: no
+        return_content: yes
+        body_format: json
+        body:
+          userId: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+        status_code: 200
+      register: cvp_token
+      until: cvp_token.status == 200
+      retries: 10
+      delay: 2
+
+    - name: Generate UUID
+      set_fact:
+        generated_uuid: "{{ 'requestId' | to_uuid }}"
+
+    - name: "Re-onboarding decommissioned device"
+      ansible.builtin.uri:
+        url: "{{ cvp_device_api }}"
+        method: POST
+        headers:
+          Accept: "application/json"
+          Cookie: "access_token={{ cvp_token.cookies.access_token }}"
+        validate_certs: no
+        return_content: yes
+        body_format: json
+        body: '{"key":{"requestId":"{{ generated_uuid }}"},"hostnameOrIp":"{{ CV_FACTS_V3_RESULT.data.cvp_devices[0].ipAddress }}","device_type":"eos"}'
+      register: _result
+      until: _result.status == 200
+      retries: 10
+      delay: 2
+
+    - name: "Checking onboarding status"
+      ansible.builtin.uri:
+        url: "{{ onboarding_status_api }}"
+        method: GET
+        headers:
+          Accept: "application/json"
+          Cookie: "access_token={{ cvp_token.cookies.access_token }}"
+        validate_certs: no
+        return_content: yes
+        body_format: json
+        body: '{}'
+      register: onboarding_status
+      until: onboarding_status.json.value.status == "ONBOARDING_STATUS_SUCCESS"
+      retries: 10
+      delay: 2
+
+    - name: "Adding the device back to the original container"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES_DEPLOY}}'
+        state: present
+      register: CV_DEVICE_V3_RESULT
+
+    - name: Execute Add Device task
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{CV_DEVICE_V3_RESULT.devices_deployed.taskIds[0]}}"
+      when: CV_DEVICE_V3_RESULT.success is true
+
+    - name: "Checking if Add Device was successful"
+      ansible.builtin.assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == true
+          - CV_DEVICE_V3_RESULT.devices_deployed.changed == true
+          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_count == 1
+          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_list == ["s1-leaf2_deployed"]
+          - CV_DEVICE_V3_RESULT.devices_deployed.success == true
+          - CV_DEVICE_V3_RESULT.devices_deployed.taskIds != []

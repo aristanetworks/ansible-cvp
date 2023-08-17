@@ -46,20 +46,20 @@
 
   tasks:
     # Creating a container
-    - name: Build Container On {{inventory_hostname}}
+    - name: Build Container On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
         topology: '{{CONTAINER}}'
 
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
       register: CV_FACTS_V3_RESULT
 
     - name: Run CV_DEVICE_V3 To Move Device
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
+        devices: '{{ CVP_DEVICES_MOVE_DEVICE }}'
         state: present
       register: MOVE_DEVICE_RUN
 
@@ -82,7 +82,7 @@
 
     - name: Run CV_DEVICE_V3 To Move Device With Parent Container None
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_PARENT_CONTAINER_NONE}}'
+        devices: '{{ CVP_DEVICES_PARENT_CONTAINER_NONE }}'
         state: present
       ignore_errors: yes
       register: MOVE_DEVICE_NONE
@@ -96,7 +96,7 @@
 
     - name: Run CV_DEVICE_V3 To Move Device With Parent Container Same
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
+        devices: '{{ CVP_DEVICES_MOVE_DEVICE }}'
         state: present
       ignore_errors: yes
       register: MOVE_DEVICE
@@ -118,7 +118,7 @@
     # moving device to undefined container
     - name: Run CV_DEVICE_V3 With State Provisioning Reset
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_PROVISIONING_RESET}}'
+        devices: '{{ CVP_DEVICES_PROVISIONING_RESET }}'
         state: provisioning_reset
       register: PROVISIONING_RESET_RESULT
 
@@ -128,17 +128,17 @@
 
     - name: Validate configurations
       arista.cvp.cv_validate_v3:
-        devices: "{{CVP_DEVICES_VALIDATE_CONFIG}}"
+        devices: "{{ CVP_DEVICES_VALIDATE_CONFIG }}"
         validate_mode: stop_on_error
       register: CVP_DEVICES_RESULTS
 
-    - name: "Deploy device on {{inventory_hostname}}"
+    - name: "Resetting original state for device {{ DEVICE_NAME }}"
       arista.cvp.cv_device_v3:
         devices: '{{CVP_DEVICES_DEPLOY}}'
         state: present
       register: CV_DEVICE_V3_RESULT
 
-    - name: "Check deploy_device"
+    - name: "Checking if the reset was successful"
       assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == true
@@ -156,5 +156,5 @@
 
     - name: Remove Container
       arista.cvp.cv_container_v3:
-        topology: '{{CONTAINER}}'
+        topology: '{{ CONTAINER }}'
         state: absent
