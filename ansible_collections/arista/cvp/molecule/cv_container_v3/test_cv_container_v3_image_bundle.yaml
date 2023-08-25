@@ -46,6 +46,11 @@
   #       4. Change in image bundles with apply_mode: strict
   #       5. Removal of container which contains image bundles.
   #       6. Remove entire 3 tier topology in which image bundles is attached to one of the containers
+    - name: "Upload image"
+      arista.cvp.cv_image_v3:
+        mode: image
+        action: add
+        image: "{{ image_name }}"
 
     - name: "Create a bundle for test"
       arista.cvp.cv_image_v3:
