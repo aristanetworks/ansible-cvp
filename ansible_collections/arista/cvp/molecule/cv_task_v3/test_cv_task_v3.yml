@@ -7,30 +7,50 @@
     - arista.cvp
 
   vars:
+
+    DEVICE1: "s1-leaf1"
+
+    DEVICE2: "s1-leaf2"
+
     CVP_DEVICES_MOVE_DEVICE_EXECUTE:
-      - fqdn: leaf1
+      - fqdn: "{{DEVICE1}}"
         parentContainerName: "Temp_Leafs"
 
     CVP_DEVICES_MOVE_DEVICE_CANCEL:
-      - fqdn: leaf2
+      - fqdn: "{{DEVICE2}}"
         parentContainerName: "Temp_Leafs"
 
     CVP_DEVICES_MOVE_ORIGINAL_LOCATION:
-      - fqdn: leaf1
-        parentContainerName: "Leaf"
-      - fqdn: leaf2
-        parentContainerName: "Leaf"
+      - fqdn: "{{DEVICE1}}"
+        parentContainerName: "{{CV_FACTS_V3_RESULT1.data.cvp_devices[0].parentContainerName}}"
+      - fqdn: "{{DEVICE2}}"
+        parentContainerName: "{{CV_FACTS_V3_RESULT2.data.cvp_devices[0].parentContainerName}}"
 
     containers:
       Temp_Leafs:
         parentContainerName: Tenant
 
   tasks:
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{DEVICE1}}"
+      register: CV_FACTS_V3_RESULT1
+
+    - name: Collect devices facts from {{inventory_hostname}}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{DEVICE2}}"
+      register: CV_FACTS_V3_RESULT2
+
     # Create test container
     - name: Create test container
       arista.cvp.cv_container_v3:
         topology: "{{containers}}"
         state: present
+
     # Running move_device to create task list
     - name: Run CV_DEVICE_V3 To Move Device For Execute Task
       arista.cvp.cv_device_v3:
@@ -97,6 +117,7 @@
           - CANCEL_TASK_DATA.actions_manager.actions_manager_count == 1
           - CANCEL_TASK_DATA.actions_manager.success == true
           - CV_FACTS_ORDER_STATUS_CANCEL == "Cancelled"
+
     # Running move_device to create task list
     - name: move devices back to their original location
       arista.cvp.cv_device_v3:
@@ -129,6 +150,7 @@
           - EXECUTE_TASK_DATA.actions_manager.actions_manager_count == 2
           - EXECUTE_TASK_DATA.actions_manager.success == true
           - CV_FACTS_ORDER_STATUS == "Completed"
+
     # Remove test container
     - name: Delete test container
       arista.cvp.cv_container_v3:

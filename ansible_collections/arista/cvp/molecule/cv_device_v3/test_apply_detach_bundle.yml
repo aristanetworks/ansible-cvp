@@ -9,59 +9,52 @@
 
     DEVICE_NAME: s1-leaf1
 
-    IMAGE_NAME: "vEOS-lab.swi"
-
-    EXTENSION_NAME: "TerminAttr-1.25.1-1.swix"
+    IMAGE_NAME: "vEOS-lab-4.30.1F.swi"
 
     BUNDLE_NAME: "Test_bundle"
 
     CVP_DEVICES_BUNDLE_ATTACHED:
-      - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+      - fqdn: "{{DEVICE_NAME }}"
+        parentContainerName: "{{ CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName }}"
         imageBundle: Test_bundle
+        configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets }}"
 
     CVP_DEVICES_BUNDLE_DETACHED:
-      - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
+      - fqdn: "{{ DEVICE_NAME }}"
+        parentContainerName: "{{ CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName }}"
+        configlets: "{{ CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets }}"
 
   tasks:
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
       register: CV_FACTS_V3_RESULT
 
-    - name: "Upload EOS image to {{inventory_hostname}}"
+    - name: "Upload EOS image to {{ inventory_hostname }}"
       arista.cvp.cv_image_v3:
         mode: image
         action: add
         image: "{{IMAGE_NAME}}"
 
-    - name: "Upload TerminAttr image to {{inventory_hostname}}"
-      arista.cvp.cv_image_v3:
-        mode: image
-        action: add
-        image: "{{EXTENSION_NAME}}"
-
-    - name: "Create bundle {{inventory_hostname}}"
+    - name: "Create bundle {{ inventory_hostname }}"
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
         bundle_name: "{{BUNDLE_NAME}}"
         image_list:
           - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"
 
-    - name: "Attach bundle on {{inventory_hostname}}"
+    - name: "Attach bundle on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_BUNDLE_ATTACHED}}'
+        devices: '{{ CVP_DEVICES_BUNDLE_ATTACHED }}'
         state: present
         apply_mode: strict
       register: ATTACH_BUNDLE
 
     - name: "Check attach bundle"
-      assert:
+      ansible.builtin.assert:
         that:
           - ATTACH_BUNDLE.bundle_attached.changed == true
           - ATTACH_BUNDLE.bundle_attached.bundle_attached_count == 1
@@ -72,33 +65,32 @@
     - name: Execute Task for attach_bundle
       arista.cvp.cv_task_v3:
         tasks:
-          - "{{item}}"
-      loop: "{{ATTACH_BUNDLE.taskIds}}"
+          - "{{ item }}"
+      loop: "{{ ATTACH_BUNDLE.taskIds }}"
 
     - name: Pause for 20 seconds to Execute Task
       ansible.builtin.pause:
         seconds: 20
 
-    - name: "Detach bundle on {{inventory_hostname}}"
+    - name: "Detach bundle on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_BUNDLE_DETACHED}}'
+        devices: '{{ CVP_DEVICES_BUNDLE_DETACHED }}'
         state: present
         apply_mode: strict
       register: DETACH_BUNDLE
 
     - name: "Check detach bundle"
-      assert:
+      ansible.builtin.assert:
         that:
           - DETACH_BUNDLE.bundle_detached.changed == true
           - DETACH_BUNDLE.bundle_detached.bundle_detached_count == 1
           - DETACH_BUNDLE.bundle_detached.bundle_detached_list != []
           - DETACH_BUNDLE.bundle_detached.success == true
 
-    - name: "Delete bundle {{inventory_hostname}}"
+    - name: "Delete bundle {{ inventory_hostname }}"
       arista.cvp.cv_image_v3:
         mode: bundle
         action: remove
         bundle_name: "{{BUNDLE_NAME}}"
         image_list:
           - "{{IMAGE_NAME}}"
-          - "{{EXTENSION_NAME}}"

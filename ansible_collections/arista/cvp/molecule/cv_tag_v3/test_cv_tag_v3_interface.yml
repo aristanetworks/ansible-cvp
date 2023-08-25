@@ -4,50 +4,54 @@
   connection: local
   gather_facts: no
   vars:
+    DEVICE1: s1-leaf3
+
+    DEVICE2: s1-leaf4
+
     ASSIGN_DELETE_TAGS_AUTO_CREATE:
-      - device: leaf1.atd.lab
+      - device: "{{DEVICE1}}"
         interface_tags:
           - tags:
-            - name: leaf1AutoAssignEth1
-              value: leaf1AutoAssignEth1
+            - name: s1-leaf3AutoAssignEth1
+              value: s1-leaf3AutoAssignEth1
             interface: Ethernet1
           - tags:
-            - name: leaf1AutoAssignEth2
-              value: leaf1AutoAssignEth2
+            - name: s1-leaf3AutoAssignEth2
+              value: s1-leaf3AutoAssignEth2
             interface: Ethernet2
-      - device: leaf2.atd.lab
+      - device: "{{DEVICE2}}"
         interface_tags:
           - tags:
-            - name: leaf2IntfAutoAssignEth1
-              value: leaf2IntfAutoAssignEth1
+            - name: s1-leaf4IntfAutoAssignEth1
+              value: s1-leaf4IntfAutoAssignEth1
             interface: Ethernet1
 
     CREATE_TAGS:
       - interface_tags:
           - tags:
-              - name: leaf1CreateTagEth1
-                value: leaf1CreateTagEth1
-              - name: leaf1CreateTagEth2
-                value: leaf1CreateTagEth2
-              - name: leaf2CreateTagEth1
-                value: leaf2CreateTagEth1
+              - name: s1-leaf3CreateTagEth1
+                value: s1-leaf3CreateTagEth1
+              - name: s1-leaf3CreateTagEth2
+                value: s1-leaf3CreateTagEth2
+              - name: s1-leaf4CreateTagEth1
+                value: s1-leaf4CreateTagEth1
 
     ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS:
-      - device: leaf1.atd.lab
+      - device: "{{DEVICE1}}"
         interface_tags:
           - tags:
-            - name: leaf1CreateTagEth1
-              value: leaf1CreateTagEth1
+            - name: s1-leaf3CreateTagEth1
+              value: s1-leaf3CreateTagEth1
             interface: Ethernet1
           - tags:
-            - name: leaf1CreateTagEth2
-              value: leaf1CreateTagEth2
+            - name: s1-leaf3CreateTagEth2
+              value: s1-leaf3CreateTagEth2
             interface: Ethernet2
-      - device: leaf2.atd.lab
+      - device: "{{DEVICE2}}"
         interface_tags:
           - tags:
-            - name: leaf2CreateTagEth1
-              value: leaf2CreateTagEth1
+            - name: s1-leaf4CreateTagEth1
+              value: s1-leaf4CreateTagEth1
             interface: Ethernet1
 
     # ASSIGN_DELETE_NON_EXISTING_TAGS:
