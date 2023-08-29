@@ -675,7 +675,8 @@ class CvDeviceTools(object):
 
         return user_inventory
 
-    def __state_present(self, user_inventory: DeviceInventory, apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE, inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
+    def __state_present(self, user_inventory: DeviceInventory, apply_mode: str = ModuleOptionValues.APPLY_MODE_LOOSE,
+                        inventory_mode: str = ModuleOptionValues.INVENTORY_MODE_STRICT):
         """
         __state_present Execute actions when user configures state=present
 
