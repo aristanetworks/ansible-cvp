@@ -1,0 +1,10 @@
+release_summary: |
+  Release 3.8.0 - See documentation on cvp.avd.sh for details.
+
+minor_changes:
+- Feat(cv_facts_v3) Added 'images', 'tasks' options and containers 'regexp_filter' (#632)
+- Feat(cv_device_v3) Add "inventory_mode" to allow ignoring missing devices (#594)
+
+bugfixes:
+- Fix(cv_task_v3) Update cv_task_v3 module documentation (#604)
+- Fix(cv_tag_v3) Delete assigned tags (#634)
