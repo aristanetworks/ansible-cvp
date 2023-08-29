@@ -5,6 +5,27 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.8.0
+======
+
+Release Summary
+---------------
+
+Release 3.8.0 - See documentation on cvp.avd.sh for details.
+
+
+Minor Changes
+-------------
+
+- Feat(cv_device_v3) Add "inventory_mode" to allow ignoring missing devices (#594)
+- Feat(cv_facts_v3) Added 'images', 'tasks' options and containers 'regexp_filter' (#632)
+
+Bugfixes
+--------
+
+- Fix(cv_tag_v3) Delete assigned tags (#634)
+- Fix(cv_task_v3) Update cv_task_v3 module documentation (#604)
+
 v3.7.0
 ======
 
