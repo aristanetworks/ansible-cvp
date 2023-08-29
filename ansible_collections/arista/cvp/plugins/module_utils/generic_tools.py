@@ -56,6 +56,19 @@ class CvElement(object):
             return self.__cv_data['key']
 
     @property
+    def reconciled(self):
+        """
+        key Getter to expose RECONCILED field
+
+        Returns
+        -------
+        str
+            Value of the KEY field
+        """
+        if 'reconciled' in self.__cv_data:
+            return self.__cv_data['reconciled']
+
+    @property
     def data(self):
         """
         data Getter to expose structure in a dict way

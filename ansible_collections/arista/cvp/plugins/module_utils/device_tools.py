@@ -526,7 +526,7 @@ class CvDeviceTools(object):
         self, configlet_applied_to_device_list, configlet_playbook_list
     ):
         """
-        __get_reordered_configlets_list Provides mechanism to reoder the configlet lists.
+        __get_reordered_configlets_list Provides mechanism to reorder the configlet lists.
 
         Extract information from CV configlet mapper and save as a cache in instance.
 
@@ -542,6 +542,7 @@ class CvDeviceTools(object):
             List of configlet in the correct order
         """
         new_configlets_list = []
+        reconciled_configlet = None
         for configlet in configlet_playbook_list:
             new_configlet = self.__get_configlet_info(configlet_name=configlet)
             if new_configlet is None:
@@ -563,13 +564,20 @@ class CvDeviceTools(object):
                     str(configlet),
                 )
                 for x in configlet_applied_to_device_list:
+                    if x.name == configlet and x.reconciled is True:
+                        reconciled_configlet = x.data
+                        configlet_applied_to_device_list.remove(x)
+                        continue
                     if x.name == configlet:
                         configlet_applied_to_device_list.remove(x)
                         new_configlets_list.append(new_configlet)
+        if reconciled_configlet is not None:
+            new_configlets_list.append(reconciled_configlet)
         configlets_attached_get_configlet_info = [
             self.__get_configlet_info(configlet_name=x.name)
             for x in configlet_applied_to_device_list
         ]
+
         # Joining the 2 new list (configlets already present + new configlet in right order)
         return configlets_attached_get_configlet_info + new_configlets_list
 
@@ -1901,6 +1909,11 @@ class CvDeviceTools(object):
                     "[%s] - There was no changes detected in the configlets list, skipping task creation for the device.",
                     str(device.fqdn),
                 )
+                MODULE_LOGGER.info(
+                    "Final reordered configlet list for device [%s] is: %s",
+                    str(device.fqdn),
+                    str([x[Api.generic.NAME] for x in configlets_reordered_list]),
+                )
                 continue
 
             MODULE_LOGGER.info(
@@ -1920,7 +1933,7 @@ class CvDeviceTools(object):
                     result_data.success = True
                     result_data.taskIds = ["check_mode"]
                     MODULE_LOGGER.warning(
-                        "[check_mode] - Fake appcation of %d configlets to %s",
+                        "[check_mode] - Fake application of %d configlets to %s",
                         len(configlets_reordered_list),
                         device.hostname,
                     )
