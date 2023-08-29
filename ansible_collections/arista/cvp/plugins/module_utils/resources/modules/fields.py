@@ -35,7 +35,6 @@ class ModuleOptionValues():
     STATE_MODE_PRESENT: str = 'present'
     STATE_MODE_DECOMM: str = 'absent'
     STATE_MODE_REMOVE: str = 'provisioning_reset'
-    STATE_MODE_VALIDATE: str = 'validate'
 
 
 # @dataclass
