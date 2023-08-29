@@ -50,6 +50,12 @@ options:
     default: 'loose'
     choices: ['loose', 'strict']
     type: str
+  inventory_mode:
+    description: Define how missing devices are handled. "loose" will ignore missing devices. "strict" will fail on any missing device.
+    required: false
+    default: 'strict'
+    choices: ['loose', 'strict']
+    type: str
   search_key:
     description: Key name to use to look for device in CloudVision.
     required: false
@@ -59,7 +65,7 @@ options:
 '''
 
 EXAMPLES = r'''
-# task in loose mode using fqdn (default)
+# task in loose apply_mode using fqdn (default)
 - name: Device Management in CloudVision
   hosts: cv_server
   connection: local
@@ -80,7 +86,30 @@ EXAMPLES = r'''
         state: present
         search_key: fqdn
 
-# task in loose mode using serial
+# task in loose apply_mode and loose inventory_mode using fqdn (default)
+- name: Device Management in CloudVision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+  collections:
+    - arista.cvp
+  vars:
+    CVP_DEVICES:
+      - fqdn: NON-EXISTING-DEVICE
+        parentContainerName: ANSIBLE
+        configlets:
+            - 'CV-EOS-ANSIBLE01'
+        imageBundle: leaf_image_bundle
+  tasks:
+    - name: "Configure devices on {{inventory_hostname}}"
+      arista.cvp.cv_device_v3:
+        devices: '{{CVP_DEVICES}}'
+        state: present
+        search_key: fqdn
+        inventory_mode: loose
+
+
+# task in loose apply_mode using serial
 - name: Device Management in CloudVision
   hosts: cv_server
   connection: local
@@ -100,7 +129,7 @@ EXAMPLES = r'''
         state: present
         search_key: serialNumber
 
-# task in strict mode
+# task in strict apply_mode
 - name: Device Management in CloudVision
   hosts: cv_server
   connection: local
@@ -221,6 +250,10 @@ def main():
                         required=False,
                         default='loose',
                         choices=['loose', 'strict']),
+        inventory_mode=dict(type='str',
+                            required=False,
+                            default='strict',
+                            choices=['loose', 'strict']),
         search_key=dict(type='str',
                         required=False,
                         default='hostname',
@@ -259,7 +292,9 @@ def main():
         user_inventory=user_topology,
         apply_mode=ansible_module.params['apply_mode'],
         search_mode=ansible_module.params['search_key'],
-        state=ansible_module.params['state'])
+        state=ansible_module.params['state'],
+        inventory_mode=ansible_module.params['inventory_mode'],
+    )
 
     ansible_module.exit_json(**result)
 

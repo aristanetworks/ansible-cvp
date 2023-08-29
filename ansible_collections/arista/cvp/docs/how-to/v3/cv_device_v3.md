@@ -39,6 +39,9 @@ CVP_DEVICES:
 - `apply_mode`: Define how configlets configured to the devices are managed by ansible:
   - `loose` (default): Configure new configlets to device and **ignore** configlet already configured but not listed.
   - `strict`: Configure new configlets to device and **remove** configlet already configured but not listed.
+- `inventory_mode`: Define how missing devices are handled.
+  - `loose`: Ignore missing devices.
+  - `strict` (default): Fail on any missing device.
 - `search_key`: Define key to use to search for devices.
   - `hostname`: Use Hostname to get devices.
   - `fqdn`: Use Hostname + DNS to get devices.
@@ -52,6 +55,13 @@ CVP_DEVICES:
 - name: "Configure devices on {{inventory_hostname}}"
   arista.cvp.cv_device_v3:
     devices: "{{CVP_DEVICES}}"
+  register: CVP_DEVICES_RESULTS
+
+# Use loose inventory_mode
+- name: "Configure devices on {{inventory_hostname}}"
+  arista.cvp.cv_device_v3:
+    devices: "{{CVP_DEVICES}}"
+    inventory_mode: "loose"
   register: CVP_DEVICES_RESULTS
 
 # Use strict apply_mode
