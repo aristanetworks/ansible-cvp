@@ -20,7 +20,7 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
       python: ${{ steps.filter.outputs.python }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -72,9 +72,13 @@ jobs:
     steps:
       # Removed as gh action is marked as deprecated
       # - uses: pre-commit/action@v2.0.2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - name: Install requirements
         run: |
           pip install -r ansible_collections/arista/cvp/requirements-dev.txt --upgrade
@@ -91,15 +95,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.9 ]
+        python_version: [3.9]
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - name: Test code compatibility
@@ -116,15 +120,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.9 ]
+        python_version: [3.9]
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install requirements
@@ -153,14 +157,14 @@ jobs:
           - cv_configlet_loose
           - cv_configlet_strict
           - cv_device
-    needs: [ file-changes, pre_commit ]
+    needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.code_v1 == 'true'
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run molecule action
         uses: arista-netdevops-community/action-molecule-avd@v1.1
         with:
@@ -187,14 +191,14 @@ jobs:
           - dhcp_management_mac
           - dhcp_management_offline
           - dhcp_system_mac
-    needs: [ file-changes, pre_commit ]
+    needs: [file-changes, pre_commit]
     if: needs.file-changes.outputs.dhcp_module == 'true'
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run molecule action
         uses: arista-netdevops-community/action-molecule-avd@v1.1
         with:
@@ -209,10 +213,10 @@ jobs:
   offline_link_check:
     name: 'Validate mkdoc links'
     runs-on: ubuntu-latest
-    needs: [ file-changes ]
+    needs: [file-changes]
     if: needs.file-changes.outputs.docs == 'true'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: 'start docker-compose stack'
         run: |
           cp development/docker-compose.yml .
@@ -243,23 +247,23 @@ jobs:
   ansible_test:
     name: Run ansible-test validation
     runs-on: ubuntu-latest
-    needs: [ molecule_dhcp, molecule_cv_modules, pytest]
+    needs: [molecule_dhcp, molecule_cv_modules, pytest]
     if: always()
     env:
-      PY_COLORS: 1 # allows molecule colors to be passed to GitHub Actions
-      ANSIBLE_FORCE_COLOR: 1 # allows ansible colors to be passed to GitHub Actions
+      PY_COLORS: 1  # allows molecule colors to be passed to GitHub Actions
+      ANSIBLE_FORCE_COLOR: 1  # allows ansible colors to be passed to GitHub Actions
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.9 ]
+        python_version: [3.9]
     steps:
       - name: 'set environment variables'
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - name: 'Install Python requirements'
