@@ -567,7 +567,7 @@ class CvDeviceTools(object):
                     if x.name == configlet and x.reconciled is True:
                         reconciled_configlet = x.data
                         configlet_applied_to_device_list.remove(x)
-                        continue
+                        break
                     if x.name == configlet:
                         configlet_applied_to_device_list.remove(x)
                         new_configlets_list.append(new_configlet)
