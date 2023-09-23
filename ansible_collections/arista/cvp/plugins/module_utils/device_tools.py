@@ -542,7 +542,15 @@ class CvDeviceTools(object):
             List of configlet in the correct order
         """
         new_configlets_list = []
-        reconciled_configlet = None
+        # Identify if device has reconciled configlet applied to it
+        reconciled_configlet = [x for x in configlet_applied_to_device_list if x.reconciled is True]
+        if reconciled_configlet:
+            # Remove reconciled configlet from configlet_applied_to_device_list (if exists)
+            MODULE_LOGGER.debug(
+                    "Removing the configlet %s from the current configlet list and keeping it in the dedicated reconciled list.",
+                    str(reconciled_configlet[0].name),
+                )
+            configlet_applied_to_device_list.remove(reconciled_configlet[0])
         for configlet in configlet_playbook_list:
             new_configlet = self.__get_configlet_info(configlet_name=configlet)
             if new_configlet is None:
@@ -555,24 +563,26 @@ class CvDeviceTools(object):
 
             # If the configlet is not applied, add it to the new list
             if configlet not in [x.name for x in configlet_applied_to_device_list]:
-                new_configlets_list.append(new_configlet)
+                if configlet not in [x[Api.generic.NAME] for x in new_configlets_list] and configlet not in [x.name for x in reconciled_configlet]:
+                    new_configlets_list.append(new_configlet)
 
-            # If the confilet is already applied, remove it from the main list and add it to the end of the new list
+            # If the configlet is already applied, remove it from the main list and add it to the end of the new list
             else:
                 MODULE_LOGGER.debug(
                     "Removing the configlet %s from the current configlet list and adding it to the new list.",
                     str(configlet),
                 )
                 for x in configlet_applied_to_device_list:
-                    if x.name == configlet and x.reconciled is True:
-                        reconciled_configlet = x.data
-                        configlet_applied_to_device_list.remove(x)
-                        break
+                    # if x.name == configlet and x.reconciled is True:
+                    #     configlet_applied_to_device_list.remove(x)
+                    #     break
                     if x.name == configlet:
                         configlet_applied_to_device_list.remove(x)
-                        new_configlets_list.append(new_configlet)
+                        if configlet not in [x[Api.generic.NAME] for x in new_configlets_list] and configlet not in [x.name for x in reconciled_configlet]:
+                            new_configlets_list.append(new_configlet)
+                            break
         if reconciled_configlet is not None:
-            new_configlets_list.append(reconciled_configlet)
+            new_configlets_list.append(reconciled_configlet[0].data)
         configlets_attached_get_configlet_info = [
             self.__get_configlet_info(configlet_name=x.name)
             for x in configlet_applied_to_device_list
@@ -1145,6 +1155,7 @@ class CvDeviceTools(object):
                 )
                 for configlet in configlets_data:
                     configlet_list.append(CvElement(cv_data=configlet))
+                MODULE_LOGGER.debug("configlet_list in get_device_configlets function is: %s", str([x.name for x in configlet_list]))
                 return configlet_list
         return None
 
@@ -1934,6 +1945,7 @@ class CvDeviceTools(object):
         for device in user_inventory.devices:
             result_data = CvApiResult(action_name=device.fqdn + "_configlet_removed")
             # FIXME: Should we ignore devices listed with no configlets ?
+            MODULE_LOGGER.debug("Device configlet list is: %s", str(device.configlets))
             if device.configlets is not None:
                 # get device facts from CV
                 device_facts = self.get_device_facts(
@@ -1945,7 +1957,7 @@ class CvDeviceTools(object):
                     self.__get_configlet_list_inherited_from_container(device)
                     + device.configlets
                 )
-
+                MODULE_LOGGER.debug("Expected configlet list is: %s", str(expected_device_configlet_list))
                 configlets_to_remove = []
 
                 # get list of configured configlets
@@ -1953,11 +1965,23 @@ class CvDeviceTools(object):
                     device_lookup=device.info[self.__search_by]
                 )
                 MODULE_LOGGER.debug(
-                    "Current configlet attached {0}".format(
+                    "Current configlet attached lru cache {0}".format(
                         [x.name for x in configlets_attached]
                     )
                 )
-
+                # Added this temporarily because the lru cache for some reason empties the configlets_attached
+                if len(configlets_attached) == 0:
+                    no_lru_cache = self.__cv_client.api.get_configlets_by_device_id(
+                        device.info[Api.device.SYSMAC]
+                    )
+                    for configlet in no_lru_cache:
+                        configlets_attached.append(CvElement(cv_data=configlet))
+                    MODULE_LOGGER.debug(
+                        "Current configlet attached without lru cache {0}".format(
+                            [x.name for x in configlets_attached]
+                        )
+                    )
+                MODULE_LOGGER.debug("Configlets attached raw data {0}".format(configlets_attached))
                 # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
                     if configlet.name not in expected_device_configlet_list:
