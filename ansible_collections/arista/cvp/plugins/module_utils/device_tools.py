@@ -575,9 +575,9 @@ class CvDeviceTools(object):
 
         # Joining the 2 new list (configlets already present + new configlet in right order)
         reordered_configlets_list = configlets_attached_get_configlet_info + new_configlets_list
-
+        MODULE_LOGGER.debug("reordered_configlets_list {}".format(reordered_configlets_list))
         # Find any reconcile configlet and move to the end of the reordered list.
-        reconciled_configlet_indexes = [index for index, configlet in reordered_configlets_list if configlet.reconciled]
+        reconciled_configlet_indexes = [index for index, configlet in enumerate(reordered_configlets_list) if configlet["reconciled"]]
         reconciled_configlet_indexes.reverse()
         reconciled_configlets = [reordered_configlets_list.pop(index) for index in reconciled_configlet_indexes]
         reordered_configlets_list.extend(reconciled_configlets)
@@ -1971,18 +1971,18 @@ class CvDeviceTools(object):
                         [x.name for x in configlets_attached]
                     )
                 )
-                # Added this temporarily because the lru cache for some reason empties the configlets_attached
-                if len(configlets_attached) == 0:
-                    no_lru_cache = self.__cv_client.api.get_configlets_by_device_id(
-                        device.info[Api.device.SYSMAC]
-                    )
-                    for configlet in no_lru_cache:
-                        configlets_attached.append(CvElement(cv_data=configlet))
-                    MODULE_LOGGER.debug(
-                        "Current configlet attached without lru cache {0}".format(
-                            [x.name for x in configlets_attached]
-                        )
-                    )
+                # # Added this temporarily because the lru cache for some reason empties the configlets_attached
+                # if len(configlets_attached) == 0:
+                #     no_lru_cache = self.__cv_client.api.get_configlets_by_device_id(
+                #         device.info[Api.device.SYSMAC]
+                #     )
+                #     for configlet in no_lru_cache:
+                #         configlets_attached.append(CvElement(cv_data=configlet))
+                #     MODULE_LOGGER.debug(
+                #         "Current configlet attached without lru cache {0}".format(
+                #             [x.name for x in configlets_attached]
+                #         )
+                #     )
                 MODULE_LOGGER.debug("Configlets attached raw data {0}".format(configlets_attached))
                 # For each configlet not in the list, add to list of configlets to remove
                 for configlet in configlets_attached:
