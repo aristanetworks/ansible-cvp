@@ -542,15 +542,6 @@ class CvDeviceTools(object):
             List of configlet in the correct order
         """
         new_configlets_list = []
-        # Identify if device has reconciled configlet applied to it
-        reconciled_configlet = [x for x in configlet_applied_to_device_list if x.reconciled is True]
-        if reconciled_configlet:
-            # Remove reconciled configlet from configlet_applied_to_device_list (if exists)
-            MODULE_LOGGER.debug(
-                    "Removing the configlet %s from the current configlet list and keeping it in the dedicated reconciled list.",
-                    str(reconciled_configlet[0].name),
-                )
-            configlet_applied_to_device_list.remove(reconciled_configlet[0])
         for configlet in configlet_playbook_list:
             new_configlet = self.__get_configlet_info(configlet_name=configlet)
             if new_configlet is None:
@@ -561,10 +552,9 @@ class CvDeviceTools(object):
                 MODULE_LOGGER.error(error_message)
                 self.__ansible.fail_json(msg=error_message)
 
-            # If the configlet is not applied, add it to the new list
-            if configlet not in [x.name for x in configlet_applied_to_device_list]:
-                if configlet not in [x[Api.generic.NAME] for x in new_configlets_list] and configlet not in [x.name for x in reconciled_configlet]:
-                    new_configlets_list.append(new_configlet)
+            # If the configlet is not applied, add it to the new list avoiding duplicates.
+            if configlet not in [x.name for x in configlet_applied_to_device_list] and new_configlet not in new_configlets_list:
+                new_configlets_list.append(new_configlet)
 
             # If the configlet is already applied, remove it from the main list and add it to the end of the new list
             else:
@@ -573,23 +563,35 @@ class CvDeviceTools(object):
                     str(configlet),
                 )
                 for x in configlet_applied_to_device_list:
-                    # if x.name == configlet and x.reconciled is True:
-                    #     configlet_applied_to_device_list.remove(x)
-                    #     break
                     if x.name == configlet:
                         configlet_applied_to_device_list.remove(x)
-                        if configlet not in [x[Api.generic.NAME] for x in new_configlets_list] and configlet not in [x.name for x in reconciled_configlet]:
+                        if new_configlet not in new_configlets_list:
                             new_configlets_list.append(new_configlet)
                             break
-        if reconciled_configlet is not None:
-            new_configlets_list.append(reconciled_configlet[0].data)
         configlets_attached_get_configlet_info = [
             self.__get_configlet_info(configlet_name=x.name)
             for x in configlet_applied_to_device_list
         ]
 
         # Joining the 2 new list (configlets already present + new configlet in right order)
-        return configlets_attached_get_configlet_info + new_configlets_list
+        reordered_configlets_list = configlets_attached_get_configlet_info + new_configlets_list
+
+        # Find any reconcile configlet and move to the end of the reordered list.
+        reconciled_configlet_indexes = [index for index, configlet in reordered_configlets_list if configlet.reconciled]
+        reconciled_configlet_indexes.reverse()
+        reconciled_configlets = [reordered_configlets_list.pop(index) for index in reconciled_configlet_indexes]
+        reordered_configlets_list.extend(reconciled_configlets)
+
+        if len(reconciled_configlet_indexes) > 1:
+            reconcile_configlet_names = ", ".join([configlet.name for configlet in reconciled_configlets])
+            error_message = (
+                "Two 'reconcile' configlets '%s' are assigned to one device, which is not supported by CloudVision.",
+                reconcile_configlet_names,
+            )
+            MODULE_LOGGER.error(error_message)
+            self.__ansible.fail_json(msg=error_message)
+
+        return reordered_configlets_list
 
     def __refresh_user_inventory(self, user_inventory: DeviceInventory):
         """
