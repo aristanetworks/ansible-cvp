@@ -575,7 +575,7 @@ class CvDeviceTools(object):
 
         # Joining the 2 new list (configlets already present + new configlet in right order)
         reordered_configlets_list = configlets_attached_get_configlet_info + new_configlets_list
-        MODULE_LOGGER.debug("reordered_configlets_list {}".format(reordered_configlets_list))
+        MODULE_LOGGER.debug("reordered_configlets_list %s", str(reordered_configlets_list))
         # Find any reconcile configlet and move to the end of the reordered list.
         reconciled_configlet_indexes = [index for index, configlet in enumerate(reordered_configlets_list) if configlet["reconciled"]]
         reconciled_configlet_indexes.reverse()
