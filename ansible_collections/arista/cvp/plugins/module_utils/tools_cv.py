@@ -207,3 +207,19 @@ def cv_update_configlets_on_device(module, device_facts, add_configlets, del_con
         LOGGER.info(" * cv_update_configlets_on_device - device_addition result: %s", str(device_addition))
     LOGGER.info(" * cv_update_configlets_on_device - final result: %s", str(response))
     return response
+
+
+def authorization_error(module, error_msg):
+    """
+    Function to handle authorization error and fail module with correct message.
+
+    Parameters
+    ----------
+    module : AnsibleModule
+        Ansible module information
+    error : str
+        Error message to check if it is an authorization error or not.
+
+    """
+    if "Unauthorized" in str(error_msg):
+        module(msg="Unauthorized access to CloudVision. Please check your credentials or service account token validty!")

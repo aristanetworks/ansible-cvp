@@ -183,7 +183,7 @@ def main():
     cv_client = tools_cv.cv_connect(ansible_module)
 
     # Instantiate ansible results
-    facts_collector = CvFactsTools(cv_connection=cv_client)
+    facts_collector = CvFactsTools(cv_connection=cv_client, ansible_module=ansible_module)
     facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'],
                                   verbose=ansible_module.params['verbose'])
     result = dict(changed=False, data=facts, failed=False)
