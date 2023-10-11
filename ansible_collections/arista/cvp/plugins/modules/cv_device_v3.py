@@ -27,6 +27,7 @@ DOCUMENTATION = r'''
 module: cv_device_v3
 version_added: "3.0.0"
 author: Ansible Arista Team (@aristanetworks)
+schema: ../schema/cv_device_v3.md
 short_description: Manage Provisioning topology.
 description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
@@ -34,12 +35,12 @@ description:
   - Returns number of created and/or deleted containers
 options:
   devices:
-    description: List of devices with their container, configlet, and image bundle information
+    description: List of devices with their container, configlet, and image bundle information.
     required: true
     type: list
     elements: dict
   state:
-    description: Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision
+    description: Set if Ansible should build, remove devices from provisioning, fully decommission or factory reset devices on CloudVision.
     required: false
     default: 'present'
     choices: ['present', 'factory_reset', 'provisioning_reset', 'absent']

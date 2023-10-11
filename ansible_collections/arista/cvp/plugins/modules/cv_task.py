@@ -35,19 +35,17 @@ deprecated:
   removed_from_collection: arista.cvp
 options:
   tasks:
-    description: CVP taskIDs to act on
+    description: CVP taskIDs to act on.
     required: True
     type: list
     elements: dict
   wait:
-    description: Time to wait for tasks to transition to 'Completed'
+    description: Time to wait for tasks to transition to 'Completed.'
     required: False
     default: 0
     type: int
   state:
-    description: action to carry out on the task
-                 executed - execute tasks
-                 cancelled - cancel tasks
+    description: Action to carry out on the task.
     required: false
     default: executed
     type: str
@@ -56,9 +54,9 @@ options:
       - cancelled
   options:
     description:
-      - Implements the ability to create a sub-argument_spec, where the sub
-      - options of the top level argument are also validated using
-      - the attributes discussed in this section.
+      Implements the ability to create a sub-argument_spec, where the sub
+      options of the top level argument are also validated using
+      the attributes discussed in this section.
     required: false
     type: dict
 '''

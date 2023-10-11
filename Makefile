@@ -11,7 +11,7 @@ ANSIBLE_TEST_MODE ?= docker
 # Python version to use in testing.
 ANSIBLE_TEST_PYTHON ?= 3.6
 # Root path for MKDOCS content
-WEBDOC_BUILD = ansible_collections/arista/cvp/docs/_build
+WEBDOC_BUILD = ansible_collections/arista/cvp/docs/build-md
 COMPOSE_FILE ?= development/docker-compose.yml
 MUFFET_TIMEOUT ?= 60
 
@@ -91,8 +91,7 @@ build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-communi
 .PHONY: webdoc
 webdoc: ## Build documentation to publish static content
 	( cd $(WEBDOC_BUILD) ; \
-	python ansible2rst.py ; \
-	find . -name 'cv_*_v3.rst' -exec pandoc {} --from rst --to gfm -o ../modules/{}.md \;)
+	python doc.py)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
 
 .PHONY: check-cvp-404

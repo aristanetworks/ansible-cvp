@@ -7,7 +7,7 @@
 
 ## Inputs
 
-Full documentation available in [module section](../../modules/cv_container_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
+Full input definitions are available in the [module documentation](../../modules/cv_container_v3.md).
 
 ### Input variables
 

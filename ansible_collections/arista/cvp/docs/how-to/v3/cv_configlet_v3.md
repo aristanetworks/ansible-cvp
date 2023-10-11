@@ -10,7 +10,7 @@ To import content from text file, leverage template rendering and then load from
 
 ## Inputs
 
-Full documentation available in [module section](../../modules/cv_configlet_v3.rst.md) and a lab is available in the following [repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
+Full documentation available in [module section](../../modules/cv_configlet_v3.md).
 
 ## Input variables
 

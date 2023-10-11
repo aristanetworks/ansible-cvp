@@ -157,21 +157,21 @@ nav:
     - CloudVision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
     - Modules version 1:
-      - cv_facts: docs/modules/cv_facts.rst/
-      - cv_configlet: docs/modules/cv_configlet.rst/
-      - cv_container: docs/modules/cv_container.rst/
-      - cv_device: docs/modules/cv_device.rst/
-      - cv_task: docs/modules/cv_task.rst/
+      - cv_facts: docs/modules/cv_facts.md
+      - cv_configlet: docs/modules/cv_configlet.md
+      - cv_container: docs/modules/cv_container.md
+      - cv_device: docs/modules/cv_device.md
+      - cv_task: docs/modules/cv_task.md
     - Module version 3:
-      - cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
-      - cv_container_v3: docs/modules/cv_container_v3.rst.md
-      - cv_device_v3: docs/modules/cv_device_v3.rst.md
-      - cv_task_v3: docs/modules/cv_task_v3.rst.md
-      - cv_facts_v3: docs/modules/cv_facts_v3.rst.md
-      - cv_image_v3: docs/modules/cv_image_v3.rst.md
-      - cv_tag_v3: docs/modules/cv_tag_v3.rst.md
-      - cv_change_control_v3: docs/modules/cv_change_control_v3.rst.md
-      - cv_validate_v3: docs/modules/cv_validate_v3.rst.md
+      - cv_configlet_v3: docs/modules/cv_configlet_v3.md
+      - cv_container_v3: docs/modules/cv_container_v3.md
+      - cv_device_v3: docs/modules/cv_device_v3.md
+      - cv_task_v3: docs/modules/cv_task_v3.md
+      - cv_facts_v3: docs/modules/cv_facts_v3.md
+      - cv_image_v3: docs/modules/cv_image_v3.md
+      - cv_tag_v3: docs/modules/cv_tag_v3.md
+      - cv_change_control_v3: docs/modules/cv_change_control_v3.md
+      - cv_validate_v3: docs/modules/cv_validate_v3.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

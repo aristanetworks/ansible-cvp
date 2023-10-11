@@ -35,9 +35,7 @@ options:
     type: list
     elements: str
   state:
-    description: action to carry out on the task
-                 executed - execute tasks
-                 cancelled - cancel tasks
+    description: Action to carry out on the task.
     required: false
     default: executed
     type: str

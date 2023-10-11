@@ -33,7 +33,7 @@ options:
   facts:
     description:
       - List of facts to retrieve from CVP.
-      - By default, cv_facts returns facts for devices/configlets/containers/images/tasks
+      - By default, cv_facts returns facts for devices, configlets, containers, images, and tasks.
       - Using this parameter allows user to limit scope to a subset of information.
     required: false
     default: ['configlets', 'containers', 'devices', 'images', 'tasks']
@@ -41,12 +41,12 @@ options:
     elements: str
     choices: ['configlets', 'containers', 'devices', 'images', 'tasks']
   regexp_filter:
-    description: Regular Expression to filter containers, configlets, devices and tasks in facts
+    description: Regular Expression to filter containers, configlets, devices and tasks in facts.
     required: false
     default: '.*'
     type: str
   verbose:
-    description: get all data from CV or get only cv_modules data
+    description: Get all data from CVP or get only cv_modules data.
     required: false
     choices: ['long', 'short']
     default: 'short'
