@@ -1,0 +1,90 @@
+  cvp_device:
+    changed: true
+    data:
+      added_tasksIds: []
+      moved: []
+      moved_devices: 0
+      moved_tasksIds: []
+      provisionned: []
+      provisionned_devices: 0
+      tasks:
+      - ccId: ''
+        ccIdV2: ''
+        completedOnInLongFormat: 1697146035906
+        createdBy: arista
+        createdOnInLongFormat: 1697146030753
+        currentTaskName: Submit
+        currentTaskType: User Task
+        data:
+          APP_SESSION_ID: ''
+          ERROR_IN_CAPTURING_DESIGN_CONFIG: ''
+          ERROR_IN_CAPTURING_RUNNING_CONFIG: ''
+          INCORRECT_CONFIG_IN_CAPTURING_DESIGN_CONFIG: ''
+          INCORRECT_CONFIG_IN_CAPTURING_DESIGN_CONFIG_OUTPUT_INDEX: ''
+          IS_ADD_OR_MOVE_FLOW: false
+          IS_AUTO_GENERATED_IN_CVP: false
+          IS_CONFIG_PUSH_NEEDED: 'yes'
+          NETELEMENT_ID: 00:1c:73:c0:c6:16
+          VIEW: CONFIG
+          WORKFLOW_ACTION: Configlet Push
+          ZERO_TOUCH_REPLACEMENT: ''
+          ccExecutingNode: ''
+          ccId: ''
+          commandUsedInMgmtIpVal: ''
+          config: []
+          configExistInCVP: false
+          configSnapshots: []
+          configletList: []
+          currentparentContainerId: container_4d9e2b7f-c63d-46ee-8fe0-9d7fad83baee
+          designedConfig: ''
+          designedConfigOutputIndex: ''
+          extensionsRequireReboot: []
+          ignoreConfigletList: []
+          image: ''
+          imageBundleId: ''
+          imageId: []
+          imageIdList: []
+          imageToBePushedToDevice: ''
+          isDCAEnabled: false
+          isRollbackFromSnapshotFlow: false
+          isRollbackTask: false
+          newparentContainerId: container_4d9e2b7f-c63d-46ee-8fe0-9d7fad83baee
+          noOfRe-Tries: 0
+          preRollbackImage: ''
+          presentImageInDevice: ''
+          runningConfig: ''
+          sessionUsedInMgmtIpVal: ''
+          targetIpAddress: ''
+          user: ''
+        description: 'Ansible: Configlet Assign: to Device s1-host1.atd.lab'
+        dualSupervisor: false
+        executedBy: ''
+        executedOnInLongFormat: 0
+        name: ''
+        netElementId: 00:1c:73:c0:c6:16
+        newParentContainerId: container_4d9e2b7f-c63d-46ee-8fe0-9d7fad83baee
+        newParentContainerName: S1-Hosts
+        note: ''
+        stageId: ''
+        taskStatus: ACTIVE
+        taskStatusBeforeCancel: ''
+        templateId: ztp
+        workFlowDetailsId: ''
+        workOrderDetails:
+          ipAddress: 192.168.0.244
+          netElementHostName: s1-host1.atd.lab
+          netElementId: 00:1c:73:c0:c6:16
+          serialNumber: s1-host1
+          workOrderDetailsId: ''
+          workOrderId: ''
+        workOrderId: '73'
+        workOrderState: ACTIVE
+        workOrderUserDefinedStatus: Pending
+      tasksIds:
+      - '73'
+      updated:
+      - s1-host1: Configlets-['73']
+      updated_devices: 1
+      updated_tasksIds:
+      - '73'
+    failed: false

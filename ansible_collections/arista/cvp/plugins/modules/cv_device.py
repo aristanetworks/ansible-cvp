@@ -24,6 +24,7 @@ DOCUMENTATION = r"""
 module: cv_device
 version_added: "1.0.0"
 author: Ansible Arista Team (@aristanetworks)
+module_output: docs/outputs/cv_device.txt
 short_description: Provision, Reset, or Update CloudVision Portal Devices.
 description:
   - CloudVision Portal Device compares the list of Devices
@@ -99,6 +100,7 @@ EXAMPLES = r"""
     devices_inventory:
       veos01:
         name: veos01
+        parentContainername: veos01
         configlets:
           - cv_device_test01
           - SYS_TelemetryBuilderV2_172.23.0.2_1

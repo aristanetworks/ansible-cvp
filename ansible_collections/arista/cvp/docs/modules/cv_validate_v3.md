@@ -14,8 +14,11 @@ The following options may be specified for this module:
 | parameter | type | required | default | choices | comments |
 | ------------- |-------------| ---------|----------- |--------- |--------- |
 | devices  |   list | True  |  | | CVP devices and configlet information. |
-| validate_mode  |   str | True  |  | <ul> <li>stop_on_error</li>  <li>stop_on_warning</li>  <li>ignore</li> </ul> | Indicate how cv_validate_v3 should behave on finding errors and/or warnings. |
+| validate_mode  |   str | True  |  | <ul> <li>stop_on_error</li>  <li>stop_on_warning</li>  <li>ignore</li> </ul> | Indicate how cv_validate_v3 should behave on finding errors or warnings. |
 
+## Inputs
+
+For a full view of the module inputs, please see the [schema documentation](../schema/cv_validate_v3.md).
 
 ## Examples
 
@@ -61,10 +64,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/cv_validate_v3.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-
-## Full schema
-
-Please see the [schema documentation](../schema/cv_validate_v3.md).

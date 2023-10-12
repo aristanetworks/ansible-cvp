@@ -19,14 +19,9 @@ The following options may be specified for this module:
 | change_id  |   list | False  |  | | List of change IDs to get/remove. |
 | schedule_time  |   str | False  |  | | RFC3339 time format, e.g., `2021-12-23T02:07:00.0`. |
 
-## Module output
+## Inputs
 
-??? output "Example output"
-    ```yaml
-    --8<--
-    docs/outputs/change_control_v3.txt
-    --8<--
-    ```
+For a full view of the module inputs, please see the [schema documentation](../schema/cv_change_control_v3.md).
 
 ## Examples
 
@@ -125,10 +120,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/change_control_v3.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-
-## Full schema
-
-Please see the [schema documentation](../schema/cv_change_control_v3.md).

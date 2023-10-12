@@ -26,6 +26,7 @@ module: cv_tag_v3
 version_added: "3.4.0"
 author: Ansible Arista Team (@aristanetworks)
 schema: ../schema/cv_tag_v3.md
+module_output: docs/outputs/cv_tag_v3.txt
 short_description: Create/Assign/Delete/Unassign tags on CVP
 description:
   - CloudVision Portal Tag module to Create/Assign/Delete/Unassign tags on CloudVision

@@ -1,0 +1,38 @@
+msg:
+  changed: true
+  configlets_attached:
+    changed: true
+    configlets_attached_count: 2
+    configlets_attached_list:
+    - CV-ANSIBLE-EOS01_configlet_attached - CV-EOS-ANSIBLE01
+    diff: {}
+    success: true
+    taskIds:
+    - '469'
+  configlets_detached:
+    changed: true
+    configlets_detached_count: 1
+    configlets_detached_list:
+    - CV-ANSIBLE-EOS01_configlet_removed - 01DEMO-alias - 01TRAINING-alias
+    diff: {}
+    success: true
+    taskIds:
+    - '469'
+  devices_deployed:
+    changed: false
+    devices_deployed_count: 0
+    devices_deployed_list: []
+    diff: {}
+    success: false
+    taskIds: []
+  devices_moved:
+    changed: false
+    devices_moved_count: 0
+    devices_moved_list: []
+    diff: {}
+    success: false
+    taskIds: []
+  failed: false
+  success: true
+  taskIds:
+  - '469'

@@ -26,15 +26,10 @@ The following options may be specified for this module:
 {% endif %}
 {% endfor %}
 
-{% if module.doc.module_output %}
-## Module output
+{% if module.doc.schema %}
+## Inputs
 
-??? output "Example output"
-    ```yaml
-    --8<--
-    {{ module.doc.module_output }}
-    --8<--
-    ```
+For a full view of the module inputs, please see the [schema documentation]({{ module.doc.schema }}).
 {% endif %}
 
 ## Examples
@@ -49,12 +44,19 @@ The following options may be specified for this module:
 ```
 {% endif%}
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+{% if module.doc.module_output %}
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    {{ module.doc.module_output }}
+    --8<--
+    ```
+{% endif %}
+
 ## Author
 
 {{ module.doc.author }}
-
-{% if module.doc.schema %}
-## Full schema
-
-Please see the [schema documentation]({{ module.doc.schema }}).
-{% endif %}

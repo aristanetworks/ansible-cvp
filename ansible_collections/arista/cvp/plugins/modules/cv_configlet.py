@@ -26,6 +26,7 @@ DOCUMENTATION = r'''
 module: cv_configlet
 version_added: "1.0.0"
 author: Ansible Arista Team (@aristanetworks)
+module_output: docs/outputs/cv_configlet.txt
 short_description: Create, Delete, or Update CloudVision Portal Configlets.
 description:
   - CloudVison Portal Configlet compares the list of configlets and config in

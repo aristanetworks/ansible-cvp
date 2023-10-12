@@ -17,6 +17,9 @@ The following options may be specified for this module:
 | mode  |   str | False  |  | <ul> <li>create</li>  <li>delete</li>  <li>assign</li>  <li>unassign</li> </ul> | Action to carry out on the tags. |
 | auto_create  |   bool | False  |  True  | | Automatically create tags before assigning. |
 
+## Inputs
+
+For a full view of the module inputs, please see the [schema documentation](../schema/cv_tag_v3.md).
 
 ## Examples
 
@@ -168,10 +171,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/cv_tag_v3.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-
-## Full schema
-
-Please see the [schema documentation](../schema/cv_tag_v3.md).

@@ -46,6 +46,7 @@ The following options may be specified for this module:
     devices_inventory:
       veos01:
         name: veos01
+        parentContainername: veos01
         configlets:
           - cv_device_test01
           - SYS_TelemetryBuilderV2_172.23.0.2_1
@@ -80,7 +81,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/cv_device.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-

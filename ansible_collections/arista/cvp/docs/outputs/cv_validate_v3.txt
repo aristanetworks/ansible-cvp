@@ -1,0 +1,15 @@
+msg:
+  changed: false
+  configlets_validated:
+    changed: false
+    configlets_validated_count: 1
+    configlets_validated_list:
+    - validate_valid_on_serialNumber_validated
+    diff: {}
+    errors: []
+    success: true
+    taskIds: []
+    warnings: []
+  failed: false
+  success: true
+  taskIds: []

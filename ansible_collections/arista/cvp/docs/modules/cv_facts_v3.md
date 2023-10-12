@@ -71,7 +71,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/cv_facts_v3.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-

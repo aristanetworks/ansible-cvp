@@ -19,6 +19,9 @@ The following options may be specified for this module:
 | state  |   str | False  |  present  | <ul> <li>present</li>  <li>absent</li> </ul> | Set if Ansible should build or remove devices on CloudVision. |
 | apply_mode  |   str | False  |  loose  | <ul> <li>loose</li>  <li>strict</li> </ul> | Set how configlets are attached/detached to containers. If set to strict all configlets not listed in your vars will be detached. |
 
+## Inputs
+
+For a full view of the module inputs, please see the [schema documentation](../schema/cv_container_v3.md).
 
 ## Examples
 
@@ -65,10 +68,17 @@ The following options may be specified for this module:
 
 ```
 
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    docs/outputs/cv_container_v3.txt
+    --8<--
+    ```
+
 ## Author
 
 Ansible Arista Team (@aristanetworks)
-
-## Full schema
-
-Please see the [schema documentation](../schema/cv_container_v3.md).
