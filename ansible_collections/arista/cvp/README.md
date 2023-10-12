@@ -79,15 +79,15 @@ This repository provides content for Ansible's collection **arista.cvp** with fo
 
 **Version 3:**
 
-- [**arista.cvp.cv_configlet_v3**](docs/modules/cv_configlet_v3.rst/) -  Manage configlet configured on CVP.
-- [**arista.cvp.cv_container_v3**](docs/modules/cv_container_v3.rst/) -  Manage container topology and attach configlet and devices to containers.
-- [**arista.cvp.cv_device_v3**](docs/modules/cv_device_v3.rst/) - Manage devices configured on CVP
-- [**arista.cvp.cv_task_v3**](docs/modules/cv_task_v3.rst/) - Run tasks created on CVP.
-- [**arista.cvp.cv_facts_v3**](docs/modules/cv_facts_v3.rst/) - Collect information from CloudVision.
-- [**arista.cvp.cv_image_v3**](docs/modules/cv_image_v3.rst/) - Create EOS images and bundles on CloudVision.
-- [**arista.cvp.cv_tag_v3**](docs/modules/cv_tag_v3.rst/) - Create, delete, assign and unassign tags on CloudVision.
-- [**arista.cvp.cv_validate_v3**](docs/modules/cv_validate_v3.rst/) - Configlet validation
-- [**arista.cvp.cv_change_control_v3**](docs/modules/cv_change_control_v3.rst/) - Manage change controls on CloudVision.
+- [**arista.cvp.cv_configlet_v3**](docs/modules/cv_configlet_v3.md) -  Manage configlet configured on CVP.
+- [**arista.cvp.cv_container_v3**](docs/modules/cv_container_v3.md) -  Manage container topology and attach configlet and devices to containers.
+- [**arista.cvp.cv_device_v3**](docs/modules/cv_device_v3.md) - Manage devices configured on CVP
+- [**arista.cvp.cv_task_v3**](docs/modules/cv_task_v3.md) - Run tasks created on CVP.
+- [**arista.cvp.cv_facts_v3**](docs/modules/cv_facts_v3.md) - Collect information from CloudVision.
+- [**arista.cvp.cv_image_v3**](docs/modules/cv_image_v3.md) - Create EOS images and bundles on CloudVision.
+- [**arista.cvp.cv_tag_v3**](docs/modules/cv_tag_v3.md) - Create, delete, assign and unassign tags on CloudVision.
+- [**arista.cvp.cv_validate_v3**](docs/modules/cv_validate_v3.md) - Configlet validation
+- [**arista.cvp.cv_change_control_v3**](docs/modules/cv_change_control_v3.md) - Manage change controls on CloudVision.
 
 ### List of available roles
 
@@ -96,11 +96,11 @@ This repository provides content for Ansible's collection **arista.cvp** with fo
 
 ### Deprecated modules
 
-- [**arista.cvp.cv_facts**](docs/modules/cv_facts.rst/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- [**arista.cvp.cv_configlet**](docs/modules/cv_configlet.rst/) -  Manage configlet configured on CVP.
-- [**arista.cvp.cv_container**](docs/modules/cv_container.rst/) -  Manage container topology and attach configlet and devices to containers.
-- [**arista.cvp.cv_device**](docs/modules/cv_device.rst/) - Manage devices configured on CVP
-- [**arista.cvp.cv_task**](docs/modules/cv_task.rst/) - Run tasks created on CVP.
+- [**arista.cvp.cv_facts**](docs/modules/cv_facts.md) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- [**arista.cvp.cv_configlet**](docs/modules/cv_configlet.md) -  Manage configlet configured on CVP.
+- [**arista.cvp.cv_container**](docs/modules/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
+- [**arista.cvp.cv_device**](docs/modules/cv_device.md) - Manage devices configured on CVP
+- [**arista.cvp.cv_task**](docs/modules/cv_task.md) - Run tasks created on CVP.
 
 ## Example
 
