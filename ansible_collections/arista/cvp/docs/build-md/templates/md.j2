@@ -26,10 +26,10 @@ The following options may be specified for this module:
 {% endif %}
 {% endfor %}
 
-{% if module.doc.schema %}
+{% if schema %}
 ## Inputs
 
-For a full view of the module inputs, please see the [schema documentation]({{ module.doc.schema }}).
+For a full view of the module inputs, please see the [schema documentation]({{ schema }}).
 {% endif %}
 
 ## Examples
@@ -46,13 +46,13 @@ For a full view of the module inputs, please see the [schema documentation]({{ m
 
 For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
 
-{% if module.doc.module_output %}
+{% if module_output %}
 ## Module output
 
 ??? output "Example output"
     ```yaml
     --8<--
-    {{ module.doc.module_output }}
+    {{ module_output }}
     --8<--
     ```
 {% endif %}

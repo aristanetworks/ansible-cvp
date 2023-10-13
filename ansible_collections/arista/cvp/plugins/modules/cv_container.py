@@ -27,7 +27,6 @@ DOCUMENTATION = r'''
 module: cv_container
 version_added: "1.0.0"
 author: Ansible Arista Team (@aristanetworks)
-module_output: docs/outputs/cv_container.txt
 short_description: Manage Provisioning topology.
 description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,

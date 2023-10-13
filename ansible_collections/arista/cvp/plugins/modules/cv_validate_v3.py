@@ -25,8 +25,6 @@ DOCUMENTATION = r"""
 module: cv_validate_v3
 version_added: "3.7.0"
 author: Ansible Arista Team (@aristanetworks)
-schema: ../schema/cv_validate_v3.md
-module_output: docs/outputs/cv_validate_v3.txt
 short_description: CVP/Local configlet Validation
 description:
   - CloudVision Portal Validate module to Validate configlets against a device on CVP.
