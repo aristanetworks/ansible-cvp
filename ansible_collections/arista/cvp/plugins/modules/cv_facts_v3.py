@@ -187,7 +187,7 @@ def main():
     try:
       facts = facts_collector.facts(scope=ansible_module.params['facts'], regex_filter=ansible_module.params['regexp_filter'],
                                     verbose=ansible_module.params['verbose'])
-    except Exception as e:
+    except CvpClientError as e:
       ansible_module.fail_json(msg=str(e))
     result = dict(changed=False, data=facts, failed=False)
 
