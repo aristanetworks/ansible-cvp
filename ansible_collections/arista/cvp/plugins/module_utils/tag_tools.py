@@ -23,14 +23,13 @@ import traceback
 import logging
 import random
 import string
+from datetime import datetime
 from ansible.module_utils.basic import AnsibleModule
-import ansible_collections.arista.cvp.plugins.module_utils.logger   # noqa # pylint: disable=unused-import
 from ansible_collections.arista.cvp.plugins.module_utils.response import CvApiResult, CvManagerResult, CvAnsibleResponse
 from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas import v3 as schema
 from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 try:
-    from cvprac.cvp_client import CvpClient  # noqa # pylint: disable=unused-import
-    from cvprac.cvp_client_errors import CvpApiError, CvpRequestError  # noqa # pylint: disable=unused-import
+    from cvprac.cvp_client_errors import CvpRequestError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
@@ -110,7 +109,7 @@ class CvTagTools(object):
         tag_manager = CvManagerResult(builder_name='tags_manager')
 
         # create workspace
-        workspace_name_id = "AnsibleWorkspace" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+        workspace_name_id = "AW_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))+'{:%Y%m%d_%H%M%S}'.format(datetime.now())
         workspace_id = workspace_name_id
 
         workspace_name = workspace_name_id
