@@ -109,7 +109,7 @@ class CvTagTools(object):
         tag_manager = CvManagerResult(builder_name='tags_manager')
 
         # create workspace
-        workspace_name_id = "AW_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))+'{:%Y%m%d_%H%M%S}'.format(datetime.now())
+        workspace_name_id = "AW_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)) + '{:%Y%m%d_%H%M%S}'.format(datetime.now())
         workspace_id = workspace_name_id
 
         workspace_name = workspace_name_id
