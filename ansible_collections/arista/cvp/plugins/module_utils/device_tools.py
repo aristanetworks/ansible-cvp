@@ -609,8 +609,8 @@ class CvDeviceTools(object):
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
         user_inventory = self.refresh_systemMacAddress(
-                cvp_inventory=cvp_inventory, user_inventory=user_inventory
-            )
+            cvp_inventory=cvp_inventory, user_inventory=user_inventory
+        )
         if self.__search_by == Api.device.FQDN:
             user_inventory = self.refresh_hostname(
                 cvp_inventory=cvp_inventory, user_inventory=user_inventory
@@ -619,16 +619,14 @@ class CvDeviceTools(object):
             user_inventory = self.refresh_fqdn(
                 cvp_inventory=cvp_inventory, user_inventory=user_inventory
             )
-            # user_inventory  = self.refresh_hostname(
-            #     cvp_inventory=cvp_inventory, user_inventory=user_inventory,
-            #     reassign=True)
-
 
         elif self.__search_by == Api.device.SERIAL:
-            user_inventory = self.refresh_fqdn(cvp_inventory=cvp_inventory,
-                user_inventory=user_inventory)
-            user_inventory = self.refresh_hostname(cvp_inventory=cvp_inventory,
-                user_inventory=user_inventory)
+            user_inventory = self.refresh_fqdn(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
+            )
+            user_inventory = self.refresh_hostname(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
+            )
             user_inventory = self.refresh_systemMacAddress(
                 cvp_inventory=cvp_inventory, user_inventory=user_inventory
             )
