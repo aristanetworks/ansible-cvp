@@ -110,7 +110,7 @@ class CvTagTools(object):
 
         # create workspace
         my_date = datetime.now()
-        datetime_string = str(my_date.year)+str(my_date.month)+str(my_date.day)+'_'+str(my_date.hour)+str(my_date.minute)+str(my_date.second)
+        datetime_string = my_date.strftime('%Y%m%d_%H%M%S')
         workspace_name_id = "AW_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)) + datetime_string
         workspace_id = workspace_name_id
 
