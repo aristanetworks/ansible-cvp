@@ -74,7 +74,7 @@ plugins:
 markdown_extensions:
   - admonition
   - attr_list
-  - fontawesome_markdown
+  # - fontawesome_markdown
   - mdx_truly_sane_lists
   - smarty
   - pymdownx.arithmatex
