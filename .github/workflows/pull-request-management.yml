@@ -240,7 +240,7 @@ jobs:
             --timeout=30
       - name: 'stop docker-compose stack'
         run: |
-          docker-compose -f docker-compose.yml down
+          docker-compose -f development/docker-compose.yml down
 
   ansible_test:
     name: Run ansible-test validation
