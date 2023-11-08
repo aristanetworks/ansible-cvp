@@ -128,3 +128,12 @@ ok: [CloudVision] =>
           id: 3b64e94f-8cac-4bb6-80f5-fd7e2736c976
         version: '2023-11-08T19:39:40.756528116Z'
     failed: false
+TASK [Remove by name output] ************************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+    - key:
+        id: DV8HoPbPX_WzIa5-6y1gy
+      time: '2023-11-08T20:39:38.691470915Z'
+    failed: false
