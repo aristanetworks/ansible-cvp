@@ -6,6 +6,9 @@
   import_playbook: test_apply_detach_configlet.yml
 
 - name: Test cv_device_v3 module
+  import_playbook: test_reconciled_configlet.yml
+
+- name: Test cv_device_v3 module
   import_playbook: test_apply_detach_bundle.yml
 
 - name: Test cv_device_v3 module

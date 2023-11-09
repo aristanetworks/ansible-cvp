@@ -1,0 +1,126 @@
+---
+- name: Test cv_device_v3
+  hosts: CloudVision
+  connection: local
+  gather_facts: no
+  vars:
+    device_name: s1-leaf1
+
+    cvp_configlets:
+      configlet1: '! This is first configlet'
+      configlet2: '! This is second configlet'
+      configlet3: 'alias shover show version'
+
+    cvp_devices_apply_configlet:
+      - fqdn: "{{device_name}}"
+        parentContainerName: "{{cv_facts_v3_result.data.cvp_devices[0].parentContainerName}}"
+        configlets:
+          - 'configlet1'
+          - 'configlet2'
+          - 'configlet3'
+
+    cvp_devices_detach_configlet:
+      - fqdn: "{{device_name}}"
+        parentContainerName: "{{cv_facts_v3_result.data.cvp_devices[0].parentContainerName}}"
+        configlets: "{{cv_facts_v3_result.data.cvp_devices[0].configlets + ['configlet1', 'configlet2']}}"
+
+    cvp_devices_deploy:
+      - fqdn: "{{device_name}}"    # device must be in undefined container
+        parentContainerName: "{{cv_facts_v3_result.data.cvp_devices[0].parentContainerName}}"
+        configlets: "{{cv_facts_v3_result.data.cvp_devices[0].configlets}}"
+
+    test_reconcile_misorder:
+      - fqdn: "{{device_name}}"
+        parentContainerName: "{{cv_facts_v3_result.data.cvp_devices[0].parentContainerName}}"
+        configlets: "{{cv_facts_v3_result.data.cvp_devices[0].configlets + ['configlet1', 'RECONCILE_' + device_name, 'configlet2']}}"
+
+  tasks:
+    - name: Collect devices facts from {{ inventory_hostname }}
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "{{ device_name }}"
+      register: cv_facts_v3_result
+
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{ cvp_configlets }}"
+        state: present
+
+    - name: Apply configlet on {{ inventory_hostname }}
+      arista.cvp.cv_device_v3:
+        devices: '{{ cvp_devices_apply_configlet }}'
+        state: present
+      register: CV_DEVICE_V3_RESULT
+
+    - name: "Check apply_configlet with apply_mode loose"
+      ansible.builtin.assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_count == 3
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == ["s1-leaf1_configlet_attached"]
+          - CV_DEVICE_V3_RESULT.configlets_attached.success == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.taskIds != []
+
+    - name: "Detach configlet from {{ inventory_hostname }}"
+      arista.cvp.cv_device_v3:
+        devices: '{{ cvp_devices_detach_configlet }}'
+        state: present
+        apply_mode: strict
+      register: CV_DEVICE_V3_RESULT
+
+    - name: Run Python script to reconcile the device
+      ansible.builtin.command: python3 molecule/cv_device_v3/reconcile.py
+
+    - name: Execute Task for detach configlet
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{ CV_DEVICE_V3_RESULT.taskIds[0] }}"
+        state: cancelled
+
+    # Regardless of where the user specifies the reconciled configlets position, cv_device_v3
+    # will make sure to move to the tail end of the configlet list, which should not trigger
+    # an empty task.
+    - name: Testing misordering the reconciled configlet
+      arista.cvp.cv_device_v3:
+        devices: '{{ test_reconcile_misorder }}'
+        state: present
+      register: reconciled_misorder_result
+
+    - name: Checking that no task was generated
+      ansible.builtin.assert:
+        that:
+          - reconciled_misorder_result.changed == false
+          - reconciled_misorder_result.configlets_attached.changed == false
+          - reconciled_misorder_result.configlets_attached.configlets_attached_count == 0
+          - reconciled_misorder_result.success == false
+          - reconciled_misorder_result.configlets_attached.taskIds == []
+
+    - name: "Resetting original state on device: {{ inventory_hostname }}"
+      arista.cvp.cv_device_v3:
+        devices: '{{ cvp_devices_deploy }}'
+        apply_mode: strict
+        state: present
+      register: CV_DEVICE_V3_RESULT
+
+    - name: "Checking if the reset was successful"
+      ansible.builtin.assert:
+        that:
+          - CV_DEVICE_V3_RESULT.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.changed == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_count == 2
+          - CV_DEVICE_V3_RESULT.configlets_attached.configlets_attached_list == ["s1-leaf1_configlet_attached"]
+          - CV_DEVICE_V3_RESULT.configlets_attached.success == true
+          - CV_DEVICE_V3_RESULT.configlets_attached.taskIds != []
+
+    - name: "Delete config"
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{ cvp_configlets | combine({'RECONCILE_' + device_name: ''}) }}"
+        state: absent
+
+    - name: Execute the task to reset the device back to its original state
+      arista.cvp.cv_task_v3:
+        tasks:
+          - "{{ CV_DEVICE_V3_RESULT.configlets_attached.taskIds[0] }}"
+      when: CV_DEVICE_V3_RESULT.success is true
