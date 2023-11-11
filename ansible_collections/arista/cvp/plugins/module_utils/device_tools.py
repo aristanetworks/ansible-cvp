@@ -1546,6 +1546,10 @@ class CvDeviceTools(object):
                             error_message = f"Error to move device {device.fqdn} to container {device.container}"
                             MODULE_LOGGER.error(error_message)
                             self.__ansible.fail_json(msg=error_message)
+                        except CvpRequestError:
+                            error_message = f"Move device {device.fqdn} to container {device.container} failed. User is unauthorized!"
+                            MODULE_LOGGER.error(error_message)
+                            self.__ansible.fail_json(msg=error_message)
                         else:
                             if resp and resp['data']['status'] == 'success':
                                 result_data.changed = True
@@ -1924,6 +1928,11 @@ class CvDeviceTools(object):
                         self.__ansible.fail_json(
                             msg="Error applying configlets to device"
                         )
+                    except CvpRequestError:
+                        MODULE_LOGGER.error("Error applying configlets to device. User is unauthorized!")
+                        self.__ansible.fail_json(
+                            msg="Error applying configlets to device. User is unauthorized!"
+                        )
                     else:
                         if resp["data"]["status"] == "success":
                             result_data.changed = True
@@ -2013,6 +2022,11 @@ class CvDeviceTools(object):
                             )
                             self.__ansible.fail_json(
                                 msg=f"Error detaching configlets from device {device.fqdn}: {catch_error}"
+                            )
+                        except CvpRequestError:
+                            MODULE_LOGGER.error("Error detaching configlets to device. User is unauthorized!")
+                            self.__ansible.fail_json(
+                                msg="Error detaching configlets to device. User is unauthorized!"
                             )
                         else:
                             if resp["data"]["status"] == "success":
@@ -2213,6 +2227,11 @@ class CvDeviceTools(object):
                     self.__ansible.fail_json(
                         msg="Error removing device from provisioning"
                     )
+                except CvpRequestError:
+                    MODULE_LOGGER.error("Removing device from provisioning failed. User is unauthorized!")
+                    self.__ansible.fail_json(
+                        msg="Removing device from provisioning failed. User is unauthorized!"
+                    )
                 else:
                     if resp["result"] == "success":
                         result_data.changed = True
@@ -2251,8 +2270,11 @@ class CvDeviceTools(object):
             except CvpApiError:
                 MODULE_LOGGER.error("Error decommissioning device")
                 self.__ansible.fail_json(msg="Error decommissioning device")
-            except CvpRequestError:
-                request_err_msg = f"Device with {device_id} does not exist or is not registered to decommission"
+            except CvpRequestError as e:
+                if "403 Forbidden" in e.msg:
+                    request_err_msg =  f"User is unauthorized to decommission device {device_id}"
+                else:
+                    request_err_msg = f"Device with {device_id} does not exist or is not registered to decommission"
                 MODULE_LOGGER.error(request_err_msg)
                 self.__ansible.fail_json(msg=request_err_msg)
             else:
@@ -2315,6 +2337,9 @@ class CvDeviceTools(object):
                 except CvpApiError:
                     MODULE_LOGGER.error("Error resetting device")
                     self.__ansible.fail_json(msg="Error resetting device")
+                except CvpRequestError:
+                    MODULE_LOGGER.error("Error resetting device. Users is unauthorized!")
+                    self.__ansible.fail_json(msg="Error resetting device. Users is unauthorized!")
                 else:
                     if resp and resp["data"]["status"] == "success":
                         result_data.changed = True
