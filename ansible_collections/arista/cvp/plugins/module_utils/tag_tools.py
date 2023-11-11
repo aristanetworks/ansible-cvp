@@ -115,7 +115,11 @@ class CvTagTools(object):
         workspace_id = workspace_name_id
 
         workspace_name = workspace_name_id
-        self.__cv_client.api.workspace_config(workspace_id, workspace_name)
+        try:
+            self.__cv_client.api.workspace_config(workspace_id, workspace_name)
+        except CvpRequestError:
+            MODULE_LOGGER.info('Workspace creation failed. User is unauthorized!')
+            self.__ansible.fail_json(msg='Workspace creation failed. User is unauthorized!')
 
         # create tags and assign tags
         for per_device in tags:
