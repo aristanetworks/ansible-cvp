@@ -6,8 +6,11 @@ Module added in version 3.0.0
 ## Synopsis
 
 CloudVision Portal Configlet configuration requires a dictionary of containers with their parent, to create and delete containers on CVP side.
-Module also supports to configure configlets at container level.
-Returns number of created and/or deleted containers
+The Module also supports assigning configlets at the container level.
+Returns number of created and/or deleted containers.
+With the argument `apply_mode` set to `loose` the module will only add new containers.
+When `apply_mode` is set to `strict` the module will try to remove unspecified containers from CloudVision.
+This will fail if the container has configlets attached to it or devices are placed in the container.
 
 ## Module-specific Options
 
@@ -34,7 +37,7 @@ For a full view of the module inputs, please see the [schema documentation](../s
   gather_facts: no
   vars:
     verbose: False
-    containers:
+    CVP_CONTAINERS:
         Fabric:
             parentContainerName: Tenant
         Spines:
@@ -53,7 +56,7 @@ For a full view of the module inputs, please see the [schema documentation](../s
   gather_facts: no
   vars:
     verbose: False
-    containers:
+    CVP_CONTAINERS:
         Fabric:
             parentContainerName: Tenant
         Spines:
