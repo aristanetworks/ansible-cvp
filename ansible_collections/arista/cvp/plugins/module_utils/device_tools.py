@@ -2272,7 +2272,7 @@ class CvDeviceTools(object):
                 self.__ansible.fail_json(msg="Error decommissioning device")
             except CvpRequestError as e:
                 if "403 Forbidden" in e.msg:
-                    request_err_msg =  f"User is unauthorized to decommission device {device_id}"
+                    request_err_msg = f"User is unauthorized to decommission device {device_id}"
                 else:
                     request_err_msg = f"Device with {device_id} does not exist or is not registered to decommission"
                 MODULE_LOGGER.error(request_err_msg)
