@@ -1700,6 +1700,13 @@ class CvDeviceTools(object):
                             self.__ansible.fail_json(
                                 msg=f"Error applying bundle to device {device.fqdn}: {str(catch_error)}"
                             )
+                        except CvpRequestError as catch_error:
+                            MODULE_LOGGER.error(
+                                "Error applying bundle to device: %s", str(catch_error)
+                            )
+                            self.__ansible.fail_json(
+                                msg=f"Error applying bundle to device {device.fqdn}: {str(catch_error)}"
+                            )
                         else:
                             if resp and resp["data"]["status"] == "success":
                                 result_data.changed = True
