@@ -1936,10 +1936,9 @@ class CvDeviceTools(object):
                             msg="Error applying configlets to device"
                         )
                     except CvpRequestError:
-                        MODULE_LOGGER.error("Error applying configlets to device. User is unauthorized!")
-                        self.__ansible.fail_json(
-                            msg="Error applying configlets to device. User is unauthorized!"
-                        )
+                        message = "Failed to apply configlets to device. User is unauthorized!"
+                        MODULE_LOGGER.error(message)
+                        self.__ansible.fail_json(msg=message)
                     else:
                         if resp["data"]["status"] == "success":
                             result_data.changed = True
@@ -2235,10 +2234,9 @@ class CvDeviceTools(object):
                         msg="Error removing device from provisioning"
                     )
                 except CvpRequestError:
-                    MODULE_LOGGER.error("Removing device from provisioning failed. User is unauthorized!")
-                    self.__ansible.fail_json(
-                        msg="Removing device from provisioning failed. User is unauthorized!"
-                    )
+                    message = "Failed to remove device from provisioning. User is unauthorized!"
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 else:
                     if resp["result"] == "success":
                         result_data.changed = True
@@ -2279,7 +2277,7 @@ class CvDeviceTools(object):
                 self.__ansible.fail_json(msg="Error decommissioning device")
             except CvpRequestError as e:
                 if "403 Forbidden" in e.msg:
-                    request_err_msg = f"User is unauthorized to decommission device {device_id}"
+                    request_err_msg = f"Failed to decommission device {device_id}. User is unauthorized!"
                 else:
                     request_err_msg = f"Device with {device_id} does not exist or is not registered to decommission"
                 MODULE_LOGGER.error(request_err_msg)
@@ -2345,8 +2343,9 @@ class CvDeviceTools(object):
                     MODULE_LOGGER.error("Error resetting device")
                     self.__ansible.fail_json(msg="Error resetting device")
                 except CvpRequestError:
-                    MODULE_LOGGER.error("Error resetting device. Users is unauthorized!")
-                    self.__ansible.fail_json(msg="Error resetting device. Users is unauthorized!")
+                    message = "Failed to reset device. Users is unauthorized!"
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 else:
                     if resp and resp["data"]["status"] == "success":
                         result_data.changed = True
