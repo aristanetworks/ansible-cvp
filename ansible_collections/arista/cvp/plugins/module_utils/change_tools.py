@@ -654,7 +654,12 @@ class CvChangeControlTools():
                     MODULE_LOGGER.debug("Successfully deleted: %s", change_id)
                     changed = True
                 except Exception as e:
-                    self.__ansible.fail_json(msg="{0}".format(e))
+                    if "Forbidden" in str(e):
+                        message = "Failed to delete Change Control. User is unauthorized!"
+                    else:
+                        message = str(e)
+                    logging.error(message)
+                    self.__ansible.fail_json(msg="{0}".format(message))
 
                 return changed, {'remove': []}, warnings
 
@@ -704,7 +709,12 @@ class CvChangeControlTools():
                 data = cc_structure['key']
 
             except Exception as e:
-                self.__ansible.fail_json(msg="{0}".format(e))
+                if "Forbidden" in str(e):
+                    message = "Failed to create Change Control. User is unauthorized!"
+                else:
+                    message = str(e)
+                logging.error(message)
+                self.__ansible.fail_json(msg="{0}".format(message))
 
         elif state in ['approve', 'unapprove', 'execute', 'schedule', 'approve_and_execute', 'schedule_and_approve'] and self.__check_mode is False:
             MODULE_LOGGER.debug("Change control state: %s", state)
@@ -764,9 +774,14 @@ class CvChangeControlTools():
                         e = "Change control {0} id not found".format(cc_id)
                         self.__ansible.fail_json(msg="{0}".format(e))
                         return changed, {"approve": change_id}, warnings
-            except CvpRequestError:
+            except CvpRequestError as e:
                 # Skip this - covers the case where an approved CC is approved again
-                pass
+                if "Forbidden" in str(e):
+                    message = "Failed to approve Change Control. User is unauthorized!"
+                    self.__ansible.fail_json(msg="{0}".format(message))
+                    logging.error(str(message))
+                else:
+                    pass
             except Exception as e:
                 self.__ansible.fail_json(msg="{0}".format(e))
 
