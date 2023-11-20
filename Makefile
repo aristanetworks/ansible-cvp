@@ -91,7 +91,7 @@ build-docker3: ## [DEPRECATED] visit https://github.com/arista-netdevops-communi
 .PHONY: webdoc
 webdoc: ## Build documentation to publish static content
 	( cd $(WEBDOC_BUILD) ; \
-	python doc.py)
+	python3 doc.py)
 	cp $(CURRENT_DIR)/contributing.md $(WEBDOC_BUILD)/.. ;\
 
 .PHONY: check-cvp-404
