@@ -49,8 +49,8 @@ options:
     type: str
   state:
     description:
-        - If absent, configlets will be removed from CVP if they are not bound
-        - to either a container or a device.
+        - If absent, configlets will be removed from CVP if not
+          bound to a container or a device.
         - If present, configlets will be created or updated.
     required: false
     default: 'present'
@@ -69,12 +69,10 @@ EXAMPLES = r'''
       Test_Configlet: "! This is a Very First Testing Configlet\n!"
       Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
   tasks:
-    - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      tags:
-        - provision
-      cv_configlet:
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
         configlets: "{{configlet_list}}"
-        configlets_notes: "Configlet managed by Ansible"
+        state: present
       register: cvp_configlet
 '''
 

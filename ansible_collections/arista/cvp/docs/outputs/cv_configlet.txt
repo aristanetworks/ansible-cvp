@@ -1,0 +1,10 @@
+  cvp_configlet:
+    changed: true
+    data:
+      deleted: []
+      new:
+      - Test_Configlet: success
+      tasks: []
+      updated: []
+    diff: ''
+    failed: false

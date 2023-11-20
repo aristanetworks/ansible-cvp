@@ -1,0 +1,34 @@
+actions_manager:
+    actions_manager_count: 0
+    actions_manager_list:
+    - tag_AnsibleWorkspaceLZ7
+    changed: true
+    diff: {}
+    success: true
+    taskIds: []
+  invocation:
+    module_args:
+      auto_create: true
+      mode: create
+      tags:
+      - device: leaf1
+        device_tags:
+        - name: tag1
+          value: value1
+        - name: tag2
+          value: value2
+        interface_tags:
+        - interface: Ethernet1/1
+          tags:
+          - name: tag1
+            value: value1
+          - name: tag2
+            value: value2
+        - interface: Ethernet1/2
+          tags:
+          - name: tag1
+            value: value1
+          - name: tag2
+            value: value2
+  success: true
+  taskIds: []

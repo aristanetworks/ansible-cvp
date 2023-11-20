@@ -1,0 +1,36 @@
+  msg:
+    changed: true
+    configlets_attached:
+      changed: true
+      configlets_attached_count: 0
+      configlets_attached_list:
+      - TEAM01_LEAFS:GLOBAL-ALIASES
+      diff: {}
+      success: true
+      taskIds:
+      - '565'
+    configlets_detached:
+      changed: false
+      configlets_detached_count: 0
+      configlets_detached_list: []
+      diff: {}
+      success: true
+      taskIds: []
+    container_added:
+      changed: false
+      container_added_count: 0
+      container_added_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    container_deleted:
+      changed: false
+      container_deleted_count: 0
+      container_deleted_list: []
+      diff: {}
+      success: false
+      taskIds: []
+    failed: false
+    success: true
+    taskIds:
+    - '565'

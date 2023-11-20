@@ -121,21 +121,6 @@ nav:
     - Requirements: docs/installation/requirements.md
   - How-To:
     - CV Authentication: docs/how-to/cvp-authentication.md
-    - CV Modules v1:
-      - Get Facts: docs/how-to/v1/cv_facts.md
-      - Manage configlets: docs/how-to/v1/cv_configlet.md
-      - Manage containers: docs/how-to/v1/cv_container.md
-      - Manage devices: docs/how-to/v1/cv_device.md
-    - CV Modules v3:
-      - Manage configlets: docs/how-to/v3/cv_configlet_v3.md
-      - Manage containers: docs/how-to/v3/cv_container_v3.md
-      - Manage devices: docs/how-to/v3/cv_device_v3.md
-      - Manage images & bundles: docs/how-to/v3/cv_image_v3.md
-      - Manage tasks: docs/how-to/v3/cv_task_v3.md
-      - Manage tags: docs/how-to/v3/cv_tag_v3.md
-      - Manage change control: docs/how-to/v3/cv_change_control_v3.md
-      - Validate Configlets: docs/how-to/v3/cv_validate_v3.md
-      - Get facts from CloudVision: docs/how-to/v3/cv_facts_v3.md
     - Development tips & tricks: docs/installation/collection-installation.md
     - Activate logging: docs/how-to/debug.md
   - Schema documentation:
@@ -157,21 +142,21 @@ nav:
     - CloudVision Configlet Sync: roles/configlets_sync/README.md
   - Modules documentation:
     - Modules version 1:
-      - cv_facts: docs/modules/cv_facts.rst/
-      - cv_configlet: docs/modules/cv_configlet.rst/
-      - cv_container: docs/modules/cv_container.rst/
-      - cv_device: docs/modules/cv_device.rst/
-      - cv_task: docs/modules/cv_task.rst/
+      - cv_facts: docs/modules/cv_facts.md
+      - cv_configlet: docs/modules/cv_configlet.md
+      - cv_container: docs/modules/cv_container.md
+      - cv_device: docs/modules/cv_device.md
+      - cv_task: docs/modules/cv_task.md
     - Module version 3:
-      - cv_configlet_v3: docs/modules/cv_configlet_v3.rst.md
-      - cv_container_v3: docs/modules/cv_container_v3.rst.md
-      - cv_device_v3: docs/modules/cv_device_v3.rst.md
-      - cv_task_v3: docs/modules/cv_task_v3.rst.md
-      - cv_facts_v3: docs/modules/cv_facts_v3.rst.md
-      - cv_image_v3: docs/modules/cv_image_v3.rst.md
-      - cv_tag_v3: docs/modules/cv_tag_v3.rst.md
-      - cv_change_control_v3: docs/modules/cv_change_control_v3.rst.md
-      - cv_validate_v3: docs/modules/cv_validate_v3.rst.md
+      - cv_configlet_v3: docs/modules/cv_configlet_v3.md
+      - cv_container_v3: docs/modules/cv_container_v3.md
+      - cv_device_v3: docs/modules/cv_device_v3.md
+      - cv_task_v3: docs/modules/cv_task_v3.md
+      - cv_facts_v3: docs/modules/cv_facts_v3.md
+      - cv_image_v3: docs/modules/cv_image_v3.md
+      - cv_tag_v3: docs/modules/cv_tag_v3.md
+      - cv_change_control_v3: docs/modules/cv_change_control_v3.md
+      - cv_validate_v3: docs/modules/cv_validate_v3.md
   - External resources:
     - Ansible collection user guide: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html
     - Ansible User guide: https://docs.ansible.com/ansible/latest/user_guide/index.html

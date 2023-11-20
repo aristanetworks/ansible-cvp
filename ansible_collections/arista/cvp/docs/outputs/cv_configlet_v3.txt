@@ -1,0 +1,40 @@
+msg:
+  changed: true
+  configlets_created:
+    changed: false
+    configlets_created_count: 0
+    configlets_created_list: []
+    diff: {}
+    success: false
+    taskIds: []
+  configlets_deleted:
+    changed: false
+    configlets_deleted_count: 0
+    configlets_deleted_list: []
+    diff: {}
+    success: false
+    taskIds: []
+  configlets_updated:
+    changed: true
+    configlets_updated_count: 2
+    configlets_updated_list:
+    - 01TRAINING-alias
+    - 01TRAINING-01
+    diff:
+      01TRAINING-alias:
+      - 0.9565217391304348
+      - - |-
+          --- CVP
+        - |-
+          +++ Ansible
+        - |-
+          @@ -1 +1 @@
+        - -alias a101 show version
+        - +alias a103 show version
+    success: true
+    taskIds:
+    - '460'
+  failed: false
+  success: true
+  taskIds:
+  - '460'

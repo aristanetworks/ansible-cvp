@@ -33,20 +33,20 @@ description:
   - authentication with token is not supported for this module only.
 options:
   image:
-    description: Name of the image file, including path if needed
+    description: Name of the image file, including path if needed.
     required: false
     type: str
   image_list:
-    description: List of name of the image file, including path if needed
+    description: List of name of the image file, including path if needed.
     required: false
     type: list
     elements: str
   bundle_name:
-    description: Name of the bundle to manage
+    description: Name of the bundle to manage.
     required: false
     type: str
   mode:
-    description: What to manage with module
+    description: What to manage with the module.
     required: false
     type: str
     choices:
@@ -54,7 +54,7 @@ options:
       - image
     default: image
   action:
-    description: Action to do with module
+    description: Action to perform with the module.
     required: false
     default: get
     type: str

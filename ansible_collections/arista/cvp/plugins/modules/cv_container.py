@@ -39,15 +39,15 @@ deprecated:
   removed_from_collection: arista.cvp
 options:
   topology:
-    description: Yaml dictionary to describe intended containers
+    description: Yaml dictionary to describe intended containers.
     required: true
     type: dict
   cvp_facts:
-    description: Facts from CVP collected by cv_facts module
+    description: Facts from CVP collected by cv_facts module.
     required: true
     type: dict
   mode:
-    description: Allow to save topology or not
+    description: Allow to save topology or not.
     required: false
     default: merge
     choices:
@@ -66,9 +66,9 @@ options:
     elements: str
   options:
     description:
-      - Implements the ability to create a sub-argument_spec, where the sub
-      - options of the top level argument are also validated using
-      - the attributes discussed in this section.
+      Implements the ability to create a sub-argument_spec, where the sub
+      options of the top level argument are also validated using
+      the attributes discussed in this section.
     required: false
     type: dict
 '''

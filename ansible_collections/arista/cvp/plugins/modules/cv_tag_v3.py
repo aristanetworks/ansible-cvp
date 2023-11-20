@@ -30,16 +30,12 @@ description:
   - CloudVision Portal Tag module to Create/Assign/Delete/Unassign tags on CloudVision
 options:
   tags:
-    description: CVP tags
+    description: List of CVP tags.
     required: True
     type: list
     elements: dict
   mode:
-    description: action to carry out on the tags
-                 create - create tags
-                 delete - delete tags
-                 assign - assign existing tags to device
-                 unassign - unassign existing tags from device
+    description: Action to carry out on the tags.
     required: false
     type: str
     choices:
@@ -48,7 +44,7 @@ options:
       - assign
       - unassign
   auto_create:
-    description: auto_create tags before assigning
+    description: Automatically create tags before assigning.
     required: false
     default: true
     type: bool

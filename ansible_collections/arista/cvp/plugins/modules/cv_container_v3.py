@@ -35,21 +35,27 @@ short_description: Manage Provisioning topology.
 description:
   - CloudVision Portal Configlet configuration requires a dictionary of containers with their parent,
     to create and delete containers on CVP side.
-  - Module also supports to configure configlets at container level.
-  - Returns number of created and/or deleted containers
+  - The Module also supports assigning configlets at the container level.
+  - Returns number of created and/or deleted containers.
+  - With the argument `apply_mode` set to `loose` the module will only add new containers.
+  - When `apply_mode` is set to `strict` the module will try to remove unspecified containers from CloudVision.
+  - This will fail if the container has configlets attached to it or devices are placed in the container.
+
 options:
   topology:
-    description: YAML dictionary to describe intended containers
+    description: YAML dictionary to describe intended containers.
     required: true
     type: dict
   state:
-    description: Set if Ansible should build or remove devices on CloudVision
+    description: Set if Ansible should build or remove devices on CloudVision.
     required: false
     default: 'present'
     choices: ['present', 'absent']
     type: str
   apply_mode:
-    description: Set how configlets are attached/detached to containers. If set to strict all configlets not listed in your vars will be detached.
+    description:
+      Set how configlets are attached/detached to containers.
+      If set to strict all configlets not listed in your vars will be detached.
     required: false
     default: 'loose'
     choices: ['loose', 'strict']
@@ -64,7 +70,7 @@ EXAMPLES = r'''
   gather_facts: no
   vars:
     verbose: False
-    containers:
+    CVP_CONTAINERS:
         Fabric:
             parentContainerName: Tenant
         Spines:
@@ -83,7 +89,7 @@ EXAMPLES = r'''
   gather_facts: no
   vars:
     verbose: False
-    containers:
+    CVP_CONTAINERS:
         Fabric:
             parentContainerName: Tenant
         Spines:

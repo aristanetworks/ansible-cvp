@@ -27,31 +27,30 @@ version_added: 3.4.0
 author: Ansible Arista Team (@aristanetworks)
 short_description: Change Control management with CloudVision
 description:
-  - CloudVision Portal Change Control Module.
-  - ''
+  - CloudVision Portal change control module.
 options:
   name:
-    description: The name of the change control, If not provided, one will be generated automatically.
+    description: The name of the change control. If not provided, one will be generated automatically.
     required: false
     type: str
   change:
-    description: A dict containing the change control to be created/modified
+    description: A dictionary containing the change control to be created/modified.
     required: false
     type: dict
   state:
-    description: Set if we should get, set/update, or remove the change control
+    description: Set if we should get, set/update, or remove the change control.
     required: false
     default: 'show'
     choices: ['show', 'set', 'remove', 'approve', 'unapprove', 'execute',
               'schedule', 'approve_and_execute', 'schedule_and_approve']
     type: str
   change_id:
-    description: List of change IDs to get/remove
+    description: List of change IDs to get/remove.
     required: false
     type: list
     elements: str
   schedule_time:
-    description: RFC3339 time format, e.g., 2021-12-23T02:07:00.0
+    description: RFC3339 time format, e.g., `2021-12-23T02:07:00.0`.
     required: false
     type: str
 '''

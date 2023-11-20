@@ -1,0 +1,62 @@
+# {{ name }}
+
+{{ module.doc.short_description }}
+
+{% if module.doc.version_added -%}
+Module added in version {{ module.doc.version_added }}
+{%- endif %}
+
+## Synopsis
+
+{% for desc in module.doc.description %}
+{{ desc }}
+{% endfor %}
+
+## Module-specific Options
+
+The following options may be specified for this module:
+
+| parameter | type | required | default | choices | comments |
+| ------------- |-------------| ---------|----------- |--------- |--------- |
+{% for k,v in module.doc.items() %}
+{% if k == 'options' %}
+{% for option,values in v.items() %}
+| {{ option }}  |  {% if values.get('type') != None %} {{ values.get('type') }} {% endif %}|{% if values.get('required') != None %} {{ values['required'] | replace('true','yes') | replace('false','no') }} {% endif %} | {% if values.get('default') != None %} {{ values['default'] | replace('None','')}} {% endif %} |{% if values.get('choices') != None %} <ul>{% for each in values['choices'] %} <li>{{ each }}</li> {% endfor %}</ul>{% endif %} | {% if values.get('description') is iterable and (values.get('description') is not string and values.get('description') is not mapping) %} <ul>{% for each in values['description'] %} <li>{{ each }}</li> {% endfor %}</ul>{% else %}{{ values['description'] }}{% endif %} |
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% if schema %}
+## Inputs
+
+For a full view of the module inputs, please see the [schema documentation]({{ schema }}).
+{% endif %}
+
+## Examples
+
+{% if module.examples%}
+```yaml
+{{ module.examples }}
+```
+{% elif module.plainexamples %}
+```yaml
+{{ module.plainexamples }}
+```
+{% endif%}
+
+For a complete list of examples, check them out on our [GitHub repository](https://github.com/aristanetworks/ansible-cvp/tree/devel/ansible_collections/arista/cvp/examples).
+
+{% if module_output %}
+## Module output
+
+??? output "Example output"
+    ```yaml
+    --8<--
+    {{ module_output }}
+    --8<--
+    ```
+{% endif %}
+
+## Author
+
+{{ module.doc.author }}

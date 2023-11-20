@@ -45,14 +45,15 @@ options:
     required: true
     type: dict
   cvp_facts:
-    description: Facts from CVP collected by cv_facts module
+    description: Facts from CVP collected by cv_facts module.
     required: true
     type: dict
   device_filter:
-    description: Filter to apply intended mode on a set of configlet.
-                 If not used, then module only uses ADD mode. device_filter
-                 list devices that can be modified or deleted based
-                 on configlets entries.
+    description:
+      Filter to apply intended mode on a set of configlet.
+      If not used, then module only uses ADD mode. device_filter
+      list devices that can be modified or deleted based
+      on configlets entries.
     required: false
     default: ['all']
     type: list
@@ -75,9 +76,9 @@ options:
     type: str
   options:
     description:
-      - Implements the ability to create a sub-argument_spec, where the sub
-      - options of the top level argument are also validated using
-      - the attributes discussed in this section.
+      Implements the ability to create a sub-argument_spec, where the sub
+      options of the top level argument are also validated using
+      the attributes discussed in this section.
     required: false
     type: dict
 """
@@ -98,6 +99,7 @@ EXAMPLES = r"""
     devices_inventory:
       veos01:
         name: veos01
+        parentContainername: veos01
         configlets:
           - cv_device_test01
           - SYS_TelemetryBuilderV2_172.23.0.2_1

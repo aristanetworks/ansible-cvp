@@ -1,0 +1,139 @@
+TASK [SHOW output] **************************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: false
+    data:
+      change_controls:
+      - time: '2023-11-08T19:47:46.275176691Z'
+        value:
+          change:
+            name: s1-leaf 2A Change Control
+            notes: Initiated from Ansible Playbook
+            rootStageId: cfd63c69-c218-403d-8c76-2f6544b3d336
+            stages:
+              values:
+                a8b8db7e-fc5b-4966-8290-6caaab0c524e:
+                  name: LEAF2A_MLAG_Health
+                  rows:
+                    values:
+                    - values:
+                      - be136747-9dba-4325-a309-e4616d590de1
+                be136747-9dba-4325-a309-e4616d590de1:
+                  action:
+                    args:
+                      values:
+                        DeviceID: SN-DC1-POD1-LEAF2A
+                    name: mlaghealthcheck
+                  name: Check_LEAF2A_MLAG_Health
+                  rows: {}
+                cfd63c69-c218-403d-8c76-2f6544b3d336:
+                  name: s1-leaf 2A Change Control root stage
+                  rows:
+                    values:
+                    - values:
+                      - a8b8db7e-fc5b-4966-8290-6caaab0c524e
+            time: '2023-11-08T19:47:46.275176691Z'
+            user: cvpadmin
+          deviceIds:
+            values:
+            - SN-DC1-POD1-LEAF2A
+          key:
+            id: 1c5db627-d9cf-4a8f-8f10-b429c778d8ef
+    failed: false
+TASK [SET output] ***************************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      id: 06e192e0-74b8-4e79-b275-7f3cc04bff7a
+    failed: false
+TASK [APPROVE output] ***********************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:33:30.177118624Z'
+      value:
+        approve:
+          notes: Initiated from Ansible Playbook
+          value: true
+        key:
+          id: 06e192e0-74b8-4e79-b275-7f3cc04bff7a
+        version: '2023-11-08T19:33:24.518784086Z'
+    failed: false
+TASK [UNAPPROVE output] *********************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:45:07.908390315Z'
+      value:
+        approve:
+          notes: Initiated from Ansible Playbook
+          value: false
+        key:
+          id: af2a25f6-c929-49a5-9e3c-8ba0eb551b0d
+        version: '2023-11-08T19:45:01.555350127Z'
+    failed: false
+TASK [EXECUTE output] ***********************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:33:35.786232908Z'
+      value:
+        key:
+          id: 06e192e0-74b8-4e79-b275-7f3cc04bff7a
+        start:
+          notes: ''
+          value: true
+    failed: false
+TASK [SCHEDULE output] **********************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:39:24.208236092Z'
+      value:
+        key:
+          id: 09292183-8c6c-4c0a-9098-7f3f18f635b2
+        schedule:
+          notes: ''
+          value: '2024-06-15T15:47:00Z'
+    failed: false
+TASK [APPROVE AND EXECUTE] ******************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:33:52.673472540Z'
+      value:
+        key:
+          id: a6675eb7-fed9-4d5d-b157-6533be697472
+        start:
+          notes: ''
+          value: true
+    failed: false
+TASK [SCHEDULE AND APPROVE output] **********************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+      time: '2023-11-08T19:39:43.875892258Z'
+      value:
+        approve:
+          notes: Initiated from Ansible Playbook
+          value: true
+        key:
+          id: 3b64e94f-8cac-4bb6-80f5-fd7e2736c976
+        version: '2023-11-08T19:39:40.756528116Z'
+    failed: false
+TASK [Remove by name output] ************************************************************
+ok: [CloudVision] =>
+  msg:
+    changed: true
+    data:
+    - key:
+        id: DV8HoPbPX_WzIa5-6y1gy
+      time: '2023-11-08T20:39:38.691470915Z'
+    failed: false

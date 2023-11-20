@@ -1,0 +1,22 @@
+ansible_facts:
+  cvp_info:
+    editable: 2023.1.1
+  configlets:
+    - name: ANSIBLE_TESTING_CONTAINER
+      isDefault: 'no'
+      config: alias a57 show version
+      reconciled: false
+      netElementCount: 3
+      editable: true
+      dateTimeInLongFormat: 1574944821353
+      isDraft: false
+      note: '## Managed by Ansible ##'
+      visible: true
+      containerCount: 2
+      user: cvpadmin
+      key: configlet_3503_4572477104617871
+      sslConfig: false
+      devices:
+        - veos01
+        - veos03
+...

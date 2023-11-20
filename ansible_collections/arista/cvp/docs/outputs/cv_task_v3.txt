@@ -1,0 +1,14 @@
+msg:
+  actions_manager:
+    actions_manager_count: 2
+    actions_manager_list:
+    - task_747
+    - task_748
+    changed: true
+    diff: {}
+    success: true
+    taskIds: []
+  changed: true
+  failed: false
+  success: true
+  taskIds: []

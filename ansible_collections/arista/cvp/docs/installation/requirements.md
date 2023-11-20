@@ -8,14 +8,15 @@
 ## Arista CloudVision
 
 !!! info
-    Starting version 2.0.0, collection uses [cvprac](https://github.com/aristanetworks/cvprac) as CloudVision connection manager. So support for any new CLoudvision server is tied to it support in this python library.
+    Starting with version 2.0.0, the collection uses [cvprac](https://github.com/aristanetworks/cvprac) as CloudVision connection manager. So support for any new CloudVision server is tied to it's support in this Python library.
 
-| ansible-cvp | 1.0.0 | 1.1.0 | 2.0.0 & higher |
-| ----------- | ----- | ----- | -------------- |
-| 2018.2 | ✅ | ✅ | ✅ |
-| 2019.x | ✅ | ✅ | ✅ |
-| 2020.1 | | ✅ | ✅ |
-| >= 2020.2 | | | ✅ |
+| ansible-cvp | 1.0.0 | 1.1.0 | >= 2.0.0 |>= 3.9.0 |
+| ----------- | ----- | ----- | -------- | -------- |
+| 2018.2 | ✅ | ✅ | ✅ | |
+| 2019.x | ✅ | ✅ | ✅ | |
+| 2020.1 | | ✅ | ✅ | |
+| >= 2020.2 | | | ✅ | |
+| >= 2021.3 | | | | ✅ |
 
 ## Python
 

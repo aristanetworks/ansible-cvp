@@ -52,7 +52,7 @@ options:
     default: 'Managed by Ansible'
     type: str
   cvp_facts:
-    description: Facts extracted from CVP servers using cv_facts module
+    description: Facts extracted from CVP servers using cv_facts module.
     required: true
     type: dict
   configlet_filter:
@@ -67,9 +67,9 @@ options:
   filter_mode:
     description:
         - If loose, a match is when a configlet matches a substring of a
-          configlet defined in the filter
+          configlet defined in the filter.
         - If strict, a match is when a configlet exactly matches a
-          configlet defined in the filter
+          configlet defined in the filter.
     required: false
     default: 'loose'
     choices: ['loose', 'strict']
@@ -85,9 +85,9 @@ options:
     type: str
   options:
     description:
-      - Implements the ability to create a sub-argument_spec, where the sub
-      - options of the top level argument are also validated using
-      - the attributes discussed in this section.
+      Implements the ability to create a sub-argument_spec, where the sub
+      options of the top level argument are also validated using
+      the attributes discussed in this section.
     required: false
     type: dict
 '''

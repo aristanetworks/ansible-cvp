@@ -35,7 +35,7 @@ options:
     type: list
     elements: dict
   validate_mode:
-    description: Indicate how cv_validate_v3 should behave on finding errors and/or warnings.
+    description: Indicate how cv_validate_v3 should behave on finding errors or warnings.
     required: true
     type: str
     choices:

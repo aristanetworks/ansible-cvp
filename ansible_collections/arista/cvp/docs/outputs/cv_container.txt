@@ -1,0 +1,31 @@
+  containers:
+    changed: false
+    cv_container:
+      attached_configlet:
+        configlet_attached: 0
+        list: []
+        taskIds: []
+      changed: true
+      creation_result:
+        containers_created: '2'
+      moved_result:
+        devices_moved: 0
+        list: []
+        taskIds: []
+      taskIds: []
+      tasks: []
+    data:
+      attached_configlet:
+        configlet_attached: 0
+        list: []
+        taskIds: []
+      changed: true
+      creation_result:
+        containers_created: '2'
+      moved_result:
+        devices_moved: 0
+        list: []
+        taskIds: []
+      taskIds: []
+      tasks: []
+    failed: false
