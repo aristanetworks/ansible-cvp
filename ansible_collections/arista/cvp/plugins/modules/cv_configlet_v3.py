@@ -72,7 +72,7 @@ EXAMPLES = r'''
     - name: 'Create configlets on CVP {{inventory_hostname}}.'
       tags:
         - provision
-      cv_configlet:
+      cv_configlet_v3:
         configlets: "{{configlet_list}}"
         configlets_notes: "Configlet managed by Ansible"
       register: cvp_configlet
