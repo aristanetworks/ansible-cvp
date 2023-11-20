@@ -592,6 +592,7 @@ class CvFactsTools():
             cv_devices = self.__cv_client.api.get_inventory()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting devices facts: %s', str(error_msg))
+            raise error_msg
         MODULE_LOGGER.info('Extract device data using filter %s', str(filter))
         facts_builder = CvFactResource()
         for device in cv_devices:
@@ -614,6 +615,7 @@ class CvFactsTools():
             cv_containers = self.__cv_client.api.get_containers()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting containers facts: %s', str(error_msg))
+            raise error_msg
         facts_builder = CvFactResource()
         for container in cv_containers['data']:
             if container[Api.generic.NAME] != 'Tenant':
@@ -637,7 +639,11 @@ class CvFactsTools():
         configlets_per_call : int, optional
             Number of configlets to retrieve per API call, by default 10
         """
-        max_range_calc = self.__cv_client.api.get_configlets(start=0, end=1)['total'] + 1
+        try:
+            max_range_calc = self.__cv_client.api.get_configlets(start=0, end=1)['total'] + 1
+        except CvpApiError as error_msg:
+            MODULE_LOGGER.error('Error when collecting configlets facts: %s', str(error_msg))
+            raise error_msg
         futures_list = []
         results = []
         with ThreadPoolExecutor(max_workers=self._max_worker) as executor:
@@ -678,6 +684,7 @@ class CvFactsTools():
             cv_images = self.__cv_client.api.get_images()
         except CvpApiError as error_msg:
             MODULE_LOGGER.error('Error when collecting images facts: %s', str(error_msg))
+            raise error_msg
 
         facts_builder = CvFactResource()
         for image in cv_images['data']:
@@ -710,18 +717,21 @@ class CvFactsTools():
                 cv_tasks = cv_tasks['data']
             except CvpApiError as error_msg:
                 MODULE_LOGGER.error('Error when collecting task facts: %s', str(error_msg))
+                raise error_msg
         elif isinstance(filter, str):
             # filter by task status
             try:
                 cv_tasks = self.__cv_client.api.get_tasks_by_status(filter)
             except CvpApiError as error_msg:
                 MODULE_LOGGER.error('Error when collecting %s task facts: %s', filter, str(error_msg))
+                raise error_msg
         elif isinstance(filter, int):
             # filter by task_id
             try:
                 cv_tasks = self.__cv_client.api.get_task_by_id(filter)
             except CvpApiError as error_msg:
                 MODULE_LOGGER.error('Error when collecting %s task facts: %s', filter, str(error_msg))
+                raise error_msg
 
         for task in cv_tasks:
             MODULE_LOGGER.debug('Got following information for task: %s', str(task))

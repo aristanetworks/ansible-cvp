@@ -137,7 +137,15 @@ class CvTaskTools():
             api_result = CvApiResult(action_name='task_' + str(task_id))
             if self.is_actionable(task_data=self.__get_task_data(task_id)):
                 if self.__ansible.check_mode is False:
-                    self.__cv_client.api.add_note_to_task(task_id, "Executed by Ansible")
+                    try:
+                        self.__cv_client.api.add_note_to_task(task_id, "Executed by Ansible")
+                    except CvpRequestError as e:
+                        if "Forbidden" in str(e):
+                            message = "Error while adding note and executing task. User is unauthorized!"
+                        else:
+                            message = "Error while adding note to task: {0}".format(str(e))
+                        logging.error(message)
+                        self.__ansible.fail_json(msg=message)
                     if state == "executed":
                         api_result.add_entry(self.execute_task(task_id))
                         api_result.changed = True

@@ -32,7 +32,7 @@ from ansible_collections.arista.cvp.plugins.module_utils.resources.schemas impor
 from ansible_collections.arista.cvp.plugins.module_utils.tools_schema import validate_json_schema
 from ansible_collections.arista.cvp.plugins.module_utils.resources.exceptions import AnsibleCVPApiError, AnsibleCVPNotFoundError, CVPRessource
 try:
-    from cvprac.cvp_client_errors import CvpClientError, CvpApiError
+    from cvprac.cvp_client_errors import CvpClientError, CvpApiError, CvpRequestError
     HAS_CVPRAC = True
 except ImportError:
     HAS_CVPRAC = False
@@ -356,6 +356,13 @@ class CvContainerTools(object):
                         container=container,
                         create_task=save_topology
                     )
+                except CvpRequestError as e:
+                    if "Forbidden" in str(e):
+                        message = "Error configuring configlets. User is unauthorized!"
+                    else:
+                        message = "Error configuring configlets " + str(configlets) + " to container " + str(container) + ". Exception: " + str(e)
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 except CvpApiError as e:
                     message = "Error configuring configlets " + str(configlets) + " to container " + str(container) + ". Exception: " + str(e)
                     MODULE_LOGGER.error(message)
@@ -425,6 +432,13 @@ class CvContainerTools(object):
                     container=container,
                     create_task=save_topology
                 )
+            except CvpRequestError as e:
+                if "Forbidden" in str(e):
+                    message = "Error removing configlets. User is unauthorized!"
+                else:
+                    message = "Error removing configlets " + str(configlets) + " to container " + str(container) + ". Exception: " + str(e)
+                MODULE_LOGGER.error(message)
+                self.__ansible.fail_json(msg=message)
             except CvpApiError as e:
                 message = "Error removing configlets " + str(configlets) + " from container " + str(container) + ". Exception: " + str(e)
                 MODULE_LOGGER.error(message)
@@ -507,6 +521,13 @@ class CvContainerTools(object):
                                 container[Api.generic.NAME],
                                 'container'
                             )
+                        except CvpRequestError as e:
+                            if "Forbidden" in str(e):
+                                message = "Error applying bundle to container. User is unauthorized!"
+                            else:
+                                message = "Error applying bundle to container " + str(container[Api.generic.NAME]) + ". Exception: " + str(e)
+                            MODULE_LOGGER.error(message)
+                            self.__ansible.fail_json(msg=message)
                         except CvpApiError as catch_error:
                             MODULE_LOGGER.error('Error applying bundle to device: %s', str(catch_error))
                             self.__ansible.fail_json(msg='Error applying bundle to container' + container[Api.generic.NAME] + ': ' + catch_error)
@@ -567,6 +588,13 @@ class CvContainerTools(object):
                             container[Api.generic.NAME],
                             'container'
                         )
+                    except CvpRequestError as e:
+                        if "Forbidden" in str(e):
+                            message = "Error removing bundle from container. User is unauthorized!"
+                        else:
+                            message = "Error removing bundle from container " + str(container[Api.generic.NAME]) + ". Exception: " + str(e)
+                        MODULE_LOGGER.error(message)
+                        self.__ansible.fail_json(msg=message)
                     except CvpApiError as catch_error:
                         MODULE_LOGGER.error('Error removing bundle from container: %s', str(catch_error))
                         self.__ansible.fail_json(msg='Error removing bundle from container: ' + container[Api.generic.NAME] + ': ' + catch_error)
@@ -839,6 +867,13 @@ class CvContainerTools(object):
                     try:
                         resp = self.__cvp_client.api.add_container(
                             container_name=container, parent_key=parent_id, parent_name=parent)
+                    except CvpRequestError as e:
+                        if "Forbidden" in str(e):
+                            message = "Error creating container. User is unauthorized!"
+                        else:
+                            message = "Error creating container " + str(container) + ". Exception: " + str(e)
+                        MODULE_LOGGER.error(message)
+                        self.__ansible.fail_json(msg=message)
                     except CvpApiError as e:
                         # Add Ansible error management
                         message = "Error creating container " + str(container) + " on CV. Exception: " + str(e)
@@ -915,6 +950,13 @@ class CvContainerTools(object):
                 try:
                     resp = self.__cvp_client.api.delete_container(
                         container_name=container, container_key=container_id, parent_key=parent_id, parent_name=parent)
+                except CvpRequestError as e:
+                    if "Forbidden" in str(e):
+                        message = "Error deleting container. User is unauthorized!"
+                    else:
+                        message = "Error deleting container " + str(container) + ". Exception: " + str(e)
+                    MODULE_LOGGER.error(message)
+                    self.__ansible.fail_json(msg=message)
                 except CvpApiError as e:
                     # Add Ansible error management
                     message = "Error deleting container " + str(container) + " on CV. Exception: " + str(e)
