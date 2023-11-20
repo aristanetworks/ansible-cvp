@@ -143,7 +143,7 @@ class CvTaskTools():
                         if "Forbidden" in str(e):
                             message = "Error while adding note and executing task. User is unauthorized!"
                         else:
-                            message = "Error while adding note to task: {}".format(str(e))
+                            message = "Error while adding note to task: {0}".format(str(e))
                         logging.error(message)
                         self.__ansible.fail_json(msg=message)
                     if state == "executed":
