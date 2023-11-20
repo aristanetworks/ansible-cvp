@@ -433,12 +433,12 @@ class CvContainerTools(object):
                     create_task=save_topology
                 )
             except CvpRequestError as e:
-                    if "Forbidden" in str(e):
-                        message = "Error removing configlets. User is unauthorized!"
-                    else:
-                        message = "Error removing configlets " + str(configlets) + " to container " + str(container) + ". Exception: " + str(e)
-                    MODULE_LOGGER.error(message)
-                    self.__ansible.fail_json(msg=message)
+                if "Forbidden" in str(e):
+                    message = "Error removing configlets. User is unauthorized!"
+                else:
+                    message = "Error removing configlets " + str(configlets) + " to container " + str(container) + ". Exception: " + str(e)
+                MODULE_LOGGER.error(message)
+                self.__ansible.fail_json(msg=message)
             except CvpApiError as e:
                 message = "Error removing configlets " + str(configlets) + " from container " + str(container) + ". Exception: " + str(e)
                 MODULE_LOGGER.error(message)
@@ -871,7 +871,7 @@ class CvContainerTools(object):
                         if "Forbidden" in str(e):
                             message = "Error creating container. User is unauthorized!"
                         else:
-                            message = "Error creating container " + str(container) +  ". Exception: " + str(e)
+                            message = "Error creating container " + str(container) + ". Exception: " + str(e)
                         MODULE_LOGGER.error(message)
                         self.__ansible.fail_json(msg=message)
                     except CvpApiError as e:
@@ -954,7 +954,7 @@ class CvContainerTools(object):
                     if "Forbidden" in str(e):
                         message = "Error deleting container. User is unauthorized!"
                     else:
-                        message = "Error deleting container " + str(container) +  ". Exception: " + str(e)
+                        message = "Error deleting container " + str(container) + ". Exception: " + str(e)
                     MODULE_LOGGER.error(message)
                     self.__ansible.fail_json(msg=message)
                 except CvpApiError as e:
