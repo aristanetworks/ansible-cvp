@@ -69,12 +69,10 @@ EXAMPLES = r'''
       Test_Configlet: "! This is a Very First Testing Configlet\n!"
       Test_DYNAMIC_Configlet: "{{ lookup('file', 'templates/configlet_'+inventory_hostname+'.txt') }}"
   tasks:
-    - name: 'Create configlets on CVP {{inventory_hostname}}.'
-      tags:
-        - provision
-      cv_configlet_v3:
+    - name: "Push config"
+      arista.cvp.cv_configlet_v3:
         configlets: "{{configlet_list}}"
-        configlets_notes: "Configlet managed by Ansible"
+        state: present
       register: cvp_configlet
 '''
 
