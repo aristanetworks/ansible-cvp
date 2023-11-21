@@ -1,3 +1,9 @@
+<!--
+  ~ Copyright (c) 2023 Arista Networks, Inc.
+  ~ Use of this source code is governed by the Apache License 2.0
+  ~ that can be found in the LICENSE file.
+  -->
+
 # configlet_sync role
 
 Ansible role to synchronize configlets between 2 instances of [CloudVision](https://www.arista.com/en/products/eos/eos-cloudvision) servers.

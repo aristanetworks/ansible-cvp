@@ -1,3 +1,9 @@
+<!--
+  ~ Copyright (c) 2023 Arista Networks, Inc.
+  ~ Use of this source code is governed by the Apache License 2.0
+  ~ that can be found in the LICENSE file.
+  -->
+
 # Debug logs
 
 If required, `arista.cvp` collection supports debug log to get more information about process execution and save all these information in a log file.
