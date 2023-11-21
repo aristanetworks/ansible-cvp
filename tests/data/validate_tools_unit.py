@@ -1,3 +1,6 @@
+# Copyright (c) 2023 Arista Networks, Inc.
+# Use of this source code is governed by the Apache License 2.0
+# that can be found in the LICENSE file.
 # error configlet
 validate_router_bgp = {
     "config": "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111",

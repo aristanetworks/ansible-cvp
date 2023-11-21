@@ -1,3 +1,6 @@
+# Copyright (c) 2023 Arista Networks, Inc.
+# Use of this source code is governed by the Apache License 2.0
+# that can be found in the LICENSE file.
 ---
 - name: gather os specific variables for Centos / Red Hat OS
   include_vars: "centos-{{ ansible_distribution_major_version }}.yml"

@@ -1,3 +1,9 @@
+<!--
+  ~ Copyright (c) 2023 Arista Networks, Inc.
+  ~ Use of this source code is governed by the Apache License 2.0
+  ~ that can be found in the LICENSE file.
+  -->
+
 # Collection installation
 
 These instructions are for regular users to install via Ansible Galaxy. To setup a development environment use [these](https://www.avd.sh/en/devel/docs/contribution/overview.html) instructions.
