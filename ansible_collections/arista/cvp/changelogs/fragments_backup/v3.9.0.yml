@@ -1,0 +1,9 @@
+release_summary: |
+  Release 3.9.0 - See documentation on cvp.avd.sh for details.
+
+minor_changes:
+- Feat(cv_facts_v3) raise errors when svcaccount/user is not authorized (#677)
+
+bugfixes:
+- Fix(cv_tag_v3) Long workspace name to avoid conflict (#679)
+- Fix(cv_device_v3) Reconciled configlets are not treated specially (#667)
