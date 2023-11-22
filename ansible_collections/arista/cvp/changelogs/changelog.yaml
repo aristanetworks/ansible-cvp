@@ -118,3 +118,16 @@ releases:
     fragments:
     - v3.8.0.yml
     release_date: '2023-08-29'
+  3.9.0:
+    changes:
+      bugfixes:
+      - Fix(cv_device_v3) Reconciled configlets are not treated specially (#667)
+      - Fix(cv_tag_v3) Long workspace name to avoid conflict (#679)
+      minor_changes:
+      - Feat(cv_facts_v3) raise errors when svcaccount/user is not authorized (#677)
+      release_summary: 'Release 3.9.0 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.9.0.yml
+    release_date: '2023-11-21'

@@ -5,6 +5,26 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.9.0
+======
+
+Release Summary
+---------------
+
+Release 3.9.0 - See documentation on cvp.avd.sh for details.
+
+
+Minor Changes
+-------------
+
+- Feat(cv_facts_v3) raise errors when svcaccount/user is not authorized (#677)
+
+Bugfixes
+--------
+
+- Fix(cv_device_v3) Reconciled configlets are not treated specially (#667)
+- Fix(cv_tag_v3) Long workspace name to avoid conflict (#679)
+
 v3.8.0
 ======
 
