@@ -63,7 +63,7 @@ def cv_connect(module):
     cert_validation = connection.get_option("validate_certs") or os.getenv("CVP_CERT_VALIDATE")
     is_cvaas = True if cvp_user == 'cvaas' else False
     # Deliberately checking against remote_user to see if ansible_user was set in inventory
-    api_token = ((cvp_pass if connection.get_option("remote_user") in svc_accounts) or os.getenv("CVP_TOKEN")) or None
+    api_token = (cvp_pass if connection.get_option("remote_user") in svc_accounts else None) or os.getenv("CVP_TOKEN")
     user = cvp_user if is_cvaas == False else ''
     user_authentication = cvp_pass if is_cvaas == False else ''
     ansible_command_timeout = connection.get_option(
