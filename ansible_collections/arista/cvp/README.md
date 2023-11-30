@@ -187,6 +187,19 @@ ansible_httpapi_port=443
 
 As modules of this collection are based on [`HTTPAPI` connection plugin](https://docs.ansible.com/ansible/latest/plugins/httpapi.html), authentication elements shall be declared using this plugin mechanism and are automatically shared with `arista.cvp.cv_*` modules.
 
+Alternatively, on a play where you are leveraging a plugin you can omit CVP from inventory, set the play to target "localhost" and set the connection requirements using the following environment variables:
+
+CVP_HOST (Example: mycvpserver.prod.example.com)
+CVP_PORT (Example: 443)
+CVP_USER (Example: myserviceaccount) *
+CVP_PASS (Example: mystrongpassword)
+CVP_TOKEN (Example: mycvpapitoken)
+CVP_CERT_VALIDATE (Example: False)
+CVP_CMD_TIMEOUT (Example: 30)
+CVP_CON_TIMEOUT (Example: 90)
+
+* Review the CVP Authentication documentation for local service accounts.
+
 ## License
 
 The project is published under [Apache License](LICENSE).
