@@ -52,24 +52,47 @@ def cv_connect(module):
     """
     client = CvpClient()
     LOGGER.info('Connecting to CVP')
-    connection = Connection(module._socket_path)
+    inventory = False
+    try:
+        connection = Connection(module._socket_path)
+        inventory = True
+    except(AssertionError):
+        pass
     # Use 'cvaas' user for CVaaS connection and 'svc_account' for CV on-prem using service account token
     svc_accounts = ['cvaas', 'svc_account']
-    # Assignment for username, and password moved here for conciseness since they have added logic checks below
-    cvp_user = connection.get_option("remote_user") or os.getenv("CVP_USER")
-    cvp_pass = connection.get_option("password") or os.getenv("CVP_PASS")
-    host = connection.get_option("host") or os.getenv("CVP_HOST")
-    port = connection.get_option("port") or os.getenv("CVP_PORT")
-    cert_validation = connection.get_option("validate_certs") or os.getenv("CVP_CERT_VALIDATE")
+    # Checks if inventory is set or if environment variables are preferred
+    if inventory:
+        cvp_user = connection.get_option("remote_user")
+        cvp_pass = connection.get_option("password")
+        host = connection.get_option("host")
+        port = int(connection.get_option("port"))
+        cert_validation = connection.get_option("validate_certs")
+        if cert_validation == "True":
+            cert_validation = True
+        elif cert_validation == "False":
+            cert_validation = False
+        api_token = (cvp_pass if connection.get_option("remote_user") in svc_accounts else None)
+        ansible_command_timeout = connection.get_option(
+        "persistent_command_timeout")
+        ansible_connect_timeout = connection.get_option(
+        "persistent_connect_timeout")
+    else:
+        cvp_user = os.getenv("CVP_USER")
+        cvp_pass = os.getenv("CVP_PASS")
+        host = os.getenv("CVP_HOST")
+        port = int(os.getenv("CVP_PORT"))
+        cert_validation = os.getenv("CVP_CERT_VALIDATE")
+        if cert_validation == "True":
+            cert_validation = True
+        elif cert_validation == "False":
+            cert_validation = False
+        api_token = os.getenv("CVP_TOKEN")
+        ansible_command_timeout = int(os.getenv("CVP_CMD_TIMEOUT"))
+        ansible_connect_timeout = int(os.getenv("CVP_CON_TIMEOUT"))
+
     is_cvaas = True if cvp_user == 'cvaas' else False
-    # Deliberately checking against remote_user to see if ansible_user was set in inventory
-    api_token = (cvp_pass if connection.get_option("remote_user") in svc_accounts else None) or os.getenv("CVP_TOKEN")
     user = cvp_user if is_cvaas == False else ''
     user_authentication = cvp_pass if is_cvaas == False else ''
-    ansible_command_timeout = connection.get_option(
-        "persistent_command_timeout") or os.getenv("CVP_CMD_TIMEOUT")
-    ansible_connect_timeout = connection.get_option(
-        "persistent_connect_timeout") or os.getenv("CVP_CON_TIMEOUT")
 
     # The following is needed because of https://github.com/ansible/ansible/issues/75503
     # Which was fixed in https://github.com/ansible/ansible/pull/78236
