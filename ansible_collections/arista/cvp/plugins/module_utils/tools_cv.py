@@ -65,13 +65,9 @@ def cv_connect(module):
         cvp_user = connection.get_option("remote_user")
         cvp_pass = connection.get_option("password")
         host = connection.get_option("host")
-        port = int(connection.get_option("port"))
+        port = connection.get_option("port")
         cert_validation = connection.get_option("validate_certs")
-        if cert_validation == "True":
-            cert_validation = True
-        elif cert_validation == "False":
-            cert_validation = False
-        api_token = (cvp_pass if connection.get_option("remote_user") in svc_accounts else None)
+        api_token = cvp_pass if cvp_user in svc_accounts else None
         ansible_command_timeout = connection.get_option(
         "persistent_command_timeout")
         ansible_connect_timeout = connection.get_option(
