@@ -63,16 +63,31 @@ ansible_password: "{{ lookup('file', '/path/to/onprem.token')}}"
 
 ### Example reading from an environment variable
 
+The following environment variables are supported for cvp authentication:
+
+CVP_HOST (Example: mycvpserver.prod.example.com)
+CVP_PORT (Example: 443)
+CVP_USER (Example: myserviceaccount) *
+CVP_PASS (Example: mystrongpassword)
+CVP_TOKEN (Example: mycvpapitoken)
+CVP_CERT_VALIDATE (Example: False)
+CVP_CMD_TIMEOUT (Example: 30)
+CVP_CON_TIMEOUT (Example: 90)
+
 ```shell
-export ONPREM_TOKEN=`cat /path/to/onprem.token`
+export CVP_USER=svc_account
 ```
+
+While it is possible to reference an environment variable in host or group vars like so:
 
 ```yaml
 ansible_user: svc_account
-ansible_password: "{{ lookup('env', 'ONPREM_TOKEN')}}"
+ansible_password: "{{ lookup('env', 'CVP_TOKEN')}}"
 ```
 
-> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the password or the token.
+for Ansible Tower (AAPv2) it is not supported to reference templated variables in a sourced inventory. Providing values as environment variables via Custom Credential Types and associating the credentials with an inventory source or template allows you to store values such as the FQDN or Token within Ansible Tower and pass them to plugins.
+
+> NOTE Remove CVP from your inventory and replace any references to it with localhost in plays / tasks that reference it for targeting or delegation if you want to leverage the environment variables.
 
 ### Example using vault
 
@@ -113,6 +128,7 @@ all:
 provide the password with any other methods as described in the [ansible vault documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html#using-encrypted-variables-and-files).
 
 > NOTE Encrypting individual variables using vault may not be supported - cf notes at the end of ## On-premise CloudVision authentication section
+> NOTE This is not supported in Ansible Tower (AAPv2)
 
 ## CloudVision as a Service authentication
 
@@ -146,19 +162,38 @@ ansible_password: "{{ lookup('file', '/path/to/cvaas.token')}}"
 
 ### Example reading from an environment variable
 
-export CVAAS_TOKEN=`cat /path/to/cvaas.token`
+The following environment variables are supported for cvp authentication:
 
-```yaml
-ansible_user: cvaas
-ansible_password: "{{ lookup('env', 'CVAAS_TOKEN')}}"
+CVP_HOST (Example: mycvpserver.prod.example.com)
+CVP_PORT (Example: 443)
+CVP_USER (Example: myserviceaccount) *
+CVP_PASS (Example: mystrongpassword)
+CVP_TOKEN (Example: mycvpapitoken)
+CVP_CERT_VALIDATE (Example: False)
+CVP_CMD_TIMEOUT (Example: 30)
+CVP_CON_TIMEOUT (Example: 90)
+
+```shell
+export CVP_USER=svc_account
 ```
 
-> NOTE Both `ansible_ssh_pass` and `ansible_password` can be used to specify the token.
+While it is possible to reference an environment variable in host or group vars like so:
+
+```yaml
+ansible_user: svc_account
+ansible_password: "{{ lookup('env', 'CVP_TOKEN')}}"
+```
+
+for Ansible Tower (AAPv2) it is not supported to reference templated variables in a sourced inventory. Providing values as environment variables via Custom Credential Types and associating the credentials with an inventory source or template allows you to store values such as the FQDN or Token within Ansible Tower and pass them to plugins.
+
+> NOTE Remove CVP from your inventory and replace any references to it with localhost in plays / tasks that reference it for targeting or delegation if you want to leverage the environment variables.
 
 ### Example using vault
 
 1. Save the token generated from the CV/CVaaS UI and encrypt it using `ansible-vault encrypt cvaas.token`
 2. Run the playbook with `ansible-playbook example.yaml --ask-vault-pass`
+
+> NOTE This is not supported in Ansible Tower (AAPv2), refer to previous section.
 
 ## How to validate SSL certificate
 
