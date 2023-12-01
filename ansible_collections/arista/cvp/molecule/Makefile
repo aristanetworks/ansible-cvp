@@ -54,3 +54,14 @@ destroy: ## destroy all molecule scenarios
 		cd ./molecule ; \
         fi \
     done
+
+.PHONY: test-molecule-v3
+test-molecule-v3:## Run V3 molecule scenarios
+	@while read -r MOLECULE_SCENARIO; do \
+        if [ -d "$$MOLECULE_SCENARIO" ]; then\
+            echo "Run scenario for "$$MOLECULE_SCENARIO && \
+            cd .. ; \
+            molecule converge --scenario-name $$MOLECULE_SCENARIO -- $(ANSIBLE_OPTIONS); \
+            cd ./molecule ; \
+        fi \
+    done <MOLECULE_SCENARIOS.txt
