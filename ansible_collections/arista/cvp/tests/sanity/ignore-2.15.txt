@@ -9,6 +9,7 @@ plugins/modules/cv_facts_v3.py validate-modules:missing-gplv3-license
 plugins/modules/cv_facts.py validate-modules:missing-gplv3-license
 plugins/modules/cv_image_v3.py validate-modules:missing-gplv3-license
 plugins/modules/cv_tag_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_validate_v3.py validate-modules:missing-gplv3-license
 plugins/modules/cv_task_v3.py validate-modules:missing-gplv3-license
 plugins/modules/cv_task.py validate-modules:missing-gplv3-license
 plugins/module_utils/change_tools.py compile-2.7!skip
