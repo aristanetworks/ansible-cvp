@@ -65,6 +65,7 @@
       ansible.builtin.assert:
         that:
           # yamllint disable-line rule:colons
+          # To disable error: "colons: too many spaces before colon"
           - create_bundle_data.data.data == "Bundle : Test_bundle successfully created"
 
     - name: "Create second bundle for test"
@@ -80,6 +81,7 @@
       ansible.builtin.assert:
         that:
           # yamllint disable-line rule:colons
+          # To disable error: "colons: too many spaces before colon"
           - create_bundle_data_2.data.data == "Bundle : vEOS-lab-4.30.1F successfully created"
 
     - name: Build Container Topology with image bundle On {{ inventory_hostname }}
