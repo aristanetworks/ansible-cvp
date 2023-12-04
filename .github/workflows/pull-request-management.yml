@@ -95,7 +95,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [3.9]
+        python_version: ['3.9','3.10','3.11']
     steps:
       - name: 'set environment variables'
         run: |
@@ -120,7 +120,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [3.9]
+        python_version: ['3.9','3.10','3.11']
     steps:
       - name: 'set environment variables'
         run: |
@@ -253,7 +253,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: [3.9]
+        python_version: ['3.9']
     steps:
       - name: 'set environment variables'
         run: |
@@ -269,6 +269,4 @@ jobs:
       - name: 'ansible-test linting'
         run: |
           cd ansible_collections/arista/cvp/
-          rm -rf molecule/
           ansible-test sanity -v --requirements --docker --python ${{ matrix.python_version }}
-          rm -rf tests/output/

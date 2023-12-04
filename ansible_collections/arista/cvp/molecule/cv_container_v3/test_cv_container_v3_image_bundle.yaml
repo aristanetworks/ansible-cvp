@@ -64,7 +64,8 @@
     - name: "Testing create bundle"
       ansible.builtin.assert:
         that:
-          - create_bundle_data.data.data == "Bundle : Test_bundle successfully created"
+          # To disable error: "colons: too many spaces before colon"
+          - create_bundle_data.data.data == "Bundle : Test_bundle successfully created" # yamllint disable-line rule:colons
 
     - name: "Create second bundle for test"
       arista.cvp.cv_image_v3:
@@ -78,7 +79,8 @@
     - name: "Testing create bundle"
       ansible.builtin.assert:
         that:
-          - create_bundle_data_2.data.data == "Bundle : vEOS-lab-4.30.1F successfully created"
+          # To disable error: "colons: too many spaces before colon"
+          - create_bundle_data_2.data.data == "Bundle : vEOS-lab-4.30.1F successfully created" # yamllint disable-line rule:colons
 
     - name: Build Container Topology with image bundle On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
