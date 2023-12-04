@@ -8,7 +8,7 @@ import requests.packages.urllib3
 requests.packages.urllib3.disable_warnings()
 
 # Setting variables
-RECONCILE = 'RECONCILE_' # Prefix for the configlet name
+RECONCILE = 'RECONCILE_'  # Prefix for the configlet name
 fixture_file = 'molecule/fixtures/cv_device_v3.yaml'
 
 with open(fixture_file, encoding="utf-8") as f:
@@ -36,4 +36,4 @@ dev_mac = device["systemMacAddress"]
 rc = clnt.api.get_device_configuration(dev_mac)
 name = RECONCILE + device['serialNumber']
 update = clnt.api.update_reconcile_configlet(dev_mac, rc, "", name, True)
-addcfg = clnt.api.apply_configlets_to_device("auto-reconciling", device,[update['data']])
+addcfg = clnt.api.apply_configlets_to_device("auto-reconciling", device, [update['data']])
