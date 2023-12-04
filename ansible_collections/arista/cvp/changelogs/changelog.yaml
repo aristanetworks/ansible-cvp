@@ -1,5 +1,13 @@
 ancestor: null
 releases:
+  3.10.0:
+    changes:
+      release_summary: 'Release 3.10.0 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.10.0.yml
+    release_date: '2023-12-04'
   3.4.0:
     changes:
       bugfixes:
