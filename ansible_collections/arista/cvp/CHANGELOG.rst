@@ -14,6 +14,11 @@ Release Summary
 Release 3.10.0 - See documentation on cvp.avd.sh for details.
 
 
+Minor Changes
+-------------
+
+- Bump required ansible version (#683)
+
 v3.9.0
 ======
 
