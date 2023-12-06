@@ -1,0 +1,4 @@
+---
+# Sample ansible-test configuration file for collections: https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/config/config.yml
+modules:
+  python_requires: ">=3.9"
