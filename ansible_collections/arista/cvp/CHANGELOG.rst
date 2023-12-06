@@ -5,6 +5,20 @@ Arista.Cvp Release Notes
 .. contents:: Topics
 
 
+v3.10.1
+=======
+
+Release Summary
+---------------
+
+Release 3.10.1 - See documentation on cvp.avd.sh for details.
+
+
+Bugfixes
+--------
+
+- Update documentation with new collection requirements
+
 v3.10.0
 =======
 

@@ -10,6 +10,16 @@ releases:
     fragments:
     - v3.10.0.yml
     release_date: '2023-12-05'
+  3.10.1:
+    changes:
+      bugfixes:
+      - Update documentation with new collection requirements
+      release_summary: 'Release 3.10.1 - See documentation on cvp.avd.sh for details.
+
+        '
+    fragments:
+    - v3.10.1.yml
+    release_date: '2023-12-06'
   3.4.0:
     changes:
       bugfixes:
