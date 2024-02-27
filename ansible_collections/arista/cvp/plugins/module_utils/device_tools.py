@@ -70,6 +70,7 @@ class DeviceElement(object):
     def __init__(self, data: dict):
         self.__data = data
         self.__fqdn = self.__data.get(Api.device.FQDN)
+        self.__hostname = self.__data.get(Api.device.HOSTNAME)
         self.__sysmac = self.__data.get(Api.device.SYSMAC)
         self.__serial = self.__data.get(Api.device.SERIAL)
         self.__mgmtip = self.__data.get(Api.device.MGMTIP)
@@ -87,10 +88,6 @@ class DeviceElement(object):
             self.__hostname = data[Api.device.HOSTNAME]
         if Api.device.MGMTIP in data:
             self.__mgmtip = data[Api.device.MGMTIP]
-        elif Api.device.FQDN in data:
-            self.__hostname = data[Api.device.FQDN].split(".")[0]
-        else:
-            self.__hostname = None
 
     @property
     def fqdn(self):
@@ -128,7 +125,7 @@ class DeviceElement(object):
         """
         return self.__hostname
 
-    @fqdn.setter
+    @hostname.setter
     def hostname(self, hostname: str):
         """
         hostname Setter for hostname
@@ -434,6 +431,18 @@ class CvDeviceTools(object):
     # Private functions
     # ------------------------------------------ #
 
+    @lru_cache
+    def __get_cvp_inventory(self):
+        """
+        __get_cvp_inventory Method to get inventory data from CloudVision
+
+        Returns
+        -------
+        list
+            Data from CloudVision
+        """
+        return self.__cv_client.api.get_inventory(start=0, end=0)
+
     # Updated as per issue #365 to set default search with hostname field
     @lru_cache
     def __get_device(self, search_value: str, search_by: str = Api.device.HOSTNAME):
@@ -583,7 +592,7 @@ class CvDeviceTools(object):
 
         return reordered_configlets_list
 
-    def __refresh_user_inventory(self, user_inventory: DeviceInventory):
+    def __refresh_user_inventory(self, cvp_inventory: list, user_inventory: DeviceInventory):
         """
         __refresh_user_inventory Get all data from Cloudvision to populate user_inventory
 
@@ -599,20 +608,32 @@ class CvDeviceTools(object):
         """
         # Need to collect all missing device systemMacAddress
         # deploy needs to locate devices by mac-address
-        if self.__search_by in [Api.device.FQDN, Api.device.HOSTNAME]:
-            user_inventory = self.refresh_systemMacAddress(
-                user_inventory=user_inventory
+        user_inventory = self.refresh_systemMacAddress(
+            cvp_inventory=cvp_inventory, user_inventory=user_inventory
+        )
+        if self.__search_by == Api.device.FQDN:
+            user_inventory = self.refresh_hostname(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
+            )
+        elif self.__search_by == Api.device.HOSTNAME:
+            user_inventory = self.refresh_fqdn(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
             )
 
         elif self.__search_by == Api.device.SERIAL:
-            user_inventory = self.refresh_fqdn(user_inventory=user_inventory)
+            user_inventory = self.refresh_fqdn(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
+            )
+            user_inventory = self.refresh_hostname(
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
+            )
             user_inventory = self.refresh_systemMacAddress(
-                user_inventory=user_inventory
+                cvp_inventory=cvp_inventory, user_inventory=user_inventory
             )
 
         return user_inventory
 
-    def __check_devices_exist(self, user_inventory: DeviceInventory):
+    def __check_devices_exist(self, cvp_inventory: list, user_inventory: DeviceInventory):
         """
         __check_devices_exist Check devices are all present on Cloudvision
 
@@ -625,7 +646,8 @@ class CvDeviceTools(object):
             Inventory provided by user
         """
         list_non_existing_devices = self.check_device_exist(
-            user_inventory=user_inventory, search_mode=self.__search_by
+            cvp_inventory=cvp_inventory, user_inventory=user_inventory,
+            search_mode=self.__search_by
         )
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
             error_message = "Error - the following devices do not exist in CVP {0} but are defined in the playbook. \
@@ -724,6 +746,8 @@ class CvDeviceTools(object):
         )
         response = CvAnsibleResponse()
 
+        cvp_inventory = self.get_cvp_inventory()
+
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
             user_inventory = self.__remove_missing_devices(
@@ -731,10 +755,10 @@ class CvDeviceTools(object):
             )
         else:
             # Check if all devices are present on CV (fail on missing)
-            self.__check_devices_exist(user_inventory=user_inventory)
+            self.__check_devices_exist(cvp_inventory, user_inventory=user_inventory)
 
         # Refresh UserInventory data with data from Cloudvision
-        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+        user_inventory = self.__refresh_user_inventory(cvp_inventory, user_inventory=user_inventory)
 
         # Deploy device if it is under undefined container
         action_result = self.deploy_device(user_inventory=user_inventory)
@@ -830,6 +854,8 @@ class CvDeviceTools(object):
         response = CvAnsibleResponse()
         cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_RESET)
 
+        cvp_inventory = self.get_cvp_inventory()
+
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
             user_inventory = self.__remove_missing_devices(
@@ -837,9 +863,10 @@ class CvDeviceTools(object):
             )
         else:
             # Check if all devices are present on CV (fail on missing)
-            self.__check_devices_exist(user_inventory=user_inventory)
+            self.__check_devices_exist(cvp_inventory, user_inventory=user_inventory)
 
-        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+        user_inventory = self.__refresh_user_inventory(
+            cvp_inventory, user_inventory=user_inventory)
 
         # Execute device reset
         action_result = self.reset_device(user_inventory=user_inventory)
@@ -875,6 +902,8 @@ class CvDeviceTools(object):
         response = CvAnsibleResponse()
         cv_reset = CvManagerResult(builder_name=DeviceResponseFields.DEVICE_REMOVED)
 
+        cvp_inventory = self.get_cvp_inventory()
+
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
             user_inventory = self.__remove_missing_devices(
@@ -882,9 +911,9 @@ class CvDeviceTools(object):
             )
         else:
             # Check if all devices are present on CV (fail on missing)
-            self.__check_devices_exist(user_inventory=user_inventory)
+            self.__check_devices_exist(cvp_inventory, user_inventory=user_inventory)
 
-        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+        user_inventory = self.__refresh_user_inventory(cvp_inventory, user_inventory=user_inventory)
 
         # Execute device delete
         action_result = self.delete_device(user_inventory=user_inventory)
@@ -921,6 +950,8 @@ class CvDeviceTools(object):
             builder_name=DeviceResponseFields.DEVICE_DECOMMISSIONED
         )
 
+        cvp_inventory = self.get_cvp_inventory()
+
         if inventory_mode == ModuleOptionValues.INVENTORY_MODE_LOOSE:
             # Remove missing devices on CV from inventory (ignore missing)
             user_inventory = self.__remove_missing_devices(
@@ -928,9 +959,9 @@ class CvDeviceTools(object):
             )
         else:
             # Check if all devices are present on CV (fail on missing)
-            self.__check_devices_exist(user_inventory=user_inventory)
+            self.__check_devices_exist(cvp_inventory, user_inventory=user_inventory)
 
-        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+        user_inventory = self.__refresh_user_inventory(cvp_inventory, user_inventory=user_inventory)
 
         # Execute device decommission
         action_result = self.decommission_device(user_inventory=user_inventory)
@@ -1077,6 +1108,17 @@ class CvDeviceTools(object):
     # ------------------------------------------ #
     # Get CV data functions
     # ------------------------------------------ #
+
+    def get_cvp_inventory(self):
+        """
+        get_cvp_inventory Get inventory from CVP
+
+        Returns
+        ----------
+        list
+            Data from CloudVision
+        """
+        return self.__get_cvp_inventory()
 
     def get_device_facts(self, device_lookup: str):
         """
@@ -1258,7 +1300,7 @@ class CvDeviceTools(object):
         else:
             return None
 
-    def refresh_systemMacAddress(self, user_inventory: DeviceInventory):
+    def refresh_systemMacAddress(self, cvp_inventory: list, user_inventory: DeviceInventory):
         # sourcery skip: class-extract-method
         """
         refresh_systemMacAddress Get System Mac Address from Cloudvision to update missing information
@@ -1280,9 +1322,14 @@ class CvDeviceTools(object):
             MODULE_LOGGER.info("Lookup is based on %s field", str(self.__search_by))
             MODULE_LOGGER.debug("Found device %s to refresh data", str(device.info))
             if device.system_mac is None:
-                system_mac = self.get_device_facts(
-                    device_lookup=device.info[self.__search_by]
-                )[Api.device.SYSMAC]
+                for per_device in cvp_inventory:
+                    if self.__search_by == Api.device.HOSTNAME:
+                        if per_device[self.__search_by] == device.hostname:
+                            system_mac = per_device[Api.device.SYSMAC]
+                    elif self.__search_by == Api.device.FQDN:
+                        if per_device[self.__search_by] == device.fqdn:
+                            system_mac = per_device[Api.device.SYSMAC]
+
                 MODULE_LOGGER.debug(
                     "Get sysmac %s for device %s", str(device.fqdn), str(system_mac)
                 )
@@ -1294,7 +1341,7 @@ class CvDeviceTools(object):
         MODULE_LOGGER.warning("Update list is: %s", str(user_result))
         return DeviceInventory(data=user_result)
 
-    def refresh_fqdn(self, user_inventory: DeviceInventory):
+    def refresh_fqdn(self, cvp_inventory: list, user_inventory: DeviceInventory):
         """
         refresh_fqdn Get FQDN from Cloudvision to update missing information
 
@@ -1313,35 +1360,83 @@ class CvDeviceTools(object):
         MODULE_LOGGER.info("Inventory to refresh is %s", str(user_inventory.devices))
         for device in user_inventory.devices:
             MODULE_LOGGER.debug("Found device %s to refresh data", str(device.info))
-            if device.system_mac is not None and self.__search_by == Api.device.SYSMAC:
-                fqdn = self.get_device_facts(device_lookup=device.system_mac)[
-                    Api.device.FQDN
-                ]
-                MODULE_LOGGER.debug(
-                    "Get fqdn %s for device %s", str(fqdn), str(device.system_mac)
-                )
-                device.fqdn = fqdn
-                user_result.append(device.info)
-            elif (
-                device.serial_number is not None
-                and self.__search_by == Api.device.SERIAL
-            ):
-                fqdn = self.get_device_facts(device_lookup=device.serial_number)[
-                    Api.device.FQDN
-                ]
-                MODULE_LOGGER.debug(
-                    "Get fqdn %s for device %s", str(fqdn), str(device.serial_number)
-                )
-                device.fqdn = fqdn
-                user_result.append(device.info)
-            else:
-                MODULE_LOGGER.debug("Skipping following device: %s", device.info)
+            for per_device in cvp_inventory:
+                if (
+                    device.system_mac is not None and
+                    self.__search_by == Api.device.SYSMAC and
+                    per_device[self.__search_by] == device.system_mac
+                ):
+                    fqdn = per_device[Api.device.FQDN]
+                    MODULE_LOGGER.debug(
+                        "Get fqdn %s for device %s", str(fqdn), str(device.system_mac))
+                    device.fqdn = fqdn
+                    user_result.append(device.info)
+                elif (
+                    device.serial_number is not None and
+                    self.__search_by == Api.device.SERIAL and
+                    per_device[self.__search_by] == device.serial_number
+                ):
+                    fqdn = per_device[Api.device.FQDN]
+                    MODULE_LOGGER.debug(
+                        "Get fqdn %s for device %s", str(fqdn), str(device.serial_number))
+                    device.fqdn = fqdn
+                    user_result.append(device.info)
+                else:
+                    MODULE_LOGGER.debug("Skipping following device: %s", device.info)
+
+        MODULE_LOGGER.warning("Update list is: %s", str(user_result))
+        return DeviceInventory(data=user_result)
+
+    def refresh_hostname(self, cvp_inventory: list, user_inventory: DeviceInventory):
+        """
+        refresh_hostname Get FQDN from Cloudvision to update missing information
+
+        Parameters
+        ----------
+        cvp_inventory: list
+            List of inventory of devices from CVP
+        user_inventory : DeviceInventory
+            Inventory provided by user and that need to be refreshed
+
+        Returns
+        -------
+        DeviceInventory
+            Updated device inventory
+        """
+        device: DeviceElement = None
+        user_result: list = []
+        MODULE_LOGGER.info("Inventory to refresh is %s", str(user_inventory.devices))
+        for device in user_inventory.devices:
+            MODULE_LOGGER.debug("Found device %s to refresh data", str(device.info))
+            for per_device in cvp_inventory:
+                if (
+                    device.system_mac is not None and
+                    self.__search_by == Api.device.SYSMAC and
+                    per_device[self.__search_by] == device.system_mac
+                ):
+                    hostname = per_device[Api.device.HOSTNAME]
+                    MODULE_LOGGER.debug(
+                        "Get hostname %s for device %s", str(hostname), str(device.system_mac))
+                    device.hostname = hostname
+                    user_result.append(device.info)
+                elif (
+                    device.serial_number is not None and
+                    self.__search_by == Api.device.SERIAL and
+                    per_device[self.__search_by] == device.serial_number
+                ):
+                    hostname = per_device[Api.device.HOSTNAME]
+                    MODULE_LOGGER.debug(
+                        "Get hostname %s for device %s", str(hostname), str(device.system_mac))
+                    device.hostname = hostname
+                    user_result.append(device.info)
+                else:
+                    MODULE_LOGGER.debug("Skipping following device: %s", device.info)
 
         MODULE_LOGGER.warning("Update list is: %s", str(user_result))
         return DeviceInventory(data=user_result)
 
     def check_device_exist(
-        self, user_inventory: DeviceInventory, search_mode: str = Api.device.FQDN
+        self, cvp_inventory: list, user_inventory: DeviceInventory, search_mode: str = Api.device.FQDN
     ):
         """
         check_device_exist Check if the devices specified in the user_inventory exist in CVP.
@@ -1365,7 +1460,7 @@ class CvDeviceTools(object):
                 or search_mode == Api.device.HOSTNAME
             ):
                 if (
-                    self.is_device_exist(device.fqdn, search_mode=Api.device.HOSTNAME)
+                    self.search_device_in_inventory(cvp_inventory, device.hostname, search_mode=Api.device.HOSTNAME)
                     is False
                 ):
                     device_not_present.append(device.fqdn)
@@ -1376,7 +1471,7 @@ class CvDeviceTools(object):
 
             elif self.__search_by == Api.device.FQDN or search_mode == Api.device.FQDN:
                 if (
-                    self.is_device_exist(device.fqdn, search_mode=Api.device.FQDN)
+                    self.search_device_in_inventory(cvp_inventory, device.fqdn, search_mode=Api.device.FQDN)
                     is False
                 ):
                     device_not_present.append(device.fqdn)
@@ -1386,7 +1481,7 @@ class CvDeviceTools(object):
                     )
 
             elif self.__search_by == Api.device.SYSMAC:
-                if self.is_device_exist(device.system_mac) is False:
+                if self.search_device_in_inventory(cvp_inventory, device.system_mac, search_mode=Api.device.SYSMAC) is False:
                     device_not_present.append(
                         device.system_mac, search_mode=Api.device.SYSMAC
                     )
@@ -1396,8 +1491,8 @@ class CvDeviceTools(object):
                     )
             elif search_mode == Api.device.SERIAL:
                 if (
-                    self.is_device_exist(
-                        device.serial_number, search_mode=Api.device.SERIAL
+                    self.search_device_in_inventory(
+                        cvp_inventory, device.serial_number, search_mode=Api.device.SERIAL
                     )
                     is False
                 ):
@@ -2432,6 +2527,29 @@ class CvDeviceTools(object):
         data = self.__get_device(search_value=device_lookup, search_by=search_mode)
         if data is not None and len(data) > 0:
             return True
+        return False
+
+    def search_device_in_inventory(
+        self, inventory: list, device_lookup: str, search_mode: str = Api.device.HOSTNAME
+    ):
+        """
+        search_device_in_inventory Test if a device exists in Cloudvision inventory
+
+        Parameters
+        ----------
+        inventory : list
+            cvp inventory
+        device_lookup : str
+            Device name
+
+        Returns
+        -------
+        bool
+            True if device available in Cloudvision, False by default
+        """
+        for per_device in inventory:
+            if per_device[search_mode] == device_lookup:
+                return True
         return False
 
     def has_correct_id(self, device: DeviceElement):

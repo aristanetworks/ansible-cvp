@@ -94,6 +94,12 @@ SCHEMA_CV_DEVICE = {
                             "serialNumber",
                             "parentContainerName",
                         ],
+                    },
+                    {
+                        "required": [
+                            "hostname",
+                            "parentContainerName",
+                        ],
                     }
                 ],
                 "additionalProperties": True,
@@ -112,6 +118,16 @@ SCHEMA_CV_DEVICE = {
                         "$id": "#/items/anyOf/0/properties/fqdn",
                         "type": "string",
                         "title": "The fqdn schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": "",
+                        "examples": [
+                            "CV-ANSIBLE-EOS01"
+                        ]
+                    },
+                    "hostname": {
+                        "$id": "#/items/anyOf/0/properties/fqdn",
+                        "type": "string",
+                        "title": "The hostname schema",
                         "description": "An explanation about the purpose of this instance.",
                         "default": "",
                         "examples": [
