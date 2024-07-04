@@ -434,6 +434,20 @@ class CvDeviceTools(object):
     # Private functions
     # ------------------------------------------ #
 
+    # Get the full inventory from Cloudvision
+    @lru_cache
+    def __get_inventory(self):
+        """
+        __get_inventory Method to get inventory from Cloudvision
+
+        Returns
+        -------
+        dict
+            Data from Cloudvision
+        """
+        return self.__cv_client.get("/api/resources/inventory/v1/Device/all")
+
+
     # Updated as per issue #365 to set default search with hostname field
     @lru_cache
     def __get_device(self, search_value: str, search_by: str = Api.device.HOSTNAME):
@@ -624,7 +638,7 @@ class CvDeviceTools(object):
         user_inventory : DeviceInventory
             Inventory provided by user
         """
-        list_non_existing_devices = self.check_device_exist(
+        list_non_existing_devices = self.check_device_existence(
             user_inventory=user_inventory, search_mode=self.__search_by
         )
         if list_non_existing_devices is not None and len(list_non_existing_devices) > 0:
@@ -930,7 +944,7 @@ class CvDeviceTools(object):
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
 
-        user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
+        #user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
 
         # Execute device decommission
         action_result = self.decommission_device(user_inventory=user_inventory)
@@ -1406,6 +1420,68 @@ class CvDeviceTools(object):
                         "Device not present in CVP but in the user_inventory: %s",
                         device.serial_number,
                     )
+        return device_not_present
+
+    def check_device_existence(self, user_inventory: DeviceInventory, search_mode: str = Api.device.FQDN):
+        """
+        check_device_existence Check if the devices specified in the user_inventory exist in CVP.
+
+        Parameters
+        ----------
+        user_inventory : DeviceInventory
+            Inventory provided by user
+        search_mode : str
+            Search method to get device information from Cloudvision
+        """
+        MODULE_LOGGER.debug("Check if all the devices specified exist in CVP")
+        device_not_present: list = []
+        cvp_inventory = self.__get_inventory()
+       # Use a single list comprehension to create the four lists
+        device_macs, device_hostnames, device_fqdns, device_ids = zip(*[
+            (
+                device["result"]["value"]["systemMacAddress"],
+                device["result"]["value"]["hostname"],
+                device["result"]["value"]["fqdn"],
+                device["result"]["value"]["key"]["deviceId"]
+            )
+            for device in cvp_inventory["data"]
+        ])
+
+        # Convert tuples back to lists
+        device_macs = list(device_macs)
+        device_hostnames = list(device_hostnames)
+        device_fqdns = list(device_fqdns)
+        device_ids = list(device_ids)
+        for device in user_inventory.devices:
+            if search_mode == Api.device.HOSTNAME:
+                if device.fqdn not in device_hostnames:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error(
+                        "Device not present in CVP but in the user_inventory: %s",
+                        device.fqdn,
+                    )
+            elif search_mode == Api.device.FQDN:
+                if device.fqdn not in device_fqdns:
+                    device_not_present.append(device.fqdn)
+                    MODULE_LOGGER.error(
+                        "Device not present in CVP but in the user_inventory: %s",
+                        device.fqdn,
+                    )
+            elif search_mode == Api.device.SYSMAC:
+                if device.system_mac not in device_macs:
+                    device_not_present.append(device.system_mac)
+                    MODULE_LOGGER.error(
+                        "Device not present in CVP but in the user_inventory: %s",
+                        device.system_mac,
+                    )
+            elif search_mode == Api.device.SERIAL:
+                if device.serial_number not in device_ids:
+                    device_not_present.append(device.serial_number)
+                    MODULE_LOGGER.error(
+                        "Device not present in CVP but in the user_inventory: %s",
+                        device.serial_number,
+                    )
+
         return device_not_present
 
     # ------------------------------------------ #
@@ -2241,6 +2317,8 @@ class CvDeviceTools(object):
         results = []
         decomm_success = "DECOMMISSIONING_STATUS_SUCCESS"
         decomm_failure = "DECOMMISSIONING_STATUS_FAILURE"
+        cvp_inventory = self.__get_inventory()["data"]
+
         for device in user_inventory.devices:
             MODULE_LOGGER.info("removing device %s from provisioning", str(device.info))
             result_data = CvApiResult(
@@ -2249,8 +2327,10 @@ class CvDeviceTools(object):
             try:
                 MODULE_LOGGER.info("send reset request for device %s", str(device.info))
                 req_id = str(uuid.uuid4())
-                device_fact = self.get_device_facts(device_lookup=device.hostname)
-                device_id = device_fact["serialNumber"]
+                for cvdev in cvp_inventory:
+                    if cvdev["result"]["value"]["hostname"] == device.hostname:
+                        device_id = cvdev["result"]["value"]["key"]["deviceId"]
+                        break
                 MODULE_LOGGER.info("Found device serial number: %s", device_id)
                 if self.__check_mode:
                     result_data.changed = False
