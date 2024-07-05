@@ -51,6 +51,7 @@ e.g.
   |------|------|---------|-------------|----------|--------|------------|
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
   | TemplateID | Dynamic | | ID of the template | Yes | No | No |
+
 - `mlaghealthcheck` (Check MLAG Health): Run this action before and after the main change control action to ensure that an MLAG device is ready to be upgraded and then to validate that it has upgraded successfully.
 
   Arguments:
@@ -58,6 +59,7 @@ e.g.
   | Name | Type | Default | Description | Required | Hidden | Deprecated |
   |------|------|---------|-------------|----------|--------|------------|
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
+
 - `cleanFlash` (Clean Flash): Delete device files using a file spec and file glob. This works by collecting the existing files on the device that match the file spec, eg "flash:" and then uses the CLI "delete" command for each file that matches the file spec, eg "log*.txt." The action protects against deleting the current running image and boot image.
 
   Arguments:
@@ -66,6 +68,7 @@ e.g.
   |------|------|---------|-------------|----------|--------|------------|
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
   | FileSpecAndGlob | Dynamic | | File spec and glob for the files to be deleted | Yes | No | No |
+
 - `downloadFile` (Download File): Download image and extension files to a device flash directory. The files specified must be available in the CloudVision file store. The action will skip the download if the desired file is already present by comparing the sha512 checksum. The action will also make space by deleting old, unused SWI images from flash.
 
   Arguments:
@@ -92,6 +95,13 @@ e.g.
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
 
 - `task` (Execute Task): Run this action with a pre-defined TaskID to execute the specified network changes.
+
+  Arguments:
+
+  | Name | Type | Default | Description | Required | Hidden | Deprecated |
+  | ---- | ---- | ------- | ----------- | -------- | ------ | ---------- |
+  | TaskID | Dynamic | | ID of the task | Yes | No | No |
+
 - `exitbgpmaintmode` (Exit BGP Maintenance Mode): Pair this action with Enter BGP Maintenance Mode to run specific tests detailed in the EOS User Manual before reinserting the device into the network.
 
   Arguments:
@@ -115,7 +125,7 @@ e.g.
   | Name | Type | Default | Description | Required | Hidden | Deprecated |
   | --- | --- | --- | --- | --- | --- | --- |
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
-  | InterfaceID | Dynamic | ID of the switch interface | Yes | No | No |
+  | InterfaceID | Dynamic | | ID of the switch interface | Yes | No | No |
   | SkipValidation | Dynamic | false | Flag for whether validation of the test should be skipped | Yes | No | No |
 
 - `interfaceCycle` (Interface Cycle): Run this action as part of a diagnostic activity. When executed, this action will temporarily change the admin state and/or the PoE state of the associated Ethernet interface in an attempt to restore network connectivity to the connected endpoint. Running this action will cause a momentary service interruption on the associated interface.
@@ -133,6 +143,7 @@ e.g.
 - `reboot`: Reboot the device specified by the DeviceID argument.
 
   Arguments:
+
   | Name | Type | Default | Description | Required | Hidden | Deprecated |
   |------|------|---------|-------------|----------|--------|------------|
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
@@ -145,7 +156,7 @@ e.g.
   |------|------|---------|-------------|----------|--------|------------|
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
   | Source   | Dynamic | | Source of Config - DesignedConfig or RunningConfig | Yes | No | No |
-  | Timestamp| Dynamic | 0001-01-01 00:00:00 +0000 UTC| Timestamp for the designed config or running config| Yes | No |
+  | Timestamp| Dynamic | 0001-01-01 00:00:00 +0000 UTC| Timestamp for the designed config or running config| Yes | No | No |
 
 - `setImage` (Set Image): Push a new image or roll back to a previous running image. This is accomplished by providing a DeviceID, Timestamp, Source (Running Image or Designed Image) and a ReloadMode. The ReloadMode argument allows the action to reboot the device using advanced EOS features like Smart System Upgrade. This action will also take care of downloading the required EOS software image and extension(s).
 
