@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
-#
+# # pylint: disable=unknown-option-value
 
 
 from __future__ import (absolute_import, division, print_function)
@@ -113,7 +113,6 @@ class CvTagTools(object):
 
         # create tags and assign tags
         for per_device in tags:
-
             if mode in ('assign', 'unassign', 'delete'):
                 if 'device_id' in per_device:
                     device_id = per_device['device_id']

@@ -7,6 +7,10 @@ COVERAGE = --cov=ansible_collections.arista.cvp.plugins.module_utils
 CLI_LOGGING ?= INFO
 PYTEST_LOGGING ?= DEBUG
 
-.PHONY: test
-test:  ## Run Pytest in verbose mode with CLI report only for all tests. By default only unit and system, but can be changed by declaring  TEST_PATH variable and its value
-	export PYTEST_LOG_LEVEL=$(PYTEST_LOGGING) && pytest $(TEST_OPT) $(REPORT) $(COVERAGE) --log-cli-level=$(CLI_LOGGING) -m '$(TAG)' $(TESTS)
+.PHONY: unit-tests
+unit-tests:  ## Run python unit tests in verbose mode with CLI report only for all tests
+	export PYTEST_LOG_LEVEL=$(PYTEST_LOGGING) && pytest ./unit $(TEST_OPT) $(REPORT) $(COVERAGE) --log-cli-level=$(CLI_LOGGING) -m '$(TAG)' $(TESTS)
+
+.PHONY: system-tests
+system-tests:  ## Run python system tests in verbose mode with CLI report only for all tests
+	export PYTEST_LOG_LEVEL=$(PYTEST_LOGGING) && pytest ./system $(TEST_OPT) $(REPORT) $(COVERAGE) --log-cli-level=$(CLI_LOGGING) -m '$(TAG)' $(TESTS)

@@ -1,41 +1,42 @@
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 ---
-- name: gather os specific variables for Centos / Red Hat OS
-  include_vars: "centos-{{ ansible_distribution_major_version }}.yml"
+- name: Gather os specific variables for Centos / Red Hat OS
+  ansible.builtin.include_vars: "centos-{{ ansible_distribution_major_version }}.yml"
   when: ansible_distribution == "CentOS" or ansible_distribution == 'Red Hat Enterprise Linux'
 
-- name: gather os specific variables for Debian / Ubuntu OS
-  include_vars: "debian.yml"
+- name: Gather os specific variables for Debian / Ubuntu OS
+  ansible.builtin.include_vars: "debian.yml"
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
-- name: update packages list
-  apt:
+- name: Update packages list
+  ansible.builtin.apt:
     update_cache: true
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
-- name: install packages
+- name: Install packages
   become: true
-  package:
+  ansible.builtin.package:
     name: "{{ dhcp_packages }}"
     state: "{{ dhcp_packages_state }}"
 
-- include_tasks: fix-debian.yml
+- name: Run task for debian host
+  ansible.builtin.include_tasks: fix-debian.yml
   when: ansible_distribution == "Debian" or ansible_distribution == 'Ubuntu'
 
-- name: 'generate DHCPd configuration file'
+- name: 'Generate DHCPd configuration file'
   become: true
-  template:
+  ansible.builtin.template:
     src: 'dhcpd.conf.j2'
     dest: '{{ dhcp_config }}'
     mode: 0644
     backup: true
-  notify: "restart dhcpd"
+  notify: "Restart dhcpd"
 
-- name: check & activate DHCP service
+- name: Check & activate DHCP service
   become: true
-  service:
+  ansible.builtin.service:
     name: '{{ dhcp_service }}'
     enabled: true
     state: started

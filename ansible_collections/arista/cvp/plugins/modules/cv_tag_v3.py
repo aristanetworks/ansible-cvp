@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -42,10 +42,10 @@ options:
 
 EXAMPLES = r'''
 # Create and assign device and interface tags to multiple devices and interfaces
-- name: cv_tag_v3 example1
+- name: Cv_tag_v3 example1
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_TAGS:
       - device: leaf1
@@ -91,17 +91,17 @@ EXAMPLES = r'''
               - name: tag6i
                 value: value6i
   tasks:
-    - name: "create tags"
+    - name: "Create tags"
       arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
+        tags: "{{ CVP_TAGS }}"
         mode: assign
         auto_create: true
 
 # Delete device and interface tags using device_id
-- name: cv_tag_v3 example2
+- name: Cv_tag_v3 example2
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_TAGS:
       - device_id: JPE123435
@@ -114,16 +114,16 @@ EXAMPLES = r'''
               - name: tag1i
                 value: value1i
   tasks:
-    - name: "create tags"
+    - name: "Create tags"
       arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
+        tags: "{{ CVP_TAGS }}"
         mode: delete
 
 # Create device and interface tags (without assigning to the devices) using device_id
-- name: cv_tag_v3 example3
+- name: Cv_tag_v3 example3
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_TAGS:
       - device_id: JPE123435
@@ -136,16 +136,16 @@ EXAMPLES = r'''
               - name: tag1i
                 value: value1i
   tasks:
-    - name: "create tags"
+    - name: "Create tags"
       arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
+        tags: "{{ CVP_TAGS }}"
         mode: create
 
 # Assign device and interface tags
-- name: cv_tag_v3 example4
+- name: Cv_tag_v3 example4
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_TAGS:
       - device: leaf1
@@ -158,16 +158,16 @@ EXAMPLES = r'''
               - name: tag1i
                 value: value1i
   tasks:
-    - name: "create tags"
+    - name: "Create tags"
       arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
+        tags: "{{ CVP_TAGS }}"
         mode: assign
 
 # Unassign device and interface tags
-- name: cv_tag_v3 example5
+- name: Cv_tag_v3 example5
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_TAGS:
       - device: leaf1
@@ -180,9 +180,9 @@ EXAMPLES = r'''
               - name: tag1i
                 value: value1i
   tasks:
-    - name: "create tags"
+    - name: "Create tags"
       arista.cvp.cv_tag_v3:
-        tags: "{{CVP_TAGS}}"
+        tags: "{{ CVP_TAGS }}"
         mode: assign
 '''
 

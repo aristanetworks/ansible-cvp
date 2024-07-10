@@ -6,60 +6,61 @@
   vars:
     CVP_DEVICES_WARNING_CVP:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_warning
     CVP_DEVICES_WARNING_LOCAL:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
           validate_warning_local: "interface Ethernet1\n   spanning-tree portfast"
 
     CVP_DEVICES_ERROR_CVP:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_error
     CVP_DEVICES_ERROR_LOCAL:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
           validate_error_local: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
 
     CVP_DEVICES_VALID_CVP:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_valid
     CVP_DEVICES_VALID_LOCAL:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
           validate_valid_local: "interface Ethernet1\n  description test_validate"
 
     CVP_DEVICES_MULTILINE_CVP:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - validate_error_multiline
 
     CVP_DEVICES_MULTILINE_LOCAL:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
-          validate_error_multiline_LOCAL: "interface Ethernet1\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree portfast\n!"
+          validate_error_multiline_LOCAL: "interface Ethernet1\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n\
+            \  spanning-tree portfast\n!"
 
     CVP_DEVICES_MULTIPLE_CVP:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         cvp_configlets:
-        - validate_error
-        - validate_valid
-        - validate_warning
+          - validate_error
+          - validate_valid
+          - validate_warning
 
     CVP_DEVICES_MULTIPLE_LOCAL:
       - device_name: s1-leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
           validate_warning_local: "interface Ethernet1\n   spanning-tree portfast"
           validate_valid_local: "interface Ethernet1\n  description test_validate"
@@ -67,24 +68,24 @@
 
     CVP_MULTIDEVICE_WARNING_IGNORE_CVP:
       - device_name: s1-leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: serialNumber # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - configlet1_warning
           - configlet2_error
       - device_name: s1-leaf2
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: serialNumber # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - configlet1_warning
           - configlet2_error
 
     CVP_MULTIDEVICE_WARNING_IGNORE_LOCAL:
       - device_name: s1-leaf1
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: serialNumber # [hostname | serialNumber | fqdn]
         local_configlets:
           configlet1_warning: "interface Ethernet1\n   spanning-tree portfast"
           configlet2_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
       - device_name: s1-leaf2
-        search_type: serialNumber #[hostname | serialNumber | fqdn]
+        search_type: serialNumber # [hostname | serialNumber | fqdn]
         local_configlets:
           configlet1_warning: "interface Ethernet2\n   spanning-tree portfast"
           configlet2_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
@@ -93,441 +94,563 @@
       validate_warning: "interface Ethernet1\n   spanning-tree portfast"
       validate_valid: "interface Ethernet1\n  description test_validate"
       validate_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
-      validate_error_multiline: "interface Ethernet1\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree portfast\n!"
+      validate_error_multiline: "interface Ethernet1\n  description test\n!\n\nruter bgp 1111\n  neighbor 1.1.1.1 remote-bs 10\n!\ninterface Ethernet1\n  spanning-tree
+        portfast\n!"
       configlet1_warning: "interface Ethernet1\n   spanning-tree portfast"
       configlet2_error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
 
   tasks:
-  - name: "Push configlet"
-    arista.cvp.cv_configlet_v3:
-      configlets: "{{CVP_CONFIGLET}}"
-      state: present
+    - name: Push configlet
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{ CVP_CONFIGLET }}"
+        state: present
 
-#####################################
-#     WARNING CONFIGLET             #
-#####################################
+    #####################################
+    #     WARNING CONFIGLET             #
+    #####################################
 
-  - name: Validate CVP warning configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_CVP}}"
-      validate_mode: stop_on_error
-    register: STOP_ON_ERROR_WARNING_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_ERROR_WARNING_CONFIG_CVP.failed == false"
-        - "STOP_ON_ERROR_WARNING_CONFIG_CVP.success == true"
-        - "STOP_ON_ERROR_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_ERROR_WARNING_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_ERROR
+    - name: Validate CVP warning configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_CVP }}"
+        validate_mode: stop_on_error
+      register: STOP_ON_ERROR_WARNING_CONFIG_CVP
+    - name: Assert - Validate CVP warning configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_WARNING_CONFIG_CVP.failed == false
+          - STOP_ON_ERROR_WARNING_CONFIG_CVP.success == true
+          - "STOP_ON_ERROR_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - STOP_ON_ERROR_WARNING_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL warning configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
-      validate_mode: stop_on_error
-    register: STOP_ON_ERROR_WARNING_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.failed == false"
-        - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.success == true"
-        - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_ERROR
+    - name: Validate LOCAL warning configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_LOCAL }}"
+        validate_mode: stop_on_error
+      register: STOP_ON_ERROR_WARNING_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL warning configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_WARNING_CONFIG_LOCAL.failed == false
+          - STOP_ON_ERROR_WARNING_CONFIG_LOCAL.success == true
+          - "STOP_ON_ERROR_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['!
+            portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast
+            is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - STOP_ON_ERROR_WARNING_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP warning configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_CVP}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes # ignoring errors so assertions can be done
-    register: STOP_ON_WARNING_WARNING_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_WARNING
+    - name: Validate CVP warning configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_CVP }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true # ignoring errors so assertions can be done
+      register: STOP_ON_WARNING_WARNING_CONFIG_CVP
+    - name: Assert - Validate CVP warning configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - STOP_ON_WARNING_WARNING_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL warning configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes # ignoring errors so assertions can be done
-    register: STOP_ON_WARNING_WARNING_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_WARNING
+    - name: Validate LOCAL warning configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_LOCAL }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true # ignoring errors so assertions can be done
+      register: STOP_ON_WARNING_WARNING_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL warning configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - STOP_ON_WARNING_WARNING_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP warning configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_WARNING_CONFIG_CVP
-  - assert:
-      that:
-        - "IGNORE_WARNING_CONFIG_CVP.failed == false"
-        - "IGNORE_WARNING_CONFIG_CVP.success == true"
-        - "IGNORE_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_WARNING_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_IGNORE
+    - name: Validate CVP warning configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_WARNING_CONFIG_CVP
+    - name: Assert - Validate CVP warning configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_WARNING_CONFIG_CVP.failed == false
+          - IGNORE_WARNING_CONFIG_CVP.success == true
+          - "IGNORE_WARNING_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should
+            only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled
+            can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - IGNORE_WARNING_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL warning configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_WARNING_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_WARNING_CONFIG_LOCAL
-  - assert:
-      that:
-        - "IGNORE_WARNING_CONFIG_LOCAL.failed == false"
-        - "IGNORE_WARNING_CONFIG_LOCAL.success == true"
-        - "IGNORE_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_WARNING_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL warning configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_WARNING_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_WARNING_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL warning configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_WARNING_CONFIG_LOCAL.failed == false
+          - IGNORE_WARNING_CONFIG_LOCAL.success == true
+          - "IGNORE_WARNING_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - IGNORE_WARNING_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_WARNING_LOCAL_ASSERT_IGNORE
 
-#####################################
-#         ERROR CONFIGLET           #
-#####################################
+    #####################################
+    #         ERROR CONFIGLET           #
+    #####################################
 
-  - name: Validate CVP error configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_CVP}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_ERROR_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
-        - "STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_ERROR
+    - name: Validate CVP error configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_CVP }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_ERROR_CONFIG_CVP
+    - name: Assert - Validate CVP error configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.warnings == []
+          - "STOP_ON_ERROR_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter
+            bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1:
+            '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL error configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_ERROR_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_ERROR
+    - name: Validate LOCAL error configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_LOCAL }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_ERROR_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL error configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []
+          - "STOP_ON_ERROR_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP error configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_CVP}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNING_ERROR_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
-        - "STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_WARNING
+    - name: Validate CVP error configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_CVP }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNING_ERROR_CONFIG_CVP
+    - name: Assert - Validate CVP error configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.warnings == []
+          - "STOP_ON_WARNING_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \">
+            ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token
+            1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL error configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNING_ERROR_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_WARNING
+    - name: Validate LOCAL error configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_LOCAL }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNING_ERROR_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL error configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []
+          - "STOP_ON_WARNING_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP error configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_ERROR_CONFIG_CVP
-  - assert:
-      that:
-        - "IGNORE_ERROR_CONFIG_CVP.failed == false"
-        - "IGNORE_ERROR_CONFIG_CVP.success == true"
-        - "IGNORE_ERROR_CONFIG_CVP.configlets_validated.warnings == []"
-        - "IGNORE_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_IGNORE
+    - name: Validate CVP error configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_ERROR_CONFIG_CVP
+    - name: Assert - Validate CVP error configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_ERROR_CONFIG_CVP.failed == false
+          - IGNORE_ERROR_CONFIG_CVP.success == true
+          - IGNORE_ERROR_CONFIG_CVP.configlets_validated.warnings == []
+          - "IGNORE_ERROR_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp
+            1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1')
+            at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL error configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_ERROR_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_ERROR_CONFIG_LOCAL
-  - assert:
-      that:
-        - "IGNORE_ERROR_CONFIG_LOCAL.failed == false"
-        - "IGNORE_ERROR_CONFIG_LOCAL.success == true"
-        - "IGNORE_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "IGNORE_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL error configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_ERROR_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_ERROR_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL error configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_ERROR_CONFIG_LOCAL.failed == false
+          - IGNORE_ERROR_CONFIG_LOCAL.success == true
+          - IGNORE_ERROR_CONFIG_LOCAL.configlets_validated.warnings == []
+          - "IGNORE_ERROR_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter
+            bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1:
+            '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_ERROR_LOCAL_ASSERT_IGNORE
 
-#####################################
-#         VALID CONFIGLET           #
-#####################################
+    #####################################
+    #         VALID CONFIGLET           #
+    #####################################
 
-  - name: Validate CVP valid configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_CVP}}"
-      validate_mode: stop_on_error
-    register: STOP_ON_ERROR_VALID_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_ERROR_VALID_CONFIG_CVP.failed == false"
-        - "STOP_ON_ERROR_VALID_CONFIG_CVP.success == true"
-        - "STOP_ON_ERROR_VALID_CONFIG_CVP.configlets_validated.warnings == []"
-        - "STOP_ON_ERROR_VALID_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_CVP_ASSERT_ERROR
+    - name: Validate CVP valid configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_CVP }}"
+        validate_mode: stop_on_error
+      register: STOP_ON_ERROR_VALID_CONFIG_CVP
+    - name: Assert - Validate CVP valid configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_VALID_CONFIG_CVP.failed == false
+          - STOP_ON_ERROR_VALID_CONFIG_CVP.success == true
+          - STOP_ON_ERROR_VALID_CONFIG_CVP.configlets_validated.warnings == []
+          - STOP_ON_ERROR_VALID_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL valid configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
-      validate_mode: stop_on_error
-    register: STOP_ON_ERROR_VALID_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.failed == false"
-        - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.success == true"
-        - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "STOP_ON_ERROR_VALID_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_ERROR
+    - name: Validate LOCAL valid configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_LOCAL }}"
+        validate_mode: stop_on_error
+      register: STOP_ON_ERROR_VALID_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL valid configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_ERROR_VALID_CONFIG_LOCAL.failed == false
+          - STOP_ON_ERROR_VALID_CONFIG_LOCAL.success == true
+          - STOP_ON_ERROR_VALID_CONFIG_LOCAL.configlets_validated.warnings == []
+          - STOP_ON_ERROR_VALID_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP valid configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_CVP}}"
-      validate_mode: stop_on_warning
-    register: STOP_ON_WARNING_VALID_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_WARNING_VALID_CONFIG_CVP.failed == false"
-        - "STOP_ON_WARNING_VALID_CONFIG_CVP.success == true"
-        - "STOP_ON_WARNING_VALID_CONFIG_CVP.configlets_validated.warnings == []"
-        - "STOP_ON_WARNING_VALID_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_CVP_ASSERT_WARNING
+    - name: Validate CVP valid configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_CVP }}"
+        validate_mode: stop_on_warning
+      register: STOP_ON_WARNING_VALID_CONFIG_CVP
+    - name: Assert - Validate CVP valid configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_WARNING_VALID_CONFIG_CVP.failed == false
+          - STOP_ON_WARNING_VALID_CONFIG_CVP.success == true
+          - STOP_ON_WARNING_VALID_CONFIG_CVP.configlets_validated.warnings == []
+          - STOP_ON_WARNING_VALID_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL valid configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
-      validate_mode: stop_on_warning
-    register: STOP_ON_WARNING_VALID_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.failed == false"
-        - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.success == true"
-        - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "STOP_ON_WARNING_VALID_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_WARNING
+    - name: Validate LOCAL valid configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_LOCAL }}"
+        validate_mode: stop_on_warning
+      register: STOP_ON_WARNING_VALID_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL valid configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - STOP_ON_WARNING_VALID_CONFIG_LOCAL.failed == false
+          - STOP_ON_WARNING_VALID_CONFIG_LOCAL.success == true
+          - STOP_ON_WARNING_VALID_CONFIG_LOCAL.configlets_validated.warnings == []
+          - STOP_ON_WARNING_VALID_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP valid configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_VALID_CONFIG_CVP
-  - assert:
-      that:
-        - "IGNORE_VALID_CONFIG_CVP.failed == false"
-        - "IGNORE_VALID_CONFIG_CVP.success == true"
-        - "IGNORE_VALID_CONFIG_CVP.configlets_validated.warnings == []"
-        - "IGNORE_VALID_CONFIG_CVP.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_CVP_ASSERT_IGNORE
+    - name: Validate CVP valid configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_VALID_CONFIG_CVP
+    - name: Assert - Validate CVP valid configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_VALID_CONFIG_CVP.failed == false
+          - IGNORE_VALID_CONFIG_CVP.success == true
+          - IGNORE_VALID_CONFIG_CVP.configlets_validated.warnings == []
+          - IGNORE_VALID_CONFIG_CVP.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL valid configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_VALID_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_VALID_CONFIG_LOCAL
-  - assert:
-      that:
-        - "IGNORE_VALID_CONFIG_LOCAL.failed == false"
-        - "IGNORE_VALID_CONFIG_LOCAL.success == true"
-        - "IGNORE_VALID_CONFIG_LOCAL.configlets_validated.warnings == []"
-        - "IGNORE_VALID_CONFIG_LOCAL.configlets_validated.errors == []"
-    register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL valid configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_VALID_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_VALID_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL valid configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_VALID_CONFIG_LOCAL.failed == false
+          - IGNORE_VALID_CONFIG_LOCAL.success == true
+          - IGNORE_VALID_CONFIG_LOCAL.configlets_validated.warnings == []
+          - IGNORE_VALID_CONFIG_LOCAL.configlets_validated.errors == []
+      register: VALIDATE_CONFIG_VALID_LOCAL_ASSERT_IGNORE
 
-#####################################
-#         MULTILINE CONFIGLET       #
-####################################
+    #####################################
+    #         MULTILINE CONFIGLET       #
+    ####################################
 
-  - name: Validate CVP multiline configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_MULTILINE_CONFIG_CVP
+    - name: Validate CVP multiline configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_CVP }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_MULTILINE_CONFIG_CVP
 
-  - assert:
-      that:
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_ERROR
+    - name: Assert - Validate CVP multiline configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "STOP_ON_ERROR_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at
+            token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL multiline configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_ERROR
+    - name: Validate LOCAL multiline configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_LOCAL }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiline configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "STOP_ON_ERROR_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors':
+            [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid
+            input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP multiline configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNING_MULTILINE_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_WARNING
+    - name: Validate CVP multiline configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_CVP }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNING_MULTILINE_CONFIG_CVP
+    - name: Assert - Validate CVP multiline configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "STOP_ON_WARNING_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at
+            token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL multiline configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_WARNING
+    - name: Validate LOCAL multiline configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_LOCAL }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiline configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "STOP_ON_WARNING_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors':
+            [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid
+            input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP multiline configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_MULTILINE_CONFIG_CVP
+    - name: Validate CVP multiline configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_MULTILINE_CONFIG_CVP
 
-  - assert:
-      that:
-        - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_IGNORE
+    - name: Assert - Validate CVP multiline configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "IGNORE_MULTILINE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at
+            token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL multiline configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTILINE_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_MULTILINE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
-        - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
-    register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL multiline configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTILINE_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_MULTILINE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiline configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 9']}]"
+          - "IGNORE_MULTILINE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_multiline_LOCAL', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 5\", 'lineNo': ' 5'}, {'error': \">   neighbor 1.1.1.1 remote-bs 10% Invalid input (at
+            token 0: 'neighbor') at line 6\", 'lineNo': ' 6'}]}]"
+      register: VALIDATE_CONFIG_MULTILINE_LOCAL_ASSERT_IGNORE
 
-######################################
-##         MULTIPLE CONFIGLET        #
-######################################
-  - name: Validate CVP multiple configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_MULTIPLE_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_ERROR
+    ######################################
+    ##         MULTIPLE CONFIGLET        #
+    ######################################
+    - name: Validate CVP multiple configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_CVP }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_MULTIPLE_CONFIG_CVP
+    - name: Assert - Validate CVP multiple configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "STOP_ON_ERROR_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"
+            > ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_ERROR
 
-  - name: Validate LOCAL multiple configlet with stop_on_error
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
-      validate_mode: stop_on_error
-    ignore_errors: yes
-    register: STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_ERROR
+    - name: Validate LOCAL multiple configlet with stop_on_error
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_LOCAL }}"
+        validate_mode: stop_on_error
+      ignore_errors: true
+      register: STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiple configlet with stop_on_error
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "STOP_ON_ERROR_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_ERROR
 
-  - name: Validate CVP multiple configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNING_MULTIPLE_CONFIG_CVP
-  - assert:
-      that:
-        - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_WARNING
+    - name: Validate CVP multiple configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_CVP }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNING_MULTIPLE_CONFIG_CVP
+    - name: Assert - Validate CVP multiple configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "STOP_ON_WARNING_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"\
+            > ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_WARNING
 
-  - name: Validate LOCAL multiple configlet with stop_on_warning
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
-      validate_mode: stop_on_warning
-    ignore_errors: yes
-    register: STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_WARNING
+    - name: Validate LOCAL multiple configlet with stop_on_warning
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_LOCAL }}"
+        validate_mode: stop_on_warning
+      ignore_errors: true
+      register: STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiple configlet with stop_on_warning
+      ansible.builtin.assert:
+        that:
+          - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "STOP_ON_WARNINIG_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_WARNING
 
-  - name: Validate CVP multiple configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_MULTIPLE_CONFIG_CVP
-  - assert:
-      that:
-        - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_IGNORE
+    - name: Validate CVP multiple configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_MULTIPLE_CONFIG_CVP
+    - name: Assert - Validate CVP multiple configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning', 'warnings': ['! portfast should
+            only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled
+            can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "IGNORE_MULTIPLE_CONFIG_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error', 'errors': [{'error': \"> ruter
+            bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1:
+            '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_CVP_ASSERT_IGNORE
 
-  - name: Validate LOCAL multiple configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_DEVICES_MULTIPLE_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_MULTIPLE_CONFIG_LOCAL
-  - assert:
-      that:
-        - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL multiple configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_DEVICES_MULTIPLE_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_MULTIPLE_CONFIG_LOCAL
+    - name: Assert - Validate LOCAL multiple configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'validate_warning_local', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "IGNORE_MULTIPLE_CONFIG_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'validate_error_local', 'errors': [{'error': \"\
+            > ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
+      register: VALIDATE_CONFIG_MULTIPLE_LOCAL_ASSERT_IGNORE
 
-####################################################
-#         MULTIPLE DEVICE WARNING CONFIGLET        #
-####################################################
+    ####################################################
+    #         MULTIPLE DEVICE WARNING CONFIGLET        #
+    ####################################################
 
-  - name: Validate LOCAL multiple device mutliple configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_MULTIDEVICE_WARNING_IGNORE_LOCAL}}"
-      validate_mode: ignore
-    register: IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL
-  - assert:
-      that:
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.failed == false"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.success == true"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'configlet1_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}, {'device': 's1-leaf2', 'configlet_name': 'configlet1_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}, {'device': 's1-leaf2', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: WARNING_CONFIG_MULTIPLE_DEVICE_LOCAL_ASSERT_IGNORE
+    - name: Validate LOCAL multiple device mutliple configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_MULTIDEVICE_WARNING_IGNORE_LOCAL }}"
+        validate_mode: ignore
+      register: IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL
+    - name: Assert - Validate LOCAL multiple device mutliple configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.failed == false
+          - IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.success == true
+          - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'configlet1_warning', 'warnings': ['!
+            portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast
+            is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}, {'device': 's1-leaf2', 'configlet_name': 'configlet1_warning', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "IGNORE_MULTIPLE_DEVICE_WARNING_LOCAL.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'configlet2_error', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}, {'device': 's1-leaf2', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111%
+            Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1')
+            at line 2\", 'lineNo': ' 2'}]}]"
+      register: WARNING_CONFIG_MULTIPLE_DEVICE_LOCAL_ASSERT_IGNORE
 
-  - name: Validate CVP multiple device mutliple configlet with ignore
-    arista.cvp.cv_validate_v3:
-      devices: "{{CVP_MULTIDEVICE_WARNING_IGNORE_CVP}}"
-      validate_mode: ignore
-    register: IGNORE_MULTIPLE_DEVICE_WARNING_CVP
-  - assert:
-      that:
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.failed == false"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.success == true"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'configlet1_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}, {'device': 's1-leaf2', 'configlet_name': 'configlet1_warning', 'warnings': ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
-        - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}, {'device': 's1-leaf2', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}]"
-    register: WARNING_CONFIG_MULTIPLE_DEVICE_CVP_ASSERT_IGNORE
+    - name: Validate CVP multiple device mutliple configlet with ignore
+      arista.cvp.cv_validate_v3:
+        devices: "{{ CVP_MULTIDEVICE_WARNING_IGNORE_CVP }}"
+        validate_mode: ignore
+      register: IGNORE_MULTIPLE_DEVICE_WARNING_CVP
+    - name: Assert - Validate CVP multiple device mutliple configlet with ignore
+      ansible.builtin.assert:
+        that:
+          - IGNORE_MULTIPLE_DEVICE_WARNING_CVP.failed == false
+          - IGNORE_MULTIPLE_DEVICE_WARNING_CVP.success == true
+          - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.configlets_validated.warnings == [{'device': 's1-leaf1', 'configlet_name': 'configlet1_warning', 'warnings': ['! portfast
+            should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when portfast is
+            enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}, {'device': 's1-leaf2', 'configlet_name': 'configlet1_warning', 'warnings':
+            ['! portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc. to this interface when
+            portfast is enabled can cause temporary bridging loops. Use with CAUTION. at line 2']}]"
+          - "IGNORE_MULTIPLE_DEVICE_WARNING_CVP.configlets_validated.errors == [{'device': 's1-leaf1', 'configlet_name': 'configlet2_error', 'errors': [{'error':
+            \"> ruter bgp 1111% Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at
+            token 1: '1.1.1.1') at line 2\", 'lineNo': ' 2'}]}, {'device': 's1-leaf2', 'configlet_name': 'configlet2_error', 'errors': [{'error': \"> ruter bgp 1111%
+            Invalid input (at token 0: 'ruter') at line 1\", 'lineNo': ' 1'}, {'error': \">    neighbor 1.1.1.1 remote-bs 111% Invalid input (at token 1: '1.1.1.1')
+            at line 2\", 'lineNo': ' 2'}]}]"
+      register: WARNING_CONFIG_MULTIPLE_DEVICE_CVP_ASSERT_IGNORE
 
-  - name: write log file
-    template:
-      src: log.j2
-      dest: "{{ playbook_dir }}/device_validate_config_LOG.log"
+    - name: Write log file
+      ansible.builtin.template:
+        src: log.j2
+        dest: "{{ playbook_dir }}/device_validate_config_LOG.log"
+        mode: "0666"
 
-  - name: "Delete config"
-    arista.cvp.cv_configlet_v3:
-      configlets: "{{CVP_CONFIGLET}}"
-      state: absent
+    - name: Delete config
+      arista.cvp.cv_configlet_v3:
+        configlets: "{{ CVP_CONFIGLET }}"
+        state: absent

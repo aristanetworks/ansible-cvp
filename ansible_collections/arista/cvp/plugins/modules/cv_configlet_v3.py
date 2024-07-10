@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -53,7 +53,7 @@ EXAMPLES = r'''
 - name: Test cv_configlet_v3
   hosts: cvp
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     configlet_list:
       Test_Configlet: "! This is a Very First Testing Configlet\n!"

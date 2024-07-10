@@ -2,108 +2,108 @@
 - name: Test cv_configlet_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_CONFIGLETS:
-      configlet1: 'alias a{{ 999 | random }} show lldp'
-      configlet2: '! This is second configlet'
+      configlet1: alias a{{ 999 | random }} show lldp
+      configlet2: "! This is second configlet"
 
   tasks:
-    - name: "Push config"
+    - name: Push config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: present
       register: CV_CONFIGLET_V3_RESULT
 
-    - name: "Check configlet creation process"
-      assert:
+    - name: Check configlet creation process
+      ansible.builtin.assert:
         that:
           - CV_CONFIGLET_V3_RESULT.changed == true
           - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_count == 2
           - CV_CONFIGLET_V3_RESULT.configlets_created.configlets_created_list == ['configlet1', 'configlet2']
           - CV_CONFIGLET_V3_RESULT.configlets_created.success == true
 
-    - name: "Update configlets"
+    - name: Update configlets
       arista.cvp.cv_configlet_v3:
         configlets:
-          configlet1: "{{CVP_CONFIGLETS.configlet1}}"
+          configlet1: "{{ CVP_CONFIGLETS.configlet1 }}"
         state: present
       register: CV_CONFIGLET_V3_RESULT
 
-    - name: "Check configlet updation process"
-      assert:
+    - name: Check configlet updation process
+      ansible.builtin.assert:
         that:
           - CV_CONFIGLET_V3_RESULT.changed == true
           - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_count == 1
           - CV_CONFIGLET_V3_RESULT.configlets_updated.configlets_updated_list == ['configlet1']
           - CV_CONFIGLET_V3_RESULT.configlets_updated.success == true
 
-    - name: "Push same config again"
+    - name: Push same config again
       arista.cvp.cv_configlet_v3:
         configlets:
-          configlet2: "{{CVP_CONFIGLETS.configlet2}}"
+          configlet2: "{{ CVP_CONFIGLETS.configlet2 }}"
         state: present
       register: CV_CONFIGLET_V3_RESULT
 
-    - name: "Check same config push"
-      assert:
+    - name: Check same config push
+      ansible.builtin.assert:
         that:
           - CV_CONFIGLET_V3_RESULT.changed == false
           - CV_CONFIGLET_V3_RESULT.success == false
           - CV_CONFIGLET_V3_RESULT.failed == false
 
-    - name: 'Collect configlets facts from {{inventory_hostname}}'
+    - name: Collect configlets facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "configlet[1-2]"
+        regexp_filter: configlet[1-2]
       register: FACTS_CONFIGLET
 
-    - name: "Check device facts"
-      assert:
+    - name: Check device facts
+      ansible.builtin.assert:
         that:
           - FACTS_CONFIGLET.changed == false
           - FACTS_CONFIGLET.data.cvp_configlets.configlet1 is defined
           - FACTS_CONFIGLET.data.cvp_configlets.configlet2 is defined
           - FACTS_CONFIGLET.failed == false
 
-    - name: "Delete config"
+    - name: Delete config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: absent
       register: DELETE_CONFIGLET_RESULT
 
-    - name: "Check configlet deletion process"
-      assert:
+    - name: Check configlet deletion process
+      ansible.builtin.assert:
         that:
           - DELETE_CONFIGLET_RESULT.changed == true
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_count == 2
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == ['configlet1', 'configlet2']
           - DELETE_CONFIGLET_RESULT.configlets_deleted.success == true
 
-    - name: "Delete non-existing config"
+    - name: Delete non-existing config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: absent
       register: DELETE_CONFIGLET_RESULT
 
-    - name: "Check configlet deletion process"
-      assert:
+    - name: Check configlet deletion process
+      ansible.builtin.assert:
         that:
           - DELETE_CONFIGLET_RESULT.changed == false
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_count == 0
           - DELETE_CONFIGLET_RESULT.configlets_deleted.configlets_deleted_list == []
           - DELETE_CONFIGLET_RESULT.configlets_deleted.success == false
 
-    - name: 'Collect configlets facts from {{inventory_hostname}}'
+    - name: Collect configlets facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "configlet[1-2]"
+        regexp_filter: configlet[1-2]
       register: FACTS_CONFIGLET
 
-    - name: "Check configlets facts"
-      assert:
+    - name: Check configlets facts
+      ansible.builtin.assert:
         that:
           - FACTS_CONFIGLET.changed == false
           - FACTS_CONFIGLET.data.cvp_configlets == {}

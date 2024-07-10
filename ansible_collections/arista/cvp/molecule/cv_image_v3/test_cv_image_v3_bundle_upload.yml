@@ -2,155 +2,155 @@
 - name: Test cv_image_v3_bundle_upload
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     # Make sure given image does not exist on CVP
-    image_name: "vEOS-lab-4.25.5M.swi"
-    extension_name: "TerminAttr-1.25.1-1.swix"
-    extension_name_2: "TerminAttr-1.26.0-1.swix"
-    bundle_name: "Test_bundle"
+    image_name: vEOS-lab-4.25.5M.swi
+    extension_name: TerminAttr-1.25.1-1.swix
+    extension_name_2: TerminAttr-1.26.0-1.swix
+    bundle_name: Test_bundle
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
     bundle_query: "[?name=='{{bundle_name}}']"
     delete_bundle_query: "[?name!='{{bundle_name}}']"
 
   tasks:
-
-    #Upload image and extension
-    - name: "Upload EOS image to {{inventory_hostname}}"
+    # Upload image and extension
+    - name: Upload EOS image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{image_name}}"
+        image: "{{ image_name }}"
 
-    - name: "Upload TerminAttr image to {{inventory_hostname}}"
+    - name: Upload TerminAttr image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{extension_name}}"
+        image: "{{ extension_name }}"
 
-    - name: "Upload Second TerminAttr image to {{inventory_hostname}}"
+    - name: Upload Second TerminAttr image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{extension_name_2}}"
+        image: "{{ extension_name_2 }}"
 
-    #Create bundle
-    - name: "Create bundle {{inventory_hostname}}"
+    # Create bundle
+    - name: Create bundle {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
-          - "{{extension_name}}"
-          - "{{extension_name_2}}"
+          - "{{ image_name }}"
+          - "{{ extension_name }}"
+          - "{{ extension_name_2 }}"
       register: CREATE_BUNDLE_DATA
 
-    - name: "Check create bundle"
+    - name: Check create bundle
       vars:
-        bundle_data_check: "Bundle : {{bundle_name}} successfully created"
-      assert:
+        bundle_data_check: "Bundle : {{ bundle_name }} successfully created"
+      ansible.builtin.assert:
         that:
           - CREATE_BUNDLE_DATA.changed == true
-          - CREATE_BUNDLE_DATA.data.data == "{{bundle_data_check}}"
+          - CREATE_BUNDLE_DATA.data.data == "{{ bundle_data_check }}"
           - CREATE_BUNDLE_DATA.failed == false
 
-    - name: "Gather CVP bundle information facts {{inventory_hostname}} for create bundle"
+    - name: Gather CVP bundle information facts {{ inventory_hostname }} for create bundle
       arista.cvp.cv_image_v3:
         mode: bundle
         action: get
       register: BUNDLE_DATA
 
     - name: Fetch the tested bundle information for create bundle
-      set_fact:
+      ansible.builtin.set_fact:
         test_bundle: "{{ BUNDLE_DATA.data.bundles | json_query(bundle_query) | first }}"
 
-    - name: "Check create bundle with images and extensions"
-      assert:
+    - name: Check create bundle with images and extensions
+      ansible.builtin.assert:
         that:
           - BUNDLE_DATA.changed == false
-          - test_bundle.name == "{{bundle_name}}"
-          - test_bundle.imageIds == ["{{image_name}}", "{{extension_name}}", "{{extension_name_2}}"]
+          - test_bundle.name == "{{ bundle_name }}"
+          - test_bundle.imageIds == ["{{ image_name }}", "{{ extension_name }}", "{{ extension_name_2 }}"]
 
-    - name: "Update bundle {{inventory_hostname}}"
+    - name: Update bundle {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
-          - "{{extension_name}}"
+          - "{{ image_name }}"
+          - "{{ extension_name }}"
       register: UPDATE_BUNDLE_DATA
 
-    - name: "Check update bundle"
-      assert:
+    - name: Check update bundle
+      ansible.builtin.assert:
         that:
           - UPDATE_BUNDLE_DATA.changed == true
           - UPDATE_BUNDLE_DATA.data.data == "Image bundle updated successfully."
           - UPDATE_BUNDLE_DATA.failed == false
 
-    - name: "Gather CVP bundle information facts {{inventory_hostname}} for update bundle"
+    - name: Gather CVP bundle information facts {{ inventory_hostname }} for update bundle
       arista.cvp.cv_image_v3:
         mode: bundle
         action: get
       register: BUNDLE_DATA_UPDATE
 
     - name: Fetch the tested bundle information
-      set_fact:
+      ansible.builtin.set_fact:
         test_bundle_update: "{{ BUNDLE_DATA_UPDATE.data.bundles | json_query(bundle_query) | first }}"
 
-    - name: "Check update bundle with images and extension"
-      assert:
+    - name: Check update bundle with images and extension
+      ansible.builtin.assert:
         that:
           - BUNDLE_DATA_UPDATE.changed == false
-          - test_bundle_update.name == "{{bundle_name}}"
-          - test_bundle_update.imageIds == ["{{image_name}}", "{{extension_name}}"]
+          - test_bundle_update.name == "{{ bundle_name }}"
+          - test_bundle_update.imageIds == ["{{ image_name }}", "{{ extension_name }}"]
 
-    - name: "Delete bundle {{inventory_hostname}}"
+    - name: Delete bundle {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: remove
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
-          - "{{extension_name}}"
+          - "{{ image_name }}"
+          - "{{ extension_name }}"
       register: DELETE_BUNDLE
 
-    - name: "Check delete bundle"
-      assert:
+    - name: Check delete bundle
+      ansible.builtin.assert:
         that:
           - DELETE_BUNDLE.changed == true
           - DELETE_BUNDLE.data.data == "success"
           - DELETE_BUNDLE.failed == false
 
-    - name: "Gather CVP bundle information facts {{inventory_hostname}} for delete bundle"
+    - name: Gather CVP bundle information facts {{ inventory_hostname }} for delete bundle
       arista.cvp.cv_image_v3:
         mode: bundle
         action: get
       register: DELETED_BUNDLE_DATA
 
     - name: Fetch the deleted bundle information
-      set_fact:
+      ansible.builtin.set_fact:
         delete_bundle: "{{ DELETED_BUNDLE_DATA.data.bundles | json_query(delete_bundle_query) | first }}"
 
-    - name: "Check delete bundle with images and extensions"
-      assert:
+    - name: Check delete bundle with images and extensions
+      ansible.builtin.assert:
         that:
-          - delete_bundle.name != "{{bundle_name}}"
-          - delete_bundle.imageIds != ["{{image_name}}", "{{extension_name}}"]
+          - delete_bundle.name != "{{ bundle_name }}"
+          - delete_bundle.imageIds != ["{{ image_name }}", "{{ extension_name }}"]
 
-    - name: "Negative test: Create bundle with multiple images {{inventory_hostname}}"
+    - name: Negative test - Create bundle with multiple images {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
-          - "{{image_name}}"
-      ignore_errors: yes
+          - "{{ image_name }}"
+          - "{{ image_name }}"
+      ignore_errors: true
       register: NEGATIVE_BUNDLE_DATA
-    - assert:
+    - name: Assert Negative test - Create bundle with multiple images {{ inventory_hostname }}
+      ansible.builtin.assert:
         that:
           - NEGATIVE_BUNDLE_DATA.changed == false
           - NEGATIVE_BUNDLE_DATA.msg == "Request Error: Failure - Only one swi image can be uploaded per bundle."

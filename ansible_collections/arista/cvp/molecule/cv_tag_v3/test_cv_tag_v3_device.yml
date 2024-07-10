@@ -2,7 +2,7 @@
 - name: Test cv_tag_v3 for device tags
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     DEVICE1: s1-leaf3
     DEVICE2: s1-leaf4
@@ -43,13 +43,13 @@
   tasks:
     - name: Assign non-existing device tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: assign
         auto_create: true
       register: AUTO_CREATE_ASSIGN_TAGS
 
     - name: Check assign non-existing device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_ASSIGN_TAGS.changed == true
           - AUTO_CREATE_ASSIGN_TAGS.failed == false
@@ -59,12 +59,12 @@
 
     - name: Unassign auto-create device tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: unassign
       register: AUTO_CREATE_UNASSIGN_TAGS
 
     - name: Check unassign auto-create device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_UNASSIGN_TAGS.changed == true
           - AUTO_CREATE_UNASSIGN_TAGS.failed == false
@@ -74,12 +74,12 @@
 
     - name: Delete auto_create device tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: delete
       register: AUTO_CREATE_TAGS_DELETE
 
     - name: Check delete auto_create device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_TAGS_DELETE.changed == true
           - AUTO_CREATE_TAGS_DELETE.failed == false
@@ -87,16 +87,16 @@
           - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_list != []
           - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-# Create -> assign -> unassign -> delete
+    # Create -> assign -> unassign -> delete
 
     - name: Create device tags (part of CREATE -> assign -> unassign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{CREATE_TAGS}}"
+        tags: "{{ CREATE_TAGS }}"
         mode: create
       register: TAGS_CREATE
 
     - name: Check create device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_CREATE.changed == true
           - TAGS_CREATE.failed == false
@@ -106,12 +106,12 @@
 
     - name: Assign existing device tags (part of create -> ASSIGN -> unassign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: assign
       register: ASSIGN_EXISTING
 
     - name: Check assign existing device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - ASSIGN_EXISTING.changed == true
           - ASSIGN_EXISTING.failed == false
@@ -121,12 +121,12 @@
 
     - name: Unassign existing device tags (part of create -> assign -> UNASSIGN -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: unassign
       register: UNASSIGN_EXISTING
 
     - name: Check unassign existing device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - UNASSIGN_EXISTING.changed == true
           - UNASSIGN_EXISTING.failed == false
@@ -136,12 +136,12 @@
 
     - name: Delete device tags (part of create -> assign -> unassign -> DELETE)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: delete
       register: TAGS_DELETE
 
     - name: Check delete device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_DELETE.changed == true
           - TAGS_DELETE.failed == false
@@ -149,16 +149,16 @@
           - TAGS_DELETE.tags_manager.tags_manager_list != []
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-# Create -> assign -> delete
+    # Create -> assign -> delete
 
     - name: Create device tags (part of CREATE -> assign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{CREATE_TAGS}}"
+        tags: "{{ CREATE_TAGS }}"
         mode: create
       register: TAGS_CREATE
 
     - name: Check create device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_CREATE.changed == true
           - TAGS_CREATE.failed == false
@@ -168,12 +168,12 @@
 
     - name: Assign existing device tags (part of create -> ASSIGN -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: assign
       register: ASSIGN_EXISTING
 
     - name: Check assign existing device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - ASSIGN_EXISTING.changed == true
           - ASSIGN_EXISTING.failed == false
@@ -183,12 +183,12 @@
 
     - name: Delete device tags (part of create -> assign -> DELETE)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: delete
       register: TAGS_DELETE
 
     - name: Check delete device tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_DELETE.changed == true
           - TAGS_DELETE.failed == false

@@ -3,27 +3,25 @@
   hosts: CloudVision
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
 
   vars:
 
-    DEVICE1: "s1-leaf1"
+    DEVICE1: s1-leaf1
 
-    DEVICE2: "s1-leaf2"
+    DEVICE2: s1-leaf2
 
     CVP_DEVICES_MOVE_DEVICE_EXECUTE:
-      - fqdn: "{{DEVICE1}}"
-        parentContainerName: "Temp_Leafs"
+      - fqdn: "{{ DEVICE1 }}"
+        parentContainerName: Temp_Leafs
 
     CVP_DEVICES_MOVE_DEVICE_CANCEL:
-      - fqdn: "{{DEVICE2}}"
-        parentContainerName: "Temp_Leafs"
+      - fqdn: "{{ DEVICE2 }}"
+        parentContainerName: Temp_Leafs
 
     CVP_DEVICES_MOVE_ORIGINAL_LOCATION:
-      - fqdn: "{{DEVICE1}}"
+      - fqdn: "{{ DEVICE1 }}"
         parentContainerName: "{{CV_FACTS_V3_RESULT1.data.cvp_devices[0].parentContainerName}}"
-      - fqdn: "{{DEVICE2}}"
+      - fqdn: "{{ DEVICE2 }}"
         parentContainerName: "{{CV_FACTS_V3_RESULT2.data.cvp_devices[0].parentContainerName}}"
 
     containers:
@@ -31,54 +29,58 @@
         parentContainerName: Tenant
 
   tasks:
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE1}}"
+        regexp_filter: "{{ DEVICE1 }}"
       register: CV_FACTS_V3_RESULT1
 
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE2}}"
+        regexp_filter: "{{ DEVICE2 }}"
       register: CV_FACTS_V3_RESULT2
 
     # Create test container
     - name: Create test container
       arista.cvp.cv_container_v3:
-        topology: "{{containers}}"
+        topology: "{{ containers }}"
         state: present
 
     # Running move_device to create task list
     - name: Run CV_DEVICE_V3 To Move Device For Execute Task
       arista.cvp.cv_device_v3:
-          devices: '{{CVP_DEVICES_MOVE_DEVICE_EXECUTE}}'
-          state: present
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE_EXECUTE }}"
+        state: present
       register: MOVE_DEVICE_DATA_EXECUTE
+
+    - name: Print
+      ansible.builtin.debug:
+        msg: "{{ MOVE_DEVICE_DATA_EXECUTE }}"
 
     - name: Execute Task
       arista.cvp.cv_task_v3:
         tasks:
-          - "{{MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0]}}"
+          - "{{ MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0] }}"
       register: EXECUTE_TASK_DATA
 
     - name: Pause for 20 seconds to Execute Task
       ansible.builtin.pause:
         seconds: 20
 
-    - name: Collect task facts from {{inventory_hostname}} filtered by task_id
+    - name: Collect task facts from {{ inventory_hostname }} filtered by task_id
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0]}}"
+        regexp_filter: "{{ MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0] }}"
       register: CV_FACTS_V3_RESULT
 
     - name: Testing Execute Task
       vars:
         CV_FACTS_ORDER_STATUS: "{{ CV_FACTS_V3_RESULT['data']['cvp_tasks'][MOVE_DEVICE_DATA_EXECUTE.devices_moved.taskIds[0]]['workOrderUserDefinedStatus'] }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - EXECUTE_TASK_DATA.actions_manager.changed == true
           - EXECUTE_TASK_DATA.actions_manager.actions_manager_count == 1
@@ -87,13 +89,13 @@
 
     - name: Run CV_DEVICE_V3 To Move Device For Cancel Task
       arista.cvp.cv_device_v3:
-          devices: '{{CVP_DEVICES_MOVE_DEVICE_CANCEL}}'
-          state: present
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE_CANCEL }}"
+        state: present
       register: MOVE_DEVICE_DATA_CANCEL
 
     - name: Cancel Pending Tasks
       arista.cvp.cv_task_v3:
-        tasks: "{{MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0]}}"
+        tasks: "{{ MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0] }}"
         state: cancelled
       register: CANCEL_TASK_DATA
 
@@ -101,17 +103,18 @@
       ansible.builtin.pause:
         seconds: 5
 
-    - name: Collect task facts from {{inventory_hostname}} filtered by task_id
+    - name: Collect task facts from {{ inventory_hostname }} filtered by task_id
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0]}}"
+        regexp_filter: "{{ MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0] }}"
       register: CV_FACTS_V3_RESULT_CANCEL
 
     - name: Testing Cancel Task
       vars:
-        CV_FACTS_ORDER_STATUS_CANCEL: "{{ CV_FACTS_V3_RESULT_CANCEL['data']['cvp_tasks'][MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0]]['workOrderUserDefinedStatus'] }}"
-      assert:
+        CV_FACTS_ORDER_STATUS_CANCEL: "{{ CV_FACTS_V3_RESULT_CANCEL['data']['cvp_tasks'][MOVE_DEVICE_DATA_CANCEL.devices_moved.taskIds[0]]['workOrderUserDefinedStatus']
+          }}"
+      ansible.builtin.assert:
         that:
           - CANCEL_TASK_DATA.actions_manager.changed == true
           - CANCEL_TASK_DATA.actions_manager.actions_manager_count == 1
@@ -119,32 +122,32 @@
           - CV_FACTS_ORDER_STATUS_CANCEL == "Cancelled"
 
     # Running move_device to create task list
-    - name: move devices back to their original location
+    - name: Move devices back to their original location
       arista.cvp.cv_device_v3:
-          devices: '{{CVP_DEVICES_MOVE_ORIGINAL_LOCATION}}'
-          state: present
+        devices: "{{ CVP_DEVICES_MOVE_ORIGINAL_LOCATION }}"
+        state: present
       register: MOVE_DEVICE_OG_LOC
 
     - name: Execute Task
       arista.cvp.cv_task_v3:
-        tasks: "{{MOVE_DEVICE_OG_LOC.devices_moved.taskIds}}"
+        tasks: "{{ MOVE_DEVICE_OG_LOC.devices_moved.taskIds }}"
       register: EXECUTE_TASK_DATA
 
     - name: Pause for 20 seconds to Execute Task
       ansible.builtin.pause:
         seconds: 20
 
-    - name: Collect task facts from {{inventory_hostname}} filtered by task_id
+    - name: Collect task facts from {{ inventory_hostname }} filtered by task_id
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{MOVE_DEVICE_OG_LOC.devices_moved.taskIds[0]}}"
+        regexp_filter: "{{ MOVE_DEVICE_OG_LOC.devices_moved.taskIds[0] }}"
       register: CV_FACTS_V3_RESULT_OG
 
     - name: Executing tasks and testing results
       vars:
         CV_FACTS_ORDER_STATUS: "{{ CV_FACTS_V3_RESULT_OG['data']['cvp_tasks'][MOVE_DEVICE_OG_LOC.devices_moved.taskIds[0]]['workOrderUserDefinedStatus'] }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - EXECUTE_TASK_DATA.actions_manager.changed == true
           - EXECUTE_TASK_DATA.actions_manager.actions_manager_count == 2
@@ -154,5 +157,5 @@
     # Remove test container
     - name: Delete test container
       arista.cvp.cv_container_v3:
-        topology: "{{containers}}"
+        topology: "{{ containers }}"
         state: absent

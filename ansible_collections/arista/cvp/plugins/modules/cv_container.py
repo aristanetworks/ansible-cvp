@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -82,15 +82,15 @@ EXAMPLES = r'''
             devices:
                 - veos01
   tasks:
-    - name: "Gather CVP facts {{inventory_hostname}}"
+    - name: "Gather CVP facts {{ inventory_hostname }}"
       cv_facts:
       register: cvp_facts
-    - name: "Build Container topology on {{inventory_hostname}}"
+    - name: "Build Container topology on {{ inventory_hostname }}"
       cv_container:
-        cvp_facts: "{{cvp_facts.ansible_facts}}"
-        topology: "{{containers}}"
+        cvp_facts: "{{ cvp_facts.ansible_facts }}"
+        topology: "{{ containers }}"
         mode: merge
-      register: CVP_CONTAINERS_RESULT
+      register: cvp_containers_result
 '''
 
 import sys

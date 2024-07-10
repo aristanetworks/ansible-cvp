@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -57,52 +57,57 @@ options:
 '''
 
 EXAMPLES = r'''
+- name: Collect Facts from CloudVision
+  hosts: cv_server
+  connection: local
+  gather_facts: false
+
   tasks:
-  - name: '#01 - Collect devices facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
+    - name: '01 - Collect devices facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
 
-  - name: '#02 - Collect devices facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - configlets
-    register: FACTS_DEVICES
+    - name: '02 - Collect devices facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - configlets
+      register: FACTS_DEVICES
 
-  - name: '#03 - Collect devices facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - devices
-        - containers
-    register: FACTS_DEVICES
+    - name: '03 - Collect devices facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+          - containers
+      register: FACTS_DEVICES
 
-  - name: '#04 - Collect devices facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - devices
-      regexp_filter: "spine1"
-      verbose: long
-    register: FACTS_DEVICES
+    - name: '04 - Collect devices facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - devices
+        regexp_filter: "spine1"
+        verbose: long
+      register: FACTS_DEVICES
 
-  - name: '#05 - Collect images facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - images
-    register: FACTS_DEVICES
+    - name: '05 - Collect images facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - images
+      register: FACTS_DEVICES
 
-  - name: '#06 - Collect task facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - tasks
-      regexp_filter: 'Pending' # get facts filtered by task status - 'Failed', 'Pending', 'Completed', 'Cancelled'
-      verbose: 'long'
-    register: FACTS_DEVICES
+    - name: '06 - Collect task facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: 'Pending' # get facts filtered by task status - 'Failed', 'Pending', 'Completed', 'Cancelled'
+        verbose: 'long'
+      register: FACTS_DEVICES
 
-  - name: '#07 - Collect task facts from {{inventory_hostname}}'
-    arista.cvp.cv_facts_v3:
-      facts:
-        - tasks
-      regexp_filter: 95 # get facts filtered by task_Id (int)
-      verbose: 'long'
-    register: FACTS_DEVICES
+    - name: '07 - Collect task facts from {{ inventory_hostname }}'
+      arista.cvp.cv_facts_v3:
+        facts:
+          - tasks
+        regexp_filter: 95 # get facts filtered by task_Id (int)
+        verbose: 'long'
+      register: FACTS_DEVICES
 '''
 
 import logging

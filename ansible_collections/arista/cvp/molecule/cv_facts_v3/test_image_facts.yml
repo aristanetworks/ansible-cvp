@@ -2,39 +2,39 @@
 - name: Test cv_facts_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
-    image_name: "vEOS-lab-4.30.1F.swi"   # image file should be present
-    bundle_name: "Test_bundle"
+    image_name: vEOS-lab-4.30.1F.swi # image file should be present
+    bundle_name: Test_bundle
 
   tasks:
-    #Upload image
-    - name: "Upload EOS image to {{inventory_hostname}}"
+    # Upload image
+    - name: Upload EOS image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{image_name}}"
+        image: "{{ image_name }}"
 
-    #Create bundle
-    - name: "Create bundle {{inventory_hostname}}"
+    # Create bundle
+    - name: Create bundle {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: add
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
+          - "{{ image_name }}"
 
-    - name: Collect images facts from {{inventory_hostname}} filtered by name
+    - name: Collect images facts from {{ inventory_hostname }} filtered by name
       arista.cvp.cv_facts_v3:
         facts:
           - images
-        regexp_filter: "{{image_name}}" # collects specific image facts
+        regexp_filter: "{{ image_name }}" # collects specific image facts
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
@@ -43,10 +43,10 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_images['vEOS-lab-4.30.1F.swi'] is defined
 
-    - name: "Delete bundle {{inventory_hostname}}"
+    - name: Delete bundle {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: bundle
         action: remove
-        bundle_name: "{{bundle_name}}"
+        bundle_name: "{{ bundle_name }}"
         image_list:
-          - "{{image_name}}"
+          - "{{ image_name }}"

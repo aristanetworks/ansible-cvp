@@ -3,16 +3,14 @@
   hosts: CloudVision
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
   vars:
 
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
 
     CVP_CONFIGLETS:
-      configlet1: '! This is first configlet'
-      configlet2: '! This is second configlet'
+      configlet1: "! This is first configlet"
+      configlet2: "! This is second configlet"
 
     TOPOLOGY_3_TIER:
       TEAM01:
@@ -24,7 +22,7 @@
         configlets:
           - configlet1
 
-    CONTAINER_NAME: "TEAM01_LEAFS"
+    CONTAINER_NAME: TEAM01_LEAFS
 
     CHANGE_CONFIGLET_LOOSE:
       TEAM01_LEAFS:
@@ -45,36 +43,36 @@
   tasks:
     # Create configlet
 
-    - name: "Push config"
+    - name: Push config
       arista.cvp.cv_configlet_v3:
-          configlets: "{{CVP_CONFIGLETS}}"
-          state: present
+        configlets: "{{ CVP_CONFIGLETS }}"
+        state: present
       register: CV_CONFIGLET
 
     # TC1 - Create and delete 3 tier topology.
     # Testing: Removal of entire topology.
 
-    - name: Build Container Topology On {{inventory_hostname}}
+    - name: Build Container Topology On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
+        topology: "{{ TOPOLOGY_3_TIER }}"
       register: Build_TOPO_3_TIER
 
     - name: Testing Build Container
-      assert:
+      ansible.builtin.assert:
         that:
           - Build_TOPO_3_TIER.container_added.changed == true
           - Build_TOPO_3_TIER.container_added.container_added_count == 3
           - Build_TOPO_3_TIER.container_added.container_added_list == ["TEAM01", "TEAM01_DC", "TEAM01_LEAFS"]
           - Build_TOPO_3_TIER.container_added.success == true
 
-    - name: Remove Container Topology On {{inventory_hostname}}
+    - name: Remove Container Topology On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
+        topology: "{{ TOPOLOGY_3_TIER }}"
         state: absent
       register: REMOVE_TOPO_3_TIER
 
     - name: Testing Remove Container
-      assert:
+      ansible.builtin.assert:
         that:
           - REMOVE_TOPO_3_TIER.container_deleted.changed == true
           - REMOVE_TOPO_3_TIER.container_deleted.container_deleted_count == 3
@@ -89,19 +87,19 @@
     #       4. Remove configlet using apply_mode: strict
     #       5. Removal of container which contains configlet.
 
-    - name: Build Container Topology On {{inventory_hostname}} With Configlet
+    - name: Build Container Topology On {{ inventory_hostname }} With Configlet
       arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
+        topology: "{{ TOPOLOGY_3_TIER }}"
       register: CONFIGLET_ADD
 
-    - name: Collect containers facts from {{inventory_hostname}}
+    - name: Collect containers facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - containers
       register: CONTAINER_RESULT
 
     - name: Testing Added Configlet
-      assert:
+      ansible.builtin.assert:
         that:
           - CONFIGLET_ADD.configlets_attached.changed == true
           - CONFIGLET_ADD.configlets_attached.configlets_attached_count == 1
@@ -111,12 +109,12 @@
 
     - name: Change Configlet With apply_mode loose
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_CONFIGLET_LOOSE}}'
+        topology: "{{ CHANGE_CONFIGLET_LOOSE }}"
         apply_mode: loose
       register: CONFIGLET_CHANGE_LOOSE
 
     - name: Testing Changed Configlet with apply_mode loose
-      assert:
+      ansible.builtin.assert:
         that:
           - CONFIGLET_CHANGE_LOOSE.configlets_attached.changed == true
           - CONFIGLET_CHANGE_LOOSE.configlets_attached.configlets_attached_count == 1
@@ -129,12 +127,12 @@
 
     - name: Change Configlet With apply_mode strict
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_CONFIGLET_STRICT}}'
+        topology: "{{ CHANGE_CONFIGLET_STRICT }}"
         apply_mode: strict
       register: CONFIGLET_CHANGE_STRICT
 
     - name: Testing Changed Configlet with apply_mode strict
-      assert:
+      ansible.builtin.assert:
         that:
           - CONFIGLET_CHANGE_STRICT.configlets_attached.changed == true
           - CONFIGLET_CHANGE_STRICT.configlets_attached.configlets_attached_count == 1
@@ -147,12 +145,12 @@
 
     - name: Remove Configlet with apply_mode strict
       arista.cvp.cv_container_v3:
-        topology: '{{REMOVE_CONFIGLET}}'
+        topology: "{{ REMOVE_CONFIGLET }}"
         apply_mode: strict
       register: CONFIGLET_REMOVE
 
     - name: Testing Remove Configlet with apply_mode strict
-      assert:
+      ansible.builtin.assert:
         that:
           - CONFIGLET_REMOVE.configlets_detached.changed == true
           - CONFIGLET_REMOVE.configlets_detached.configlets_detached_count == 1
@@ -161,38 +159,39 @@
 
     - name: Add Configlet
       arista.cvp.cv_container_v3:
-        topology: '{{CHANGE_CONFIGLET_LOOSE}}'
+        topology: "{{ CHANGE_CONFIGLET_LOOSE }}"
 
     - name: Remove Container With Configlet
       arista.cvp.cv_container_v3:
-        topology: '{{REMOVE_CONFIGLET}}'
+        topology: "{{ REMOVE_CONFIGLET }}"
         state: absent
       register: REMOVE_CONTAINER_WITH_CONFIGLET
 
     - name: Testing Remove Container With Configlet
-      assert:
+      ansible.builtin.assert:
         that:
           - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.changed == true
           - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.container_deleted_count == 1
           - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.container_deleted_list == ["TEAM01_LEAFS"]
           - REMOVE_CONTAINER_WITH_CONFIGLET.container_deleted.success == true
 
-    - arista.cvp.cv_container_v3:
-        topology: '{{REMOVE_CONFIGLET}}'
+    - name: Remove Configlet
+      arista.cvp.cv_container_v3:
+        topology: "{{ REMOVE_CONFIGLET }}"
 
-    - name: "Delete configlet"
+    - name: Delete configlet
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: absent
 
     - name: Clean-up Topology for CONFIGLET
       arista.cvp.cv_container_v3:
-        topology: '{{TOPOLOGY_3_TIER}}'
+        topology: "{{ TOPOLOGY_3_TIER }}"
         state: absent
       register: DELETE_TOPOLOGY
 
     - name: Testing Clean-up for CONFIGLET
-      assert:
+      ansible.builtin.assert:
         that:
           - DELETE_TOPOLOGY.container_deleted.changed == true
           - DELETE_TOPOLOGY.container_deleted.container_deleted_count == 3

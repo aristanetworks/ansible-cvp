@@ -18,18 +18,18 @@
           mode: parallel
 
   tasks:
-    - name: "Create a change control on {{inventory_hostname}}"
+    - name: "Create a change control on {{ inventory_hostname }}"
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
-    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
+    - name: "Approve a change control using change_id field on {{ inventory_hostname }}"
       arista.cvp.cv_change_control_v3:
         state: approve
         change_id: ["{{ cv_change_control_test.data.id }}"]
 
-    - name: "Execute a change control on {{inventory_hostname}} using change_id field"
+    - name: "Execute a change control using change_id field on {{ inventory_hostname }} "
       arista.cvp.cv_change_control_v3:
         state: execute
         change_id: ["{{ cv_change_control_test.data.id }}"]

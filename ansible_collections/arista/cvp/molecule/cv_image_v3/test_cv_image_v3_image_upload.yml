@@ -2,95 +2,97 @@
 - name: Test cv_image_v3_image_upload
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     # Make sure given image does not exist on CVP
-    image1_name: "vEOS-lab-4.25.5M.swi"
-    image2_name: "vEOS-lab-4.26.0F.swi"
-    extension1_name: "TerminAttr-1.25.1-1.swix"
-    extension2_name: "TerminAttr-1.26.0-1.swix"
+    image1_name: vEOS-lab-4.25.5M.swi
+    image2_name: vEOS-lab-4.26.0F.swi
+    extension1_name: TerminAttr-1.25.1-1.swix
+    extension2_name: TerminAttr-1.26.0-1.swix
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
     image1_query: "[?name=='{{image1_name}}']"
 
   tasks:
-    #Upload image1
-    - name: "Upload EOS image to {{inventory_hostname}}"
+    # Upload image1
+    - name: Upload EOS image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{image1_name}}"
+        image: "{{ image1_name }}"
       register: ADD_IMAGE
 
-    - name: "Check Adding an image"
-      assert:
+    - name: Check Adding an image
+      ansible.builtin.assert:
         that:
           - ADD_IMAGE.changed == true
           - ADD_IMAGE.data.result == "success"
-          - ADD_IMAGE.data.imageId == "{{image1_name}}"
-          - ADD_IMAGE.data.name == "{{image1_name}}"
+          - ADD_IMAGE.data.imageId == "{{ image1_name }}"
+          - ADD_IMAGE.data.name == "{{ image1_name }}"
           - ADD_IMAGE.failed == false
 
-    - name: "Gather CVP image information facts {{inventory_hostname}} for add image"
+    - name: Gather CVP image information facts {{ inventory_hostname }} for add image
       arista.cvp.cv_image_v3:
         mode: image
         action: get
       register: IMAGE_DATA
 
     - name: Fetch the tested image information
-      set_fact:
-        image_data: "{{ IMAGE_DATA.data.images | json_query(image1_query) | first}}"
+      ansible.builtin.set_fact:
+        image_data: "{{ IMAGE_DATA.data.images | json_query(image1_query) | first }}"
 
-    - name: "Check adding an image with parameters"
-      assert:
+    - name: Check adding an image with parameters
+      ansible.builtin.assert:
         that:
-          - image_data.imageFileName == "{{image1_name}}"
-          - image_data.imageId == "{{image1_name}}"
-          - image_data.name == "{{image1_name}}"
+          - image_data.imageFileName == "{{ image1_name }}"
+          - image_data.imageId == "{{ image1_name }}"
+          - image_data.name == "{{ image1_name }}"
 
-    - name: "Upload EOS image2 to {{inventory_hostname}}"
+    - name: Upload EOS image2 to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{image2_name}}"
+        image: "{{ image2_name }}"
 
-    - name: "Upload TerminAttr image to {{inventory_hostname}}"
+    - name: Upload TerminAttr image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{extension1_name}}"
+        image: "{{ extension1_name }}"
 
-    - name: "Upload Second TerminAttr image to {{inventory_hostname}}"
+    - name: Upload Second TerminAttr image to {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{extension2_name}}"
+        image: "{{ extension2_name }}"
 
-    - name: "Negative test: Add image already exists {{inventory_hostname}}"
+    - name: Negative test - Add image already exists {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: add
-        image: "{{image1_name}}"
-      ignore_errors: yes
+        image: "{{ image1_name }}"
+      ignore_errors: true
       register: NEGATIVE_ADD_IMAGE
-    - assert:
+    - name: Assert negative test - Add image already exists {{ inventory_hostname }}
+      ansible.builtin.assert:
         that:
           - NEGATIVE_ADD_IMAGE.changed == false
           - NEGATIVE_ADD_IMAGE.data == {}
           - NEGATIVE_ADD_IMAGE.failed == false
 
-# #####################################################################
-# ##### Deletion of images through API is not supported currently #####
-# #####################################################################
+    # #####################################################################
+    # ##### Deletion of images through API is not supported currently #####
+    # #####################################################################
 
-    - name: "Negative test: Delete an image {{inventory_hostname}}"
+    - name: Negative test -  Delete an image {{ inventory_hostname }}
       arista.cvp.cv_image_v3:
         mode: image
         action: remove
-        image: "{{image1_name}}"
-      ignore_errors: yes
+        image: "{{ image1_name }}"
+      ignore_errors: true
       register: DELETE_IMAGE
-    - assert:
+    - name: Assert Negative test - Delete an image {{ inventory_hostname }}
+      ansible.builtin.assert:
         that:
           - DELETE_IMAGE.changed == false
           - DELETE_IMAGE.msg == "Deletion of images through API is not currently supported"

@@ -2,7 +2,7 @@
 - name: Test cv_device_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     ansible_command_timeout: 1200
     ansible_connect_timeout: 600
@@ -15,7 +15,7 @@
 
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "Test_Leaf"
+        parentContainerName: Test_Leaf
 
     CVP_DEVICES_PARENT_CONTAINER_NONE:
       - fqdn: "{{DEVICE_NAME}}"
@@ -23,11 +23,11 @@
 
     CVP_DEVICES_PROVISIONING_RESET:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "Test_Leaf"
+        parentContainerName: Test_Leaf
 
     CVP_DEVICES_APPLY_CONFIGLET:
       - fqdn: "{{DEVICE_NAME}}"
-        parentContainerName: "Undefined"
+        parentContainerName: Undefined
         configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
     CVP_DEVICES_VALIDATE_CONFIG:
@@ -36,7 +36,7 @@
         cvp_configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
     CVP_DEVICES_DEPLOY:
-      - fqdn: "{{DEVICE_NAME}}"    # device must be in undefined container
+      - fqdn: "{{DEVICE_NAME}}" # device must be in undefined container
         parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
@@ -48,7 +48,7 @@
     # Creating a container
     - name: Build Container On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
-        topology: '{{CONTAINER}}'
+        topology: "{{ CONTAINER }}"
 
     - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
@@ -59,7 +59,7 @@
 
     - name: Run CV_DEVICE_V3 To Move Device
       arista.cvp.cv_device_v3:
-        devices: '{{ CVP_DEVICES_MOVE_DEVICE }}'
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE }}"
         state: present
       register: MOVE_DEVICE_RUN
 
@@ -69,26 +69,26 @@
 
     - name: Execute Task for deploy_Device
       arista.cvp.cv_task_v3:
-        tasks: "{{MOVE_DEVICE_RUN.taskIds}}"
+        tasks: "{{ MOVE_DEVICE_RUN.taskIds }}"
 
     - name: Check Move Device
-      assert:
+      ansible.builtin.assert:
         that:
-          - "MOVE_DEVICE_RUN.devices_moved.changed == true"
-          - "MOVE_DEVICE_RUN.devices_moved.devices_moved_count == 1"
-          - "MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['s1-leaf1_to_Test_Leaf']"
-          - "MOVE_DEVICE_RUN.devices_moved.success == true"
-          - "MOVE_DEVICE_RUN.failed == false"
+          - MOVE_DEVICE_RUN.devices_moved.changed == true
+          - MOVE_DEVICE_RUN.devices_moved.devices_moved_count == 1
+          - MOVE_DEVICE_RUN.devices_moved.devices_moved_list == ['s1-leaf1_to_Test_Leaf']
+          - MOVE_DEVICE_RUN.devices_moved.success == true
+          - MOVE_DEVICE_RUN.failed == false
 
     - name: Run CV_DEVICE_V3 To Move Device With Parent Container None
       arista.cvp.cv_device_v3:
-        devices: '{{ CVP_DEVICES_PARENT_CONTAINER_NONE }}'
+        devices: "{{ CVP_DEVICES_PARENT_CONTAINER_NONE }}"
         state: present
-      ignore_errors: yes
+      ignore_errors: true
       register: MOVE_DEVICE_NONE
 
     - name: Negative Test Check Move Device With Parent Container None
-      assert:
+      ansible.builtin.assert:
         that:
           - MOVE_DEVICE_NONE.msg == "The target container 'None' for the device 's1-leaf1' does not exist on CVP."
           - MOVE_DEVICE_NONE.changed == false
@@ -96,13 +96,13 @@
 
     - name: Run CV_DEVICE_V3 To Move Device With Parent Container Same
       arista.cvp.cv_device_v3:
-        devices: '{{ CVP_DEVICES_MOVE_DEVICE }}'
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE }}"
         state: present
-      ignore_errors: yes
+      ignore_errors: true
       register: MOVE_DEVICE
 
     - name: Negative Test Check Move Device With Same Parent Container
-      assert:
+      ansible.builtin.assert:
         that:
           - MOVE_DEVICE.devices_moved.changed == false
           - MOVE_DEVICE.devices_moved.devices_moved_count == 0
@@ -118,7 +118,7 @@
     # moving device to undefined container
     - name: Run CV_DEVICE_V3 With State Provisioning Reset
       arista.cvp.cv_device_v3:
-        devices: '{{ CVP_DEVICES_PROVISIONING_RESET }}'
+        devices: "{{ CVP_DEVICES_PROVISIONING_RESET }}"
         state: provisioning_reset
       register: PROVISIONING_RESET_RESULT
 
@@ -132,14 +132,14 @@
         validate_mode: stop_on_error
       register: CVP_DEVICES_RESULTS
 
-    - name: "Resetting original state for device {{ DEVICE_NAME }}"
+    - name: Resetting original state for device {{ DEVICE_NAME }}
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_DEPLOY}}'
+        devices: "{{ CVP_DEVICES_DEPLOY }}"
         state: present
       register: CV_DEVICE_V3_RESULT
 
-    - name: "Checking if the reset was successful"
-      assert:
+    - name: Checking if the reset was successful
+      ansible.builtin.assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == true
           - CV_DEVICE_V3_RESULT.devices_deployed.changed == true
@@ -151,10 +151,10 @@
     - name: Execute Task for deploy_Device
       arista.cvp.cv_task_v3:
         tasks:
-          - "{{CV_DEVICE_V3_RESULT.devices_deployed.taskIds[0]}}"
+          - "{{ CV_DEVICE_V3_RESULT.devices_deployed.taskIds[0] }}"
       when: CVP_DEVICES_RESULTS.success is true
 
     - name: Remove Container
       arista.cvp.cv_container_v3:
-        topology: '{{ CONTAINER }}'
+        topology: "{{ CONTAINER }}"
         state: absent

@@ -2,13 +2,13 @@
 - name: Test cv_change_control_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: s1-leaf1A Change Control
       notes: Initiated from Ansible Playbook
       activities:
-        - action: "mlaghealthcheck"
+        - action: mlaghealthcheck
           name: Check_LEAF1A_MLAG_Health
           arguments:
             - name: DeviceID
@@ -19,118 +19,118 @@
           mode: parallel
 
   tasks:
-######################################
-##   CREATE,APPROVE AND EXECUTE     ##
-######################################
-    - name: "Create a change control on {{inventory_hostname}}"
+    ######################################
+    ##   CREATE,APPROVE AND EXECUTE     ##
+    ######################################
+    - name: Create a change control on {{ inventory_hostname }}
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
     - name: Check change control create
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_test.changed == true
           - cv_change_control_test.data.id is defined
           - cv_change_control_test.failed == false
 
-    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
+    - name: Approve a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: approve
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_change_control_approve
 
     - name: Check change control approve
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_approve.changed == true
           - cv_change_control_approve.data.time is defined
           - cv_change_control_approve.data.value.approve.notes == "Initiated from Ansible Playbook"
           - cv_change_control_approve.data.value.approve.value == true
-          - cv_change_control_approve.data.value.key.id == "{{ cv_change_control_test.data.id }}"
+          - cv_change_control_approve.data.value.key.id == cv_change_control_test.data.id
           - cv_change_control_approve.data.value.version is defined
           - cv_change_control_approve.failed == false
 
-    - name: "Execute a change control on {{inventory_hostname}} using change_id field"
+    - name: Execute a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: execute
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_control_execute
 
     - name: Check change control execute
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_control_execute.changed == true
           - cv_control_execute.data.time is defined
-          - cv_control_execute.data.value.key.id == "{{ cv_change_control_test.data.id }}"
+          - cv_control_execute.data.value.key.id == cv_change_control_test.data.id
           - cv_control_execute.data.value.start.value == true
           - cv_control_execute.failed == false
 
     # negative test for approve
-    - name: "Approve an unknown change control on {{inventory_hostname}} using change_id field"
+    - name: Approve an unknown change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: approve
-        change_id: [ "1234567890" ] # unknown cc id, does not exist on CV
-      ignore_errors: yes
+        change_id: ["1234567890"] # unknown cc id, does not exist on CV
+      ignore_errors: true
       register: cv_change_control_approve
 
     - name: Check cv_change_control_approve
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_approve.changed == false
           - cv_change_control_approve.failed ==  true
           - cv_change_control_approve.msg == "Change control 1234567890 id not found"
 
-    - name: "Create a change control on {{inventory_hostname}}"
+    - name: Create a change control on {{ inventory_hostname }}
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
     # negative test for execute
-    - name: "Execute a change control on {{inventory_hostname}} before approve"
+    - name: Execute a change control on {{ inventory_hostname }} before approve
       arista.cvp.cv_change_control_v3:
         state: execute
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
-      ignore_errors: yes
+        change_id: ["{{ cv_change_control_test.data.id }}"]
+      ignore_errors: true
       register: cv_change_control_execute
 
     - name: Check cv_change_control_execute
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_execute.changed == false
           - cv_change_control_execute.failed ==  true
           - cv_change_control_execute.msg == "Request Error: Bad Request - {"code":9, "message":"not approved"}"
 
-################################################
-###       APPROVE AND EXECUTE TOGETHER        ##
-################################################
-    - name: "Approve and Execute a change control on {{inventory_hostname}} using change_id field"
+    ################################################
+    ###       APPROVE AND EXECUTE TOGETHER        ##
+    ################################################
+    - name: Approve and Execute a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: approve_and_execute
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_control_approve_and_execute
 
     - name: Check change control execute
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_control_approve_and_execute.changed == true
           - cv_control_approve_and_execute.data.time is defined
-          - cv_control_approve_and_execute.data.value.key.id == "{{ cv_change_control_test.data.id }}"
+          - cv_control_approve_and_execute.data.value.key.id == cv_change_control_test.data.id
           - cv_control_approve_and_execute.data.value.start.value == true
           - cv_control_approve_and_execute.failed == false
 
     # negative test for approve_and_execute
-    - name: "Approve and execute unknown change control on {{inventory_hostname}} using change_id field"
+    - name: Approve and execute unknown change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: approve_and_execute
-        change_id: [ "1234567890" ] # unknown cc id, does not exist on CV
-      ignore_errors: yes
+        change_id: ["1234567890"] # unknown cc id, does not exist on CV
+      ignore_errors: true
       register: cv_change_control_approve_and_Execute
 
     - name: Check cv_change_control_approve
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_approve_and_Execute.changed == false
           - cv_change_control_approve_and_Execute.failed ==  true

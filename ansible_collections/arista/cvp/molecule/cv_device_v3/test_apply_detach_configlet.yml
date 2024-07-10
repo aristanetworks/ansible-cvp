@@ -2,20 +2,20 @@
 - name: Test cv_device_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     DEVICE_NAME: s1-leaf1
 
     CVP_CONFIGLETS:
-      configlet1: '! This is first configlet'
-      configlet2: '! This is second configlet'
+      configlet1: "! This is first configlet"
+      configlet2: "! This is second configlet"
 
     CVP_DEVICES_APPLY_CONFIGLET:
       - fqdn: "{{DEVICE_NAME}}"
         parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets:
-          - 'configlet1'
-          - 'configlet2'
+          - configlet1
+          - configlet2
 
     CVP_DEVICES_DETACH_CONFIGLET:
       - fqdn: "{{DEVICE_NAME}}"
@@ -23,7 +23,7 @@
         configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
     CVP_DEVICES_DEPLOY:
-      - fqdn: "{{DEVICE_NAME}}"    # device must be in undefined container
+      - fqdn: "{{DEVICE_NAME}}" # device must be in undefined container
         parentContainerName: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].parentContainerName}}"
         configlets: "{{CV_FACTS_V3_RESULT.data.cvp_devices[0].configlets}}"
 
@@ -32,21 +32,21 @@
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
       register: CV_FACTS_V3_RESULT
 
-    - name: "Push config"
+    - name: Push config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: present
 
-    - name: "Apply configlet on {{ inventory_hostname }}"
+    - name: Apply configlet on {{ inventory_hostname }}
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_APPLY_CONFIGLET}}'
+        devices: "{{ CVP_DEVICES_APPLY_CONFIGLET }}"
         state: present
       register: CV_DEVICE_V3_RESULT
 
-    - name: "Check apply_configlet with apply_mode loose"
+    - name: Check apply_configlet with apply_mode loose
       ansible.builtin.assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == true
@@ -56,13 +56,13 @@
           - CV_DEVICE_V3_RESULT.configlets_attached.success == true
           - CV_DEVICE_V3_RESULT.configlets_attached.taskIds != []
 
-    - name: "Apply same configlet again on {{ inventory_hostname }}"
+    - name: Apply same configlet again on {{ inventory_hostname }}
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_APPLY_CONFIGLET}}'
+        devices: "{{ CVP_DEVICES_APPLY_CONFIGLET }}"
         state: present
       register: CV_DEVICE_V3_RESULT
 
-    - name: "Check apply_configlet with same configlets"
+    - name: Check apply_configlet with same configlets
       ansible.builtin.assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == false
@@ -72,9 +72,9 @@
           - CV_DEVICE_V3_RESULT.configlets_attached.success == false
           - CV_DEVICE_V3_RESULT.configlets_attached.taskIds == []
 
-    - name: "Detach configlet from {{ inventory_hostname }}"
+    - name: Detach configlet from {{ inventory_hostname }}
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_DETACH_CONFIGLET}}'
+        devices: "{{ CVP_DEVICES_DETACH_CONFIGLET }}"
         state: present
         apply_mode: strict
       register: CV_DEVICE_V3_RESULT
@@ -82,9 +82,9 @@
     - name: Execute Task for detach configlet
       arista.cvp.cv_task_v3:
         tasks:
-          - "{{CV_DEVICE_V3_RESULT.taskIds[0]}}"
+          - "{{ CV_DEVICE_V3_RESULT.taskIds[0] }}"
 
-    - name: "Check detach_configlet with apply_mode strict"
+    - name: Check detach_configlet with apply_mode strict
       ansible.builtin.assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == true
@@ -94,18 +94,18 @@
           - CV_DEVICE_V3_RESULT.configlets_detached.success == true
           - CV_DEVICE_V3_RESULT.configlets_detached.taskIds != []
 
-    - name: "Delete config"
+    - name: Delete config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: absent
 
     - name: "Resetting original state on device: {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_DEPLOY}}'
+        devices: "{{ CVP_DEVICES_DEPLOY }}"
         state: present
       register: CV_DEVICE_V3_RESULT
 
-    - name: "Checking if the reset was successful"
+    - name: Checking if the reset was successful
       ansible.builtin.assert:
         that:
           - CV_DEVICE_V3_RESULT.changed == true
@@ -118,5 +118,5 @@
     - name: Execute the task to reset the device back to its original state
       arista.cvp.cv_task_v3:
         tasks:
-          - "{{CV_DEVICE_V3_RESULT.configlets_attached.taskIds[0]}}"
+          - "{{ CV_DEVICE_V3_RESULT.configlets_attached.taskIds[0] }}"
       when: CV_DEVICE_V3_RESULT.success is true

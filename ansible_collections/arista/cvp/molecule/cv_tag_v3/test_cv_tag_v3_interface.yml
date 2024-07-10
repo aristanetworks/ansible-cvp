@@ -2,7 +2,7 @@
 - name: Test cv_tag_v3 for interface tags
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     DEVICE1: s1-leaf3
     DEVICE2: s1-leaf4
@@ -11,18 +11,18 @@
       - device: "{{DEVICE1}}"
         interface_tags:
           - tags:
-            - name: s1-leaf3AutoAssignEth1
-              value: s1-leaf3AutoAssignEth1
+              - name: s1-leaf3AutoAssignEth1
+                value: s1-leaf3AutoAssignEth1
             interface: Ethernet1
           - tags:
-            - name: s1-leaf3AutoAssignEth2
-              value: s1-leaf3AutoAssignEth2
+              - name: s1-leaf3AutoAssignEth2
+                value: s1-leaf3AutoAssignEth2
             interface: Ethernet2
       - device: "{{DEVICE2}}"
         interface_tags:
           - tags:
-            - name: s1-leaf4IntfAutoAssignEth1
-              value: s1-leaf4IntfAutoAssignEth1
+              - name: s1-leaf4IntfAutoAssignEth1
+                value: s1-leaf4IntfAutoAssignEth1
             interface: Ethernet1
 
     CREATE_TAGS:
@@ -39,38 +39,38 @@
       - device: "{{DEVICE1}}"
         interface_tags:
           - tags:
-            - name: s1-leaf3CreateTagEth1
-              value: s1-leaf3CreateTagEth1
+              - name: s1-leaf3CreateTagEth1
+                value: s1-leaf3CreateTagEth1
             interface: Ethernet1
           - tags:
-            - name: s1-leaf3CreateTagEth2
-              value: s1-leaf3CreateTagEth2
+              - name: s1-leaf3CreateTagEth2
+                value: s1-leaf3CreateTagEth2
             interface: Ethernet2
       - device: "{{DEVICE2}}"
         interface_tags:
           - tags:
-            - name: s1-leaf4CreateTagEth1
-              value: s1-leaf4CreateTagEth1
+              - name: s1-leaf4CreateTagEth1
+                value: s1-leaf4CreateTagEth1
             interface: Ethernet1
 
-    # ASSIGN_DELETE_NON_EXISTING_TAGS:
-    #   - device: leaf1.atd.lab
-    #     interface_tags:
-    #       - tags:
-    #         - name: leaf1NegativeEth1
-    #           value: leaf1NegativeEth1
-    #         interface: Ethernet1
+  # ASSIGN_DELETE_NON_EXISTING_TAGS:
+  #   - device: leaf1.atd.lab
+  #     interface_tags:
+  #       - tags:
+  #         - name: leaf1NegativeEth1
+  #           value: leaf1NegativeEth1
+  #         interface: Ethernet1
 
   tasks:
     - name: Assign non-existing interface tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: assign
         auto_create: true
       register: AUTO_CREATE_ASSIGN_TAGS
 
     - name: Check assign non-existing interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_ASSIGN_TAGS.changed == true
           - AUTO_CREATE_ASSIGN_TAGS.failed == false
@@ -80,12 +80,12 @@
 
     - name: Unassign non-existing interface tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: unassign
       register: AUTO_CREATE_UNASSIGN_TAGS
 
     - name: Check unassign non-existing interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_UNASSIGN_TAGS.changed == true
           - AUTO_CREATE_UNASSIGN_TAGS.failed == false
@@ -95,12 +95,12 @@
 
     - name: Delete auto_create interface tags
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_DELETE_TAGS_AUTO_CREATE}}"
+        tags: "{{ ASSIGN_DELETE_TAGS_AUTO_CREATE }}"
         mode: delete
       register: AUTO_CREATE_TAGS_DELETE
 
     - name: Check auto_create delete interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - AUTO_CREATE_TAGS_DELETE.changed == true
           - AUTO_CREATE_TAGS_DELETE.failed == false
@@ -108,16 +108,16 @@
           - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_list != []
           - AUTO_CREATE_TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-# Create -> assign -> unassign -> delete
+    # Create -> assign -> unassign -> delete
 
     - name: Create interface tags (part of CREATE -> assign -> unassign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{CREATE_TAGS}}"
+        tags: "{{ CREATE_TAGS }}"
         mode: create
       register: TAGS_CREATE
 
     - name: Check create interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_CREATE.changed == true
           - TAGS_CREATE.failed == false
@@ -127,12 +127,12 @@
 
     - name: Assign existing interface tags (part of create -> ASSIGN -> unassign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: assign
       register: ASSIGN_EXISTING
 
     - name: Check assign existing interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - ASSIGN_EXISTING.changed == true
           - ASSIGN_EXISTING.failed == false
@@ -142,12 +142,12 @@
 
     - name: Unassign existing interface tags (part of create -> assign -> UNASSIGN -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: unassign
       register: UNASSIGN_EXISTING
 
     - name: Check unassign existing interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - UNASSIGN_EXISTING.changed == true
           - UNASSIGN_EXISTING.failed == false
@@ -157,12 +157,12 @@
 
     - name: Delete interface tags (part of create -> assign -> unassign -> DELETE)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: delete
       register: TAGS_DELETE
 
     - name: Check delete interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_DELETE.changed == true
           - TAGS_DELETE.failed == false
@@ -170,16 +170,16 @@
           - TAGS_DELETE.tags_manager.tags_manager_list != []
           - TAGS_DELETE.tags_manager.tags_manager_count == 1
 
-# Create -> assign -> delete
+    # Create -> assign -> delete
 
     - name: Create interface tags (part of CREATE -> assign -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{CREATE_TAGS}}"
+        tags: "{{ CREATE_TAGS }}"
         mode: create
       register: TAGS_CREATE
 
     - name: Check create interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_CREATE.changed == true
           - TAGS_CREATE.failed == false
@@ -189,12 +189,12 @@
 
     - name: Assign existing interface tags (part of create -> ASSIGN -> delete)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: assign
       register: ASSIGN_EXISTING
 
     - name: Check assign existing interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - ASSIGN_EXISTING.changed == true
           - ASSIGN_EXISTING.failed == false
@@ -204,12 +204,12 @@
 
     - name: Delete interface tags (part of create -> assign -> DELETE)
       arista.cvp.cv_tag_v3:
-        tags: "{{ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS}}"
+        tags: "{{ ASSIGN_UNASSIGN_DELETE_EXISTING_TAGS }}"
         mode: delete
       register: TAGS_DELETE
 
     - name: Check delete interface tags
-      assert:
+      ansible.builtin.assert:
         that:
           - TAGS_DELETE.changed == true
           - TAGS_DELETE.failed == false

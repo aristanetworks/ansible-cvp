@@ -2,13 +2,13 @@
 - name: Test cv_change_control_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 1A Change Control
       notes: Initiated from Ansible Playbook
       activities:
-        - action: "mlaghealthcheck"
+        - action: mlaghealthcheck
           name: Check_LEAF1A_MLAG_Health
           arguments:
             - name: DeviceID
@@ -19,52 +19,52 @@
           mode: parallel
 
   tasks:
-######################################
-##     UNAPPROVE AND EXECUTE        ##
-######################################
+    ######################################
+    ##     UNAPPROVE AND EXECUTE        ##
+    ######################################
 
-    - name: "Create a change control on {{inventory_hostname}}"
+    - name: Create a change control on {{ inventory_hostname }}
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
-    - name: "Approve a change control on {{inventory_hostname}} using change_id field"
+    - name: Approve a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: approve
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
 
-    - name: "Unapprove a change control on {{inventory_hostname}} using change_id field"
+    - name: Unapprove a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: unapprove
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_change_control_unapprove
 
     - name: Check change control unapprove
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_change_control_unapprove.changed == true
           - cv_change_control_unapprove.data.time is defined
           - cv_change_control_unapprove.data.value.approve.notes == "Initiated from Ansible Playbook"
           - cv_change_control_unapprove.data.value.approve.value == false
-          - cv_change_control_unapprove.data.value.key.id == "{{ cv_change_control_test.data.id }}"
+          - cv_change_control_unapprove.data.value.key.id == cv_change_control_test.data.id
           - cv_change_control_unapprove.failed == false
 
-    - name: "Execute a change control on {{inventory_hostname}} using change_id field - this should fail"
+    - name: Execute a change control on {{ inventory_hostname }} using change_id field - this should fail
       arista.cvp.cv_change_control_v3:
         state: execute
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
-      ignore_errors: yes
+        change_id: ["{{ cv_change_control_test.data.id }}"]
+      ignore_errors: true
       register: cv_cc_execute_unapprove
 
     - name: Check execute unapproved change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_cc_execute_unapprove.changed == false
           - cv_cc_execute_unapprove.failed == true
           - cv_cc_execute_unapprove.msg == "Request Error: Bad Request - {"code":9, "message":"not approved"}"
 
-    - name: "Remove a change control on {{inventory_hostname}} using change_id field"
+    - name: Remove a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: remove
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]

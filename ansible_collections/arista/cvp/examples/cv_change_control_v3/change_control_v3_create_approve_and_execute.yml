@@ -34,13 +34,13 @@
           parent: Leaf Upgrades
 
   tasks:
-    - name: "Create a change control on {{inventory_hostname}}"
+    - name: "Create a change control on {{ inventory_hostname }}"
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
-    - name: "Approve and Execute a change control on {{inventory_hostname}} using change_id field"
+    - name: "Approve and Execute a change control using change_id field on {{ inventory_hostname }}"
       arista.cvp.cv_change_control_v3:
         state: approve_and_execute
         change_id: ["{{ cv_change_control_test.data.id }}"]

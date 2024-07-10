@@ -1,13 +1,14 @@
+---
 - name: Test cv_change_control_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     change:
       name: Leaf 2A Change Control
       notes: Initiated from Ansible Playbook
       activities:
-        - action: "mlaghealthcheck"
+        - action: mlaghealthcheck
           name: Check_LEAF2A_MLAG_Health
           arguments:
             - name: DeviceID
@@ -18,101 +19,102 @@
           mode: parallel
 
   tasks:
-######################################
-##      SHOW CHANGE CONTROL         ##
-######################################
-    - name: "Create a change control on {{inventory_hostname}}"
+    ######################################
+    ##      SHOW CHANGE CONTROL         ##
+    ######################################
+    - name: Create a change control on {{ inventory_hostname }}
       arista.cvp.cv_change_control_v3:
         state: set
         change: "{{ change }}"
       register: cv_change_control_test
 
-    - name: "Show a change control on {{inventory_hostname}} using change_id field"
+    - name: Show a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: show
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_show_cc_by_id
 
     - name: Check change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_show_cc_by_id.changed == false
-          - cv_show_cc_by_id.data.change_controls[0].value.change.name == "{{ change.name }}"
-          - cv_show_cc_by_id.data.change_controls[0].value.change.notes == "{{ change.notes }}"
-          - cv_show_cc_by_id.data.change_controls[0].value.key.id == "{{cv_change_control_test.data.id}}"
+          - cv_show_cc_by_id.data.change_controls[0].value.change.name == change.name
+          - cv_show_cc_by_id.data.change_controls[0].value.change.notes == change.notes
+          - cv_show_cc_by_id.data.change_controls[0].value.key.id == cv_change_control_test.data.id
           - cv_show_cc_by_id.data.change_controls[0].value.change.stages.values != {}
 
-    - name: "Show a change control on {{inventory_hostname}} using CC name"
+    - name: Show a change control on {{ inventory_hostname }} using CC name
       arista.cvp.cv_change_control_v3:
         state: show
         name: "{{ change.name }}"
       register: cv_show_cc_by_name
 
-    - name: Check change control
+    - name: Set change control name
       vars:
         query: "[?value.change.name=='{{ change.name }}']"
-      set_fact:
+      ansible.builtin.set_fact:
         show_cc_by_name: "{{ cv_show_cc_by_name.data.change_controls | json_query(query) | first }}"
 
-    - assert:
+    - name: Check change control approve
+      ansible.builtin.assert:
         that:
           - cv_show_cc_by_name.changed == false
           - show_cc_by_name.value.change.name == "{{ change.name }}"
           - show_cc_by_name.value.change.notes == "{{ change.notes }}"
           - show_cc_by_name.value.change.stages.values != {}
 
-    - name: "Show an unknown change control on {{inventory_hostname}} using CC name"
+    - name: Show an unknown change control on {{ inventory_hostname }} using CC name
       arista.cvp.cv_change_control_v3:
         state: show
-        name: "Unknown-CC-1234567890" # unknown cc name, does not exist on CV
+        name: Unknown-CC-1234567890 # unknown cc name, does not exist on CV
       register: cv_show_cc_by_name
 
     - name: Check change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_show_cc_by_name.changed == false
           - cv_show_cc_by_name.data.change_controls == []
           - cv_show_cc_by_name.failed == false
 
-    - name: "Show an unknown change control on {{inventory_hostname}} using change_id field"
+    - name: Show an unknown change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: show
-        change_id: [ "1234567890" ]
+        change_id: ["1234567890"]
       register: cv_show_unknown_id
 
     - name: Check change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_show_unknown_id.changed == false
           - cv_show_unknown_id.data.change_controls == [None]
           - cv_show_unknown_id.failed == false
 
-######################################
-##       REMOVE CHANGE CONTROL      ##
-######################################
+    ######################################
+    ##       REMOVE CHANGE CONTROL      ##
+    ######################################
 
-    - name: "Remove a change control on {{inventory_hostname}} using change_id field"
+    - name: Remove a change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: remove
-        change_id: [ "{{ cv_change_control_test.data.id }}" ]
+        change_id: ["{{ cv_change_control_test.data.id }}"]
       register: cv_remove_change_control
 
     - name: Check remove change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_remove_change_control.changed == true
           - cv_remove_change_control.failed == false
           - cv_remove_change_control.data.remove == []
 
-    - name: "Remove an unknown change control on {{inventory_hostname}} using change_id field"
+    - name: Remove an unknown change control on {{ inventory_hostname }} using change_id field
       arista.cvp.cv_change_control_v3:
         state: remove
-        change_id: [ "Unknown-1234567890" ]
-      ignore_errors: yes
+        change_id: [Unknown-1234567890]
+      ignore_errors: true
       register: cv_remove_unknown_cc
 
     - name: Check remove unknown change control
-      assert:
+      ansible.builtin.assert:
         that:
           - cv_remove_unknown_cc.changed == false
           - cv_remove_unknown_cc.failed ==  true

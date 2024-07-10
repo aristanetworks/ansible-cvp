@@ -1,9 +1,9 @@
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 ---
 - name: 'Generate DHCPd configuration file'
-  template:
+  ansible.builtin.template:
     src: 'dhcpd.conf.j2'
     dest: '{{ output_dir }}/dhcpd.conf'
     backup: true

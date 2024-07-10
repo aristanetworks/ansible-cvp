@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -35,41 +35,41 @@ options:
 
 EXAMPLES = r"""
 # offline validation
-- name: offline configlet validation
+- name: Offline configlet validation
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - device_name: leaf1
-        search_type: hostname #[hostname | serialNumber | fqdn]
+        search_type: hostname # [hostname | serialNumber | fqdn]
         local_configlets:
           valid: "interface Ethernet1\n  description test_validate"
           error: "ruter bgp 1111\n   neighbor 1.1.1.1 remote-bs 111"
 
   tasks:
-    - name: validate module
+    - name: Validate module
       arista.cvp.cv_validate_v3:
-        devices: "{{CVP_DEVICES}}"
+        devices: "{{ CVP_DEVICES }}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 
 # online validation
 - name: Online configlet validation
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - device_name: leaf1.aristanetworks.com
-        search_type: fqdn #[hostname | serialNumber | fqdn]
+        search_type: fqdn # [hostname | serialNumber | fqdn]
         cvp_configlets:
           - valid
           - invalid
 
   tasks:
-    - name: validate module
+    - name: Validate module
       arista.cvp.cv_validate_v3:
-        devices: "{{CVP_DEVICES}}"
+        devices: "{{ CVP_DEVICES }}"
         validate_mode: stop_on_error # | stop_on_warning | valid
 """
 

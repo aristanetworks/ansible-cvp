@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -106,7 +106,7 @@ EXAMPLES = r'''
         cvp_facts: "{{cvp_facts.ansible_facts}}"
         configlets: "{{configlet_list}}"
         configlets_notes: "Configlet managed by Ansible"
-        configlet_filter: ["New", "Test","base-chk","base-firewall"]
+        configlet_filter: ["New", "Test", "base-chk", "base-firewall"]
       register: cvp_configlet
 '''
 

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -57,39 +57,39 @@ EXAMPLES = r'''
 - name: Create container topology on CVP
   hosts: cvp
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
-    verbose: False
+    verbose: false
     CVP_CONTAINERS:
-        Fabric:
-            parentContainerName: Tenant
-        Spines:
-            parentContainerName: Fabric
-            configlets:
-                - container_configlet
+      Fabric:
+        parentContainerName: Tenant
+      Spines:
+        parentContainerName: Fabric
+        configlets:
+          - container_configlet
   tasks:
-    - name: 'running cv_container'
+    - name: 'Running cv_container'
       arista.cvp.cv_container_v3:
-        topology: "{{CVP_CONTAINERS}}"
+        topology: "{{ CVP_CONTAINERS }}"
 
 # task in strict mode
 - name: Create container topology on CVP
   hosts: cvp
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
-    verbose: False
+    verbose: false
     CVP_CONTAINERS:
-        Fabric:
-            parentContainerName: Tenant
-        Spines:
-            parentContainerName: Fabric
-            configlets:
-                - container_configlet
+      Fabric:
+        parentContainerName: Tenant
+      Spines:
+        parentContainerName: Fabric
+        configlets:
+          - container_configlet
   tasks:
-    - name: 'running cv_container'
+    - name: 'Running cv_container'
       arista.cvp.cv_container_v3:
-        topology: "{{CVP_CONTAINERS}}"
+        topology: "{{ CVP_CONTAINERS }}"
         apply_mode: strict
 '''
 

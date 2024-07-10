@@ -1,4 +1,0 @@
-- node: 192.168.0.5
-  username: arista
-  password: ""
-  device: s1-leaf1

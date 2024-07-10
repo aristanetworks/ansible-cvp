@@ -1,0 +1,14 @@
+plugins/modules/cv_change_control_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_configlet_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_configlet.py validate-modules:missing-gplv3-license
+plugins/modules/cv_container_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_container.py validate-modules:missing-gplv3-license
+plugins/modules/cv_device_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_device.py validate-modules:missing-gplv3-license
+plugins/modules/cv_facts_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_facts.py validate-modules:missing-gplv3-license
+plugins/modules/cv_image_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_tag_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_validate_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_task_v3.py validate-modules:missing-gplv3-license
+plugins/modules/cv_task.py validate-modules:missing-gplv3-license

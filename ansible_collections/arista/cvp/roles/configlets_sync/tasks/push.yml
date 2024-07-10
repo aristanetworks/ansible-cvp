@@ -1,8 +1,8 @@
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 ---
-- name: "collect CVP Facts"
+- name: "Collect CVP Facts"
   tags:
     - sync
   arista.cvp.cv_facts:
@@ -11,7 +11,7 @@
 - name: "Refresh Shared Configlet Data"
   tags:
     - sync
-  include_vars:
+  ansible.builtin.include_vars:
     file: '{{ common_configlets_dir }}/master.yml'
     name: 'shared_configlets'
   delegate_to: '{{ ansible_runner }}'
@@ -19,7 +19,7 @@
 - name: 'Refresh Shared configlet files for CVP'
   tags:
     - sync
-  template:
+  ansible.builtin.template:
     src: "template.cvp.shared_configlets.j2"
     dest: '{{ cvp_servers_dir }}/{{ inventory_hostname }}_shared.yml'
     mode: 0644
@@ -29,7 +29,7 @@
 - name: "Load refreshed CVP shared Configlet information"
   tags:
     - sync
-  include_vars: '{{ cvp_servers_dir }}/{{ inventory_hostname }}_shared.yml'
+  ansible.builtin.include_vars: '{{ cvp_servers_dir }}/{{ inventory_hostname }}_shared.yml'
   delegate_to: '{{ ansible_runner }}'
 
 - name: 'Update Shared configlets on CVP Servers.'

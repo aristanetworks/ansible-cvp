@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 ---
@@ -10,8 +10,8 @@
 #   delegate_to: localhost
 #   run_once: True
 
-- name: 'creating folder {{ common_configlets_dir }}'
-  file:
+- name: 'Creating folder {{ common_configlets_dir }}'
+  ansible.builtin.file:
     path: '{{ common_configlets_dir }}'
     recurse: true
     state: directory
@@ -19,8 +19,8 @@
   delegate_to: localhost
   run_once: true
 
-- name: 'creating folder {{ cvp_servers_dir }}'
-  file:
+- name: 'Creating folder {{ cvp_servers_dir }}'
+  ansible.builtin.file:
     path: '{{ cvp_servers_dir }}'
     recurse: true
     state: directory
@@ -28,8 +28,8 @@
   delegate_to: localhost
   run_once: true
 
-- name: 'creating folder {{ devices_dir }}'
-  file:
+- name: 'Creating folder {{ devices_dir }}'
+  ansible.builtin.file:
     path: '{{ devices_dir }}'
     recurse: true
     state: directory

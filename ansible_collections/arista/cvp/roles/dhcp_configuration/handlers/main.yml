@@ -1,16 +1,16 @@
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 ---
 # handlers file for ztp_configuration
 
 - name: Restart DHCP service
-  service:
+  ansible.builtin.service:
     name: '{{ dhcp_service }}'
     state: restarted
-  listen: "restart dhcpd"
+  listen: "Restart dhcpd"
 
-- name: restart apparmor
-  service:
+- name: Restart apparmor
+  ansible.builtin.service:
     name: apparmor
     state: restarted

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2023 Arista Networks, Inc.
+# Copyright (c) 2023-2024 Arista Networks, Inc.
 # Use of this source code is governed by the Apache License 2.0
 # that can be found in the LICENSE file.
 # coding: utf-8 -*-
@@ -60,19 +60,17 @@ EXAMPLES = r'''
   hosts: cv_server
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
   vars:
     CVP_DEVICES:
       - fqdn: CV-ANSIBLE-EOS01
         parentContainerName: ANSIBLE
         configlets:
-            - 'CV-EOS-ANSIBLE01'
+          - 'CV-EOS-ANSIBLE01'
         imageBundle: leaf_image_bundle
   tasks:
-    - name: "Configure devices on {{inventory_hostname}}"
+    - name: "Configure devices on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+        devices: '{{ CVP_DEVICES }}'
         state: present
         search_key: fqdn
 
@@ -81,19 +79,17 @@ EXAMPLES = r'''
   hosts: cv_server
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
   vars:
     CVP_DEVICES:
       - fqdn: NON-EXISTING-DEVICE
         parentContainerName: ANSIBLE
         configlets:
-            - 'CV-EOS-ANSIBLE01'
+          - 'CV-EOS-ANSIBLE01'
         imageBundle: leaf_image_bundle
   tasks:
-    - name: "Configure devices on {{inventory_hostname}}"
+    - name: "Configure devices on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+        devices: '{{ CVP_DEVICES }}'
         state: present
         search_key: fqdn
         inventory_mode: loose
@@ -104,18 +100,16 @@ EXAMPLES = r'''
   hosts: cv_server
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
   vars:
     CVP_DEVICES:
       - serialNumber: xxxxxxxxxxxx
         parentContainerName: ANSIBLE
         configlets:
-            - 'CV-EOS-ANSIBLE01'
+          - 'CV-EOS-ANSIBLE01'
   tasks:
-    - name: "Configure devices on {{inventory_hostname}}"
+    - name: "Configure devices on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+        devices: '{{ CVP_DEVICES }}'
         state: present
         search_key: serialNumber
 
@@ -124,18 +118,16 @@ EXAMPLES = r'''
   hosts: cv_server
   connection: local
   gather_facts: false
-  collections:
-    - arista.cvp
   vars:
     CVP_DEVICES:
       - fqdn: CV-ANSIBLE-EOS01
         parentContainerName: ANSIBLE
         configlets:
-            - 'CV-EOS-ANSIBLE01'
+          - 'CV-EOS-ANSIBLE01'
   tasks:
-    - name: "Configure devices on {{inventory_hostname}}"
+    - name: "Configure devices on {{ inventory_hostname }}"
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+        devices: '{{ CVP_DEVICES }}'
         state: present
         apply_mode: strict
 
@@ -143,15 +135,15 @@ EXAMPLES = r'''
 - name: Decommission device
   hosts: cv_server
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - fqdn: leaf1
         parentContainerName: ""
   tasks:
-  - name: decommission device
-    arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+    - name: Decommission device
+      arista.cvp.cv_device_v3:
+        devices: '{{ CVP_DEVICES }}'
         state: absent
 
 # Remove a device from provisioning
@@ -159,30 +151,30 @@ EXAMPLES = r'''
 - name: Remove device
   hosts: CVP
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - fqdn: leaf2
         parentContainerName: ""
   tasks:
-  - name: remove device
-    arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+    - name: Remove device
+      arista.cvp.cv_device_v3:
+        devices: '{{ CVP_DEVICES }}'
         state: provisioning_reset
 
 # Factory reset a device (moves the device to ZTP mode)
 - name: Factory reset device
   hosts: CVP
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
     CVP_DEVICES:
       - fqdn: leaf2
         parentContainerName: ""
   tasks:
-  - name: remove device
-    arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES}}'
+    - name: Remove device
+      arista.cvp.cv_device_v3:
+        devices: '{{ CVP_DEVICES }}'
         state: factory_reset
 '''
 

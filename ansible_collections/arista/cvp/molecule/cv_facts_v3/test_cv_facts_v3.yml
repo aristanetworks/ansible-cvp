@@ -2,18 +2,18 @@
 - name: Test cv_facts_v3
   hosts: CloudVision
   connection: local
-  gather_facts: no
+  gather_facts: false
   vars:
-    DEVICE_NAME: "s1-leaf1"
+    DEVICE_NAME: s1-leaf1
 
     CONTAINER:
       Test_Leafs:
         parentContainerName: Tenant
 
-    CONTAINER_NAME: "Test_Leafs"
+    CONTAINER_NAME: Test_Leafs
 
     CVP_CONFIGLETS:
-      configlet1: 'alias a{{ 999 | random }} show lldp'
+      configlet1: alias a{{ 999 | random }} show lldp
 
     CVP_DEVICES_MOVE_DEVICE:
       - fqdn: s1-leaf1
@@ -23,42 +23,46 @@
       - fqdn: s1-leaf1
         parentContainerName: "{{CV_FACTS_V3_RESULT_ORG.data.cvp_devices[0].parentContainerName}}"
 
-    TASK_STATUS: "Pending"
+    TASK_STATUS: Pending
 
-    CONFIGLET_NAME: "configlet1"
+    CONFIGLET_NAME: configlet1
 
   tasks:
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
       register: CV_FACTS_V3_RESULT_ORG
 
     # push configlet to be used in verifying configlet facts
-    - name: "Push config"
+    - name: Push config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: present
 
     # Creating a container
-    - name: Build Container On {{inventory_hostname}}
+    - name: Build Container On {{ inventory_hostname }}
       arista.cvp.cv_container_v3:
-        topology: '{{CONTAINER}}'
+        topology: "{{ CONTAINER }}"
 
     # Running move_device to create a task
     - name: Run Move Device to create a task
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_MOVE_DEVICE}}'
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE }}"
         state: present
       register: MOVE_DEVICE_RESULT
 
-    - name: Collect facts from {{inventory_hostname}}
+    - name: Print
+      ansible.builtin.debug:
+        msg: "{{ MOVE_DEVICE_RESULT }}"
+
+    - name: Collect facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -68,15 +72,15 @@
           - CV_FACTS_V3_RESULT.data.cvp_images != []
           - CV_FACTS_V3_RESULT.data.cvp_tasks != []
 
-    - name: Collect facts for a specific configlet from {{inventory_hostname}}
+    - name: Collect facts for a specific configlet from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - configlets
-        regexp_filter: "{{CONFIGLET_NAME}}" # using regexp_filter
+        regexp_filter: "{{ CONFIGLET_NAME }}" # using regexp_filter
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for a specific configlet
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -86,14 +90,14 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_configlets.configlet1 is defined
 
-    - name: Collect facts for containers from {{inventory_hostname}}
+    - name: Collect facts for containers from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - containers
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for containers
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -103,28 +107,28 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_containers != []
 
-    - name: Collect facts for specific container from {{inventory_hostname}}
+    - name: Collect facts for specific container from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - containers
-        regexp_filter: "{{CONTAINER_NAME}}"
+        regexp_filter: "{{ CONTAINER_NAME }}"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for containers
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.data.cvp_containers.Test_Leafs is defined
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
 
-    - name: Collect devices facts from {{inventory_hostname}}
+    - name: Collect devices facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - devices
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for devices
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -134,15 +138,15 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_devices != []
 
-    - name:  Collect devices facts from {{inventory_hostname}} with verbose short
+    - name: Collect devices facts from {{ inventory_hostname }} with verbose short
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for device with verbose short
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -152,16 +156,16 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "s1-leaf1"
 
-    - name: Collect devices facts from {{inventory_hostname}} with verbose long
+    - name: Collect devices facts from {{ inventory_hostname }} with verbose long
       arista.cvp.cv_facts_v3:
         facts:
           - devices
-        regexp_filter: "{{DEVICE_NAME}}"
+        regexp_filter: "{{ DEVICE_NAME }}"
         verbose: long
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts for device with verbose long
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.failed == false
@@ -172,14 +176,14 @@
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].hostname == "s1-leaf1"
           - CV_FACTS_V3_RESULT.data.cvp_devices[0].deviceStatus == "Registered" # we get this key only with verbose long
 
-    - name: Collect images facts from {{inventory_hostname}}
+    - name: Collect images facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
-          - images  # collects all images facts
+          - images # collects all images facts
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
@@ -188,14 +192,14 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks == []
           - CV_FACTS_V3_RESULT.data.cvp_images != []
 
-    - name: Collect task facts from {{inventory_hostname}}
+    - name: Collect task facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
@@ -205,16 +209,16 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks != []
           - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
 
-    - name: Collect task facts from {{inventory_hostname}}
+    - name: Collect task facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{TASK_STATUS}}" # filtered by status
+        regexp_filter: "{{ TASK_STATUS }}" # filtered by status
         verbose: long
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
@@ -224,15 +228,15 @@
           - CV_FACTS_V3_RESULT.data.cvp_tasks != []
           - CV_FACTS_V3_RESULT.data.cvp_tasks.total_tasks is defined
 
-    - name: Collect task facts from {{inventory_hostname}}
+    - name: Collect task facts from {{ inventory_hostname }}
       arista.cvp.cv_facts_v3:
         facts:
           - tasks
-        regexp_filter: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}" # filtered by task id
+        regexp_filter: "{{ MOVE_DEVICE_RESULT.devices_deployed.taskIds[0] }}" # filtered by task id
       register: CV_FACTS_V3_RESULT
 
     - name: Check cv_facts_v3 result
-      assert:
+      ansible.builtin.assert:
         that:
           - CV_FACTS_V3_RESULT.changed == false
           - CV_FACTS_V3_RESULT.data.cvp_configlets == []
@@ -244,27 +248,27 @@
 
     - name: Delete config
       arista.cvp.cv_configlet_v3:
-        configlets: "{{CVP_CONFIGLETS}}"
+        configlets: "{{ CVP_CONFIGLETS }}"
         state: absent
 
     - name: Cancel Pending Tasks
       arista.cvp.cv_task_v3:
-        tasks: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}"
+        tasks: "{{ MOVE_DEVICE_RESULT.devices_deployed.taskIds[0] }}"
         state: cancelled
 
     # Running move_device to empty the container
     - name: Run Move Device to empty the container
       arista.cvp.cv_device_v3:
-        devices: '{{CVP_DEVICES_MOVE_DEVICE_BACK}}'
+        devices: "{{ CVP_DEVICES_MOVE_DEVICE_BACK }}"
         state: present
       register: MOVE_DEVICE_RESULT
 
     - name: Remove Container
       arista.cvp.cv_container_v3:
-        topology: '{{CONTAINER}}'
+        topology: "{{ CONTAINER }}"
         state: absent
 
     - name: Cancel Pending Tasks
       arista.cvp.cv_task_v3:
-        tasks: "{{MOVE_DEVICE_RESULT.devices_moved.taskIds[0]}}"
+        tasks: "{{ MOVE_DEVICE_RESULT.devices_deployed.taskIds[0] }}"
         state: cancelled
