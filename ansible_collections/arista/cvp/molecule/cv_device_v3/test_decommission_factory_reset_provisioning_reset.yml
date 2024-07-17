@@ -259,6 +259,33 @@
       retries: 10
       delay: 2
 
+    - name: Add target device to inventory
+      add_host:
+        name: "{{ DEVICE_NO_STREAMING }}"
+        groups: target_device
+        ansible_user: arista
+        ansible_password: "{{ lookup('env', 'LABPASSPHRASE') }}"
+        ansible_connection: httpapi
+        ansible_network_os: eos
+        ansible_httpapi_port: 443
+        ansible_httpapi_use_ssl: True
+        ansible_httpapi_validate_certs: False
+
+    - name: Stop TerminAttr on s1-leaf4
+      run_once: true
+      delegate_to: "{{ DEVICE_NO_STREAMING }}"
+      arista.eos.eos_command:
+        commands:
+          - "enable"
+          - "configure"
+          - "daemon TerminAttr"
+          - "shutdown"
+      register: EAPI_RESULT
+
+    - name: debug
+      debug:
+        msg: "{{EAPI_RESULT}}"
+
     - name: Pause for 120 seconds for streaming to stop
       ansible.builtin.pause:
         seconds: 120
@@ -332,6 +359,21 @@
       retries: 10
       delay: 2
 
+    - name: Pause for 10 seconds for streaming to stop
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Restart TerminAttr
+      run_once: true
+      delegate_to: "{{ DEVICE_NO_STREAMING }}"
+      arista.eos.eos_command:
+        commands:
+          - enable
+          - configure
+          - daemon TerminAttr
+          - shutdown
+          - no shutdown
+
     - name: Checking onboarding status
       ansible.builtin.uri:
         url: "{{ onboarding_status_api }}"
@@ -345,8 +387,8 @@
         body: "{}"
       register: onboarding_status
       until: onboarding_status.json.value.status == "ONBOARDING_STATUS_SUCCESS"
-      retries: 10
-      delay: 2
+      retries: 30
+      delay: 5
 
     - name: Adding the device back to the original container
       arista.cvp.cv_device_v3:
@@ -366,6 +408,6 @@
           - CV_DEVICE_V3_RESULT.changed == true
           - CV_DEVICE_V3_RESULT.devices_deployed.changed == true
           - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_count == 1
-          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_list == ["s1-leaf2_deployed"]
+          - CV_DEVICE_V3_RESULT.devices_deployed.devices_deployed_list == ["s1-leaf4_deployed"]
           - CV_DEVICE_V3_RESULT.devices_deployed.success == true
           - CV_DEVICE_V3_RESULT.devices_deployed.taskIds != []
