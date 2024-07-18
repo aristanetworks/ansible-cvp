@@ -7,7 +7,6 @@
     cvp_device_api: https://{{ ansible_host }}/api/resources/inventory/v1/DeviceOnboardingConfig
     onboarding_status_api: https://{{ ansible_host }}/api/resources/inventory/v1/DeviceOnboarding?key.requestId={{ generated_uuid }}
     cvp_login_api: https://{{ ansible_host }}/cvpservice/login/authenticate.do
-    cvp_di_api: https://{{ ansible_host }}/cvpservice/di/internal/runcmds
     streaming_status_api: https://{{ ansible_host }}/api/resources/inventory/v1/Device?key.deviceId=s1-leaf4
     DEVICE_NAME: s1-leaf2
     DEVICE_NO_STREAMING: s1-leaf4
@@ -242,22 +241,6 @@
           - CV_DEVICE_V3_RESULT.devices_deployed.taskIds != []
 
 # Test for decommissioning a device that is not streaming and has been removed from Network Provisioning
-
-    - name: Stop TerminAttr on s1-leaf4
-      ansible.builtin.uri:
-        url: "{{ cvp_di_api }}"
-        method: POST
-        headers:
-          Accept: application/json
-          Cookie: access_token={{ cvp_token.cookies.access_token }}
-        validate_certs: false
-        return_content: true
-        body_format: json
-        body: '{"cmds":["enable","configure","daemon TerminAttr","shutdown"],"deviceID":"s1-leaf4"}'
-      register: _result
-      until: _result.status == 200
-      retries: 10
-      delay: 2
 
     - name: Add target device to inventory
       add_host:
