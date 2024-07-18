@@ -447,7 +447,6 @@ class CvDeviceTools(object):
         """
         return self.__cv_client.get("/api/resources/inventory/v1/Device/all")
 
-
     # Updated as per issue #365 to set default search with hostname field
     @lru_cache
     def __get_device(self, search_value: str, search_by: str = Api.device.HOSTNAME):
@@ -944,8 +943,6 @@ class CvDeviceTools(object):
             # Check if all devices are present on CV (fail on missing)
             self.__check_devices_exist(user_inventory=user_inventory)
 
-        #user_inventory = self.__refresh_user_inventory(user_inventory=user_inventory)
-
         # Execute device decommission
         action_result = self.decommission_device(user_inventory=user_inventory)
         if action_result is not None:
@@ -1436,7 +1433,7 @@ class CvDeviceTools(object):
         MODULE_LOGGER.debug("Check if all the devices specified exist in CVP")
         device_not_present: list = []
         cvp_inventory = self.__get_inventory()
-       # Use a single list comprehension to create the four lists
+        # Use a single list comprehension to create the four lists
         device_macs, device_hostnames, device_fqdns, device_ids = zip(*[
             (
                 device["result"]["value"]["systemMacAddress"],
