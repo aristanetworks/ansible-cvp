@@ -106,7 +106,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: ['3.9','3.10','3.11']
+        python_version: ['3.10','3.11','3.12','3.13']
     steps:
       - name: 'set environment variables'
         run: |
@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python_version: ['3.9','3.10','3.11','3.12']
+        python_version: ['3.10','3.11','3.12','3.13']
     steps:
       - name: 'set environment variables'
         run: |
@@ -143,9 +143,8 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install requirements
-        # Removing ansible-lint in requirement-dev-3.9 to allow requirements installation for Python 3.9.
         run: |
-          pip install -r ansible_collections/arista/cvp/requirements-dev-pytest.txt
+          pip install -r ansible_collections/arista/cvp/requirements-dev.txt
           pip install -r ansible_collections/arista/cvp/requirements.txt
       - name: 'Execute pytest validation'
         run: |
@@ -165,7 +164,7 @@ jobs:
       fail-fast: true
       matrix:
         ansible_version:
-          - 'ansible-core>=2.15.0,<2.18.0 --upgrade'
+          - 'ansible-core>=2.16.0,<2.19.0 --upgrade'
         cvp_scenario:
           - cv_configlet_loose
           - cv_configlet_strict
@@ -200,7 +199,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ansible_version: ['ansible-core==2.15.0', 'ansible-core<2.18.0']
+        ansible_version: ['ansible-core==2.16.0', 'ansible-core<2.19.0']
         cvp_scenario:
           - dhcp_management_mac
           - dhcp_management_offline

@@ -26,11 +26,11 @@
 
 ## Python
 
-- Python **3.9** or later
+- Python **3.10** or later
 
 ## Supported Ansible Versions
 
-- ansible-core from **2.15.0** to **2.17.x**
+- ansible-core from **2.16.0** to **2.18.x**
 
 ## Additional Python Libraries required
 
