@@ -94,7 +94,7 @@ This example outlines how to use `arista.cvp` to create a container's topology o
 
 A dedicated repository is available for step-by-step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-toi).
 
-A [complete end-to-end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
+A [complete end-to-end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista AVD Ansible collection](https://avd.arista.com) and CloudVision modules is available as an example.
 
 Below is a very basic example of build a container topology on a CloudVision platform, assuming you have three vEOS named `veos0{1,3}` and a configlet named `alias`.
 

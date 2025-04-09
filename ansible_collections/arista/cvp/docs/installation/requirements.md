@@ -52,7 +52,7 @@ pip3 install -r ${ARISTA_CVP_DIR}/arista/cvp/requirements.txt
 If the collection is cloned from GitHub, the requirements file can be referenced directly:
 
 ```shell
-pip3 install -r ansible-avd/ansible_collections/arista/cvp/requirements.txt
+pip3 install -r ansible-cvp/ansible_collections/arista/cvp/requirements.txt
 ```
 
 !!! warning

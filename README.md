@@ -63,7 +63,7 @@ This example outlines how to use `arista.cvp` to create a containers topology on
 
 A dedicated repository is available for step by step examples on [ansible-cvp-toi](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi).
 
-A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
+A [complete end to end demo](https://github.com/arista-netdevops-community/ansible-avd-cloudvision-demo) using [Arista AVD Ansible collection](https://avd.arista.com) and CloudVision modules is available as an example.
 
 Another [demonstration repository](https://github.com/arista-netdevops-community/atd-avd) is available to play with Arista Test Drive. Please reach out to your favorite SE for getting access to such instance.
 
@@ -174,13 +174,13 @@ collections_paths = /path/to/local/repository:~/.ansible/collections:/usr/share/
 
 ### Docker for testing
 
-In an effort to support both [arista.avd](https://github.com/aristanetworks/ansible-avd) and arista.cvp collections, you can find a generic docker image in [this repository](https://github.com/arista-netdevops-community/docker-avd-base).
+In an effort to support both [arista.avd](https://github.com/aristanetworks/avd) and arista.cvp collections, you can find a generic docker image in [this repository](https://github.com/arista-netdevops-community/docker-avd-base).
 
 Besides this image, a repository with some basic labs to use as part of a TOI are available in [this repository](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)
 
 ## Resources
 
-- Ansible for [Arista Validated Design](https://github.com/aristanetworks/ansible-avd)
+- Ansible for [Arista AVD](https://github.com/aristanetworks/avd)
 - Ansible [EOS modules](https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#eos) on ansible documentation.
 - [CloudVision Platform](https://www.arista.com/en/products/eos/eos-cloudvision) overvierw
 - [Training Lab content](https://github.com/arista-netdevops-community/ansible-cvp-avd-toi)

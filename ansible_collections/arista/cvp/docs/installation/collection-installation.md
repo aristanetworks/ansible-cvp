@@ -44,7 +44,7 @@ You can specify multiple range identifiers which are split by ,. You can use the
 ### Install latest `devel` version from AVD GitHub
 
 ```shell
-ansible-galaxy collection install git+https://github.com/aristanetworks/ansible-avd.git#/ansible_collections/arista/cvp/,devel
+ansible-galaxy collection install git+https://github.com/aristanetworks/ansible-cvp.git#/ansible_collections/arista/cvp/,devel
 ```
 
 ### Install in a specific directory

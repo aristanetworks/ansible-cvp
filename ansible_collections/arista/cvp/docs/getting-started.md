@@ -8,7 +8,7 @@
 
 This example outlines how to use `arista.cvp` to create a containers topology on Arista CloudVision.
 
-A [complete end to end demo](https://github.com/aristanetworks/netdevops-examples#demo-content) using [Arista Validated Design collection](https://github.com/aristanetworks/ansible-avd) and CloudVision modules is available as an example.
+A [complete end to end demo](https://github.com/aristanetworks/netdevops-examples#demo-content) using [Arista AVD](https://avd.arista.com) and CloudVision modules is available as an example.
 
 Below is a very basic example to build a container topology on a CloudVision platform assuming:
 
