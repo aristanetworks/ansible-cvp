@@ -150,7 +150,7 @@ jobs:
         run: |
           cd tests/
           make unit-tests
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pytest-report
           path: |
@@ -188,7 +188,7 @@ jobs:
           ansible: "${{ matrix.ansible_version }}"
           check_git: true
           check_git_enforced: false
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: molecule-${{ matrix.cvp_scenario }}-artifacts
           path: ansible_collections/arista/cvp/molecule/${{ matrix.cvp_scenario }}
