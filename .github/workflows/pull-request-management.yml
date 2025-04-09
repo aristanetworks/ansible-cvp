@@ -164,7 +164,7 @@ jobs:
       fail-fast: true
       matrix:
         ansible_version:
-          - 'ansible-core>=2.16.0,<2.19.0 --upgrade'
+          - 'ansible-core>=2.15.0,<2.19.0 --upgrade'
         cvp_scenario:
           - cv_configlet_loose
           - cv_configlet_strict
@@ -199,7 +199,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ansible_version: ['ansible-core==2.16.0', 'ansible-core<2.19.0']
+        ansible_version: ['ansible-core==2.15.0', 'ansible-core<2.19.0']
         cvp_scenario:
           - dhcp_management_mac
           - dhcp_management_offline

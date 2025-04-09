@@ -43,7 +43,7 @@ Please check the minimum version supported by your ansible installation on the [
 
 **Ansible version:**
 
-- ansible-core>=2.16.0,<2.19.0
+- ansible-core>=2.15.0,<2.19.0
 
 **3rd party Python libraries:**
 
