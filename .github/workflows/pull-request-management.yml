@@ -154,8 +154,8 @@ jobs:
         with:
           name: pytest-report
           path: |
-            ./tests/report-${{ matrix.python_version }}.html
-            ./tests/htmlcov-${{ matrix.python_version }}
+            ./tests/report.html
+            ./tests/htmlcov
 
   molecule_cv_modules:
     name: Validate code V1 with Molecule
