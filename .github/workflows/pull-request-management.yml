@@ -256,6 +256,7 @@ jobs:
             --exclude "treelib.readthedocs.io" \
             --exclude "www.paramiko.org" \
             --exclude "requests.readthedocs.io" \
+            --exclude "www.arista.com.*" \
             --max-connections-per-host 30 \
             --max-redirections 3 \
             --rate-limit 1 \
