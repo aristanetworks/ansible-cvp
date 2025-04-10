@@ -151,6 +151,8 @@ jobs:
           cd tests/
           make unit-tests
       - uses: actions/upload-artifact@v4
+        if: |
+          matrix.python == '3.11'
         with:
           name: pytest-report
           path: |
