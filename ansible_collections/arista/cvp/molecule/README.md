@@ -20,8 +20,8 @@ To manually run molecule testing, follow commands:
 # Install development requirements
 $ pip install -r development/requirements-dev.txt
 
-# Move to AVD collection
-$ ansible-avd/ansible_collections/arista/cvp
+# Move to CVP collection
+$ ansible-cvp/ansible_collections/arista/cvp
 
 # Run molecule for a given test
 $ molecule test -s <scenario-name>
