@@ -316,7 +316,7 @@ jobs:
             3.10
       - name: 'Install Python & Ansible requirements'
         run: |
-          pip install -r ansible_collections/arista/cvp/requirements.txt -r ansible_collections/arista/cvp/requirements-dev.txt
+          pip install -r ansible_collections/arista/cvp/requirements.txt -r ansible_collections/arista/cvp/requirements-dev.txt --upgrade
       - name: 'Run ansible-test integration test cases'
         run: |
           cd ansible_collections/arista/cvp/
