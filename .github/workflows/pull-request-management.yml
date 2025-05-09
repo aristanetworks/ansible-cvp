@@ -181,7 +181,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: 'Install python and ansible requirements'
         run: |
-          python -m pip install "${{ matrix.ansible_version}}" -r ansible_collections/arista/cvp/requirements.txt
+          python -m pip install "${{ matrix.ansible_version}}" -r .github/requirements-ci-molecule.txt -r ansible_collections/arista/cvp/requirements.txt
           ansible-galaxy install -r "ansible_collections/arista/cvp/collections.yml"
       - name: 'Run molecule action'
         working-directory: ansible_collections/arista/cvp
@@ -216,7 +216,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: 'Install python and ansible requirements'
         run: |
-          python -m pip install "${{ matrix.ansible_version}}" -r ansible_collections/arista/cvp/requirements.txt
+          python -m pip install "${{ matrix.ansible_version}}" -r .github/requirements-ci-molecule.txt -r ansible_collections/arista/cvp/requirements.txt
           ansible-galaxy install -r "ansible_collections/arista/cvp/collections.yml"
       - name: ' Run molecule action'
         working-directory: ansible_collections/arista/cvp
@@ -225,10 +225,6 @@ jobs:
       - name: 'Check GIT status'
         run: |
           sh .github/check-git-status.sh
-      - uses: actions/upload-artifact@v4
-        with:
-          name: molecule-${{ matrix.cvp_scenario }}-artifacts
-          path: ansible_collections/arista/cvp/molecule/${{ matrix.cvp_scenario }}
 
   offline_link_check:
     name: 'Validate mkdoc links'

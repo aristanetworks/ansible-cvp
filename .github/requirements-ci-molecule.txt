@@ -1,0 +1,2 @@
+molecule>6.0
+molecule-docker>=0.2.4
