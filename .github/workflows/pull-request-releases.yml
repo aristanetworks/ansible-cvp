@@ -1,4 +1,3 @@
-
 ---
 name: "Pre-release validation"
 on:
@@ -13,14 +12,14 @@ concurrency:
 jobs:
   ansible_test:
     name: Run ansible-test validation
-    runs-on: ubuntu-20.04]
+    runs-on: ubuntu-latest
     if: needs.cloudvision.status != 'failed' && needs.molecule_eos_designs.status != 'failed' && needs.file-changes.outputs.plugins == 'true'
     strategy:
       fail-fast: true
       matrix:
-        python_version: [ 3.8 ]
+        python_version: [3.8]
     steps:
-      - name: 'set environment variables'
+      - name: "set environment variables"
         run: |
           echo "PY_COLORS=1" >> $GITHUB_ENV
           echo "ANSIBLE_FORCE_COLOR=1" >> $GITHUB_ENV
@@ -29,9 +28,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python_version }}
-      - name: 'Install Python requirements'
+      - name: "Install Python requirements"
         run: make install-requirements
-      - name: 'ansible-test linting'
+      - name: "ansible-test linting"
         run: |
           cd ansible_collections/arista/avd/
           ansible-test sanity  -v --requirements --docker --skip-test yamllint --exclude docs/
