@@ -34,6 +34,7 @@ jobs:
           pip install mkdocs-macros-plugin
           pip install mdx_truly_sane_lists
           pip install mkdocs-glightbox
+          pip install mkdocs-git-revision-date-localized-plugin
           mkdocs build
 
       - name: Setup Pages 📖
