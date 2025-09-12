@@ -3,9 +3,9 @@ name: mkdocs-to-pages
 concurrency: mkdocs-to-pages
 on:
   push:
-    branches: [devel]
+    branches: ['**']
     paths:
-    - ansible_collections/arista/cvp/docs/**
+    - ansible_collections/arista/cvp/**
     - mkdocs.yml
     - .github/workflows/publish-pages.yml
   workflow_dispatch:
