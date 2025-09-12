@@ -3,7 +3,7 @@ name: mkdocs-to-pages
 concurrency: mkdocs-to-pages
 on:
   push:
-    branches: ['**']
+    branches: [devel]
     paths:
     - ansible_collections/arista/cvp/**
     - mkdocs.yml
