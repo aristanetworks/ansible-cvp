@@ -1,0 +1,49 @@
+---
+name: marp-and-mkdocs-to-pages
+concurrency: marp-and-mkdocs-to-pages
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - ansible_collections/arista/cvp/docs/**
+    - mkdocs.yml
+    - .github/workflows/publish-pages.yml
+  workflow_dispatch:
+    branches: [main]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  build:
+    # if: github.repository == 'aristanetworks/ansible-cvp'
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Checkout code ✅
+        uses: actions/checkout@v4
+
+      - name: Setup Python3 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build MkDocs Site
+        run: |
+          pip install mkdocs-material
+          pip install mkdocs-macros-plugin
+          pip install mdx_truly_sane_lists
+          pip install mkdocs-glightbox
+          mkdocs build
+
+      - name: Setup Pages 📖
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact 🔼
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site/
+
+      - name: Deploy to GitHub Pages 🚀
+        id: deployment
+        uses: actions/deploy-pages@v4
