@@ -1,22 +1,22 @@
 ---
-name: marp-and-mkdocs-to-pages
-concurrency: marp-and-mkdocs-to-pages
+name: mkdocs-to-pages
+concurrency: mkdocs-to-pages
 on:
   push:
-    branches: [ main ]
+    branches: [devel]
     paths:
     - ansible_collections/arista/cvp/docs/**
     - mkdocs.yml
     - .github/workflows/publish-pages.yml
   workflow_dispatch:
-    branches: [main]
+    branches: [devel]
 permissions:
   contents: write
   pages: write
   id-token: write
 jobs:
   build:
-    # if: github.repository == 'aristanetworks/ansible-cvp'
+    if: github.repository == 'aristanetworks/ansible-cvp'
     runs-on: ubuntu-22.04
     steps:
 
