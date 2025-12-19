@@ -16,7 +16,7 @@
   <img src='ansible_collections/arista/cvp/medias/ansible-cloudvision.png' alt='Arista CloudVision and Ansible'/>
 </p>
 
-More documentation is available in [project's website](https://cvp.avd.sh/)
+More documentation is available in [project's website](https://aristanetworks.github.io/ansible-cvp/)
 
 ## List of CVP versions supported
 
@@ -37,25 +37,25 @@ This repository provides content for Ansible's collection **arista.cvp** with fo
 
 **Version 3:**
 
-- [**arista.cvp.cv_configlet_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_configlet_v3.md) -  Manage configlet configured on CVP.
-- [**arista.cvp.cv_container_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_container_v3.md) -  Manage container topology and attach configlet and devices to containers.
-- [**arista.cvp.cv_device_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_device_v3.md) - Manage devices configured on CVP
-- [**arista.cvp.cv_task_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_task_v3.md) - Run tasks created on CVP.
-- [**arista.cvp.cv_facts_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_facts_v3.md) - Collect information from CloudVision.
-- [**arista.cvp.cv_image_v3**](https://cvp.avd.sh/en/latest/docs/modules/cv_image_v3.md) - Create EOS images and bundles on CloudVision.
+- [**arista.cvp.cv_configlet_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_configlet_v3/) -  Manage configlet configured on CVP.
+- [**arista.cvp.cv_container_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_container_v3/) -  Manage container topology and attach configlet and devices to containers.
+- [**arista.cvp.cv_device_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_device_v3/) - Manage devices configured on CVP
+- [**arista.cvp.cv_task_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_task_v3/) - Run tasks created on CVP.
+- [**arista.cvp.cv_facts_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_facts_v3/) - Collect information from CloudVision.
+- [**arista.cvp.cv_image_v3**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_image_v3/) - Create EOS images and bundles on CloudVision.
 
 ### List of available roles
 
-- [**arista.cvp.dhcp_configuration**](https://cvp.avd.sh/en/latest/roles/dhcp_configuration/) - Configure DHCPD service on a CloudVision server or any dhcpd service.
-- [**arista.cvp.configlet_sync**](https://cvp.avd.sh/en/latest/roles/configlets_sync/) - Synchronize configlets between multiple CloudVision servers.
+- [**arista.cvp.dhcp_configuration**](https://aristanetworks.github.io/ansible-cvp/roles/dhcp_configuration/) - Configure DHCPD service on a CloudVision server or any dhcpd service.
+- [**arista.cvp.configlet_sync**](https://aristanetworks.github.io/ansible-cvp/roles/configlets_sync/) - Synchronize configlets between multiple CloudVision servers.
 
 ## Deprecated modules
 
-- [**arista.cvp.cv_facts**](https://cvp.avd.sh/en/latest/docs/modules/cv_facts.md) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
-- [**arista.cvp.cv_configlet**](https://cvp.avd.sh/en/latest/docs/modules/cv_configlet.md) -  Manage configlet configured on CVP.
-- [**arista.cvp.cv_container**](https://cvp.avd.sh/en/latest/docs/modules/cv_container.md) -  Manage container topology and attach configlet and devices to containers.
-- [**arista.cvp.cv_device**](https://cvp.avd.sh/en/latest/docs/modules/cv_device.md) - Manage devices configured on CVP
-- [**arista.cvp.cv_task**](https://cvp.avd.sh/en/latest/docs/modules/cv_task.md) - Run tasks created on CVP.
+- [**arista.cvp.cv_facts**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_facts/) - Collect CVP facts from server like list of containers, devices, configlet and tasks.
+- [**arista.cvp.cv_configlet**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_configlet/) -  Manage configlet configured on CVP.
+- [**arista.cvp.cv_container**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_container/) -  Manage container topology and attach configlet and devices to containers.
+- [**arista.cvp.cv_device**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_device/) - Manage devices configured on CVP
+- [**arista.cvp.cv_task**](https://aristanetworks.github.io/ansible-cvp/docs/modules/cv_task/) - Run tasks created on CVP.
 
 ## Example
 
@@ -139,11 +139,11 @@ As modules of this collection are based on [`HTTPAPI` connection plugin](https:/
 
 ## Installation
 
-Complete installation process is available on [repository website](https://cvp.avd.sh/)
+Complete installation process is available on [repository website](https://aristanetworks.github.io/ansible-cvp/)
 
 ### Requirements
 
-To install requirements please follow [this](https://cvp.avd.sh/en/stable/docs/installation/requirements/) guide.
+To install requirements please follow [this](https://aristanetworks.github.io/ansible-cvp/en/stable/docs/installation/requirements/) guide.
 
 ### Installation from ansible-galaxy
 

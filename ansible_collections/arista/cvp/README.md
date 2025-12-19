@@ -21,7 +21,7 @@ The CVP collection has the following requirements:
 - Install the arista.cvp collection
 - [Additional Python packages](#additional-python-dependencies)
 
-For a full breakdown of the requirements, please see the official `arista.cvp` [documentation](https://cvp.avd.sh/en/stable/docs/installation/requirements/).
+For a full breakdown of the requirements, please see the official `arista.cvp` [documentation](https://aristanetworks.github.io/ansible-cvp/docs/installation/requirements/).
 
 ## Installations
 
