@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2023-2025 Arista Networks, Inc.
+  ~ Copyright (c) 2023-2026 Arista Networks, Inc.
   ~ Use of this source code is governed by the Apache License 2.0
   ~ that can be found in the LICENSE file.
   -->
@@ -8,25 +8,25 @@
 
 | Variable | Type | Required | Default | Choices | Description |
 | -------- | ---- | -------- | ------- | ------------------ | ----------- |
-| change_id | list | No |  |  | List of change IDs to get/remove |
-| name | str | No |  |  | The name of the change control, if not provided, one will be generated automatically |
+| change_id | list | No | | | List of change IDs to get/remove |
+| name | str | No | | | The name of the change control, if not provided, one will be generated automatically |
 | state | str | No | show | show<br>set<br>remove | Set if we should get, set/update, or remove the change control |
-| change | Dict | No |  |  | A dict containing the change control to be created/modified |
-| &nbsp;&nbsp;&nbsp;&nbsp;name | str | No |  |  | Name of change control |
-| &nbsp;&nbsp;&nbsp;&nbsp;notes | str | No |  |  | Any notes that you want to add |
-| &nbsp;&nbsp;&nbsp;&nbsp;stages | Dict | Yes |  |  |  |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes |  |  | Name of stage |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode | str | Yes |  | series<br>parallel | Serial or parallel execution |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parent | str | Yes |  |  | Name of parent stage |
-| &nbsp;&nbsp;&nbsp;&nbsp;activities | Dict | Yes |  |  |  |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes |  |  | Only used internally, "task" for any tasks |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stage | str | Yes |  |  | The name of the Stage to assign the task to |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;task_id | str | Yes |  |  | The WorkOrderId of the task to be executed, if this is to be a task activity |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeout | int | No | 900 |  | The timeout, if this is to be a task activity |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action | str | Yes |  |  | The ID of the action performed (mutually exclusive to task_id and timeout) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arguments | Dict | Yes |  |  |  |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes |  |  | Device ID |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value | str | Yes |  |  | Device serial number |
+| change | Dict | No | | | A dict containing the change control to be created/modified |
+| &nbsp;&nbsp;&nbsp;&nbsp;name | str | No | | | Name of change control |
+| &nbsp;&nbsp;&nbsp;&nbsp;notes | str | No | | | Any notes that you want to add |
+| &nbsp;&nbsp;&nbsp;&nbsp;stages | Dict | Yes | | | |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes | | | Name of stage |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode | str | Yes | | series<br>parallel | Serial or parallel execution |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parent | str | Yes | | | Name of parent stage |
+| &nbsp;&nbsp;&nbsp;&nbsp;activities | Dict | Yes | | | |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes | | | Only used internally, "task" for any tasks |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stage | str | Yes | | | The name of the Stage to assign the task to |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;task_id | str | Yes | | | The WorkOrderId of the task to be executed, if this is to be a task activity |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeout | int | No | 900 | | The timeout, if this is to be a task activity |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action | str | Yes | | | The ID of the action performed (mutually exclusive to task_id and timeout) |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arguments | Dict | Yes | | | |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name | str | Yes | | | Device ID |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value | str | Yes | | | Device serial number |
 
 ## How to find the Action ID
 
@@ -133,12 +133,12 @@ e.g.
   Arguments:
 
   | Name | Type | Default | Description | Required | Hidden | Deprecated |
-  |------|------|---------|-------------|----------|--------|------------|
-  | AdminStateCycle | Dynamic | false   | Flag for whether to administratively cycle the interface | Yes | No | No |
+  | ------ | ------ | --------- | ------------- | ---------- | -------- | ------------ |
+  | AdminStateCycle | Dynamic | false | Flag for whether to administratively cycle the interface | Yes | No | No |
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
-  | InterfaceID | Dynamic || ID of the switch interface | Yes | No | No |
-  | PoeCycle | Dynamic | false   | Flag for whether to cycle the POE of the interface | Yes | No | No |
-  | SkipValidation | Dynamic | false   | Flag for whether to skip monitor the interface post-cycle | Yes | No| No |
+  | InterfaceID | Dynamic | | ID of the switch interface | Yes | No | No |
+  | PoeCycle | Dynamic | false | Flag for whether to cycle the POE of the interface | Yes | No | No |
+  | SkipValidation | Dynamic | false | Flag for whether to skip monitor the interface post-cycle | Yes | No | No |
 
 - `reboot`: Reboot the device specified by the DeviceID argument.
 
@@ -153,10 +153,10 @@ e.g.
   Arguments:
 
   | Name | Type | Default | Description | Required | Hidden | Deprecated |
-  |------|------|---------|-------------|----------|--------|------------|
+  | ------ | ------ | --------- | ------------- | ---------- | -------- | ------------ |
   | DeviceID | Dynamic | | ID of the device | Yes | No | No |
-  | Source   | Dynamic | | Source of Config - DesignedConfig or RunningConfig | Yes | No | No |
-  | Timestamp| Dynamic | 0001-01-01 00:00:00 +0000 UTC| Timestamp for the designed config or running config| Yes | No | No |
+  | Source | Dynamic | | Source of Config - DesignedConfig or RunningConfig | Yes | No | No |
+  | Timestamp | Dynamic | 0001-01-01 00:00:00 +0000 UTC | Timestamp for the designed config or running config | Yes | No | No |
 
 - `setImage` (Set Image): Push a new image or roll back to a previous running image. This is accomplished by providing a DeviceID, Timestamp, Source (Running Image or Designed Image) and a ReloadMode. The ReloadMode argument allows the action to reboot the device using advanced EOS features like Smart System Upgrade. This action will also take care of downloading the required EOS software image and extension(s).
 
