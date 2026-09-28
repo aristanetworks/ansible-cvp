@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2023-2025 Arista Networks, Inc.
+  ~ Copyright (c) 2023-2026 Arista Networks, Inc.
   ~ Use of this source code is governed by the Apache License 2.0
   ~ that can be found in the LICENSE file.
   -->
@@ -16,7 +16,7 @@
 !!! info
     Starting with version 2.0.0, the collection uses [cvprac](https://github.com/aristanetworks/cvprac) as CloudVision connection manager. So support for any new CloudVision server is tied to it's support in this Python library.
 
-| ansible-cvp | 1.0.0 | 1.1.0 | >= 2.0.0 |>= 3.9.0 |
+| ansible-cvp | 1.0.0 | 1.1.0 | >= 2.0.0 | >= 3.9.0 |
 | ----------- | ----- | ----- | -------- | -------- |
 | 2018.2 | ✅ | ✅ | ✅ | |
 | 2019.x | ✅ | ✅ | ✅ | |
